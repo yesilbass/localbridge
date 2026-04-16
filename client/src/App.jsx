@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Mentors from './pages/Mentors';
 import MentorProfile from './pages/MentorProfile';
 import Dashboard from './pages/Dashboard';
+import Pricing from './pages/Pricing';
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="/mentors" element={<Mentors />} />
             <Route path="/mentors/:id" element={<MentorProfile />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/pricing" element={<Pricing />} />
           </Routes>
         </div>
       </BrowserRouter>
