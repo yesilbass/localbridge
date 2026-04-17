@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import { getFeaturedMentors } from '../api/mentors';
 import LoadingSpinner from '../components/LoadingSpinner';
 import useInView from '../utils/useInView';
-import SessionTypeCard from '../components/SessionTypeCard';
-import { SESSION_TYPES } from '../constants/sessionTypes';
+import SessionTypeCard, { SESSION_TYPES } from '../components/SessionTypeCard';
+
+// ─── Animation wrapper ────────────────────────────────────────────────────────
 
 function Reveal({ children, className = '', delay = 0 }) {
   const [ref, inView] = useInView();
@@ -14,8 +15,8 @@ function Reveal({ children, className = '', delay = 0 }) {
       className={className}
       style={{
         opacity: inView ? 1 : 0,
-        transform: inView ? 'translateY(0)' : 'translateY(24px)',
-        transition: `opacity 0.65s ease ${delay}ms, transform 0.65s ease ${delay}ms`,
+        transform: inView ? 'translateY(0)' : 'translateY(28px)',
+        transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
       }}
     >
       {children}
@@ -23,13 +24,15 @@ function Reveal({ children, className = '', delay = 0 }) {
   );
 }
 
+// ─── Avatar helpers ───────────────────────────────────────────────────────────
+
 const AVATAR_COLORS = [
-  'bg-violet-200 text-violet-900',
-  'bg-amber-200 text-amber-900',
-  'bg-emerald-200 text-emerald-900',
-  'bg-sky-200 text-sky-900',
-  'bg-rose-200 text-rose-900',
-  'bg-indigo-200 text-indigo-900',
+  'bg-violet-200 text-violet-800',
+  'bg-amber-200 text-amber-800',
+  'bg-emerald-200 text-emerald-800',
+  'bg-sky-200 text-sky-800',
+  'bg-rose-200 text-rose-800',
+  'bg-indigo-200 text-indigo-800',
 ];
 
 function avatarColor(name) {
@@ -39,149 +42,136 @@ function avatarColor(name) {
 }
 
 function initials(name) {
-  return name
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+  return name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
 }
+
+// ─── Hero ─────────────────────────────────────────────────────────────────────
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden px-4 pb-20 pt-16 sm:px-6 sm:pb-28 sm:pt-20 lg:px-8">
+    <section className="relative overflow-hidden bg-amber-50 pt-24 pb-28 px-6">
+      {/* Decorative background blobs */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-20 top-10 h-[420px] w-[420px] rounded-full bg-gradient-to-br from-amber-300/40 via-orange-200/30 to-transparent blur-3xl"
+        className="pointer-events-none absolute -top-24 -right-24 w-[480px] h-[480px] rounded-full opacity-30"
+        style={{ background: 'radial-gradient(circle, #fbbf24 0%, transparent 70%)' }}
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-32 bottom-0 h-80 w-80 rounded-full bg-orange-200/35 blur-3xl"
+        className="pointer-events-none absolute bottom-0 -left-16 w-[320px] h-[320px] rounded-full opacity-20"
+        style={{ background: 'radial-gradient(circle, #f59e0b 0%, transparent 70%)' }}
       />
 
-      <div className="relative mx-auto grid max-w-6xl gap-14 lg:grid-cols-2 lg:items-center lg:gap-10">
-        <div>
-          <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-200/80 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-orange-800 shadow-sm backdrop-blur-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_2px_rgb(16_185_129_0.5)]" />
-            Real people · booking open
-          </p>
-
-          <h1 className="font-display text-4xl font-semibold leading-[1.08] tracking-tight text-stone-900 sm:text-5xl lg:text-[3.5rem]">
-            Talk to someone who&apos;s already done
-            <span className="text-gradient-bridge"> the thing </span>
-            you&apos;re trying to do.
-          </h1>
-
-          <p className="mt-6 max-w-lg text-lg leading-relaxed text-stone-600">
-            No motivational poster stuff—just folks who&apos;ve sat in the chair you want, and will tell you what actually
-            moved the needle for them.
-          </p>
-
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link
-              to="/mentors"
-              className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition hover:from-orange-500 hover:to-amber-400 hover:shadow-xl"
-            >
-              Browse mentors
-            </Link>
-            <Link
-              to="/register"
-              className="inline-flex items-center justify-center rounded-full border-2 border-stone-900/10 bg-white/90 px-8 py-4 text-sm font-semibold text-stone-800 shadow-sm backdrop-blur-sm transition hover:border-stone-900/20 hover:shadow-md"
-            >
-              I want to mentor
-            </Link>
-          </div>
-
-          <dl className="mt-14 grid grid-cols-3 gap-6 border-t border-stone-200/80 pt-10">
-            {[
-              { k: '2.4k+', l: 'Profiles' },
-              { k: '85%', l: 'Got interviews' },
-              { k: '50+', l: 'Fields' },
-            ].map(({ k, l }) => (
-              <div key={l}>
-                <dt className="font-display text-2xl font-semibold tabular-nums text-stone-900 sm:text-3xl">{k}</dt>
-                <dd className="mt-1 text-xs font-medium uppercase tracking-wider text-stone-500">{l}</dd>
-              </div>
-            ))}
-          </dl>
+      <div className="relative max-w-4xl mx-auto text-center">
+        <div
+          className="inline-block mb-5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide bg-amber-100 text-amber-800 border border-amber-200"
+          style={{ opacity: 1 }}
+        >
+          EARLY ACCESS — JOIN FREE
         </div>
 
-        {/* Decorative preview stack */}
-        <div className="relative mx-auto w-full max-w-md lg:mx-0 lg:max-w-none lg:justify-self-end">
-          <div
-            aria-hidden
-            className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-orange-400/20 via-amber-300/15 to-transparent blur-2xl"
-          />
-          <div className="relative rounded-3xl border border-white/80 bg-white/90 p-4 shadow-bridge-glow backdrop-blur-md sm:p-6">
-            <div className="mb-4 flex items-center gap-2 border-b border-stone-100 pb-4">
-              <div className="flex gap-1.5">
-                <span className="h-3 w-3 rounded-full bg-red-400/80" />
-                <span className="h-3 w-3 rounded-full bg-amber-400/80" />
-                <span className="h-3 w-3 rounded-full bg-emerald-400/80" />
-              </div>
-              <span className="ml-2 text-xs font-medium text-stone-400">bridge.app / mentors</span>
+        <h1
+          className="text-5xl sm:text-6xl font-bold text-stone-900 leading-[1.1] tracking-tight mb-6"
+          style={{
+            animation: 'fadeUp 0.7s ease both',
+          }}
+        >
+          Your next career move<br />
+          <span className="text-amber-600">starts with a conversation.</span>
+        </h1>
+
+        <p
+          className="text-lg sm:text-xl text-stone-500 max-w-2xl mx-auto leading-relaxed mb-10"
+          style={{ animation: 'fadeUp 0.7s ease 120ms both' }}
+        >
+          Connect with professionals who've been where you're going. Get career advice,
+          interview prep, and real connections that open doors.
+        </p>
+
+        <div
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14"
+          style={{ animation: 'fadeUp 0.7s ease 220ms both' }}
+        >
+          <Link
+            to="/mentors"
+            className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-amber-500 text-white font-semibold text-sm hover:bg-amber-600 active:bg-amber-700 transition-colors shadow-md shadow-amber-200"
+          >
+            Find a Mentor
+          </Link>
+          <Link
+            to="/register"
+            className="w-full sm:w-auto px-8 py-3.5 rounded-full border-2 border-stone-300 text-stone-700 font-semibold text-sm hover:border-stone-500 hover:text-stone-900 transition-colors"
+          >
+            Become a Mentor
+          </Link>
+        </div>
+
+        {/* Stats */}
+        <div
+          className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12"
+          style={{ animation: 'fadeUp 0.7s ease 340ms both' }}
+        >
+          {[
+            { value: '2,400+', label: 'Active Mentors' },
+            { value: '85%', label: 'Got Interviews' },
+            { value: '50+', label: 'Industries' },
+          ].map(({ value, label }) => (
+            <div key={label} className="text-center">
+              <div className="text-2xl font-bold text-stone-900">{value}</div>
+              <div className="text-sm text-stone-500 mt-0.5">{label}</div>
             </div>
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className={`mb-3 flex items-center gap-4 rounded-2xl border border-stone-100 bg-gradient-to-r from-stone-50/80 to-white p-4 shadow-sm last:mb-0 ${i === 2 ? 'ring-2 ring-orange-400/40' : ''}`}
-              >
-                <div className="h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-orange-200 to-amber-100" />
-                <div className="min-w-0 flex-1">
-                  <div className="h-3 max-w-[140px] rounded-full bg-stone-200" style={{ width: '60%' }} />
-                  <div className="mt-2 h-2.5 max-w-[100px] rounded-full bg-stone-100" style={{ width: '40%' }} />
-                </div>
-                <span className="shrink-0 rounded-full bg-stone-900 px-3 py-1 text-xs font-semibold text-amber-50">
-                  Book time
-                </span>
-              </div>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
+
+      <style>{`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </section>
   );
 }
 
+// ─── How it Works ─────────────────────────────────────────────────────────────
+
 const STEPS = [
   {
     n: '01',
-    title: 'Say what you’re stuck on',
-    desc: 'Interview loop, pivot, promo, first job—whatever. You don’t need a perfect pitch, just a real sentence.',
+    title: 'Create Your Profile',
+    desc: "Tell us your goals, current role, and the kind of guidance you're looking for. It takes two minutes.",
   },
   {
     n: '02',
-    title: 'Stalk profiles until one clicks',
-    desc: 'Read bios like you’d pick a teammate. When someone’s story matches yours, that’s the DM you’d actually send.',
+    title: 'Browse & Match',
+    desc: 'Explore mentors filtered by industry, expertise, and experience level until you find your fit.',
   },
   {
     n: '03',
-    title: 'Book it, do the homework',
-    desc: 'Sessions are short on purpose. You leave with a next step—not a fuzzy “let’s circle back.”',
+    title: 'Book & Connect',
+    desc: 'Schedule a 1-on-1 session, show up with your questions, and build a relationship that lasts.',
   },
 ];
 
 function HowItWorks() {
   return (
-    <section className="relative px-4 py-24 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <Reveal className="mx-auto mb-16 max-w-2xl text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-orange-700">How it works</p>
-          <h2 className="font-display text-3xl font-semibold text-stone-900 sm:text-4xl">
-            Less spiraling in your notes app, more one honest hour
-          </h2>
+    <section className="bg-white py-24 px-6">
+      <div className="max-w-5xl mx-auto">
+        <Reveal className="text-center mb-14">
+          <p className="text-xs font-semibold tracking-widest text-amber-600 uppercase mb-3">How it works</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-stone-900">Three steps to your next opportunity</h2>
         </Reveal>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {STEPS.map(({ n, title, desc }, i) => (
-            <Reveal key={n} delay={i * 90}>
-              <div className="group relative h-full overflow-hidden rounded-3xl border border-stone-200/80 bg-white/90 p-8 shadow-bridge-card transition duration-300 hover:-translate-y-1 hover:border-orange-200/60 hover:shadow-bridge-glow">
-                <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 opacity-80" />
-                <span className="font-display text-5xl font-semibold text-orange-100 transition group-hover:text-orange-200/90">
+            <Reveal key={n} delay={i * 100}>
+              <div className="relative p-8 rounded-2xl border border-stone-100 bg-stone-50 hover:border-amber-200 hover:bg-amber-50 transition-colors h-full">
+                <span className="text-5xl font-black text-amber-100 select-none leading-none block mb-4">
                   {n}
                 </span>
-                <h3 className="mt-4 text-lg font-semibold text-stone-900">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-stone-600">{desc}</p>
+                <h3 className="text-lg font-semibold text-stone-900 mb-2">{title}</h3>
+                <p className="text-sm text-stone-500 leading-relaxed">{desc}</p>
               </div>
             </Reveal>
           ))}
@@ -191,70 +181,65 @@ function HowItWorks() {
   );
 }
 
+// ─── Featured Mentors ─────────────────────────────────────────────────────────
+
 function MentorPreviewCard({ mentor }) {
   const color = avatarColor(mentor.name);
   return (
-    <div className="group flex h-full flex-col gap-4 rounded-3xl border border-stone-200/80 bg-white/95 p-6 shadow-bridge-card transition duration-300 hover:-translate-y-1 hover:border-orange-200/50 hover:shadow-bridge-glow">
+    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col gap-3">
       <div className="flex items-center gap-3">
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-xs font-bold ${color}`}>
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${color}`}>
           {initials(mentor.name)}
         </div>
         <div className="min-w-0">
-          <p className="truncate font-semibold text-stone-900">{mentor.name}</p>
-          <p className="truncate text-xs text-stone-500">
-            {mentor.title} · {mentor.company}
-          </p>
+          <p className="font-semibold text-stone-900 text-sm truncate">{mentor.name}</p>
+          <p className="text-xs text-stone-500 truncate">{mentor.title} · {mentor.company}</p>
         </div>
       </div>
 
-      <p className="line-clamp-2 text-sm leading-relaxed text-stone-600">{mentor.bio}</p>
+      <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed">{mentor.bio}</p>
 
       <div className="flex flex-wrap gap-1.5">
         {mentor.expertise.slice(0, 3).map((tag) => (
-          <span
-            key={tag}
-            className="rounded-full border border-orange-100 bg-orange-50/80 px-2.5 py-0.5 text-xs font-medium text-orange-900"
-          >
+          <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
             {tag}
           </span>
         ))}
       </div>
 
-      <div className="mt-auto flex items-center justify-between border-t border-stone-100 pt-4">
-        <span className="flex items-center gap-1 text-xs font-medium text-stone-500">
+      <div className="flex items-center justify-between pt-1 border-t border-stone-100">
+        <span className="flex items-center gap-1 text-xs text-stone-500">
           <span className="text-amber-500">★</span>
           {mentor.rating.toFixed(1)} · {mentor.years_experience} yrs
         </span>
         <Link
           to={`/mentors/${mentor.id}`}
-          className="rounded-full bg-stone-900 px-4 py-1.5 text-xs font-semibold text-amber-50 transition hover:bg-stone-800"
+          className="text-xs px-3 py-1 rounded-full bg-stone-900 text-amber-50 hover:bg-stone-700 transition-colors"
         >
-          Open profile
+          View
         </Link>
       </div>
     </div>
   );
 }
 
+// ─── What can you work on? ────────────────────────────────────────────────────
+
 function SessionTypes() {
   return (
-    <section className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-orange-50/40 to-transparent"
-      />
-      <div className="relative mx-auto max-w-6xl">
-        <Reveal className="mx-auto mb-14 max-w-2xl text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-orange-700">Session types</p>
-          <h2 className="font-display text-3xl font-semibold text-stone-900 sm:text-4xl">Pick how you want to use the hour</h2>
-          <p className="mt-4 text-stone-600">
-            Each format has a point. We’re not here to fill time—we’re here so you walk out knowing what to do Monday.
+    <section className="bg-amber-50 py-24 px-6">
+      <div className="max-w-5xl mx-auto">
+        <Reveal className="text-center mb-14">
+          <p className="text-xs font-semibold tracking-widest text-amber-600 uppercase mb-3">Session types</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-stone-900">What can you work on?</h2>
+          <p className="text-stone-500 mt-3 max-w-xl mx-auto text-base">
+            Every session is focused and intentional. Pick the format that matches where you are right now.
           </p>
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {SESSION_TYPES.map((type, i) => (
-            <Reveal key={type.key} delay={i * 70}>
+            <Reveal key={type.key} delay={i * 80}>
               <SessionTypeCard type={type} />
             </Reveal>
           ))}
@@ -263,6 +248,8 @@ function SessionTypes() {
     </section>
   );
 }
+
+// ─── Featured Mentors ─────────────────────────────────────────────────────────
 
 function FeaturedMentors() {
   const [featured, setFeatured] = useState([]);
@@ -299,40 +286,39 @@ function FeaturedMentors() {
   }
 
   return (
-    <section className="px-4 py-24 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <Reveal className="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+    <section className="bg-amber-50 py-24 px-6">
+      <div className="max-w-5xl mx-auto">
+        <Reveal className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-orange-700">Spotlight</p>
-            <h2 className="font-display text-3xl font-semibold text-stone-900 sm:text-4xl">A few people we’d nudge you toward</h2>
+            <p className="text-xs font-semibold tracking-widest text-amber-600 uppercase mb-3">Featured mentors</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-stone-900">Meet a few of our mentors</h2>
           </div>
           <Link
             to="/mentors"
-            className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-orange-800 transition hover:gap-3"
+            className="text-sm font-medium text-stone-600 hover:text-stone-900 underline underline-offset-4 transition-colors shrink-0"
           >
-            Full directory
-            <span aria-hidden>→</span>
+            Browse all mentors →
           </Link>
         </Reveal>
 
         {loading ? (
-          <LoadingSpinner label="Pulling featured mentors…" className="py-12" />
+          <LoadingSpinner label="Loading featured mentors…" className="py-8" />
         ) : error ? (
-          <div className="max-w-xl rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-900">
-            <p className="font-semibold">That didn&apos;t load</p>
-            <p className="mt-1 opacity-90">{error}</p>
+          <div className="rounded-xl border border-red-200 bg-red-50 text-red-900 px-4 py-3 text-sm max-w-xl">
+            <p className="font-semibold">Couldn&apos;t load mentors</p>
+            <p className="mt-1 text-red-800/90">{error}</p>
             <button
               type="button"
               onClick={loadFeatured}
-              className="mt-4 rounded-full bg-red-900 px-4 py-2 text-sm font-medium text-white hover:bg-red-800"
+              className="mt-3 text-sm font-medium px-4 py-2 rounded-full bg-red-900 text-white hover:bg-red-800 transition-colors"
             >
               Try again
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {featured.map((m, i) => (
-              <Reveal key={m.id} delay={i * 80}>
+              <Reveal key={m.id} delay={i * 100}>
                 <MentorPreviewCard mentor={m} />
               </Reveal>
             ))}
@@ -343,57 +329,54 @@ function FeaturedMentors() {
   );
 }
 
+// ─── Testimonials ─────────────────────────────────────────────────────────────
+
 const TESTIMONIALS = [
   {
     quote:
-      'Two calls in I stopped rewriting my resume for no one. He basically called out the story I was dodging and we fixed it in an hour.',
-    name: 'Tyler N.',
-    role: 'Engineer (new gig)',
+      'Within two weeks of my first session, I had three interviews lined up. My mentor helped me reframe my entire narrative.',
+    name: 'Tyler Nguyen',
+    role: 'Now SWE at Amazon',
     initials: 'TN',
   },
   {
     quote:
-      'I went to a no-name school and thought finance was closed to me. She’d done the same jump and told me exactly where I was wasting energy.',
-    name: 'Priya S.',
-    role: 'Analyst',
+      'I came from a non-target school and had no idea how to break into finance. My mentor had done it herself and showed me exactly how.',
+    name: 'Priya Shah',
+    role: 'Now Analyst at Goldman Sachs',
     initials: 'PS',
   },
   {
     quote:
-      'I’d been “fine” at the same job for four years. One session made quitting feel boring instead of terrifying—sounds dramatic but that’s what happened.',
-    name: 'Jordan E.',
-    role: 'PM',
+      "I'd been stuck at the same company for four years. One honest conversation with my mentor gave me the confidence to make the leap.",
+    name: 'Jordan Ellis',
+    role: 'Now Senior PM at Notion',
     initials: 'JE',
   },
 ];
 
 function Testimonials() {
   return (
-    <section className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
-      <div className="absolute inset-0 bg-gradient-to-br from-stone-900 via-stone-900 to-orange-950" />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-20 top-0 h-96 w-96 rounded-full bg-orange-500/20 blur-3xl"
-      />
-      <div className="relative mx-auto max-w-6xl">
-        <Reveal className="mx-auto mb-14 max-w-2xl text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-orange-300">Stories</p>
-          <h2 className="font-display text-3xl font-semibold text-white sm:text-4xl">What people say after (not before)</h2>
+    <section className="bg-white py-24 px-6">
+      <div className="max-w-5xl mx-auto">
+        <Reveal className="text-center mb-14">
+          <p className="text-xs font-semibold tracking-widest text-amber-600 uppercase mb-3">Stories</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-stone-900">Real people, real results</h2>
         </Reveal>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {TESTIMONIALS.map(({ quote, name, role, initials: ini }, i) => (
-            <Reveal key={name} delay={i * 90}>
-              <div className="flex h-full flex-col rounded-3xl border border-white/10 bg-white/5 p-7 backdrop-blur-md transition hover:border-white/20 hover:bg-white/10">
-                <span className="font-display text-4xl leading-none text-orange-400/90">“</span>
-                <p className="-mt-2 flex-1 text-sm leading-relaxed text-stone-200">{quote}</p>
-                <div className="mt-6 flex items-center gap-3 border-t border-white/10 pt-5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-amber-500 text-xs font-bold text-white">
+            <Reveal key={name} delay={i * 100}>
+              <div className="flex flex-col gap-5 p-7 rounded-2xl border border-stone-100 bg-stone-50 h-full">
+                <span className="text-4xl text-amber-300 font-serif leading-none select-none">"</span>
+                <p className="text-sm text-stone-700 leading-relaxed flex-1 -mt-4">{quote}</p>
+                <div className="flex items-center gap-3 pt-4 border-t border-stone-200">
+                  <div className="w-8 h-8 rounded-full bg-amber-200 text-amber-800 flex items-center justify-center text-xs font-bold shrink-0">
                     {ini}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white">{name}</p>
-                    <p className="text-xs text-orange-200/80">{role}</p>
+                    <p className="text-sm font-semibold text-stone-900">{name}</p>
+                    <p className="text-xs text-stone-500">{role}</p>
                   </div>
                 </div>
               </div>
@@ -405,22 +388,22 @@ function Testimonials() {
   );
 }
 
+// ─── Pricing Teaser ───────────────────────────────────────────────────────────
+
 function PricingTeaser() {
   return (
-    <section className="px-4 py-16 sm:px-6 lg:px-8">
+    <section className="bg-amber-50 py-16 px-6">
       <Reveal>
-        <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-8 rounded-3xl border border-stone-200/80 bg-white/90 p-10 shadow-bridge-glow sm:flex-row sm:p-12">
+        <div className="max-w-3xl mx-auto rounded-2xl border border-amber-200 bg-white px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
           <div>
-            <h3 className="font-display text-2xl font-semibold text-stone-900">Poke around free. Pay when it’s a habit.</h3>
-            <p className="mt-2 text-stone-600">
-              If you’re booking every week, the paid tier pays for itself. If not, stay on free—no guilt trip.
-            </p>
+            <p className="font-semibold text-stone-900 text-lg mb-1">Plans starting at free.</p>
+            <p className="text-sm text-stone-500">Upgrade for unlimited sessions and priority matching.</p>
           </div>
           <Link
             to="/pricing"
-            className="shrink-0 rounded-full border-2 border-stone-900 px-8 py-3 text-sm font-semibold text-stone-900 transition hover:bg-stone-900 hover:text-amber-50"
+            className="shrink-0 px-6 py-2.5 rounded-full border-2 border-stone-900 text-stone-900 text-sm font-semibold hover:bg-stone-900 hover:text-amber-50 transition-colors"
           >
-            See pricing
+            View Pricing
           </Link>
         </div>
       </Reveal>
@@ -428,40 +411,40 @@ function PricingTeaser() {
   );
 }
 
+// ─── Final CTA ────────────────────────────────────────────────────────────────
+
 function FinalCTA() {
   return (
-    <section className="px-4 pb-24 pt-4 sm:px-6 lg:px-8">
-      <Reveal>
-        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-orange-600 via-amber-500 to-orange-600 px-8 py-20 text-center shadow-bridge-glow sm:px-16">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.06\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"
-          />
-          <h2 className="relative font-display text-4xl font-semibold leading-tight text-white sm:text-5xl">
-            Stop collecting takes from strangers on LinkedIn
+    <section className="bg-stone-900 py-28 px-6">
+      <div className="max-w-3xl mx-auto text-center">
+        <Reveal>
+          <h2 className="text-4xl sm:text-5xl font-bold text-amber-50 leading-tight mb-5">
+            Ready to bridge the gap?
           </h2>
-          <p className="relative mx-auto mt-4 max-w-lg text-lg text-orange-50/90">
-            Make an account, find one person whose background rhymes with yours, and book. That’s the whole pitch.
+          <p className="text-stone-400 text-lg mb-10 max-w-xl mx-auto">
+            Thousands of people have already taken the first step. Your mentor is waiting.
           </p>
-          <div className="relative mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/register"
-              className="inline-flex w-full items-center justify-center rounded-full bg-white px-8 py-4 text-sm font-semibold text-orange-700 shadow-lg transition hover:bg-orange-50 sm:w-auto"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-amber-500 text-white font-semibold text-sm hover:bg-amber-400 transition-colors shadow-lg shadow-amber-900/30"
             >
-              Sign up free
+              Get Started Free
             </Link>
             <Link
               to="/mentors"
-              className="inline-flex w-full items-center justify-center rounded-full border-2 border-white/40 px-8 py-4 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-stone-600 text-stone-300 font-semibold text-sm hover:border-stone-400 hover:text-white transition-colors"
             >
-              Just show me mentors
+              Learn More
             </Link>
           </div>
-        </div>
-      </Reveal>
+        </Reveal>
+      </div>
     </section>
   );
 }
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Landing() {
   return (
@@ -473,6 +456,30 @@ export default function Landing() {
       <Testimonials />
       <PricingTeaser />
       <FinalCTA />
+      <section className="max-w-5xl mx-auto px-6 py-12">
+        <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-orange-500 mb-2">
+              Affordable access
+            </p>
+            <h2 className="text-2xl md:text-3xl font-bold text-stone-900">
+              Plans starting at $0
+            </h2>
+            <p className="mt-2 text-stone-600">
+              Start free, explore mentors, and upgrade when you're ready for more sessions and support.
+            </p>
+          </div>
+
+          <a
+              href="/pricing"
+              className="px-6 py-3 rounded-full bg-stone-900 text-amber-50 hover:bg-stone-700 transition-colors"
+          >
+            View Pricing
+          </a>
+        </div>
+      </section>
     </>
+
   );
+
 }

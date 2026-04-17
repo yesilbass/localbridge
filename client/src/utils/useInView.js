@@ -20,8 +20,6 @@ export default function useInView(options = {}) {
 
     observer.observe(el);
     return () => observer.disconnect();
-    // IntersectionObserver is created once on mount; options are typically static from the call site.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
   }, []);
 
   return [ref, inView];
