@@ -63,7 +63,6 @@ export default function Pricing() {
                         Subscribe
                     </button>
                 </div>
-
                 {/* PREMIUM */}
                 <div className="bg-white p-6 rounded-xl shadow">
                     <h2 className="text-xl font-semibold mb-2">Premium</h2>
