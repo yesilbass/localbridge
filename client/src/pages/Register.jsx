@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -49,128 +49,141 @@ export default function Register() {
   }
 
   return (
-    <main className="flex items-center justify-center min-h-[calc(100vh-4rem)] px-6 py-12">
-      <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-lg shadow-stone-200/60">
-        <h1 className="text-2xl font-bold text-stone-900 text-center mb-1">Create account</h1>
-        <p className="text-sm text-stone-500 text-center mb-8">Join Bridge in a minute.</p>
+    <main className="min-h-[calc(100vh-4rem)] px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[640px] max-w-5xl overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white/90 shadow-bridge-glow backdrop-blur-sm">
+        <div className="relative hidden w-[38%] flex-col justify-between bg-gradient-to-br from-orange-600 via-amber-500 to-orange-700 p-10 lg:flex">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23fff\' fill-opacity=\'0.08\'%3E%3Cpath d=\'M0 40h40V0H0v40zm2-2V2h36v36H2z\'/%3E%3C/g%3E%3C/svg%3E')]"
+          />
+          <div className="relative">
+            <p className="font-display text-2xl font-medium leading-snug text-white">
+              Got a playbook worth sharing—or stuck and need someone else’s? Cool. That’s what this is for.
+            </p>
+            <p className="mt-4 text-sm text-orange-100/90">Mentors and mentees use the same signup. We’ll sort you after.</p>
+          </div>
+          <p className="relative text-xs font-medium uppercase tracking-wider text-white/70">Bridge</p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          {error ? (
-            <div
-              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-              role="alert"
-            >
-              {error}
+        <div className="flex flex-1 flex-col justify-center px-6 py-12 sm:px-10">
+          <h1 className="font-display text-3xl font-semibold text-stone-900">Make an account</h1>
+          <p className="mt-2 text-sm text-stone-500">Takes a minute. We’re not asking for a card.</p>
+
+          <form onSubmit={handleSubmit} className="mt-8 flex max-h-[70vh] flex-col gap-4 overflow-y-auto pr-1 sm:max-h-none sm:overflow-visible">
+            {error ? (
+              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+                {error}
+              </div>
+            ) : null}
+
+            <div>
+              <label htmlFor="register-name" className="mb-1.5 block text-sm font-medium text-stone-700">
+                Full name
+              </label>
+              <input
+                id="register-name"
+                type="text"
+                autoComplete="name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30"
+                placeholder="Alex Rivera"
+              />
             </div>
-          ) : null}
 
-          <div>
-            <label htmlFor="register-name" className="block text-sm font-medium text-stone-700 mb-1.5">
-              Full name
-            </label>
-            <input
-              id="register-name"
-              type="text"
-              autoComplete="name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="w-full rounded-xl border border-stone-200 bg-amber-50/40 px-4 py-2.5 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-sm"
-              placeholder="Alex Rivera"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="register-email" className="block text-sm font-medium text-stone-700 mb-1.5">
-              Email
-            </label>
-            <input
-              id="register-email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-stone-200 bg-amber-50/40 px-4 py-2.5 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-sm"
-              placeholder="you@example.com"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="register-password" className="block text-sm font-medium text-stone-700 mb-1.5">
-              Password
-            </label>
-            <input
-              id="register-password"
-              type="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-stone-200 bg-amber-50/40 px-4 py-2.5 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-sm"
-              placeholder="At least 6 characters"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="register-confirm" className="block text-sm font-medium text-stone-700 mb-1.5">
-              Confirm password
-            </label>
-            <input
-              id="register-confirm"
-              type="password"
-              autoComplete="new-password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full rounded-xl border border-stone-200 bg-amber-50/40 px-4 py-2.5 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-sm"
-              placeholder="Repeat password"
-            />
-          </div>
-
-          <fieldset className="space-y-3">
-            <legend className="block text-sm font-medium text-stone-700 mb-2">I am…</legend>
-            <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-stone-200 bg-amber-50/30 px-4 py-3 has-[:checked]:border-amber-400 has-[:checked]:bg-amber-50/60">
+            <div>
+              <label htmlFor="register-email" className="mb-1.5 block text-sm font-medium text-stone-700">
+                Email
+              </label>
               <input
-                type="radio"
-                name="role"
-                value="mentee"
-                checked={role === 'mentee'}
-                onChange={() => setRole('mentee')}
-                className="mt-1 text-amber-600 focus:ring-amber-500"
+                id="register-email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30"
+                placeholder="you@example.com"
               />
-              <span>
-                <span className="font-medium text-stone-900">I&apos;m looking for a mentor</span>
-                <span className="block text-xs text-stone-500 mt-0.5">Get guidance on your career</span>
-              </span>
-            </label>
-            <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-stone-200 bg-amber-50/30 px-4 py-3 has-[:checked]:border-amber-400 has-[:checked]:bg-amber-50/60">
+            </div>
+
+            <div>
+              <label htmlFor="register-password" className="mb-1.5 block text-sm font-medium text-stone-700">
+                Password
+              </label>
               <input
-                type="radio"
-                name="role"
-                value="mentor"
-                checked={role === 'mentor'}
-                onChange={() => setRole('mentor')}
-                className="mt-1 text-amber-600 focus:ring-amber-500"
+                id="register-password"
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30"
+                placeholder="At least 6 characters"
               />
-              <span>
-                <span className="font-medium text-stone-900">I want to be a mentor</span>
-                <span className="block text-xs text-stone-500 mt-0.5">Share your experience with others</span>
-              </span>
-            </label>
-          </fieldset>
+            </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="mt-2 w-full rounded-full bg-stone-900 text-amber-50 py-3 text-sm font-semibold hover:bg-stone-800 disabled:opacity-60 disabled:pointer-events-none transition-colors"
-          >
-            {submitting ? 'Creating account…' : 'Create account'}
-          </button>
-        </form>
+            <div>
+              <label htmlFor="register-confirm" className="mb-1.5 block text-sm font-medium text-stone-700">
+                Confirm password
+              </label>
+              <input
+                id="register-confirm"
+                type="password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30"
+                placeholder="Repeat password"
+              />
+            </div>
 
-        <p className="mt-8 text-center text-sm text-stone-600">
-          Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-amber-800 hover:text-amber-900 underline underline-offset-2">
-            Log in
-          </Link>
-        </p>
+            <fieldset className="space-y-2">
+              <legend className="mb-2 block text-sm font-medium text-stone-700">I am…</legend>
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3 has-[:checked]:border-orange-400 has-[:checked]:ring-2 has-[:checked]:ring-orange-400/20">
+                <input
+                  type="radio"
+                  name="role"
+                  value="mentee"
+                  checked={role === 'mentee'}
+                  onChange={() => setRole('mentee')}
+                  className="mt-1 text-orange-600"
+                />
+                <span>
+                  <span className="font-medium text-stone-900">I want a mentor</span>
+                  <span className="mt-0.5 block text-xs text-stone-500">I’m trying to figure the next step out</span>
+                </span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3 has-[:checked]:border-orange-400 has-[:checked]:ring-2 has-[:checked]:ring-orange-400/20">
+                <input
+                  type="radio"
+                  name="role"
+                  value="mentor"
+                  checked={role === 'mentor'}
+                  onChange={() => setRole('mentor')}
+                  className="mt-1 text-orange-600"
+                />
+                <span>
+                  <span className="font-medium text-stone-900">I want to mentor</span>
+                  <span className="mt-0.5 block text-xs text-stone-500">I’ve got stuff worth passing on</span>
+                </span>
+              </label>
+            </fieldset>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="mt-2 w-full rounded-full bg-gradient-to-r from-orange-600 to-amber-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/25 transition hover:from-orange-500 hover:to-amber-400 disabled:opacity-60"
+            >
+              {submitting ? 'Creating account…' : 'Create account'}
+            </button>
+          </form>
+
+          <p className="mt-8 text-center text-sm text-stone-600">
+            Already signed up?{' '}
+            <Link to="/login" className="font-semibold text-orange-800 hover:text-orange-900">
+              Log in
+            </Link>
+          </p>
+        </div>
       </div>
     </main>
   );

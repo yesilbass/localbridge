@@ -13,7 +13,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-amber-50 text-stone-900">
+        <div className="min-h-screen bg-bridge-page text-stone-900 font-sans antialiased">
           <Navbar />
           <Routes>
             <Route path="/" element={<Landing />} />
