@@ -3,8 +3,9 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getMentorById } from '../api/mentors';
 import { getReviewsForMentor } from '../api/reviews';
 import { createSession } from '../api/sessions';
-import { useAuth } from '../context/AuthContext';
-import SessionTypeCard, { SESSION_TYPES } from '../components/SessionTypeCard';
+import { useAuth } from '../context/useAuth';
+import SessionTypeCard from '../components/SessionTypeCard';
+import { SESSION_TYPES } from '../constants/sessionTypes';
 import { addRecentlyViewedMentor } from '../utils/recentlyViewed';
 
 function BookingModal({ mentor, onClose }) {
@@ -50,7 +51,7 @@ function BookingModal({ mentor, onClose }) {
         if (error) {
             setResult({ ok: false, message: error.message ?? 'Something went wrong. Please try again.' });
         } else {
-            setResult({ ok: true, message: 'Session booked! Your mentor will confirm shortly.' });
+            setResult({ ok: true, message: "Request sent — they'll confirm or suggest another time." });
         }
     }
 
@@ -75,9 +76,9 @@ function BookingModal({ mentor, onClose }) {
                         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-4xl shadow-lg shadow-amber-900/20">
                             ✓
                         </div>
-                        <h2 className="font-serif text-2xl font-semibold text-stone-900 sm:text-3xl">You&apos;re booked</h2>
+                        <h2 className="font-display text-2xl font-semibold text-stone-900 sm:text-3xl">You’re on the list</h2>
                         <p className="mt-3 max-w-sm text-stone-600 leading-relaxed">{result.message}</p>
-                        <p className="mt-2 text-sm text-stone-500">We&apos;ll email you when {mentorFirst} responds.</p>
+                        <p className="mt-2 text-sm text-stone-500">We’ll email you when {mentorFirst} gets back to you.</p>
                         <button
                             type="button"
                             onClick={handleClose}
@@ -93,15 +94,16 @@ function BookingModal({ mentor, onClose }) {
                             <div className="pointer-events-none absolute -bottom-20 left-1/4 h-40 w-40 rounded-full bg-orange-400/10 blur-3xl" />
                             <div className="relative flex items-start justify-between gap-4">
                                 <div className="min-w-0">
-                                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-200/90">Book a session</p>
+                                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-200/90">Book time</p>
                                     <h2
                                         id="booking-modal-title"
-                                        className="mt-2 font-serif text-2xl font-semibold tracking-tight text-white sm:text-3xl"
+                                        className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl"
                                     >
                                         Meet with {mentor.name}
                                     </h2>
                                     <p className="mt-2 max-w-md text-sm leading-relaxed text-stone-300">
-                                        Pick a format, add an optional time and note — your mentor confirms the details.
+                                        Choose a format, toss in a time if you have one, leave a short note. They’ll confirm or
+                                        counter-offer like a normal human.
                                     </p>
                                 </div>
                                 <button
@@ -140,9 +142,9 @@ function BookingModal({ mentor, onClose }) {
                             <div className="space-y-8 px-5 py-6 sm:px-8 sm:py-8">
                                 <section>
                                     <div className="mb-4">
-                                        <h3 className="text-base font-semibold text-stone-900">Session format</h3>
+                                        <h3 className="text-base font-semibold text-stone-900">What kind of hour is this?</h3>
                                         <p className="mt-1 text-sm text-stone-500">
-                                            Tap a card to select. Hover to preview — selection shows a ring and checkmark.
+                                            Tap one. The ring and checkmark mean you’re locked in on that format.
                                         </p>
                                     </div>
                                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
@@ -159,8 +161,8 @@ function BookingModal({ mentor, onClose }) {
                                 </section>
 
                                 <section className="rounded-2xl border border-stone-200/80 bg-gradient-to-b from-stone-50/90 to-white p-5 sm:p-6">
-                                    <h3 className="text-base font-semibold text-stone-900">When &amp; focus</h3>
-                                    <p className="mt-1 text-sm text-stone-500">Optional — helps your mentor prepare.</p>
+                                    <h3 className="text-base font-semibold text-stone-900">When &amp; what to prep</h3>
+                                    <p className="mt-1 text-sm text-stone-500">Optional, but it helps them show up ready.</p>
                                     <div className="mt-5 space-y-5">
                                         <div>
                                             <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-stone-500" htmlFor="scheduled-date">
@@ -183,7 +185,7 @@ function BookingModal({ mentor, onClose }) {
                                                 value={message}
                                                 onChange={(e) => setMessage(e.target.value)}
                                                 rows={3}
-                                                placeholder="e.g. Preparing for PM interviews at mid-size startups…"
+                                                placeholder="e.g. PM loops at ~200-person startups, nervous about system design…"
                                                 className="w-full resize-none rounded-xl border border-stone-200 bg-white px-4 py-3 text-stone-900 placeholder-stone-400 shadow-sm transition focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
                                             />
                                         </div>
@@ -217,7 +219,7 @@ function BookingModal({ mentor, onClose }) {
                                     disabled={!selectedType || submitting}
                                     className="rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-amber-900/25 transition hover:from-amber-400 hover:to-orange-400 disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none sm:min-w-[200px]"
                                 >
-                                    {submitting ? 'Sending request…' : 'Request session'}
+                                    {submitting ? 'Sending…' : 'Send request'}
                                 </button>
                             </div>
                         </footer>
@@ -405,7 +407,7 @@ export default function MentorProfile() {
     if (!profile?.mentor) {
         return (
             <main className="max-w-2xl mx-auto px-6 py-16 text-center">
-                <p className="text-stone-500 text-lg mb-6">We couldn&apos;t find that mentor.</p>
+                <p className="text-stone-500 text-lg mb-6">That mentor’s not here—maybe the link’s old.</p>
                 <Link to="/mentors" className="inline-flex items-center gap-2 text-amber-800 font-medium hover:underline">
                     ← Browse all mentors
                 </Link>
@@ -421,7 +423,7 @@ export default function MentorProfile() {
 
     return (
         <>
-            <div className="min-h-screen bg-gradient-to-b from-amber-50 via-orange-50/40 to-stone-100 relative overflow-hidden">
+            <div className="relative min-h-screen overflow-hidden bg-bridge-page">
                 <div
                     className="pointer-events-none absolute inset-0 opacity-[0.35]"
                     style={{
@@ -484,7 +486,7 @@ export default function MentorProfile() {
                                         )}
                                     </div>
 
-                                    <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold text-stone-900 tracking-tight leading-[1.1] mb-3">
+                                    <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold text-stone-900 tracking-tight leading-[1.1] mb-3">
                                         {mentor.name}
                                     </h1>
 
@@ -559,19 +561,19 @@ export default function MentorProfile() {
                         {/* Main column */}
                         <div className="lg:col-span-8 flex flex-col gap-8">
                             <section className="rounded-3xl bg-white/90 backdrop-blur border border-stone-200/80 shadow-lg shadow-stone-900/5 p-8 sm:p-10">
-                                <h2 className="font-serif text-2xl font-semibold text-stone-900 mb-6 flex items-center gap-3">
+                                <h2 className="font-display text-2xl font-semibold text-stone-900 mb-6 flex items-center gap-3">
                                     <span className="w-1 h-8 rounded-full bg-gradient-to-b from-amber-500 to-orange-400" />
                                     About
                                 </h2>
                                 <div className="relative pl-4 border-l-2 border-amber-200/80">
                                     <p className="text-stone-700 text-lg leading-relaxed whitespace-pre-line">
-                                        {mentor.bio?.trim() || 'This mentor hasn’t added a bio yet — book a session to connect and learn more about their background.'}
+                                        {mentor.bio?.trim() || 'No bio yet—book and ask whatever you’d normally read here.'}
                                     </p>
                                 </div>
                             </section>
 
                             <section className="rounded-3xl bg-white/90 backdrop-blur border border-stone-200/80 shadow-lg shadow-stone-900/5 p-8 sm:p-10">
-                                <h2 className="font-serif text-2xl font-semibold text-stone-900 mb-6">Expertise</h2>
+                                <h2 className="font-display text-2xl font-semibold text-stone-900 mb-6">Expertise</h2>
                                 {mentor.expertise?.length > 0 ? (
                                     <div className="flex flex-wrap gap-2.5">
                                         {mentor.expertise.map((tag) => (
@@ -589,8 +591,8 @@ export default function MentorProfile() {
                             </section>
 
                             <section className="rounded-3xl bg-white/90 backdrop-blur border border-stone-200/80 shadow-lg shadow-stone-900/5 p-8 sm:p-10">
-                                <h2 className="font-serif text-2xl font-semibold text-stone-900 mb-2">What mentees say</h2>
-                                <p className="text-stone-500 text-sm mb-8">Honest feedback from completed sessions.</p>
+                                <h2 className="font-display text-2xl font-semibold text-stone-900 mb-2">What people said after</h2>
+                                <p className="text-stone-500 text-sm mb-8">Pulls from real session reviews when we’ve got them.</p>
 
                                 {mentorReviews.length > 0 ? (
                                     <ul className="space-y-5">
@@ -614,7 +616,7 @@ export default function MentorProfile() {
                                                         {rev.comment?.trim() ? (
                                                             <p className="text-stone-700 leading-relaxed">{rev.comment.trim()}</p>
                                                         ) : (
-                                                            <p className="text-stone-400 text-sm italic">Left a rating without a written review.</p>
+                                                            <p className="text-stone-400 text-sm italic">Rated but didn’t leave a note.</p>
                                                         )}
                                                     </div>
                                                 </div>
@@ -626,7 +628,7 @@ export default function MentorProfile() {
                                         <p className="text-4xl mb-3">💬</p>
                                         <p className="font-medium text-stone-700">No reviews yet</p>
                                         <p className="text-sm text-stone-500 mt-1 max-w-sm mx-auto">
-                                            Be the first to book a session — reviews show up here after you meet.
+                                            Book a session—reviews show up here after, if they leave one.
                                         </p>
                                     </div>
                                 )}
@@ -636,10 +638,11 @@ export default function MentorProfile() {
                         {/* Sticky sidebar */}
                         <aside className="lg:col-span-4 lg:sticky lg:top-6 space-y-6">
                             <div className="rounded-3xl bg-stone-900 text-amber-50 p-8 shadow-2xl shadow-stone-900/30 ring-1 ring-stone-700/50">
-                                <p className="text-amber-200/90 text-xs font-semibold uppercase tracking-widest mb-2">1:1 mentorship</p>
-                                <h3 className="font-serif text-2xl font-semibold mb-4 leading-snug">Book time with {mentor.name.split(' ')[0]}</h3>
+                                <p className="text-amber-200/90 text-xs font-semibold uppercase tracking-widest mb-2">1:1</p>
+                                <h3 className="font-display text-2xl font-semibold mb-4 leading-snug">Grab time with {mentor.name.split(' ')[0]}</h3>
                                 <p className="text-amber-100/80 text-sm leading-relaxed mb-6">
-                                    Pick a session type, suggest a time, and send a short note. Your mentor will confirm or propose another slot.
+                                    Pick a format, suggest a window if you have one, add context. They confirm or ping you with a
+                                    better slot.
                                 </p>
                                 <ul className="space-y-3 mb-8">
                                     {SESSION_TYPES.map((type) => (
@@ -659,24 +662,24 @@ export default function MentorProfile() {
                                     Book a session
                                 </button>
                                 <p className="text-xs text-amber-200/60 text-center mt-4 leading-relaxed">
-                                    Pro plan may apply for unlimited sessions.
+                                    If you’re hammering sessions, Pro is probably worth it—we’ll remind you inside billing later.
                                 </p>
                             </div>
 
                             <div className="rounded-3xl bg-white/90 border border-stone-200/80 p-6 text-sm text-stone-600">
-                                <p className="font-semibold text-stone-900 mb-2">Why Bridge?</p>
+                                <p className="font-semibold text-stone-900 mb-2">Why bother with us</p>
                                 <ul className="space-y-2 list-none">
                                     <li className="flex gap-2 py-1">
                                         <span className="text-amber-600">✓</span>
-                                        Vetted mentor profiles
+                                        Profiles meant to be read, not SEO’d
                                     </li>
                                     <li className="flex gap-2 py-1">
                                         <span className="text-amber-600">✓</span>
-                                        Structured session types
+                                        Session types so you’re not stuck in small talk
                                     </li>
                                     <li className="flex gap-2 py-1">
                                         <span className="text-amber-600">✓</span>
-                                        Secure booking flow
+                                        Booking that doesn’t feel like a ticket system
                                     </li>
                                 </ul>
                             </div>
