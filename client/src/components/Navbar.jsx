@@ -16,8 +16,10 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-stone-200/60 bg-white/75 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="group flex items-center gap-2">
+      <nav className="mx-auto grid h-16 max-w-6xl grid-cols-3 items-center px-4 sm:px-6 lg:px-8">
+
+        {/* Left — logo */}
+        <Link to="/" className="group flex items-center gap-2 justify-self-start">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-lg font-bold text-white shadow-md shadow-orange-500/25 transition group-hover:shadow-lg group-hover:shadow-orange-500/30">
             B
           </span>
@@ -26,18 +28,25 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-1 sm:gap-2">
+        {/* Center — nav links */}
+        <div className="flex items-center justify-center gap-1">
           <Link to="/mentors" className="rounded-full px-3 py-2 text-sm font-medium text-stone-600 transition hover:bg-white hover:text-stone-900 hover:shadow-sm sm:px-4">
             Mentors
+          </Link>
+          <Link to="/about" className="rounded-full px-3 py-2 text-sm font-medium text-stone-600 transition hover:bg-white hover:text-stone-900 hover:shadow-sm sm:px-4">
+            About
           </Link>
           <Link to="/pricing" className="rounded-full px-3 py-2 text-sm font-medium text-stone-600 transition hover:bg-white hover:text-stone-900 hover:shadow-sm sm:px-4">
             Pricing
           </Link>
+        </div>
 
+        {/* Right — auth */}
+        <div className="flex items-center justify-end">
           {loading ? (
-            <div className="ml-2 h-9 w-24 animate-pulse rounded-full bg-stone-200/70" aria-hidden />
+            <div className="h-9 w-24 animate-pulse rounded-full bg-stone-200/70" aria-hidden />
           ) : user ? (
-            <div className="ml-2 flex items-center gap-2 pl-2 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <span className="hidden max-w-[9rem] truncate text-sm text-stone-600 sm:inline" title={user.user_metadata?.full_name ?? user.email}>
                 {user.user_metadata?.full_name ?? user.email}
               </span>
@@ -49,7 +58,7 @@ export default function Navbar() {
               </button>
             </div>
           ) : (
-            <div className="ml-2 flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Link to="/login" className="rounded-full px-4 py-2 text-sm font-medium text-stone-600 transition hover:bg-white hover:text-stone-900">
                 Log in
               </Link>
@@ -59,6 +68,7 @@ export default function Navbar() {
             </div>
           )}
         </div>
+
       </nav>
     </header>
   );

@@ -214,12 +214,15 @@ function EmptyState({ message, cta, href }) {
 //   2. Mentee read-only → <Link> navigates to mentor profile
 //   3. Mentor read-only (history) → plain <div>
 
-function SessionCard({ session, isMentor = false, onAccept, onDecline, onCancel, actionLoading }) {
+function SessionCard({ session, isMentor = false, mentorProfile, onAccept, onDecline, onCancel, actionLoading }) {
   const type = SESSION_TYPE_MAP[session.session_type];
   const name = isMentor
     ? (session.mentee_name ?? 'Unknown mentee')
-    : (session.mentor_name ?? 'Unknown mentor');
-  const subtitle = isMentor ? null : session.mentor_title;
+    : (mentorProfile?.name ?? session.mentor_name ?? 'Unknown mentor');
+  const subtitle = isMentor ? null : (mentorProfile?.title ?? session.mentor_title ?? null);
+  const avatarUrl = !isMentor ? (mentorProfile?.image_url ?? null) : null;
+  const avatarColor = getAvatarColor(name);
+  const avatarInits = getInitials(name);
 
   const now = new Date();
   const isPast = session.scheduled_date && new Date(session.scheduled_date) < now;
@@ -232,12 +235,29 @@ function SessionCard({ session, isMentor = false, onAccept, onDecline, onCancel,
 
   const cardBody = (
     <>
-      <div
-        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl ${type?.accent.iconBg ?? 'bg-stone-100'}`}
-        aria-hidden
-      >
-        {type?.icon ?? '📋'}
-      </div>
+      {!isMentor ? (
+        avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt=""
+            className="h-11 w-11 shrink-0 rounded-xl object-cover ring-2 ring-white shadow-sm"
+          />
+        ) : (
+          <div
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm ring-2 ring-white ${avatarColor}`}
+            aria-hidden
+          >
+            {avatarInits}
+          </div>
+        )
+      ) : (
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl ${type?.accent.iconBg ?? 'bg-stone-100'}`}
+          aria-hidden
+        >
+          {type?.icon ?? '📋'}
+        </div>
+      )}
       <div className="min-w-0 flex-1">
         <p className="truncate font-semibold text-stone-900 transition group-hover:text-orange-900">{name}</p>
         {subtitle ? <p className="truncate text-sm text-stone-500">{subtitle}</p> : null}
@@ -405,7 +425,7 @@ export default function Dashboard() {
           if (ids.length > 0) {
             const { data: profiles, error: profErr } = await supabase
               .from('mentor_profiles')
-              .select('id, name, title, company, image_url')
+              .select('*')
               .in('id', ids);
             if (profErr) throw profErr;
             setMentorMap(Object.fromEntries((profiles ?? []).map((p) => [p.id, p])));
@@ -649,6 +669,7 @@ export default function Dashboard() {
                     key={s.id}
                     session={s}
                     isMentor={isMentor}
+                    mentorProfile={!isMentor ? mentorMap[s.mentor_id] : undefined}
                     actionLoading={actionLoading}
                     onAccept={isMentor ? (id) => handleStatusUpdate(id, 'accepted') : undefined}
                     onDecline={isMentor ? (id) => handleStatusUpdate(id, 'declined') : undefined}
@@ -676,7 +697,7 @@ export default function Dashboard() {
             {historySessions.length > 0 ? (
               <div className="flex flex-col gap-3">
                 {visibleHistory.map((s) => (
-                  <SessionCard key={s.id} session={s} isMentor={isMentor} />
+                  <SessionCard key={s.id} session={s} isMentor={isMentor} mentorProfile={!isMentor ? mentorMap[s.mentor_id] : undefined} />
                 ))}
                 {historySessions.length > 10 && (
                   <button

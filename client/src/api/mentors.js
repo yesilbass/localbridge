@@ -20,14 +20,27 @@ export async function getMentorById(mentorProfileId) {
   };
 }
 
-export async function getAllMentors(filters = {}) {
-  let query = supabase.from("mentor_profiles").select("*");
-  Object.entries(filters).forEach(([field, value]) => {
-    query = query.eq(field, value);
-  });
-  const { data, error } = await query.order("created_at", { ascending: false });
-  if (error) throw error;
-  return data || [];
+export async function getAllMentors({ search = '', industry = '', sortBy = 'rating', page = 0, pageSize = 12 } = {}) {
+  const sortColumn = sortBy === 'experience' ? 'years_experience' : sortBy === 'sessions' ? 'total_sessions' : 'rating';
+
+  let query = supabase
+    .from("mentor_profiles")
+    .select("*", { count: "exact" });
+
+  if (search) {
+    query = query.or(`name.ilike.%${search}%,title.ilike.%${search}%,company.ilike.%${search}%`);
+  }
+  if (industry) {
+    query = query.eq("industry", industry);
+  }
+
+  query = query
+    .order(sortColumn, { ascending: false })
+    .range(page * pageSize, (page + 1) * pageSize - 1);
+
+  const { data, error, count } = await query;
+  if (error) return { data: null, error, totalCount: 0 };
+  return { data: data ?? [], error: null, totalCount: count ?? 0 };
 }
 
 export async function getFeaturedMentors() {
