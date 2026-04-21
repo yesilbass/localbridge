@@ -27,6 +27,7 @@ import supabase from '../api/supabase';
 import LoadingSpinner from '../components/LoadingSpinner';
 import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
 import Reveal from '../components/Reveal';
+import OnboardingModal from '../components/OnboardingModal';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -1032,6 +1033,7 @@ export default function Dashboard() {
             )}
           </Reveal>
         </main>
+        <OnboardingModal />
       </div>
   );
 }

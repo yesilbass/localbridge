@@ -740,7 +740,6 @@ function Outcomes() {
             }}
         />
         <div aria-hidden className="pointer-events-none absolute -right-24 top-1/4 h-[min(480px,70vw)] w-[min(480px,70vw)] rounded-full bg-orange-500/25 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-amber-400/15 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl">
           <Reveal className="mb-14 max-w-2xl">
