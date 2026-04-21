@@ -12,7 +12,7 @@ import Footer from './components/Footer';
 import About from './pages/About';
 import Careers from './pages/Careers';
 import Blog from './pages/Blog';
-import FAQ from './pages/FAQ';
+import FAQ from './pages/footer/FAQ.jsx';
 import Contact from './pages/Contact';
 import Help from './pages/Help';
 import Trust from './pages/Trust';
