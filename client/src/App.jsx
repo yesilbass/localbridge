@@ -10,16 +10,16 @@ import Dashboard from './pages/Dashboard';
 import Pricing from './pages/Pricing';
 import Footer from './components/Footer';
 import About from './pages/About';
-import Careers from './pages/Careers';
-import Blog from './pages/Blog';
+import Careers from './pages/footer/Careers.jsx';
+import Blog from './pages/footer/Blog.jsx';
 import FAQ from './pages/footer/FAQ.jsx';
-import Contact from './pages/Contact';
-import Help from './pages/Help';
-import Trust from './pages/Trust';
-import Community from './pages/Community';
-import Privacy from './pages/Privacy';
-import Terms from './pages/Terms';
-import Cookies from './pages/Cookies';
+import Contact from './pages/footer/Contact.jsx';
+import Help from './pages/footer/Help.jsx';
+import Trust from './pages/footer/Trust.jsx';
+import Community from './pages/footer/Community.jsx';
+import Privacy from './pages/footer/Privacy.jsx';
+import Terms from './pages/footer/Terms.jsx';
+import Cookies from './pages/footer/Cookies.jsx';
 
 export default function App() {
   return (
