@@ -16,23 +16,55 @@ const focusRingDark =
 const focusRingWhite =
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900';
 
-// Default time slots offered when a day is picked. These are simple half-hour buckets;
-// when backend exposes real availability, replace with per-day arrays.
 const DEFAULT_TIME_SLOTS = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
 function SessionTypeIcon({ typeKey, className = 'h-5 w-5' }) {
-    const common = { className, fill: 'none', stroke: 'currentColor', strokeWidth: 1.75, viewBox: '0 0 24 24', 'aria-hidden': true };
+    const common = {
+        className,
+        fill: 'none',
+        stroke: 'currentColor',
+        strokeWidth: 1.75,
+        viewBox: '0 0 24 24',
+        'aria-hidden': true,
+    };
+
     switch (typeKey) {
         case 'career_advice':
-            return <svg {...common}><circle cx="12" cy="12" r="9" /><path strokeLinecap="round" strokeLinejoin="round" d="m14.5 9.5-3 5-5 3 3-5 5-3Z" /></svg>;
+            return (
+                <svg {...common}>
+                    <circle cx="12" cy="12" r="9" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m14.5 9.5-3 5-5 3 3-5 5-3Z" />
+                </svg>
+            );
         case 'interview_prep':
-            return <svg {...common}><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.5" fill="currentColor" /></svg>;
+            return (
+                <svg {...common}>
+                    <circle cx="12" cy="12" r="9" />
+                    <circle cx="12" cy="12" r="5" />
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                </svg>
+            );
         case 'resume_review':
-            return <svg {...common}><path strokeLinecap="round" strokeLinejoin="round" d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M14 3v6h6M8 13h8M8 17h5" /></svg>;
+            return (
+                <svg {...common}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 3v6h6M8 13h8M8 17h5" />
+                </svg>
+            );
         case 'networking':
-            return <svg {...common}><circle cx="8" cy="8" r="3" /><circle cx="16" cy="8" r="3" /><path strokeLinecap="round" strokeLinejoin="round" d="M2 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1M14 20v-1a5 5 0 0 1 5-5h0a3 3 0 0 1 3 3v3" /></svg>;
+            return (
+                <svg {...common}>
+                    <circle cx="8" cy="8" r="3" />
+                    <circle cx="16" cy="8" r="3" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1M14 20v-1a5 5 0 0 1 5-5h0a3 3 0 0 1 3 3v3" />
+                </svg>
+            );
         default:
-            return <svg {...common}><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>;
+            return (
+                <svg {...common}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+            );
     }
 }
 
@@ -45,18 +77,28 @@ function avatarColor(name = '') {
         'from-sky-400 to-indigo-500',
         'from-fuchsia-400 to-rose-500',
     ];
+
     let hash = 0;
     for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
     return palette[Math.abs(hash) % palette.length];
 }
 
 function initials(name = '') {
-    return name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+    return name
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((w) => w[0].toUpperCase())
+        .join('');
 }
 
 function formatIndustry(industry) {
     if (!industry?.trim()) return null;
-    return industry.trim().split(/\s+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    return industry
+        .trim()
+        .split(/\s+/)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
 }
 
 function StarRow({ rating, size = 'md' }) {
@@ -65,6 +107,7 @@ function StarRow({ rating, size = 'md' }) {
     const full = Math.floor(r);
     const partial = r - full;
     const dim = size === 'lg' ? 'w-5 h-5' : 'w-4 h-4';
+
     return (
         <span className="flex items-center gap-0.5" aria-label={`${r.toFixed(1)} out of 5 stars`}>
       {Array.from({ length: 5 }).map((_, i) => {
@@ -72,6 +115,7 @@ function StarRow({ rating, size = 'md' }) {
           if (i < full) fill = 100;
           else if (i === full) fill = Math.round(partial * 100);
           const gid = `star-${uid}-${i}-${size}`;
+
           return (
               <svg key={i} className={dim} viewBox="0 0 20 20">
                   <defs>
@@ -80,7 +124,10 @@ function StarRow({ rating, size = 'md' }) {
                           <stop offset={`${fill}%`} stopColor="#e7e5e4" />
                       </linearGradient>
                   </defs>
-                  <polygon points="10,1 12.9,7 19.5,7.6 14.5,12 16.2,18.5 10,15 3.8,18.5 5.5,12 0.5,7.6 7.1,7" fill={`url(#${gid})`} />
+                  <polygon
+                      points="10,1 12.9,7 19.5,7.6 14.5,12 16.2,18.5 10,15 3.8,18.5 5.5,12 0.5,7.6 7.1,7"
+                      fill={`url(#${gid})`}
+                  />
               </svg>
           );
       })}
@@ -88,14 +135,15 @@ function StarRow({ rating, size = 'md' }) {
     );
 }
 
-/** Derive 14-day pseudo-availability seeded by mentor id. Swap for real data when backend ready. */
 function useAvailability(mentorId) {
     return useMemo(() => {
         const now = new Date();
         now.setHours(0, 0, 0, 0);
+
         let seed = 0;
         const idStr = String(mentorId ?? '');
         for (let i = 0; i < idStr.length; i++) seed = idStr.charCodeAt(i) + ((seed << 5) - seed);
+
         const out = [];
         for (let i = 0; i < 14; i++) {
             const d = new Date(now);
@@ -103,22 +151,26 @@ function useAvailability(mentorId) {
             const dow = d.getDay();
             const pseudo = ((seed + i * 31) * 9301 + 49297) % 233280;
             const rand = pseudo / 233280;
+
             let status = 'free';
             if (dow === 0 || dow === 6) status = rand > 0.6 ? 'limited' : rand > 0.3 ? 'booked' : 'free';
             else status = rand > 0.7 ? 'booked' : rand > 0.35 ? 'limited' : 'free';
+
             out.push({ date: d, status });
         }
+
         return out;
     }, [mentorId]);
 }
 
-/** Per-day pseudo time-slot availability so booked/limited days show fewer slots. */
 function useSlotsForDate(date, mentorId) {
     return useMemo(() => {
         if (!date) return [];
+
         let seed = 0;
         const key = `${mentorId ?? ''}-${date.toISOString().slice(0, 10)}`;
         for (let i = 0; i < key.length; i++) seed = key.charCodeAt(i) + ((seed << 5) - seed);
+
         return DEFAULT_TIME_SLOTS.map((slot, i) => {
             const pseudo = ((seed + i * 53) * 9301 + 49297) % 233280;
             const rand = pseudo / 233280;
@@ -127,18 +179,12 @@ function useSlotsForDate(date, mentorId) {
     }, [date, mentorId]);
 }
 
-/**
- * The inline booking flow panel. Appears when a session format is chosen.
- * Two columns: choice summary on left, date + time picker on right.
- * "Book session" is gated until both date AND time are picked.
- */
 function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, navigate, mentorId }) {
     const [pickedDate, setPickedDate] = useState(null);
     const [pickedTime, setPickedTime] = useState(null);
     const availability = useAvailability(mentor.id);
     const slots = useSlotsForDate(pickedDate, mentor.id);
 
-    // Reset time when day changes so stale time doesn't persist.
     useEffect(() => {
         setPickedTime(null);
     }, [pickedDate]);
@@ -147,12 +193,19 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
 
     function handleBookClick() {
         if (!canBook) return;
+
         if (!user) {
             navigate('/login', { state: { from: `/mentors/${mentorId}` } });
             return;
         }
+
         const iso = `${pickedDate.toISOString().slice(0, 10)}T${pickedTime}`;
-        onRequestConfirm({ sessionType, isoDate: iso, prettyDate: pickedDate, prettyTime: pickedTime });
+        onRequestConfirm({
+            sessionType,
+            isoDate: iso,
+            prettyDate: pickedDate,
+            prettyTime: pickedTime,
+        });
     }
 
     return (
@@ -161,11 +214,12 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
                 <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500" />
 
                 <div className="grid gap-0 lg:grid-cols-12">
-                    {/* LEFT — choice recap */}
                     <div className="relative overflow-hidden bg-gradient-to-br from-stone-900 via-stone-900 to-orange-950 p-7 text-amber-50 lg:col-span-4 lg:p-8">
                         <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-500/20 blur-3xl" />
 
-                        <p className="relative text-[11px] font-bold uppercase tracking-[0.22em] text-orange-300">You&apos;re booking</p>
+                        <p className="relative text-[11px] font-bold uppercase tracking-[0.22em] text-orange-300">
+                            You&apos;re booking
+                        </p>
 
                         <div className="relative mt-4 flex items-start gap-3">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-stone-900">
@@ -173,12 +227,16 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
               </span>
                             <div>
                                 <p className="font-display text-xl font-semibold text-white">{sessionType.name}</p>
-                                <p className="text-sm text-orange-200/80">{sessionType.duration} · with {mentor.name.split(' ')[0]}</p>
+                                <p className="text-sm text-orange-200/80">
+                                    {sessionType.duration} · with {mentor.name.split(' ')[0]}
+                                </p>
                             </div>
                         </div>
 
                         <div className="relative mt-5 border-t border-white/10 pt-4 text-sm">
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-orange-300">Current selection</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-orange-300">
+                                Current selection
+                            </p>
                             <dl className="mt-2.5 space-y-2">
                                 <div className="flex items-center justify-between gap-2">
                                     <dt className="text-stone-400">Format</dt>
@@ -188,7 +246,11 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
                                     <dt className="text-stone-400">Date</dt>
                                     <dd className={`text-right font-medium ${pickedDate ? 'text-white' : 'text-stone-500'}`}>
                                         {pickedDate
-                                            ? pickedDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+                                            ? pickedDate.toLocaleDateString(undefined, {
+                                                weekday: 'short',
+                                                month: 'short',
+                                                day: 'numeric',
+                                            })
                                             : 'Pick a day →'}
                                     </dd>
                                 </div>
@@ -197,6 +259,10 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
                                     <dd className={`text-right font-medium ${pickedTime ? 'text-white' : 'text-stone-500'}`}>
                                         {pickedTime ?? 'Pick a time →'}
                                     </dd>
+                                </div>
+                                <div className="flex items-center justify-between gap-2 border-t border-white/10 pt-2">
+                                    <dt className="text-stone-400">Session Fee</dt>
+                                    <dd className="text-right font-medium text-white">${mentor.session_price}</dd>
                                 </div>
                             </dl>
                         </div>
@@ -211,11 +277,13 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
                                     : 'cursor-not-allowed bg-white/10 text-stone-500'
                             }`}
                         >
-                            {canBook ? 'Book session →' : 'Pick a date & time'}
+                            {canBook ? 'Book paid session →' : 'Pick a date & time'}
                         </button>
+
                         <p className="mt-2 text-center text-xs text-stone-400">
-                            Pro plan required for unlimited sessions.
+                            This mentor charges ${mentor.session_price} per session. Subscription plans do not include mentor session fees.
                         </p>
+
                         <button
                             type="button"
                             onClick={onReset}
@@ -225,17 +293,19 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
                         </button>
                     </div>
 
-                    {/* RIGHT — date + time picker */}
                     <div className="p-7 lg:col-span-8 lg:p-8">
                         <div className="mb-5 flex items-baseline justify-between">
                             <div>
-                                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-800/80">Step 2 of 2</p>
-                                <h3 className="mt-1 font-display text-xl font-semibold text-stone-900">When works for you?</h3>
+                                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-800/80">
+                                    Step 2 of 2
+                                </p>
+                                <h3 className="mt-1 font-display text-xl font-semibold text-stone-900">
+                                    When works for you?
+                                </h3>
                             </div>
                             <p className="text-xs text-stone-500">Next 14 days</p>
                         </div>
 
-                        {/* Calendar — 14-day grid */}
                         <div>
                             <div className="mb-3 flex items-center gap-3 text-[11px] text-stone-500">
                 <span className="inline-flex items-center gap-1.5">
@@ -248,29 +318,40 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
                   <span className="h-2 w-2 rounded-full bg-stone-300" /> Booked
                 </span>
                             </div>
+
                             <div className="grid grid-cols-7 gap-1.5">
                                 {availability.map(({ date, status }) => {
                                     const iso = date.toISOString().slice(0, 10);
                                     const isSelected = pickedDate?.toISOString().slice(0, 10) === iso;
                                     const isClickable = status !== 'booked';
-                                    const base = 'flex aspect-square flex-col items-center justify-center rounded-lg border p-1 text-xs font-semibold transition';
+                                    const base =
+                                        'flex aspect-square flex-col items-center justify-center rounded-lg border p-1 text-xs font-semibold transition';
+
                                     let tone;
                                     if (isSelected) {
-                                        tone = 'border-orange-500 bg-gradient-to-br from-orange-100 to-amber-100 text-orange-950 shadow-md ring-2 ring-orange-400';
+                                        tone =
+                                            'border-orange-500 bg-gradient-to-br from-orange-100 to-amber-100 text-orange-950 shadow-md ring-2 ring-orange-400';
                                     } else if (status === 'free') {
-                                        tone = 'border-emerald-300/70 bg-emerald-50/80 text-emerald-900 hover:border-emerald-400 hover:bg-emerald-100/70';
+                                        tone =
+                                            'border-emerald-300/70 bg-emerald-50/80 text-emerald-900 hover:border-emerald-400 hover:bg-emerald-100/70';
                                     } else if (status === 'limited') {
-                                        tone = 'border-amber-300/70 bg-amber-50/80 text-amber-900 hover:border-amber-400 hover:bg-amber-100/70';
+                                        tone =
+                                            'border-amber-300/70 bg-amber-50/80 text-amber-900 hover:border-amber-400 hover:bg-amber-100/70';
                                     } else {
                                         tone = 'border-stone-200 bg-stone-100/60 text-stone-400 cursor-not-allowed';
                                     }
+
                                     return (
                                         <button
                                             key={iso}
                                             type="button"
                                             disabled={!isClickable}
                                             onClick={() => setPickedDate(new Date(date))}
-                                            aria-label={`${date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })} — ${status}`}
+                                            aria-label={`${date.toLocaleDateString(undefined, {
+                                                weekday: 'long',
+                                                month: 'long',
+                                                day: 'numeric',
+                                            })} — ${status}`}
                                             aria-pressed={isSelected}
                                             className={`${base} ${tone} ${focusRing}`}
                                         >
@@ -284,20 +365,31 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
                             </div>
                         </div>
 
-                        {/* Time slots — appear after a date is chosen */}
-                        <div className={`mt-6 overflow-hidden transition-all duration-300 ${pickedDate ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                        <div
+                            className={`mt-6 overflow-hidden transition-all duration-300 ${
+                                pickedDate ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                            }`}
+                        >
                             <div className="rounded-xl border border-stone-200 bg-stone-50/60 p-4">
                                 <div className="mb-3 flex items-baseline justify-between">
-                                    <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">Available times</p>
+                                    <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                                        Available times
+                                    </p>
                                     {pickedDate ? (
                                         <p className="text-xs font-medium text-stone-700">
-                                            {pickedDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+                                            {pickedDate.toLocaleDateString(undefined, {
+                                                weekday: 'long',
+                                                month: 'long',
+                                                day: 'numeric',
+                                            })}
                                         </p>
                                     ) : null}
                                 </div>
+
                                 <div className="grid grid-cols-4 gap-2 sm:grid-cols-4">
                                     {slots.map(({ time, available }) => {
                                         const isSelected = pickedTime === time;
+
                                         return (
                                             <button
                                                 key={time}
@@ -318,6 +410,7 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
                                         );
                                     })}
                                 </div>
+
                                 {slots.every((s) => !s.available) ? (
                                     <p className="mt-3 text-xs text-stone-500">
                                         No open slots this day — try another date.
@@ -338,7 +431,6 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
     );
 }
 
-/** Confirmation modal — summary of choice, not another input form. */
 function ConfirmModal({ mentor, confirmation, onClose, onConfirmed }) {
     const [submitting, setSubmitting] = useState(false);
     const [result, setResult] = useState(null);
@@ -350,9 +442,11 @@ function ConfirmModal({ mentor, confirmation, onClose, onConfirmed }) {
         const onKey = (e) => {
             if (e.key === 'Escape') handleClose();
         };
+
         window.addEventListener('keydown', onKey);
         const prev = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
+
         return () => {
             window.removeEventListener('keydown', onKey);
             document.body.style.overflow = prev;
@@ -382,7 +476,9 @@ function ConfirmModal({ mentor, confirmation, onClose, onConfirmed }) {
 
     const mentorFirst = mentor.name?.split(/\s+/)[0] ?? 'your mentor';
     const prettyDate = confirmation.prettyDate.toLocaleDateString(undefined, {
-        weekday: 'long', month: 'long', day: 'numeric',
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
     });
 
     return (
@@ -398,6 +494,7 @@ function ConfirmModal({ mentor, confirmation, onClose, onConfirmed }) {
                 aria-label="Close"
                 onClick={handleClose}
             />
+
             <div className="relative flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl shadow-stone-950/25 ring-1 ring-stone-200/90 sm:rounded-3xl sm:ring-stone-200/60">
                 {result?.ok ? (
                     <div className="flex flex-col items-center px-8 py-14 text-center">
@@ -424,7 +521,9 @@ function ConfirmModal({ mentor, confirmation, onClose, onConfirmed }) {
                             <div aria-hidden className="pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full bg-amber-500/15 blur-3xl" />
                             <div className="relative flex items-start justify-between gap-3">
                                 <div>
-                                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-200/90">Confirm booking</p>
+                                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-200/90">
+                                        Confirm booking
+                                    </p>
                                     <h2 id="confirm-modal-title" className="mt-1.5 font-display text-lg font-semibold text-white">
                                         Ready to send this request?
                                     </h2>
@@ -442,34 +541,45 @@ function ConfirmModal({ mentor, confirmation, onClose, onConfirmed }) {
 
                         <div className="flex-1 overflow-y-auto">
                             <div className="space-y-5 px-6 py-5 sm:px-7">
-                                {/* Summary card */}
                                 <div className="rounded-2xl border border-stone-200 bg-gradient-to-br from-amber-50/50 to-orange-50/30 p-4">
                                     <dl className="space-y-3 text-sm">
                                         <div className="flex items-start justify-between gap-3">
                                             <dt className="shrink-0 text-stone-500">Mentor</dt>
                                             <dd className="text-right font-semibold text-stone-900">{mentor.name}</dd>
                                         </div>
+
                                         <div className="flex items-start justify-between gap-3 border-t border-stone-200 pt-3">
                                             <dt className="shrink-0 text-stone-500">Format</dt>
                                             <dd className="text-right font-semibold text-stone-900">
                                                 {confirmation.sessionType.name}
-                                                <span className="ml-1.5 font-normal text-stone-500">· {confirmation.sessionType.duration}</span>
+                                                <span className="ml-1.5 font-normal text-stone-500">
+                          · {confirmation.sessionType.duration}
+                        </span>
                                             </dd>
                                         </div>
+
                                         <div className="flex items-start justify-between gap-3 border-t border-stone-200 pt-3">
                                             <dt className="shrink-0 text-stone-500">Date</dt>
                                             <dd className="text-right font-semibold text-stone-900">{prettyDate}</dd>
                                         </div>
+
                                         <div className="flex items-start justify-between gap-3 border-t border-stone-200 pt-3">
                                             <dt className="shrink-0 text-stone-500">Time</dt>
                                             <dd className="text-right font-semibold text-stone-900">{confirmation.prettyTime}</dd>
                                         </div>
+
+                                        <div className="flex items-start justify-between gap-3 border-t border-stone-200 pt-3">
+                                            <dt className="shrink-0 text-stone-500">Session Fee</dt>
+                                            <dd className="text-right font-semibold text-stone-900">${mentor.session_price}</dd>
+                                        </div>
                                     </dl>
                                 </div>
 
-                                {/* Optional context note */}
                                 <div>
-                                    <label htmlFor="booking-note" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                                    <label
+                                        htmlFor="booking-note"
+                                        className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500"
+                                    >
                                         Add context <span className="font-normal normal-case text-stone-400">(optional)</span>
                                     </label>
                                     <textarea
@@ -477,7 +587,7 @@ function ConfirmModal({ mentor, confirmation, onClose, onConfirmed }) {
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
                                         rows={3}
-                                        placeholder={`What do you want to get out of this hour?`}
+                                        placeholder="What do you want to get out of this hour?"
                                         className="w-full resize-none rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder-stone-400 shadow-sm transition focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
                                     />
                                 </div>
@@ -491,6 +601,10 @@ function ConfirmModal({ mentor, confirmation, onClose, onConfirmed }) {
                         </div>
 
                         <footer className="shrink-0 border-t border-stone-200/80 bg-white/95 px-6 py-4 sm:px-7">
+                            <div className="mb-2 text-right text-xs text-stone-500">
+                                You’ll pay ${mentor.session_price} if this booking is confirmed.
+                            </div>
+
                             <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
                                 <button
                                     type="button"
@@ -545,7 +659,11 @@ function ProfileSkeleton() {
 function formatReviewDate(iso) {
     if (!iso) return '';
     try {
-        return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        return new Date(iso).toLocaleDateString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        });
     } catch {
         return '';
     }
@@ -566,13 +684,12 @@ export default function MentorProfile() {
 
     useEffect(() => {
         let cancelled = false;
-        /* eslint-disable react-hooks/set-state-in-effect */
         setLoading(true);
         setLoadError(null);
-        /* eslint-enable react-hooks/set-state-in-effect */
 
         Promise.all([getMentorById(id), getReviewsForMentor(id)]).then(([mentorRes, reviewsRes]) => {
             if (cancelled) return;
+
             if (mentorRes.error) {
                 setProfile(null);
                 setMentorReviews([]);
@@ -587,6 +704,7 @@ export default function MentorProfile() {
                 setLoadError(null);
                 addRecentlyViewedMentor(mentorRes.data.mentor);
             }
+
             setLoading(false);
         });
 
@@ -603,10 +721,8 @@ export default function MentorProfile() {
         return r != null ? Number(r) : 0;
     }, [profile]);
 
-    // When user picks a format, scroll to the booking flow panel so they see it appear.
     function handlePickType(type) {
         setSelectedType(type);
-        // Defer scroll until the panel has rendered.
         setTimeout(() => {
             bookingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 80);
@@ -619,7 +735,9 @@ export default function MentorProfile() {
             <main className="relative min-h-screen overflow-x-hidden px-4 py-16 sm:px-6">
                 <PageGutterAtmosphere />
                 <div className="relative mx-auto max-w-lg rounded-[2rem] border border-stone-200/90 bg-white/95 px-8 py-12 text-center shadow-bridge-card">
-                    <p className="font-display text-lg font-semibold text-stone-900">Couldn&apos;t load this profile</p>
+                    <p className="font-display text-lg font-semibold text-stone-900">
+                        Couldn&apos;t load this profile
+                    </p>
                     <p className="mt-3 text-sm leading-relaxed text-stone-600">{loadError}</p>
                     <Link
                         to="/mentors"
@@ -637,8 +755,12 @@ export default function MentorProfile() {
             <main className="relative min-h-screen overflow-x-hidden px-4 py-16 sm:px-6">
                 <PageGutterAtmosphere />
                 <div className="relative mx-auto max-w-lg rounded-[2rem] border border-dashed border-stone-200/90 bg-gradient-to-b from-stone-50/90 to-orange-50/40 px-8 py-12 text-center shadow-sm">
-                    <p className="font-display text-lg font-semibold text-stone-900">This mentor isn&apos;t here</p>
-                    <p className="mt-3 text-sm text-stone-600">The link may be outdated or the profile was removed.</p>
+                    <p className="font-display text-lg font-semibold text-stone-900">
+                        This mentor isn&apos;t here
+                    </p>
+                    <p className="mt-3 text-sm text-stone-600">
+                        The link may be outdated or the profile was removed.
+                    </p>
                     <Link
                         to="/mentors"
                         className={`mt-8 inline-flex items-center justify-center rounded-full border-2 border-stone-900/10 bg-white px-7 py-3 text-sm font-semibold text-stone-900 shadow-md transition hover:border-orange-300/70 ${focusRing}`}
@@ -658,44 +780,74 @@ export default function MentorProfile() {
 
     return (
         <>
-            <main id="mentor-profile" className="relative min-h-screen overflow-x-hidden" aria-labelledby="profile-heading">
+            <main
+                id="mentor-profile"
+                className="relative min-h-screen overflow-x-hidden"
+                aria-labelledby="profile-heading"
+            >
                 <PageGutterAtmosphere />
 
-                {/* Breadcrumb strip */}
                 <section className="relative border-b border-stone-200/50 bg-gradient-to-b from-white/60 via-orange-50/25 to-transparent px-4 pt-6 sm:px-6 lg:px-8">
-                    <div aria-hidden className="pointer-events-none absolute -right-20 -top-8 h-56 w-56 rounded-full bg-amber-200/25 blur-3xl" />
+                    <div
+                        aria-hidden
+                        className="pointer-events-none absolute -right-20 -top-8 h-56 w-56 rounded-full bg-amber-200/25 blur-3xl"
+                    />
                     <div className="relative mx-auto max-w-6xl pb-5">
                         <nav aria-label="Breadcrumb">
                             <ol className="flex flex-wrap items-center gap-2 text-sm text-stone-500">
                                 <li>
-                                    <Link to="/" className={`rounded-md font-medium text-stone-600 transition hover:text-orange-800 ${focusRing}`}>Home</Link>
+                                    <Link
+                                        to="/"
+                                        className={`rounded-md font-medium text-stone-600 transition hover:text-orange-800 ${focusRing}`}
+                                    >
+                                        Home
+                                    </Link>
                                 </li>
                                 <li aria-hidden className="text-stone-300">
-                                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <svg
+                                        className="h-3.5 w-3.5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        viewBox="0 0 24 24"
+                                    >
                                         <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
                                     </svg>
                                 </li>
                                 <li>
-                                    <Link to="/mentors" className={`rounded-md font-medium text-stone-600 transition hover:text-orange-800 ${focusRing}`}>Mentors</Link>
+                                    <Link
+                                        to="/mentors"
+                                        className={`rounded-md font-medium text-stone-600 transition hover:text-orange-800 ${focusRing}`}
+                                    >
+                                        Mentors
+                                    </Link>
                                 </li>
                                 <li aria-hidden className="text-stone-300">
-                                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <svg
+                                        className="h-3.5 w-3.5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        viewBox="0 0 24 24"
+                                    >
                                         <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
                                     </svg>
                                 </li>
-                                <li className="max-w-[min(100%,14rem)] truncate font-medium text-stone-800">{mentor.name}</li>
+                                <li className="max-w-[min(100%,14rem)] truncate font-medium text-stone-800">
+                                    {mentor.name}
+                                </li>
                             </ol>
                         </nav>
                     </div>
                 </section>
 
                 <div className="relative mx-auto max-w-6xl px-4 pb-24 pt-6 sm:px-6 sm:pt-8 lg:px-8">
-                    {/* Hero card with inline stats */}
                     <section
                         aria-labelledby="profile-heading"
                         className="relative mb-8 overflow-hidden rounded-[1.75rem] border border-stone-200/90 bg-white/95 shadow-bridge-card backdrop-blur-md"
                     >
                         <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500" />
+
                         <div className="relative grid grid-cols-1 gap-6 p-6 sm:p-8 lg:grid-cols-12 lg:items-center lg:gap-8">
                             <div className="flex flex-col gap-5 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left lg:col-span-8">
                                 <div className="flex justify-center sm:block">
@@ -722,6 +874,7 @@ export default function MentorProfile() {
                         {industryLabel}
                       </span>
                                         ) : null}
+
                                         {mentor.available ? (
                                             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
                         <span className="relative flex h-1.5 w-1.5">
@@ -751,35 +904,62 @@ export default function MentorProfile() {
                                             ) : null}
                                         </p>
                                     ) : null}
+
+                                    <p className="mt-2 text-sm font-medium text-amber-700">
+                                        {mentor.mentor_tier} Mentor
+                                    </p>
                                 </div>
                             </div>
 
-                            <dl className="grid grid-cols-3 gap-2 border-t border-stone-100 pt-5 sm:gap-3 lg:col-span-4 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+                            <dl className="grid grid-cols-2 gap-2 border-t border-stone-100 pt-5 sm:grid-cols-4 sm:gap-3 lg:col-span-4 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
                                 <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-                                    <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-500">Rating</dt>
+                                    <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-500">
+                                        Rating
+                                    </dt>
                                     <dd className="mt-1 flex items-baseline gap-1">
                     <span className="font-display text-xl font-semibold tabular-nums text-stone-900 sm:text-2xl">
                       {displayRating > 0 ? displayRating.toFixed(1) : '—'}
                     </span>
                                         {reviewMeta?.count > 0 ? (
-                                            <span className="text-[11px] font-medium text-stone-500">({reviewMeta.count})</span>
+                                            <span className="text-[11px] font-medium text-stone-500">
+                        ({reviewMeta.count})
+                      </span>
                                         ) : null}
                                     </dd>
                                 </div>
-                                <div className="flex flex-col items-center border-x border-stone-100 text-center lg:items-start lg:border-0 lg:text-left">
-                                    <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-500">Experience</dt>
+
+                                <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+                                    <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-500">
+                                        Experience
+                                    </dt>
                                     <dd className="mt-1 flex items-baseline gap-1">
                     <span className="font-display text-xl font-semibold tabular-nums text-stone-900 sm:text-2xl">
                       {mentor.years_experience != null ? mentor.years_experience : '—'}
                     </span>
-                                        {mentor.years_experience != null ? <span className="text-[11px] font-medium text-stone-500">yrs</span> : null}
+                                        {mentor.years_experience != null ? (
+                                            <span className="text-[11px] font-medium text-stone-500">yrs</span>
+                                        ) : null}
                                     </dd>
                                 </div>
+
                                 <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-                                    <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-500">Sessions</dt>
+                                    <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-500">
+                                        Sessions
+                                    </dt>
                                     <dd className="mt-1">
                     <span className="font-display text-xl font-semibold tabular-nums text-stone-900 sm:text-2xl">
                       {mentor.total_sessions != null ? mentor.total_sessions : '—'}
+                    </span>
+                                    </dd>
+                                </div>
+
+                                <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+                                    <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-500">
+                                        Price
+                                    </dt>
+                                    <dd className="mt-1">
+                    <span className="font-display text-xl font-semibold tabular-nums text-stone-900 sm:text-2xl">
+                      ${mentor.session_price}
                     </span>
                                     </dd>
                                 </div>
@@ -787,19 +967,30 @@ export default function MentorProfile() {
                         </div>
                     </section>
 
-                    {/* Session type picker OR booking flow — they swap in place */}
                     <div ref={bookingRef} className="mb-10 scroll-mt-4">
                         {!selectedType ? (
                             <section className="relative overflow-hidden rounded-[1.75rem] border border-stone-900/90 bg-gradient-to-br from-stone-900 via-stone-900 to-orange-950 p-7 text-amber-50 shadow-2xl shadow-stone-950/25 ring-1 ring-white/10 sm:p-8">
-                                <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-500/20 blur-3xl" />
+                                <div
+                                    aria-hidden
+                                    className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-500/20 blur-3xl"
+                                />
+
                                 <div className="relative flex items-baseline justify-between gap-3">
                                     <div>
-                                        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-300">Book a session</p>
+                                        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-300">
+                                            Book a session
+                                        </p>
                                         <h2 className="mt-2 font-display text-2xl font-semibold text-white sm:text-3xl">
                                             What kind of hour do you want?
                                         </h2>
-                                        <p className="mt-2 text-sm text-stone-300">Pick a format. The date and time come next.</p>
+                                        <p className="mt-2 text-sm text-stone-300">
+                                            Pick a format. The date and time come next.
+                                        </p>
+                                        <p className="mt-2 text-sm font-medium text-amber-200">
+                                            Session price: ${mentor.session_price} · Mentor sessions are paid separately during booking.
+                                        </p>
                                     </div>
+
                                     <span className="hidden rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-amber-200 sm:inline-block">
                     Step 1 of 2
                   </span>
@@ -820,7 +1011,14 @@ export default function MentorProfile() {
                         <span className="block text-sm font-semibold text-white">{type.name}</span>
                         <span className="block text-xs text-stone-400">{type.duration}</span>
                       </span>
-                                            <svg className="h-4 w-4 text-stone-500 transition group-hover:translate-x-0.5 group-hover:text-amber-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
+                                            <svg
+                                                className="h-4 w-4 text-stone-500 transition group-hover:translate-x-0.5 group-hover:text-amber-300"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                viewBox="0 0 24 24"
+                                                aria-hidden
+                                            >
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
                                             </svg>
                                         </button>
@@ -829,7 +1027,11 @@ export default function MentorProfile() {
 
                                 {!user ? (
                                     <p className="relative mt-5 text-xs text-stone-400">
-                                        <Link to="/login" state={{ from: `/mentors/${id}` }} className="font-semibold text-amber-300 underline underline-offset-2 hover:text-amber-200">
+                                        <Link
+                                            to="/login"
+                                            state={{ from: `/mentors/${id}` }}
+                                            className="font-semibold text-amber-300 underline underline-offset-2 hover:text-amber-200"
+                                        >
                                             Log in
                                         </Link>{' '}
                                         to book — you can still browse without an account.
@@ -849,15 +1051,19 @@ export default function MentorProfile() {
                         )}
                     </div>
 
-                    {/* Content: bio, expertise, reviews */}
                     <div className="grid grid-cols-1 gap-6">
                         <Reveal>
                             <section className="relative overflow-hidden rounded-[1.75rem] border border-stone-200/90 bg-white/95 p-7 shadow-bridge-card sm:p-8">
-                                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">About</p>
-                                <h2 className="mt-1.5 font-display text-xl font-semibold text-stone-900 sm:text-2xl">Their story</h2>
+                                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">
+                                    About
+                                </p>
+                                <h2 className="mt-1.5 font-display text-xl font-semibold text-stone-900 sm:text-2xl">
+                                    Their story
+                                </h2>
                                 <div className="mt-4 border-l-[3px] border-orange-200/90 pl-5">
                                     <p className="whitespace-pre-line text-base leading-relaxed text-stone-700 sm:text-lg">
-                                        {mentor.bio?.trim() || 'No bio yet — book a session and ask what you would normally read here.'}
+                                        {mentor.bio?.trim() ||
+                                            'No bio yet — book a session and ask what you would normally read here.'}
                                     </p>
                                 </div>
                             </section>
@@ -865,12 +1071,19 @@ export default function MentorProfile() {
 
                         <Reveal delay={60}>
                             <section className="relative overflow-hidden rounded-[1.75rem] border border-stone-200/90 bg-white/95 p-7 shadow-bridge-card sm:p-8">
-                                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Focus areas</p>
-                                <h2 className="mt-1.5 font-display text-xl font-semibold text-stone-900 sm:text-2xl">Expertise</h2>
+                                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">
+                                    Focus areas
+                                </p>
+                                <h2 className="mt-1.5 font-display text-xl font-semibold text-stone-900 sm:text-2xl">
+                                    Expertise
+                                </h2>
                                 {mentor.expertise?.length > 0 ? (
                                     <div className="mt-4 flex flex-wrap gap-2">
                                         {mentor.expertise.map((tag) => (
-                                            <span key={tag} className="rounded-full border border-orange-100 bg-orange-50/80 px-3 py-1.5 text-sm font-medium text-orange-900">
+                                            <span
+                                                key={tag}
+                                                className="rounded-full border border-orange-100 bg-orange-50/80 px-3 py-1.5 text-sm font-medium text-orange-900"
+                                            >
                         {tag}
                       </span>
                                         ))}
@@ -883,24 +1096,37 @@ export default function MentorProfile() {
 
                         <Reveal delay={120}>
                             <section className="relative overflow-hidden rounded-[1.75rem] border border-stone-200/90 bg-white/95 p-7 shadow-bridge-card sm:p-8">
-                                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Reviews</p>
-                                <h2 className="mt-1.5 font-display text-xl font-semibold text-stone-900 sm:text-2xl">After sessions</h2>
+                                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">
+                                    Reviews
+                                </p>
+                                <h2 className="mt-1.5 font-display text-xl font-semibold text-stone-900 sm:text-2xl">
+                                    After sessions
+                                </h2>
 
                                 {mentorReviews.length > 0 ? (
                                     <ul className="mt-5 space-y-3">
                                         {mentorReviews.map((rev) => (
-                                            <li key={rev.id} className="rounded-2xl border border-stone-100/90 bg-stone-50/60 p-4 transition hover:border-orange-100/80 hover:bg-orange-50/25">
+                                            <li
+                                                key={rev.id}
+                                                className="rounded-2xl border border-stone-100/90 bg-stone-50/60 p-4 transition hover:border-orange-100/80 hover:bg-orange-50/25"
+                                            >
                                                 <figure>
                                                     <figcaption className="mb-1.5 flex flex-wrap items-center gap-2">
                                                         <StarRow rating={rev.rating} />
-                                                        <span className="text-xs text-stone-400">{formatReviewDate(rev.created_at)}</span>
+                                                        <span className="text-xs text-stone-400">
+                              {formatReviewDate(rev.created_at)}
+                            </span>
                                                     </figcaption>
                                                     {rev.comment?.trim() ? (
                                                         <blockquote>
-                                                            <p className="text-pretty leading-relaxed text-stone-700">{rev.comment.trim()}</p>
+                                                            <p className="text-pretty leading-relaxed text-stone-700">
+                                                                {rev.comment.trim()}
+                                                            </p>
                                                         </blockquote>
                                                     ) : (
-                                                        <p className="text-sm italic text-stone-400">Rated the session but didn&apos;t leave a note.</p>
+                                                        <p className="text-sm italic text-stone-400">
+                                                            Rated the session but didn&apos;t leave a note.
+                                                        </p>
                                                     )}
                                                 </figure>
                                             </li>
@@ -909,7 +1135,9 @@ export default function MentorProfile() {
                                 ) : (
                                     <div className="mt-5 rounded-2xl border border-dashed border-stone-200/90 bg-stone-50/50 px-6 py-10 text-center">
                                         <p className="font-medium text-stone-800">No reviews yet</p>
-                                        <p className="mt-1.5 text-sm text-stone-600">After you meet, they can leave feedback — it&apos;ll show up here.</p>
+                                        <p className="mt-1.5 text-sm text-stone-600">
+                                            After you meet, they can leave feedback — it&apos;ll show up here.
+                                        </p>
                                     </div>
                                 )}
                             </section>
@@ -924,7 +1152,6 @@ export default function MentorProfile() {
                     confirmation={pendingConfirm}
                     onClose={() => setPendingConfirm(null)}
                     onConfirmed={() => {
-                        // After successful booking, reset the picker state so user doesn't accidentally rebook.
                         setSelectedType(null);
                     }}
                 />

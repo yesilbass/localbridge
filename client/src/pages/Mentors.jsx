@@ -64,6 +64,7 @@ function StarRating({ rating }) {
   const uid = useId().replace(/:/g, '');
   const full = Math.floor(rating);
   const partial = rating - full;
+
   return (
       <span className="flex items-center gap-1">
       <span className="flex">
@@ -71,6 +72,7 @@ function StarRating({ rating }) {
           const fill =
               i < full ? '100%' : i === full && partial > 0 ? `${Math.round(partial * 100)}%` : '0%';
           const gid = `${uid}-star-${i}`;
+
           return (
               <svg key={i} className="h-3.5 w-3.5" viewBox="0 0 20 20" aria-hidden>
                 <defs>
@@ -92,10 +94,6 @@ function StarRating({ rating }) {
   );
 }
 
-/**
- * Skeleton card wrapped in Reveal so it fades in on mount.
- * Also has a shimmer overlay so the "loading" state has motion.
- */
 function MentorSkeletonCard({ delay = 0 }) {
   return (
       <Reveal delay={delay}>
@@ -209,6 +207,7 @@ function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favo
             <h3 className="truncate font-semibold text-stone-900">{mentor.name}</h3>
             <p className="truncate text-sm text-stone-500">{mentor.title}</p>
             <p className="truncate text-sm font-medium text-amber-800">{mentor.company}</p>
+            <p className="truncate text-xs text-stone-500">{mentor.mentor_tier} Mentor</p>
           </div>
         </div>
 
@@ -234,6 +233,10 @@ function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favo
           </span>
           )}
         </div>
+
+        <p className="text-sm font-semibold text-amber-700">
+          ${mentor.session_price} per session
+        </p>
 
         <div className="mt-auto flex items-center justify-between border-t border-stone-100/90 pt-4">
           <span className="text-xs text-stone-400">{mentor.total_sessions} sessions</span>
@@ -292,24 +295,21 @@ export default function Mentors() {
   }, [search]);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect */
     setPage(0);
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [debouncedSearch, activeIndustry, sortBy]);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect */
     if (!user) {
       setFavoriteIds(new Set());
       return;
     }
-    /* eslint-enable react-hooks/set-state-in-effect */
+
     void getMyFavorites().then(({ data, error: favErr }) => {
       if (favErr) {
         const msg = favErr.message || String(favErr);
         if (msg.includes('favorites') || msg.includes('schema cache') || msg.includes('does not exist')) {
           setFavoriteMessage(
-              "Hearts need a favorites table in Supabase. If you're the admin, run bridge_schema.sql — we can't fake that on the frontend.",
+              "Hearts need a favorites table in Supabase. If you're the admin, run bridge_schema.sql — we can't fake that on the frontend."
           );
         }
         setFavoriteIds(new Set());
@@ -322,10 +322,8 @@ export default function Mentors() {
 
   useEffect(() => {
     let cancelled = false;
-    /* eslint-disable react-hooks/set-state-in-effect */
     setLoading(true);
     setError(null);
-    /* eslint-enable react-hooks/set-state-in-effect */
 
     void (async () => {
       const { data, error: fetchError, totalCount: count } = await getAllMentors({
@@ -335,14 +333,18 @@ export default function Mentors() {
         page,
         pageSize: PAGE_SIZE,
       });
+
       if (cancelled) return;
+
       setLoading(false);
+
       if (fetchError) {
         setMentors([]);
         setTotalCount(0);
         setError(fetchError.message || 'Something went wrong.');
         return;
       }
+
       setMentors(data ?? []);
       setTotalCount(count ?? 0);
     })();
@@ -370,7 +372,7 @@ export default function Mentors() {
       setFavoriteMessage(
           msg.includes('favorites') || msg.includes('does not exist') || msg.includes('schema cache')
               ? 'Could not save that — favorites table missing in Supabase (see bridge_schema.sql).'
-              : msg,
+              : msg
       );
     }
 
@@ -404,7 +406,6 @@ export default function Mentors() {
       <main id="mentors-directory" aria-label="Mentor directory" className="relative min-h-screen overflow-x-hidden">
         <PageGutterAtmosphere />
 
-        {/* Header strip — reveals first */}
         <Reveal>
           <section
               aria-labelledby="mentors-heading"
@@ -461,7 +462,10 @@ export default function Mentors() {
                   <div className="relative flex-1 sm:w-72 sm:flex-initial">
                     <svg
                         className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
-                        fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
                     >
                       <circle cx="11" cy="11" r="8" />
                       <path d="m21 21-4.35-4.35" />
