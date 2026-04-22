@@ -17,7 +17,7 @@
  * mentors see `menteeCards` and mentee names. Shared UI lives in `dashboardShared.jsx` + `dashboardUtils.js`.
  */
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Calendar,
   Clock,
@@ -39,6 +39,7 @@ import {
 import { formatSessionDate } from './dashboardUtils';
 
 export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout }) {
+  const navigate = useNavigate();
   const {
     sessions,
     mentorMap,
@@ -89,7 +90,9 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout }
                           <div className="mt-8 flex gap-3">
                             <button
                                 type="button"
-                                onClick={() => alert('The meeting room will be available 5 minutes before the scheduled time.')}
+                                onClick={() => nextSession.video_room_url
+                                  ? navigate(`/session/${nextSession.id}/video`)
+                                  : alert('The video room will be available once your mentor accepts the session.')}
                                 className="rounded-xl bg-white px-6 py-2.5 text-sm font-bold text-stone-900 transition hover:bg-orange-50"
                             >
                               Join Meeting

@@ -40,7 +40,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { isMentorAccount } from '../../utils/accountRole';
-import { getMySession, updateSessionStatus } from '../../api/sessions';
+import { getMySession, updateSessionStatus, acceptSession } from '../../api/sessions';
 import supabase from '../../api/supabase';
 
 /** PostgREST needs sessions.mentee_id → auth.users FK for mentee:mentee_id(...) embeds (PGRST200 if missing). */
@@ -231,8 +231,13 @@ export function useDashboardData(user, authLoading) {
     setActionLoading(sessionId);
     setError(null);
     try {
-      await updateSessionStatus(sessionId, status);
-      setSessions((prev) => prev.map((s) => (s.id === sessionId ? { ...s, status } : s)));
+      let updated;
+      if (status === 'accepted') {
+        updated = await acceptSession(sessionId);
+      } else {
+        updated = await updateSessionStatus(sessionId, status);
+      }
+      setSessions((prev) => prev.map((s) => (s.id === sessionId ? { ...s, ...updated } : s)));
     } catch (err) {
       console.error('Session status update failed:', err);
       setError(err.message ?? 'Failed to update session. Please try again.');
