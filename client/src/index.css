@@ -9,6 +9,11 @@
   font-optical-sizing: auto;
 }
 
+/* Slightly wider than 7xl (1280px) for nav + page alignment on large monitors; still capped for readability */
+@utility max-w-bridge {
+  max-width: min(100%, 88rem);
+}
+
 /* Page backdrop: warm cream + soft aurora orbs */
 @utility bg-bridge-page {
   background-color: #fffaf3;

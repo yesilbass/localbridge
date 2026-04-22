@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Reveal from '../../components/Reveal';
-
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf3]';
+import { focusRing, pageShell } from '../../ui';
 
 const POSTS = [
     { id: 1, category: 'Career', readTime: '6 min', title: 'How to Find the Right Mentor', date: 'Apr 15, 2026', author: 'Sarah Chen', excerpt: 'A practical guide to identifying mentors who will actually move the needle on your career.', body: `Finding a mentor is less about prestige and more about fit. The best mentors aren't the most famous — they're the ones who've walked your exact next step.\n\nStart by writing down the specific transition you're trying to make. "Get promoted" is too vague. "Go from senior IC to staff engineer at a Series B" is actionable. Now search for people who made that exact move in the last three years.\n\nWhen you reach out, skip the flattery. Lead with what you're trying to figure out and why you think they specifically can help. Keep it to five sentences. Book one session. See if it works. Don't commit to a six-month program with someone you've never met.\n\nThe best mentor relationships are built session by session, not signed up for.` },
@@ -22,7 +21,7 @@ export default function Blog() {
 
     if (active) {
         return (
-            <main className="relative min-h-screen bg-gradient-to-b from-[#fffaf3] via-[#fff4e3] to-[#fffaf3] px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+            <main className={`${pageShell} px-4 py-16 sm:px-6 sm:py-20 lg:px-8`}>
                 <article className="mx-auto max-w-3xl">
                     <button onClick={() => setOpen(null)} className={`mb-8 inline-flex items-center gap-1.5 text-sm font-semibold text-orange-700 transition hover:text-orange-900 ${focusRing} rounded`}>
                         ← Back to blog
@@ -39,7 +38,7 @@ export default function Blog() {
     }
 
     return (
-        <main className="relative min-h-screen bg-gradient-to-b from-[#fffaf3] via-[#fff4e3] to-[#fffaf3] px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+        <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
             <div className="mx-auto max-w-5xl">
                 <Reveal className="mb-10 max-w-3xl">
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Blog</p>

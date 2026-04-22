@@ -6,11 +6,9 @@ import { useAuth } from '../context/useAuth';
 import { isMentorAccount } from '../utils/accountRole';
 import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
 import Reveal from '../components/Reveal';
+import { focusRing } from '../ui';
 
 const PAGE_SIZE = 12;
-
-const focusRing =
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf3]';
 const focusRingDarkChip =
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900';
 
@@ -465,20 +463,17 @@ export default function Mentors() {
   });
 
   return (
-      <main id="mentors-directory" aria-label="Mentor directory" className="relative min-h-screen overflow-x-hidden">
+      <main id="mentors-directory" aria-label="Mentor directory" className="relative min-h-screen overflow-x-hidden bg-[var(--bridge-canvas)]">
         <PageGutterAtmosphere />
 
         {/* Compact top strip — title + count + inline search/sort + filter toggle.
           Everything fits in ~140px so mentors appear immediately below. */}
         <section
             aria-labelledby="mentors-heading"
-            className="relative border-b border-stone-200/70 bg-gradient-to-b from-white/70 via-orange-50/30 to-transparent px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8"
+            className="bridge-hero-strip relative px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8"
         >
-          <div
-              aria-hidden
-              className="pointer-events-none absolute -right-20 -top-10 h-64 w-64 rounded-full bg-gradient-to-br from-amber-300/25 via-orange-200/15 to-transparent blur-3xl"
-          />
-          <div className="relative mx-auto max-w-7xl">
+          <div aria-hidden className="bridge-ambient-orb absolute -right-16 -top-12 h-56 w-56" />
+          <div className="relative mx-auto max-w-bridge">
             <nav aria-label="Breadcrumb" className="mb-4">
               <ol className="flex flex-wrap items-center gap-2 text-sm text-stone-500">
                 <li>
@@ -786,7 +781,7 @@ export default function Mentors() {
         </section>
 
         {/* Mentors grid — now directly under the strip */}
-        <div ref={gridRef} className="relative mx-auto max-w-7xl scroll-mt-24 px-4 pb-24 pt-8 sm:px-6 sm:pt-10 lg:px-8">
+        <div ref={gridRef} className="relative mx-auto max-w-bridge scroll-mt-24 px-4 pb-24 pt-8 sm:px-6 sm:pt-10 lg:px-8">
           {favoriteMessage ? (
               <div
                   className="mb-6 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50/95 to-orange-50/40 px-5 py-4 text-sm text-amber-950 shadow-sm backdrop-blur-sm"

@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import Reveal from '../components/Reveal';
-
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf3]';
+import { focusRing, pageShell } from '../ui';
 
 export default function About() {
     const values = [
@@ -19,7 +18,7 @@ export default function About() {
     ];
 
     return (
-        <main className="relative min-h-screen overflow-x-hidden bg-gradient-to-b from-[#fffaf3] via-[#fff4e3] to-[#fffaf3]">
+        <main className={`${pageShell}`}>
             <section className="relative px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
                 <div className="mx-auto max-w-4xl text-center">
                     <Reveal>
@@ -37,14 +36,14 @@ export default function About() {
             <section className="px-4 pb-20 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-5xl grid gap-6 lg:grid-cols-2">
                     <Reveal>
-                        <div className="rounded-[1.75rem] border border-stone-200/90 bg-white p-8 shadow-bridge-card">
+                        <div className="rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-8 shadow-bridge-card">
                             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Our mission</p>
                             <h2 className="mt-3 font-display text-2xl font-semibold text-stone-900 sm:text-3xl">Democratize access to the right conversation.</h2>
                             <p className="mt-4 leading-relaxed text-stone-600">The right ten minutes with the right person can alter the trajectory of a life. We're making those ten minutes bookable.</p>
                         </div>
                     </Reveal>
                     <Reveal delay={80}>
-                        <div className="rounded-[1.75rem] border border-stone-200/90 bg-white p-8 shadow-bridge-card">
+                        <div className="rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-8 shadow-bridge-card">
                             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Our story</p>
                             <h2 className="mt-3 font-display text-2xl font-semibold text-stone-900 sm:text-3xl">Started in 2026 with a simple observation.</h2>
                             <p className="mt-4 leading-relaxed text-stone-600">Cold DMs go unanswered. Coaching packages cost thousands. The people with real answers weren't reachable — so we made them reachable, one hour at a time.</p>
@@ -53,8 +52,8 @@ export default function About() {
                 </div>
             </section>
 
-            <section className="border-y border-stone-200/70 bg-gradient-to-b from-white via-amber-50/40 to-white px-4 py-20 sm:px-6 lg:px-8">
-                <div className="mx-auto max-w-7xl">
+            <section className="border-y border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-20 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-bridge">
                     <Reveal className="mb-10 max-w-2xl">
                         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">What we believe</p>
                         <h2 className="mt-3 font-display text-3xl font-semibold text-stone-900 sm:text-4xl">Values we actually use.</h2>
@@ -62,7 +61,7 @@ export default function About() {
                     <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
                         {values.map((v, i) => (
                             <Reveal key={v.title} delay={i * 60}>
-                                <div className="h-full rounded-2xl border border-stone-200/90 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-bridge-card">
+                                <div className="h-full rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-bridge-card">
                                     <p className="font-display text-lg font-semibold text-stone-900">{v.title}</p>
                                     <p className="mt-2 text-sm leading-relaxed text-stone-600">{v.desc}</p>
                                 </div>
@@ -73,7 +72,7 @@ export default function About() {
             </section>
 
             <section className="px-4 py-20 sm:px-6 lg:px-8">
-                <div className="mx-auto max-w-7xl">
+                <div className="mx-auto max-w-bridge">
                     <Reveal className="mb-10 max-w-2xl">
                         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Leadership</p>
                         <h2 className="mt-3 font-display text-3xl font-semibold text-stone-900 sm:text-4xl">The people behind Bridge.</h2>
@@ -81,11 +80,11 @@ export default function About() {
                     <div className="grid gap-6 md:grid-cols-3">
                         {team.map((m, i) => (
                             <Reveal key={m.name} delay={i * 80}>
-                                <div className="rounded-[1.75rem] border border-stone-200/90 bg-white p-6 shadow-sm">
+                                <div className="rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-sm">
                                     <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-amber-300 to-orange-500" />
                                     <p className="mt-4 font-display text-lg font-semibold text-stone-900">{m.name}</p>
-                                    <p className="text-sm font-medium text-orange-800">{m.role}</p>
-                                    <p className="mt-3 text-sm leading-relaxed text-stone-600">{m.bio}</p>
+                                    {m.role ? <p className="text-sm font-medium text-orange-800">{m.role}</p> : null}
+                                    {m.bio ? <p className="mt-3 text-sm leading-relaxed text-stone-600">{m.bio}</p> : null}
                                 </div>
                             </Reveal>
                         ))}

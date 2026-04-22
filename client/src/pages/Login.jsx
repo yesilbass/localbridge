@@ -5,9 +5,7 @@ import { isMentorAccount } from '../utils/accountRole';
 import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Reveal from '../components/Reveal';
-
-const focusRing =
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf3]';
+import { focusRing } from '../ui';
 
 const inputClass =
     'w-full rounded-2xl border border-stone-200/90 bg-stone-50/50 px-4 py-4 text-base text-stone-900 shadow-inner placeholder:text-stone-400 transition focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/30 sm:px-5';
@@ -182,7 +180,7 @@ export default function Login() {
               className="pointer-events-none absolute -left-32 bottom-0 h-80 w-80 rounded-full bg-orange-200/35 blur-3xl"
           />
 
-          <div className="relative z-[1] mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-x-8 xl:gap-x-10 lg:items-start">
+          <div className="relative z-[1] mx-auto grid max-w-bridge grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-x-8 xl:gap-x-10 lg:items-start">
             <div className="flex flex-col gap-3 sm:gap-4 lg:col-span-5">
               <nav aria-label="Breadcrumb" className="mb-4 lg:mb-5">
                 <ol className="flex flex-wrap items-center gap-2 text-sm text-stone-500">

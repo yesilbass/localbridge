@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Reveal from '../../components/Reveal';
-
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf3]';
+import { focusRing, pageShell } from '../../ui';
 
 const EVENTS = [
     { date: 'May 8, 2026', city: 'San Francisco', title: 'Career pivots: Finance to tech', spots: 12 },
@@ -28,8 +27,8 @@ export default function Community() {
     }
 
     return (
-        <main className="relative min-h-screen bg-gradient-to-b from-[#fffaf3] via-[#fff4e3] to-[#fffaf3] px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-            <div className="mx-auto max-w-7xl">
+        <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
+            <div className="mx-auto max-w-bridge">
                 <Reveal className="mb-12 max-w-3xl">
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Community</p>
                     <h1 className="mt-3 font-display text-4xl font-semibold leading-tight text-stone-900 sm:text-5xl">More than a directory. A <span className="italic text-gradient-bridge">place</span>.</h1>
@@ -39,9 +38,9 @@ export default function Community() {
                 <div className="mb-16 grid grid-cols-2 gap-3 md:grid-cols-4">
                     {stats.map((s, i) => (
                         <Reveal key={s.label} delay={i * 50}>
-                            <div className="rounded-2xl border border-stone-200/90 bg-white p-5 text-center shadow-sm">
+                            <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-5 text-center shadow-sm">
                                 <p className="font-display text-3xl font-semibold text-gradient-bridge">{s.n}</p>
-                                <p className="mt-1 text-xs font-medium uppercase tracking-wider text-stone-500">{s.label}</p>
+                                <p className="mt-1 text-xs font-medium uppercase tracking-wider text-[var(--bridge-text-muted)]">{s.label}</p>
                             </div>
                         </Reveal>
                     ))}
@@ -53,12 +52,12 @@ export default function Community() {
                         <h2 className="mt-3 font-display text-3xl font-semibold text-stone-900">Meet the community in person.</h2>
                         <div className="mt-6 space-y-3">
                             {EVENTS.map((e, i) => (
-                                <div key={i} className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-sm transition hover:border-orange-300/70">
+                                <div key={i} className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-5 shadow-sm transition hover:border-orange-300/70">
                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <div className="flex gap-4">
-                                            <div className="shrink-0 rounded-xl bg-gradient-to-br from-orange-100 to-amber-100 px-4 py-2 text-center">
+                                            <div className="shrink-0 rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] px-4 py-2 text-center">
                                                 <p className="text-[10px] font-bold uppercase tracking-wider text-orange-800">{e.date.split(',')[0].split(' ')[0]}</p>
-                                                <p className="font-display text-xl font-semibold text-stone-900">{e.date.split(' ')[1].replace(',', '')}</p>
+                                                <p className="font-display text-xl font-semibold text-[var(--bridge-text)]">{e.date.split(' ')[1].replace(',', '')}</p>
                                             </div>
                                             <div>
                                                 <p className="font-display text-lg font-semibold text-stone-900">{e.title}</p>
@@ -77,7 +76,7 @@ export default function Community() {
 
                 <div className="grid gap-5 md:grid-cols-2">
                     <Reveal>
-                        <div className="h-full rounded-[1.75rem] border border-stone-200/90 bg-white p-8 shadow-bridge-card">
+                        <div className="h-full rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-8 shadow-bridge-card">
                             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Discord</p>
                             <h3 className="mt-3 font-display text-2xl font-semibold text-stone-900">Real-time conversations.</h3>
                             <p className="mt-3 leading-relaxed text-stone-600">Peer support, weekly AMAs with top mentors, and channels organized by industry. 24/7 conversation with people further along your path.</p>
@@ -85,15 +84,15 @@ export default function Community() {
                         </div>
                     </Reveal>
                     <Reveal delay={80}>
-                        <div className="h-full rounded-[1.75rem] border border-orange-200/70 bg-gradient-to-br from-orange-50/60 to-amber-50/40 p-8">
+                        <div className="h-full rounded-[1.75rem] border border-[var(--bridge-border-strong)] bg-gradient-to-br from-[var(--bridge-surface-muted)] to-[var(--bridge-surface)] p-8">
                             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Newsletter</p>
                             <h3 className="mt-3 font-display text-2xl font-semibold text-stone-900">Weekly, actually useful.</h3>
                             <p className="mt-3 leading-relaxed text-stone-600">Insights from mentors, community highlights, early access to new features. Sent Sundays. Unsubscribe anytime.</p>
                             {subscribed ? (
-                                <p className="mt-6 rounded-xl bg-white p-4 font-semibold text-emerald-800">✓ Subscribed. Check your inbox.</p>
+                                <p className="mt-6 rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] p-4 font-semibold text-emerald-800">✓ Subscribed. Check your inbox.</p>
                             ) : (
                                 <form onSubmit={subscribe} className="mt-6 flex gap-2">
-                                    <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className={`flex-1 rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm ${focusRing}`} />
+                                    <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className={`flex-1 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] px-5 py-2.5 text-sm ${focusRing}`} />
                                     <button type="submit" className={`shrink-0 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:from-orange-500 hover:to-amber-400 ${focusRing}`}>Subscribe</button>
                                 </form>
                             )}

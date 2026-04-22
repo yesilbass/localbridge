@@ -9,8 +9,7 @@ import { SESSION_TYPES } from '../constants/sessionTypes';
 import { addRecentlyViewedMentor } from '../utils/recentlyViewed';
 import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
 import Reveal from '../components/Reveal';
-
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf3]';
+import { focusRing } from '../ui';
 const focusRingDark = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900';
 const focusRingWhite = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900';
 
@@ -146,7 +145,7 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
 
     return (
         <Reveal>
-            <div className="relative overflow-hidden rounded-[1.75rem] border border-orange-200/70 bg-white shadow-bridge-glow">
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-glow">
                 <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500" />
 
                 <div className="grid gap-0 lg:grid-cols-12">
@@ -245,7 +244,7 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
                         </div>
 
                         <div className={`mt-6 overflow-hidden transition-all duration-300 ${pickedDate ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                            <div className="rounded-xl border border-stone-200 bg-stone-50/60 p-4">
+                            <div className="rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] p-4">
                                 <div className="mb-3 flex items-baseline justify-between">
                                     <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">Available times</p>
                                     {pickedDate ? <p className="text-xs font-medium text-stone-700">{pickedDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p> : null}
@@ -323,7 +322,7 @@ function ConfirmModal({ mentor, confirmation, onClose, onConfirmed }) {
     return (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
             <button type="button" className="absolute inset-0 bg-stone-950/70 backdrop-blur-[2px]" aria-label="Close" onClick={handleClose} />
-            <div className="relative flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl ring-1 ring-stone-200/90 sm:rounded-3xl">
+            <div className="relative flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl bg-[var(--bridge-surface)] shadow-2xl ring-1 ring-[var(--bridge-border)] sm:rounded-3xl">
                 {result?.ok ? (
                     <div className="flex flex-col items-center px-8 py-14 text-center">
                         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-4xl text-white shadow-lg">✓</div>
@@ -367,7 +366,7 @@ function ConfirmModal({ mentor, confirmation, onClose, onConfirmed }) {
                             </div>
                         </div>
 
-                        <footer className="shrink-0 border-t border-stone-200/80 bg-white/95 px-6 py-4 sm:px-7">
+                        <footer className="shrink-0 border-t border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-6 py-4 sm:px-7">
                             <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
                                 <button type="button" onClick={handleClose} disabled={submitting} className={`rounded-xl border border-stone-200 bg-white px-5 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 disabled:opacity-60 ${focusRing}`}>Cancel</button>
                                 <button type="button" onClick={handleConfirm} disabled={submitting} className={`rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:from-amber-400 hover:to-orange-400 disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[180px] ${focusRing}`}>
@@ -384,7 +383,7 @@ function ConfirmModal({ mentor, confirmation, onClose, onConfirmed }) {
 
 function ProfileSkeleton() {
     return (
-        <main className="relative mx-auto min-h-screen max-w-7xl overflow-x-hidden px-4 py-8 sm:px-6 sm:py-12">
+        <main className="relative mx-auto min-h-screen max-w-bridge overflow-x-hidden px-4 py-8 sm:px-6 sm:py-12">
             <PageGutterAtmosphere />
             <div className="animate-pulse space-y-8">
                 <div className="h-4 w-56 rounded-full bg-stone-200/90" />
@@ -467,7 +466,7 @@ export default function MentorProfile() {
         return (
             <main className="relative min-h-screen overflow-x-hidden px-4 py-16 sm:px-6">
                 <PageGutterAtmosphere />
-                <div className="relative mx-auto max-w-lg rounded-[2rem] border border-stone-200/90 bg-white/95 px-8 py-12 text-center shadow-bridge-card">
+                <div className="relative mx-auto max-w-lg rounded-[2rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-8 py-12 text-center shadow-bridge-card">
                     <p className="font-display text-lg font-semibold text-stone-900">Couldn't load this profile</p>
                     <p className="mt-3 text-sm leading-relaxed text-stone-600">{loadError}</p>
                     <Link to="/mentors" className={`mt-8 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 text-sm font-semibold text-white shadow-md transition hover:from-orange-500 hover:to-amber-400 ${focusRing}`}>Back to mentors</Link>
@@ -502,12 +501,12 @@ export default function MentorProfile() {
 
     return (
         <>
-            <main id="mentor-profile" className="relative min-h-screen overflow-x-hidden" aria-labelledby="profile-heading">
+            <main id="mentor-profile" className="relative min-h-screen overflow-x-hidden bg-[var(--bridge-canvas)]" aria-labelledby="profile-heading">
                 <PageGutterAtmosphere />
 
-                <section className="relative border-b border-stone-200/50 bg-gradient-to-b from-white/60 via-orange-50/25 to-transparent px-4 pt-6 sm:px-6 lg:px-8">
-                    <div aria-hidden className="pointer-events-none absolute -right-20 -top-8 h-56 w-56 rounded-full bg-amber-200/25 blur-3xl" />
-                    <div className="relative mx-auto max-w-7xl pb-5">
+                <section className="bridge-hero-strip relative px-4 pt-6 sm:px-6 lg:px-8">
+                    <div aria-hidden className="bridge-ambient-orb absolute -right-14 -top-10 h-52 w-52" />
+                    <div className="relative mx-auto max-w-bridge pb-5">
                         <nav aria-label="Breadcrumb">
                             <ol className="flex flex-wrap items-center gap-2 text-sm text-stone-500">
                                 <li><Link to="/" className={`rounded-md font-medium text-stone-600 transition hover:text-orange-800 ${focusRing}`}>Home</Link></li>
@@ -520,16 +519,16 @@ export default function MentorProfile() {
                     </div>
                 </section>
 
-                <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 sm:pt-8 lg:px-8">
-                    <section aria-labelledby="profile-heading" className="relative mb-8 overflow-hidden rounded-[1.75rem] border border-stone-200/90 bg-white/95 shadow-bridge-card backdrop-blur-md">
+                <div className="relative mx-auto max-w-bridge px-4 pb-24 pt-6 sm:px-6 sm:pt-8 lg:px-8">
+                    <section aria-labelledby="profile-heading" className="relative mb-8 overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card backdrop-blur-md">
                         <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500" />
                         <div className="relative grid grid-cols-1 gap-6 p-6 sm:p-8 lg:grid-cols-12 lg:items-center lg:gap-8">
                             <div className="flex flex-col gap-5 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left lg:col-span-7">
                                 <div className="flex justify-center sm:block">
                                     {mentor.image_url ? (
-                                        <img src={mentor.image_url} alt={`${mentor.name} — profile photo`} className="h-24 w-24 shrink-0 rounded-2xl object-cover shadow-md ring-4 ring-white sm:h-28 sm:w-28" />
+                                        <img src={mentor.image_url} alt={`${mentor.name} — profile photo`} className="h-24 w-24 shrink-0 rounded-2xl object-cover shadow-md ring-4 ring-[var(--bridge-canvas)] sm:h-28 sm:w-28" />
                                     ) : (
-                                        <div className={`flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${grad} text-2xl font-bold text-white shadow-md ring-4 ring-white sm:h-28 sm:w-28 sm:text-3xl`} aria-hidden>{mentorInitials}</div>
+                                        <div className={`flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${grad} text-2xl font-bold text-white shadow-md ring-4 ring-[var(--bridge-canvas)] sm:h-28 sm:w-28 sm:text-3xl`} aria-hidden>{mentorInitials}</div>
                                     )}
                                 </div>
 
@@ -670,7 +669,7 @@ export default function MentorProfile() {
 
                     <div className="grid grid-cols-1 gap-6">
                         <Reveal>
-                            <section className="relative overflow-hidden rounded-[1.75rem] border border-stone-200/90 bg-white/95 p-7 shadow-bridge-card sm:p-8">
+                            <section className="relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-7 shadow-bridge-card sm:p-8">
                                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">About</p>
                                 <h2 className="mt-1.5 font-display text-xl font-semibold text-stone-900 sm:text-2xl">Their story</h2>
                                 <div className="mt-4 border-l-[3px] border-orange-200/90 pl-5">
@@ -682,7 +681,7 @@ export default function MentorProfile() {
                         </Reveal>
 
                         <Reveal delay={60}>
-                            <section className="relative overflow-hidden rounded-[1.75rem] border border-stone-200/90 bg-white/95 p-7 shadow-bridge-card sm:p-8">
+                            <section className="relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-7 shadow-bridge-card sm:p-8">
                                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Focus areas</p>
                                 <h2 className="mt-1.5 font-display text-xl font-semibold text-stone-900 sm:text-2xl">Expertise</h2>
                                 {mentor.expertise?.length > 0 ? (
@@ -698,7 +697,7 @@ export default function MentorProfile() {
                         </Reveal>
 
                         <Reveal delay={120}>
-                            <section className="relative overflow-hidden rounded-[1.75rem] border border-stone-200/90 bg-white/95 p-7 shadow-bridge-card sm:p-8">
+                            <section className="relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-7 shadow-bridge-card sm:p-8">
                                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Reviews</p>
                                 <h2 className="mt-1.5 font-display text-xl font-semibold text-stone-900 sm:text-2xl">After sessions</h2>
 

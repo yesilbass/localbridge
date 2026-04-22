@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom';
 import { getFeaturedMentors } from '../api/mentors';
 import Reveal from '../components/Reveal';
 import { useAuth } from '../context/useAuth';
+import { focusRing } from '../ui';
 
-const focusRing =
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf3]';
 const focusRingWhite =
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-orange-600';
 
@@ -84,91 +83,104 @@ function Hero() {
   const [activePersona, setActivePersona] = useState(PERSONAS[0].id);
   const persona = PERSONAS.find((p) => p.id === activePersona) ?? PERSONAS[0];
 
+  const personaMatchCount = useMemo(() => {
+    const n = persona.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    return 172 + (n % 52);
+  }, [persona.id]);
+
   return (
       <section
           aria-labelledby="landing-heading"
-          className="relative isolate overflow-hidden px-4 pb-24 pt-16 sm:px-6 sm:pb-28 sm:pt-20 lg:px-8 lg:pt-24"
+          className="landing-hero relative isolate overflow-hidden bg-[var(--bridge-canvas)] px-4 pb-24 pt-16 sm:px-6 sm:pb-28 sm:pt-20 lg:px-8 lg:pt-24"
       >
-        {/* Layered atmosphere — editorial, not SaaS-template */}
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#fffaf3] via-[#fff4e3] to-[#fffaf3]" />
+        {/* Atmosphere: always follows theme tokens so text + background stay paired */}
         <div
             aria-hidden
-            className="absolute inset-0 opacity-[0.18]"
+            className="absolute inset-0 bg-gradient-to-b from-[var(--bridge-surface-muted)] via-[var(--bridge-canvas)] to-[var(--bridge-canvas)]"
+        />
+        <div
+            aria-hidden
+            className="absolute inset-0 opacity-[0.85] dark:opacity-[0.9]"
             style={{
-              backgroundImage:
-                  "radial-gradient(circle at 1px 1px, rgba(120,113,108,0.45) 1px, transparent 0)",
+              backgroundImage: 'radial-gradient(circle at 1px 1px, var(--landing-hero-dot) 1px, transparent 0)',
               backgroundSize: '28px 28px',
             }}
         />
-        <div aria-hidden className="pointer-events-none absolute -left-32 top-[-10%] h-[38rem] w-[38rem] rounded-full bg-gradient-to-br from-orange-300/35 via-amber-200/20 to-transparent blur-[100px]" />
-        <div aria-hidden className="pointer-events-none absolute -right-20 top-[30%] h-[30rem] w-[30rem] rounded-full bg-gradient-to-tl from-rose-200/25 via-orange-200/15 to-transparent blur-[90px]" />
         <div
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#fffaf3] to-transparent"
+            className="pointer-events-none absolute -left-32 top-[-10%] h-[38rem] w-[38rem] rounded-full bg-gradient-to-br from-orange-400/25 via-amber-300/15 to-transparent blur-[100px] dark:from-orange-600/20 dark:via-amber-600/10"
+        />
+        <div
+            aria-hidden
+            className="pointer-events-none absolute -right-20 top-[30%] h-[30rem] w-[30rem] rounded-full bg-gradient-to-tl from-rose-300/20 via-orange-200/12 to-transparent blur-[90px] dark:from-orange-500/15 dark:via-rose-500/10"
+        />
+        <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[var(--bridge-canvas)] to-transparent"
         />
 
-        <div className="relative mx-auto max-w-7xl">
+        <div className="relative mx-auto max-w-bridge">
           {/* Top meta row */}
           <div className="mb-10 flex flex-wrap items-center justify-between gap-3 sm:mb-14">
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-stone-900/10 bg-white/80 px-3.5 py-1.5 shadow-sm backdrop-blur-md">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            </span>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-700">
-              Live · 2,400 mentors
-            </span>
+            <div className="inline-flex items-center gap-2.5 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 shadow-sm backdrop-blur-md dark:bg-[var(--bridge-surface-raised)]">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              </span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--bridge-text-secondary)]">
+                Live · 2,400 mentors
+              </span>
             </div>
-            <div className="hidden items-center gap-5 text-[11px] font-medium uppercase tracking-[0.18em] text-stone-500 sm:flex">
+            <div className="hidden items-center gap-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)] sm:flex">
               <span>Engineering</span>
-              <span className="h-1 w-1 rounded-full bg-stone-300" />
+              <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] opacity-60" />
               <span>Product</span>
-              <span className="h-1 w-1 rounded-full bg-stone-300" />
+              <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] opacity-60" />
               <span>Design</span>
-              <span className="h-1 w-1 rounded-full bg-stone-300" />
+              <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] opacity-60" />
               <span>Finance</span>
-              <span className="h-1 w-1 rounded-full bg-stone-300" />
+              <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] opacity-60" />
               <span>+46 more</span>
             </div>
           </div>
 
-          {/* Editorial headline — centered, oversized, asymmetric framing */}
+          {/* Editorial headline */}
           <div className="relative mx-auto max-w-4xl text-center">
             <h1
                 id="landing-heading"
-                className="font-display text-balance text-[2.9rem] font-semibold leading-[0.98] tracking-[-0.02em] text-stone-900 sm:text-[4rem] sm:leading-[0.96] lg:text-[5rem] lg:leading-[0.95]"
+                className="font-display text-balance text-[2.9rem] font-semibold leading-[0.98] tracking-[-0.02em] text-[var(--bridge-text)] sm:text-[4rem] sm:leading-[0.96] lg:text-[5rem] lg:leading-[0.95]"
             >
-              The person you need to talk to
-              <span className="relative mx-2 inline-block">
-              <span className="relative z-10 italic text-gradient-bridge">has already</span>
-              <span
-                  aria-hidden
-                  className="absolute bottom-1 left-0 right-0 -z-0 h-[0.35em] -rotate-1 bg-amber-200/60"
-              />
-            </span>
+              The person you need to talk to{' '}
+              <span className="relative mx-1 inline-block sm:mx-2">
+                <span className="relative z-10 italic text-gradient-bridge">has already</span>
+                <span
+                    aria-hidden
+                    className="absolute bottom-1 left-0 right-0 -z-0 h-[0.35em] -rotate-1 bg-[var(--landing-hero-highlight)]"
+                />
+              </span>{' '}
               done the job.
             </h1>
 
-            <p className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-stone-600 sm:text-xl sm:leading-[1.55]">
+            <p className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-[var(--bridge-text-secondary)] sm:text-xl sm:leading-[1.55]">
               Bridge is a directory of vetted professionals you book by the hour. One session with someone who&apos;s
               lived your exact next step — not a recruiter, not a coach, not a content creator.
             </p>
 
-            {/* CTAs under headline */}
+            {/* CTAs */}
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
               <Link
                   to="/mentors"
-                  className={`group inline-flex w-full items-center justify-center gap-2 rounded-full bg-stone-900 px-8 py-4 text-sm font-semibold text-amber-50 shadow-[0_10px_40px_-8px_rgba(28,25,23,0.35)] transition hover:bg-stone-800 sm:w-auto ${focusRing}`}
+                  className={`group inline-flex w-full min-h-[3rem] items-center justify-center gap-2 rounded-full bg-stone-900 px-8 py-3.5 text-sm font-semibold text-white shadow-[0_10px_40px_-8px_rgba(28,25,23,0.4)] transition hover:bg-stone-800 dark:bg-gradient-to-r dark:from-orange-500 dark:via-amber-500 dark:to-orange-600 dark:text-stone-950 dark:shadow-[0_12px_40px_-8px_rgba(234,88,12,0.45)] dark:hover:brightness-105 sm:w-auto ${focusRing}`}
               >
                 Browse 2,400+ mentors
                 <span className="transition group-hover:translate-x-0.5" aria-hidden>
-                →
-              </span>
+                  →
+                </span>
               </Link>
               {!user ? (
                   <Link
                       to="/register?intent=mentor"
-                      className={`inline-flex w-full items-center justify-center rounded-full border border-stone-300 bg-white/80 px-8 py-4 text-sm font-semibold text-stone-800 backdrop-blur-sm transition hover:border-stone-400 hover:bg-white sm:w-auto ${focusRing}`}
+                      className={`inline-flex w-full min-h-[3rem] items-center justify-center rounded-full border-2 border-stone-300 bg-[var(--bridge-surface)] px-8 py-3.5 text-sm font-semibold text-[var(--bridge-text)] shadow-sm transition hover:border-orange-400/90 hover:bg-[var(--bridge-surface-raised)] dark:border-white/20 dark:bg-white/5 dark:text-stone-100 dark:hover:border-orange-400/50 dark:hover:bg-white/10 sm:w-auto ${focusRing}`}
                   >
                     Become a mentor
                   </Link>
@@ -176,13 +188,13 @@ function Hero() {
             </div>
 
             {/* Trust row */}
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 text-sm text-stone-500 sm:flex-row sm:gap-5">
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 text-sm text-[var(--bridge-text-muted)] sm:flex-row sm:gap-5">
               <div className="flex items-center gap-2.5">
                 <div className="flex -space-x-2" aria-hidden>
                   {['SK', 'MR', 'LV', 'JE', 'TN'].map((ini, idx) => (
                       <div
                           key={ini}
-                          className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#fffaf3] text-[9px] font-bold shadow-sm ${
+                          className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-[var(--bridge-canvas)] text-[9px] font-bold shadow-sm ${
                               idx === 0
                                   ? 'bg-amber-200 text-amber-900'
                                   : idx === 1
@@ -199,41 +211,41 @@ function Hero() {
                   ))}
                 </div>
                 <span>
-                <span className="font-semibold text-stone-900">4,800+</span> sessions booked
-              </span>
+                  <span className="font-semibold text-[var(--bridge-text)]">4,800+</span> sessions booked
+                </span>
               </div>
-              <span className="hidden h-1 w-1 rounded-full bg-stone-300 sm:block" aria-hidden />
+              <span className="hidden h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] sm:block" aria-hidden />
               <div className="flex items-center gap-1.5">
-              <span className="flex text-amber-500" aria-hidden>
-                {[0, 1, 2, 3, 4].map((i) => (
-                    <span key={i} className="text-xs">
-                    ★
-                  </span>
-                ))}
-              </span>
+                <span className="flex text-amber-500 dark:text-amber-400" aria-hidden>
+                  {[0, 1, 2, 3, 4].map((i) => (
+                      <span key={i} className="text-xs">
+                        ★
+                      </span>
+                  ))}
+                </span>
                 <span>
-                <span className="font-semibold text-stone-900">4.9</span> avg rating
-              </span>
+                  <span className="font-semibold text-[var(--bridge-text)]">4.9</span> avg rating
+                </span>
               </div>
-              <span className="hidden h-1 w-1 rounded-full bg-stone-300 sm:block" aria-hidden />
+              <span className="hidden h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] sm:block" aria-hidden />
               <span>
-              <span className="font-semibold text-stone-900">From $25</span> / session
-            </span>
+                <span className="font-semibold text-[var(--bridge-text)]">From $25</span> / session
+              </span>
             </div>
           </div>
 
           {/* Persona chooser — full-width, horizontal, below headline */}
           <div className="relative mx-auto mt-20 max-w-5xl sm:mt-24">
-            <div className="mb-5 flex items-baseline justify-between">
+            <div className="mb-5 flex items-baseline justify-between gap-4">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-800/90">
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-700 dark:text-orange-300/95">
                   Find your match
                 </p>
-                <p className="mt-1 font-display text-xl font-semibold text-stone-900 sm:text-2xl">
+                <p className="mt-1 font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
                   Where are you right now?
                 </p>
               </div>
-              <p className="hidden text-xs text-stone-500 sm:block">
+              <p className="hidden text-xs font-medium text-[var(--bridge-text-muted)] sm:block">
                 Tap one → see who to talk to
               </p>
             </div>
@@ -248,48 +260,46 @@ function Hero() {
                         type="button"
                         onClick={() => setActivePersona(p.id)}
                         aria-pressed={isActive}
-                        className={`group relative overflow-hidden rounded-2xl border px-4 py-4 text-left transition ${
+                        className={`group relative min-h-[5.5rem] overflow-hidden rounded-2xl border px-4 py-4 text-left transition ${
                             isActive
-                                ? 'border-stone-900 bg-stone-900 text-amber-50 shadow-[0_12px_30px_-10px_rgba(28,25,23,0.4)]'
-                                : 'border-stone-200 bg-white/70 text-stone-800 backdrop-blur-sm hover:border-stone-400 hover:bg-white'
+                                ? 'border-stone-900 bg-stone-900 text-amber-50 shadow-[0_12px_30px_-10px_rgba(28,25,23,0.45)] dark:border-orange-400/40 dark:bg-gradient-to-br dark:from-orange-600 dark:to-amber-700 dark:text-white dark:shadow-[0_12px_32px_-10px_rgba(0,0,0,0.55)]'
+                                : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text)] shadow-sm hover:border-orange-300/70 hover:bg-[var(--bridge-surface-raised)] dark:hover:border-orange-500/30'
                         } ${focusRing}`}
                     >
-                  <span
-                      aria-hidden
-                      className={`absolute right-3 top-3 text-xl transition ${isActive ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'}`}
-                  >
-                    {p.emoji}
-                  </span>
+                      <span
+                          aria-hidden
+                          className={`absolute right-3 top-3 text-xl transition ${isActive ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'}`}
+                      >
+                        {p.emoji}
+                      </span>
                       <span
                           className={`block text-[10px] font-bold uppercase tracking-[0.18em] ${
-                              isActive ? 'text-amber-300' : 'text-orange-700'
+                              isActive ? 'text-amber-300 dark:text-amber-100' : 'text-orange-700 dark:text-orange-300'
                           }`}
                       >
-                    Path 0{PERSONAS.indexOf(p) + 1}
-                  </span>
-                      <span className="mt-2 block text-sm font-semibold leading-snug">
-                    {p.label}
-                  </span>
+                        Path 0{PERSONAS.indexOf(p) + 1}
+                      </span>
+                      <span className="mt-2 block text-sm font-semibold leading-snug">{p.label}</span>
                     </button>
                 );
               })}
             </div>
 
-            {/* Match preview — horizontal card */}
-            <div className="relative mt-5 overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-[0_20px_50px_-20px_rgba(28,25,23,0.25)] backdrop-blur-md">
-              <div className="absolute left-0 right-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-orange-400/80 to-transparent" />
+            {/* Match preview */}
+            <div className="relative mt-5 overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-[0_20px_50px_-20px_rgba(28,25,23,0.18)] backdrop-blur-md dark:shadow-[0_24px_50px_-20px_rgba(0,0,0,0.45)]">
+              <div className="absolute left-0 right-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-orange-400/80 to-transparent dark:via-orange-400/60" />
               <div className="grid gap-0 md:grid-cols-3">
-                <div className="border-b border-stone-100 p-5 md:border-b-0 md:border-r">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">If you&apos;re…</p>
-                  <p className="mt-2 font-display text-lg font-semibold text-stone-900">{persona.label}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-600">{persona.blurb}</p>
-                  <p className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-orange-700">
-                    <span>{Math.floor(Math.random() * 40) + 180} mentors match</span>
+                <div className="border-b border-[var(--bridge-border)] p-5 md:border-b-0 md:border-r md:border-[var(--bridge-border)]">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">If you&apos;re…</p>
+                  <p className="mt-2 font-display text-lg font-semibold text-[var(--bridge-text)]">{persona.label}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-[var(--bridge-text-secondary)]">{persona.blurb}</p>
+                  <p className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-orange-700 dark:text-orange-300">
+                    <span>{personaMatchCount} mentors match</span>
                     <span aria-hidden>→</span>
                   </p>
                 </div>
                 <div className="md:col-span-2">
-                  <p className="border-b border-stone-100 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">
+                  <p className="border-b border-[var(--bridge-border)] px-5 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">
                     Talk to
                   </p>
                   {persona.matches.map((m) => {
@@ -297,21 +307,21 @@ function Hero() {
                     return (
                         <div
                             key={m.name}
-                            className="flex items-center gap-4 border-b border-stone-100 px-5 py-3.5 transition last:border-b-0 hover:bg-orange-50/40"
+                            className="flex items-center gap-4 border-b border-[var(--bridge-border)] px-5 py-3.5 transition last:border-b-0 hover:bg-orange-50/50 dark:hover:bg-white/[0.04]"
                         >
                           <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold shadow-sm ${color}`}>
                             {initials(m.name)}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-stone-900">{m.name}</p>
-                            <p className="truncate text-xs text-stone-500">{m.role}</p>
+                            <p className="truncate text-sm font-semibold text-[var(--bridge-text)]">{m.name}</p>
+                            <p className="truncate text-xs text-[var(--bridge-text-muted)]">{m.role}</p>
                           </div>
-                          <span className="hidden shrink-0 rounded-full border border-orange-100 bg-orange-50/90 px-2.5 py-0.5 text-[10px] font-medium text-orange-900 sm:inline-block">
-                        {m.tag}
-                      </span>
+                          <span className="hidden shrink-0 rounded-full border border-orange-200/80 bg-orange-50/90 px-2.5 py-0.5 text-[10px] font-medium text-orange-900 dark:border-orange-500/30 dark:bg-orange-950/50 dark:text-orange-100 sm:inline-block">
+                            {m.tag}
+                          </span>
                           <Link
                               to="/mentors"
-                              className="shrink-0 text-xs font-semibold text-stone-900 underline-offset-4 transition hover:text-orange-700 hover:underline"
+                              className="shrink-0 text-xs font-semibold text-[var(--bridge-text)] underline-offset-4 transition hover:text-orange-600 hover:underline dark:hover:text-orange-300"
                           >
                             View →
                           </Link>
@@ -349,7 +359,7 @@ function FeaturedMentor({ mentor, loading }) {
 
   return (
       <section className="relative px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-bridge">
           <Reveal className="mb-10 max-w-2xl">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">This week&apos;s spotlight</p>
             <h2 className="font-display text-balance text-3xl font-semibold text-stone-900 sm:text-4xl lg:text-[2.5rem] lg:leading-tight">
@@ -582,11 +592,16 @@ function HowItWorks() {
   ];
 
   return (
-      <section id="how-it-works" className="relative scroll-mt-20 overflow-hidden border-y border-stone-200/70 bg-gradient-to-b from-white via-amber-50/40 to-white px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section
+          id="how-it-works"
+          className="relative scroll-mt-20 overflow-hidden border-y border-[var(--bridge-border)] bg-gradient-to-b from-[var(--bridge-surface)] via-[var(--bridge-surface-muted)] to-[var(--bridge-surface)] px-4 py-20 sm:px-6 sm:py-24 lg:px-8"
+      >
+        <div className="mx-auto max-w-bridge">
           <Reveal className="mb-14 max-w-2xl">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">How it works</p>
-            <h2 className="font-display text-balance text-3xl font-semibold text-stone-900 sm:text-4xl lg:text-[2.65rem] lg:leading-tight">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-orange-700 dark:text-orange-300/90">
+              How it works
+            </p>
+            <h2 className="font-display text-balance text-3xl font-semibold text-[var(--bridge-text)] sm:text-4xl lg:text-[2.65rem] lg:leading-tight">
               From search to session in three steps.
             </h2>
           </Reveal>
@@ -594,7 +609,7 @@ function HowItWorks() {
           <div className="grid gap-8 lg:grid-cols-3 lg:gap-6">
             {STEPS.map(({ n, title, desc, mock, dark }, i) => (
                 <Reveal key={n} delay={i * 100}>
-                  <div className="group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-stone-200/80 bg-white shadow-bridge-card transition hover:-translate-y-1 hover:shadow-bridge-glow">
+                  <div className="group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card transition hover:-translate-y-1 hover:shadow-bridge-glow">
                     <div
                         className={`relative h-48 overflow-hidden p-5 ${
                             dark
@@ -608,11 +623,13 @@ function HowItWorks() {
                     </div>
                     <div className="p-6 sm:p-7">
                       <div className="flex items-center gap-3">
-                        <span className="font-display text-3xl font-semibold leading-none text-orange-300">{n}</span>
-                        <span className="h-px flex-1 bg-stone-200" />
+                        <span className="font-display text-3xl font-semibold leading-none text-orange-500 dark:text-orange-300/90">
+                          {n}
+                        </span>
+                        <span className="h-px flex-1 bg-[var(--bridge-border)]" />
                       </div>
-                      <h3 className="mt-4 font-display text-lg font-semibold text-stone-900 sm:text-xl">{title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-stone-600">{desc}</p>
+                      <h3 className="mt-4 font-display text-lg font-semibold text-[var(--bridge-text)] sm:text-xl">{title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-[var(--bridge-text-secondary)]">{desc}</p>
                     </div>
                   </div>
                 </Reveal>
@@ -637,7 +654,7 @@ function WhyBridge() {
 
   return (
       <section id="why-bridge" className="relative scroll-mt-20 px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-bridge">
           <Reveal className="mb-12 max-w-3xl">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Why Bridge</p>
             <h2 className="font-display text-balance text-3xl font-semibold text-stone-900 sm:text-4xl lg:text-[2.65rem] lg:leading-tight">
@@ -741,7 +758,7 @@ function Outcomes() {
         />
         <div aria-hidden className="pointer-events-none absolute -right-24 top-1/4 h-[min(480px,70vw)] w-[min(480px,70vw)] rounded-full bg-orange-500/25 blur-3xl" />
 
-        <div className="relative mx-auto max-w-7xl">
+        <div className="relative mx-auto max-w-bridge">
           <Reveal className="mb-14 max-w-2xl">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">Outcomes</p>
             <h2 className="font-display text-balance text-3xl font-semibold text-white sm:text-4xl lg:text-[2.5rem]">

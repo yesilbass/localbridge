@@ -29,11 +29,9 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
 import Reveal from '../components/Reveal';
 import OnboardingModal from '../components/OnboardingModal';
+import { focusRing } from '../ui';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const focusRing =
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2';
 
 const SESSION_TYPE_MAP = Object.fromEntries(SESSION_TYPES.map((t) => [t.key, t]));
 
@@ -140,7 +138,7 @@ function SectionHeading({ id, children, count }) {
 
 function StatCard({ label, value, icon: Icon, colorClass }) {
   return (
-      <div className="group relative overflow-hidden rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:border-orange-200/50 hover:shadow-md">
+      <div className="group relative overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-5 shadow-sm transition-all duration-300 hover:border-orange-200/50 hover:shadow-md">
         <div className="flex items-start justify-between">
           <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${colorClass} transition-transform duration-300 group-hover:scale-110`}>
             <Icon className="h-5 w-5" />
@@ -158,7 +156,7 @@ function StatCard({ label, value, icon: Icon, colorClass }) {
 
 function EmptyState({ message, cta, href, icon: Icon = CalendarDays }) {
   return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-stone-200/90 bg-stone-50/40 px-6 py-12 text-center">
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/50 px-6 py-12 text-center">
         <div className="mb-4 rounded-full bg-stone-100 p-3 text-stone-400">
           <Icon className="h-6 w-6" />
         </div>
@@ -203,7 +201,7 @@ function SessionCard({ session, isMentor = false, mentorProfile, onAccept, onDec
   const showCancelButton = canAct && !isMentor && (session.status === 'pending' || session.status === 'accepted') && onCancel;
 
   return (
-      <div className="group relative flex flex-col gap-4 rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-200/50 hover:shadow-md sm:flex-row sm:items-center sm:gap-5">
+      <div className="group relative flex flex-col gap-4 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-4 shadow-sm transition-all duration-300 hover:border-orange-200/50 hover:shadow-md sm:flex-row sm:items-center sm:gap-5">
         <div className="flex flex-1 min-w-0 items-center gap-4">
           {!isMentor ? (
               <div className="relative shrink-0">
@@ -211,17 +209,17 @@ function SessionCard({ session, isMentor = false, mentorProfile, onAccept, onDec
                     <img
                         src={avatarUrl}
                         alt=""
-                        className="h-12 w-12 rounded-xl object-cover ring-2 ring-white shadow-sm"
+                        className="h-12 w-12 rounded-xl object-cover ring-2 ring-[var(--bridge-canvas)] shadow-sm"
                     />
                 ) : (
                     <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-xl text-sm font-bold shadow-sm ring-2 ring-white ${avatarColor}`}
+                        className={`flex h-12 w-12 items-center justify-center rounded-xl text-sm font-bold shadow-sm ring-2 ring-[var(--bridge-canvas)] ${avatarColor}`}
                         aria-hidden
                     >
                       {avatarInits}
                     </div>
                 )}
-                <div className={`absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-stone-100 ${type?.accent.text ?? 'text-stone-500'}`}>
+                <div className={`absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-lg bg-[var(--bridge-surface)] shadow-sm ring-1 ring-[var(--bridge-border)] ${type?.accent.text ?? 'text-stone-500'}`}>
                   <span className="text-[10px]">{type?.icon ?? '📋'}</span>
                 </div>
               </div>
@@ -305,17 +303,17 @@ function MentorCard({ mentor }) {
   return (
       <Link
           to={`/mentors/${mentor.id}`}
-          className={`group flex items-center gap-4 rounded-2xl border border-stone-200/80 bg-white/95 p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-orange-200/55 hover:shadow-md sm:p-5 ${focusRing}`}
+          className={`group flex items-center gap-4 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-orange-200/55 hover:shadow-md sm:p-5 ${focusRing}`}
       >
         {mentor.image_url ? (
             <img
                 src={mentor.image_url}
                 alt=""
-                className="h-12 w-12 shrink-0 rounded-xl object-cover ring-2 ring-white shadow-sm"
+                className="h-12 w-12 shrink-0 rounded-xl object-cover ring-2 ring-[var(--bridge-canvas)] shadow-sm"
             />
         ) : (
             <div
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm ring-2 ring-white ${color}`}
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm ring-2 ring-[var(--bridge-canvas)] ${color}`}
                 aria-hidden
             >
               {inits}
@@ -512,12 +510,12 @@ export default function Dashboard() {
   ];
 
   return (
-      <div className="min-h-[calc(100vh-4rem)] bg-[#fffaf3] selection:bg-orange-100 selection:text-orange-900">
+      <div className="min-h-[calc(100vh-4rem)] bg-[var(--bridge-canvas)] selection:bg-orange-200/50 selection:text-stone-900 dark:selection:bg-orange-900/50 dark:selection:text-orange-50">
         <PageGutterAtmosphere />
 
         {/* ── Sticky page header + tabs ──────────────────────────────────────── */}
-        <div className="sticky top-16 z-30 border-b border-stone-200/60 bg-white/80 backdrop-blur-md">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="sticky top-16 z-30 border-b border-[var(--bridge-border)] bg-[var(--bridge-surface)]/80 backdrop-blur-md supports-[backdrop-filter]:bg-[var(--bridge-surface)]/72">
+          <div className="mx-auto max-w-bridge px-4 sm:px-6 lg:px-8">
             {/* Greeting row */}
             <div className="flex items-end justify-between pt-6 pb-3">
               <div>
@@ -563,7 +561,7 @@ export default function Dashboard() {
         </div>
 
         {/* ── Main content ───────────────────────────────────────────────────── */}
-        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <main className="mx-auto max-w-bridge px-4 py-8 sm:px-6 lg:px-8">
           {/* Error banner */}
           {error && (
               <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
@@ -660,7 +658,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                       ) : (
-                          <div className="rounded-[2rem] bg-gradient-to-br from-orange-500 to-amber-500 p-8 text-white shadow-lg shadow-orange-200">
+                          <div className="rounded-[2rem] bg-gradient-to-br from-orange-500 to-amber-500 p-8 text-white shadow-lg shadow-orange-950/25">
                             <h3 className="font-display text-2xl font-bold">No sessions scheduled</h3>
                             <p className="mt-2 text-sm text-orange-100/90">
                               {isMentor
@@ -722,7 +720,7 @@ export default function Dashboard() {
                     {/* Right column — widgets */}
                     <div className="space-y-6">
                       {/* Quick actions */}
-                      <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+                      <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-sm">
                         <h3 className="mb-4 font-display text-lg font-bold text-stone-900">Quick Actions</h3>
                         <div className="space-y-2">
                           {!isMentor ? (
@@ -759,7 +757,7 @@ export default function Dashboard() {
                       </div>
 
                       {/* Recent activity */}
-                      <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+                      <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-sm">
                         <h3 className="mb-4 font-display text-lg font-bold text-stone-900">Recent Activity</h3>
                         <div className="space-y-4">
                           {visibleHistory.length > 0 ? (
@@ -821,7 +819,7 @@ export default function Dashboard() {
                           placeholder="Search by name or type…"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full rounded-xl border border-stone-200 bg-white py-2 pl-10 pr-4 text-sm transition-all focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                          className="w-full rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-2 pl-10 pr-4 text-sm transition-all focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
                       />
                     </div>
                   </div>
@@ -941,7 +939,7 @@ export default function Dashboard() {
                           placeholder="Search by name…"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full rounded-xl border border-stone-200 bg-white py-2 pl-10 pr-4 text-sm transition-all focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                          className="w-full rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-2 pl-10 pr-4 text-sm transition-all focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
                       />
                     </div>
                   </div>
@@ -981,10 +979,10 @@ export default function Dashboard() {
                               return (
                                   <div
                                       key={m.id}
-                                      className="group flex items-center gap-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm transition-all hover:border-orange-200 hover:shadow-md"
+                                      className="group flex items-center gap-4 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-5 shadow-sm transition-all hover:border-orange-200 hover:shadow-md"
                                   >
                                     <div
-                                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm ring-2 ring-white ${color}`}
+                                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm ring-2 ring-[var(--bridge-canvas)] ${color}`}
                                     >
                                       {inits}
                                     </div>

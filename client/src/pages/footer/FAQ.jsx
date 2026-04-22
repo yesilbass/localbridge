@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import Reveal from '../../components/Reveal';
-
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf3]';
+import { focusRing, pageShell } from '../../ui';
 
 const FAQS = [
     { cat: 'Getting Started', q: 'How does Bridge work?', a: 'Browse 2,400+ vetted mentors by industry, role, or skill. Pick a session format, book an available time slot, and meet over video. Payment is handled securely — you only pay when the session is confirmed.' },
@@ -30,7 +29,7 @@ export default function FAQ() {
     }, [cat, search]);
 
     return (
-        <main className="relative min-h-screen bg-gradient-to-b from-[#fffaf3] via-[#fff4e3] to-[#fffaf3] px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+        <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
             <div className="mx-auto max-w-4xl">
                 <Reveal className="mb-10 text-center">
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Help</p>

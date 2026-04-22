@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Reveal from '../../components/Reveal';
-
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf3]';
+import { focusRing, pageShell } from '../../ui';
 
 export default function Trust() {
     const [form, setForm] = useState({ type: 'Conduct issue', description: '', contact: '' });
@@ -27,7 +26,7 @@ export default function Trust() {
     }
 
     return (
-        <main className="relative min-h-screen bg-gradient-to-b from-[#fffaf3] via-[#fff4e3] to-[#fffaf3] px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+        <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
             <div className="mx-auto max-w-5xl">
                 <Reveal className="mb-14 max-w-3xl">
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Trust & Safety</p>
