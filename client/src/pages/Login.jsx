@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import { isMentorAccount } from '../utils/accountRole';
 import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Reveal from '../components/Reveal';
@@ -71,6 +72,7 @@ function LoginAside() {
 
 function LoginAlreadySignedIn({ user }) {
   const display = user.user_metadata?.full_name?.trim() || user.email || 'your account';
+  const asMentor = isMentorAccount(user);
 
   return (
       <main className="relative min-h-screen overflow-x-hidden" aria-labelledby="login-heading">
@@ -89,16 +91,16 @@ function LoginAlreadySignedIn({ user }) {
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
-                    to="/mentors"
+                    to={asMentor ? '/dashboard' : '/mentors'}
                     className={`inline-flex flex-1 items-center justify-center rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/25 transition hover:from-orange-500 hover:to-amber-400 sm:flex-none ${focusRing}`}
                 >
-                  Browse mentors
+                  {asMentor ? 'Mentor dashboard' : 'Browse mentors'}
                 </Link>
                 <Link
-                    to="/dashboard"
+                    to={asMentor ? '/settings' : '/dashboard'}
                     className={`inline-flex flex-1 items-center justify-center rounded-full border-2 border-stone-900/10 bg-white px-6 py-3.5 text-sm font-semibold text-stone-900 shadow-sm transition hover:border-orange-300/60 hover:shadow-md sm:flex-none ${focusRing}`}
                 >
-                  Dashboard
+                  {asMentor ? 'Account settings' : 'Dashboard'}
                 </Link>
               </div>
               <p className="mt-8 text-center text-sm text-stone-500">
@@ -134,8 +136,9 @@ export default function Login() {
     setError('');
     setSubmitting(true);
     try {
-      await login(email.trim(), password);
-      navigate(redirectPath ?? '/mentors', { replace: true });
+      const signedIn = await login(email.trim(), password);
+      const home = isMentorAccount(signedIn) ? '/dashboard' : '/mentors';
+      navigate(redirectPath ?? home, { replace: true });
     } catch (err) {
       setError(err.message ?? 'Something went wrong. Please try again.');
     } finally {

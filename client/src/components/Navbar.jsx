@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { Bell, LogOut, LayoutDashboard, User, Settings } from 'lucide-react';
+import { isMentorAccount } from '../utils/accountRole';
+import { Bell, LogOut, LayoutDashboard, User, Settings, Sparkles } from 'lucide-react';
 
 function getInitials(name = '') {
   return name
@@ -16,6 +17,7 @@ export default function Navbar() {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const asMentor = user ? isMentorAccount(user) : false;
 
   async function handleLogout() {
     setMenuOpen(false);
@@ -41,11 +43,23 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Center — nav links */}
+        {/* Center — nav links (mentors: hub-first; mentees: discover mentors) */}
         <div className="flex items-center justify-center gap-1">
-          <Link to="/mentors" className="rounded-full px-3 py-2 text-sm font-medium text-stone-600 transition hover:bg-white hover:text-stone-900 hover:shadow-sm sm:px-4">
-            Mentors
-          </Link>
+          {asMentor ? (
+            <Link
+              to="/dashboard"
+              className="rounded-full px-3 py-2 text-sm font-medium text-stone-600 transition hover:bg-white hover:text-stone-900 hover:shadow-sm sm:px-4"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              to="/mentors"
+              className="rounded-full px-3 py-2 text-sm font-medium text-stone-600 transition hover:bg-white hover:text-stone-900 hover:shadow-sm sm:px-4"
+            >
+              Mentors
+            </Link>
+          )}
           <Link to="/about" className="rounded-full px-3 py-2 text-sm font-medium text-stone-600 transition hover:bg-white hover:text-stone-900 hover:shadow-sm sm:px-4">
             About
           </Link>
@@ -95,6 +109,16 @@ export default function Navbar() {
                         {user.user_metadata?.full_name ?? user.email}
                       </p>
                       <p className="truncate text-xs text-stone-400">{user.email}</p>
+                      <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-stone-600">
+                        {asMentor ? (
+                          <>
+                            <Sparkles className="h-3 w-3 text-amber-600" aria-hidden />
+                            Mentor
+                          </>
+                        ) : (
+                          'Member'
+                        )}
+                      </p>
                     </div>
 
                     <Link
@@ -121,8 +145,19 @@ export default function Navbar() {
                       className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
                     >
                       <LayoutDashboard className="h-4 w-4 text-stone-400" />
-                      Dashboard
+                      {asMentor ? 'Mentor dashboard' : 'Dashboard'}
                     </Link>
+
+                    {!asMentor ? (
+                      <Link
+                        to="/mentors"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+                      >
+                        <Sparkles className="h-4 w-4 text-stone-400" />
+                        Find a mentor
+                      </Link>
+                    ) : null}
 
                     <div className="border-t border-stone-100">
                       <button

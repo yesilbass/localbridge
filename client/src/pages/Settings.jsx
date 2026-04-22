@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import { isMentorAccount } from '../utils/accountRole';
 import { 
   User, 
   Bell, 
@@ -30,6 +31,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 export default function Settings() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const asMentor = user ? isMentorAccount(user) : false;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState('account');
@@ -298,6 +300,28 @@ export default function Settings() {
                 <User className="h-5 w-5 text-orange-500" />
                 <h2 className="text-xl font-semibold text-stone-900">Account Settings</h2>
               </div>
+
+              {asMentor ? (
+                  <div className="mb-6 rounded-xl border border-amber-200/90 bg-gradient-to-r from-amber-50 to-orange-50/60 px-4 py-3.5 text-sm">
+                    <p className="font-semibold text-amber-950">Mentor account</p>
+                    <p className="mt-1 leading-relaxed text-amber-950/85">
+                      You&apos;re set up to receive requests and run sessions. Booking other mentors isn&apos;t available on this account—create a separate member profile if you also want to learn from someone.
+                    </p>
+                    <Link
+                        to="/dashboard"
+                        className="mt-2 inline-flex font-semibold text-orange-900 underline decoration-orange-300/70 underline-offset-2 hover:text-orange-950"
+                    >
+                      Open mentor dashboard
+                    </Link>
+                  </div>
+              ) : (
+                  <div className="mb-6 rounded-xl border border-stone-200/90 bg-stone-50/80 px-4 py-3.5 text-sm text-stone-700">
+                    <p className="font-semibold text-stone-900">Member account</p>
+                    <p className="mt-1 leading-relaxed text-stone-600">
+                      Use the mentor directory to shortlist people, book sessions, and track everything from your dashboard.
+                    </p>
+                  </div>
+              )}
               
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

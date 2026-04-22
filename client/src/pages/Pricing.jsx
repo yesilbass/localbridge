@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import { isMentorAccount } from '../utils/accountRole';
 import Reveal from '../components/Reveal';
 
 const focusRing =
@@ -160,6 +161,7 @@ function PricingFaq({ headingId, items }) {
 
 export default function Pricing() {
   const { user } = useAuth();
+  const asMentor = user ? isMentorAccount(user) : false;
   const [annual, setAnnual] = useState(false);
 
   function handlePaidClick() {
@@ -169,17 +171,26 @@ export default function Pricing() {
   const tiers = [
     {
       name: 'Free',
-      tagline: 'Explore the platform',
+      tagline: asMentor ? 'Run sessions on Bridge' : 'Explore the platform',
       monthly: 0,
-      blurb:
-          'Browse mentors, read reviews, and use the platform at no cost. Mentor sessions are still paid separately during booking.',
-      features: [
-        'Browse mentor profiles',
-        'View ratings and reviews',
-        'Save up to 10 mentors',
-        'Basic platform access',
-        'Mentor sessions booked separately',
-      ],
+      blurb: asMentor
+          ? 'List your profile, receive mentee requests, and use the mentor dashboard at no platform fee. What mentees pay you per session is separate from Bridge subscriptions.'
+          : 'Browse mentors, read reviews, and use the platform at no cost. Mentor sessions are still paid separately during booking.',
+      features: asMentor
+          ? [
+              'Public mentor profile in the directory',
+              'Session requests in your dashboard',
+              'Accept, decline, and track sessions',
+              'Basic platform access',
+              'Per-session earnings paid to you when enabled',
+            ]
+          : [
+              'Browse mentor profiles',
+              'View ratings and reviews',
+              'Save up to 10 mentors',
+              'Basic platform access',
+              'Mentor sessions booked separately',
+            ],
       cta: user ? 'Current plan' : 'Sign up free',
       href: user ? '/dashboard' : '/register',
       primary: false,

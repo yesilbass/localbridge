@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getAllMentors } from '../api/mentors';
 import { getMyFavorites, toggleFavorite } from '../api/favorites';
 import { useAuth } from '../context/useAuth';
+import { isMentorAccount } from '../utils/accountRole';
 import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
 import Reveal from '../components/Reveal';
 
@@ -178,7 +179,7 @@ function HeartButton({ filled, onClick, label, disabled }) {
   );
 }
 
-function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favoriteBusy }) {
+function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favoriteBusy, favoritesEnabled = true }) {
   const avatarColor = getAvatarColor(mentor.name);
 
   function handleHeart() {
@@ -192,16 +193,18 @@ function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favo
   return (
       <div className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-[1.75rem] border border-stone-200/80 bg-white/95 p-6 shadow-bridge-card transition duration-300 hover:-translate-y-1 hover:border-orange-200/55 hover:shadow-bridge-glow">
         <div className="absolute left-0 right-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-orange-400/70 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
-        <div className="absolute right-4 top-5">
-          <HeartButton
-              filled={isFavorite}
-              disabled={Boolean(favoriteBusy)}
-              onClick={handleHeart}
-              label={isFavorite ? 'Remove from favorites' : 'Save to favorites'}
-          />
-        </div>
+        {favoritesEnabled ? (
+            <div className="absolute right-4 top-5">
+              <HeartButton
+                  filled={isFavorite}
+                  disabled={Boolean(favoriteBusy)}
+                  onClick={handleHeart}
+                  label={isFavorite ? 'Remove from favorites' : 'Save to favorites'}
+              />
+            </div>
+        ) : null}
 
-        <div className="flex items-start gap-4 pr-12">
+        <div className={`flex items-start gap-4 ${favoritesEnabled ? 'pr-12' : ''}`}>
           {mentor.image_url ? (
               <img
                   src={mentor.image_url}
@@ -292,6 +295,7 @@ function FetchErrorBanner({ message, onRetry }) {
 export default function Mentors() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const asMentor = user ? isMentorAccount(user) : false;
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [activeIndustry, setActiveIndustry] = useState('');
@@ -327,7 +331,7 @@ export default function Mentors() {
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- sync favorites with auth session */
-    if (!user) {
+    if (!user || isMentorAccount(user)) {
       setFavoriteIds(new Set());
       return;
     }
@@ -452,6 +456,7 @@ export default function Mentors() {
     (rateMin !== '' || rateMax !== '' ? 1 : 0) +
     (availableOnly ? 1 : 0);
   const visibleMentors = mentors.filter((m) => {
+    if (asMentor && user?.id && m.user_id === user.id) return false;
     if (activeTier && m.tier !== activeTier) return false;
     if (rateMin !== '' && (m.session_rate == null || m.session_rate < Number(rateMin))) return false;
     if (rateMax !== '' && (m.session_rate == null || m.session_rate > Number(rateMax))) return false;
@@ -492,6 +497,24 @@ export default function Mentors() {
                 <li className="font-medium text-stone-800">Mentors</li>
               </ol>
             </nav>
+
+            {asMentor ? (
+                <div className="mb-6 rounded-2xl border border-amber-200/90 bg-gradient-to-r from-amber-50/95 to-orange-50/50 px-4 py-4 shadow-sm sm:px-5 sm:py-4">
+                  <p className="text-sm font-semibold text-amber-950">Signed in as a mentor</p>
+                  <p className="mt-1.5 text-sm leading-relaxed text-amber-950/85">
+                    Browse profiles for inspiration or market context—you can&apos;t book sessions or save favorites on this account. Incoming requests and your calendar live on your dashboard.
+                  </p>
+                  <Link
+                      to="/dashboard"
+                      className={`mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-orange-900 underline decoration-orange-300/60 underline-offset-2 hover:text-orange-950 ${focusRing} rounded-sm`}
+                  >
+                    Open mentor dashboard
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
+                    </svg>
+                  </Link>
+                </div>
+            ) : null}
 
             <div className="flex flex-col gap-5 pb-6 sm:gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
@@ -824,6 +847,7 @@ export default function Mentors() {
                             user={user}
                             navigate={navigate}
                             favoriteBusy={favoriteBusyId === normalizeMentorId(mentor.id)}
+                            favoritesEnabled={!asMentor}
                         />
                       </Reveal>
                   ))}

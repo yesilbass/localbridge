@@ -4,6 +4,7 @@ import { getMentorById } from '../api/mentors';
 import { getReviewsForMentor } from '../api/reviews';
 import { createSession } from '../api/sessions';
 import { useAuth } from '../context/useAuth';
+import { isMentorAccount } from '../utils/accountRole';
 import { SESSION_TYPES } from '../constants/sessionTypes';
 import { addRecentlyViewedMentor } from '../utils/recentlyViewed';
 import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
@@ -443,6 +444,11 @@ export default function MentorProfile() {
         return () => { cancelled = true; };
     }, [id]);
 
+    useEffect(() => {
+        setSelectedType(null);
+        setPendingConfirm(null);
+    }, [id]);
+
     const displayRating = useMemo(() => {
         if (!profile?.mentor) return 0;
         const fromReviews = profile.reviews?.average;
@@ -485,6 +491,11 @@ export default function MentorProfile() {
 
     const mentor = profile.mentor;
     const reviewMeta = profile.reviews;
+    const viewerIsMentor = user ? isMentorAccount(user) : false;
+    const isOwnMentorProfile = Boolean(
+        user && mentor.user_id && mentor.user_id === user.id,
+    );
+    const bookingDisabledForMentor = viewerIsMentor && !isOwnMentorProfile;
     const industryLabel = formatIndustry(mentor.industry);
     const grad = avatarColor(mentor.name);
     const mentorInitials = initials(mentor.name);
@@ -577,7 +588,49 @@ export default function MentorProfile() {
                     </section>
 
                     <div ref={bookingRef} className="mb-10 scroll-mt-24">
-                        {!selectedType ? (
+                        {isOwnMentorProfile ? (
+                            <section className="relative overflow-hidden rounded-[1.75rem] border border-emerald-200/80 bg-gradient-to-br from-emerald-50/90 via-white to-amber-50/40 p-7 shadow-bridge-card sm:p-8">
+                                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">Your public profile</p>
+                                <h2 className="mt-2 font-display text-2xl font-semibold text-stone-900 sm:text-3xl">
+                                    This is what mentees see before they book
+                                </h2>
+                                <p className="mt-3 max-w-xl text-sm leading-relaxed text-stone-600">
+                                    Session requests and your availability are managed from your dashboard. You don&apos;t book yourself here—that keeps your calendar and payouts accurate.
+                                </p>
+                                <div className="mt-6 flex flex-wrap gap-3">
+                                    <Link
+                                        to="/dashboard"
+                                        className={`inline-flex items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-stone-800 ${focusRing}`}
+                                    >
+                                        Open mentor dashboard
+                                    </Link>
+                                    <Link
+                                        to="/settings"
+                                        className={`inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-6 py-3 text-sm font-semibold text-stone-800 shadow-sm transition hover:border-orange-200 ${focusRing}`}
+                                    >
+                                        Account settings
+                                    </Link>
+                                </div>
+                            </section>
+                        ) : bookingDisabledForMentor ? (
+                            <section className="relative overflow-hidden rounded-[1.75rem] border border-amber-200/90 bg-gradient-to-br from-amber-50 via-white to-orange-50/50 p-7 shadow-bridge-card sm:p-8">
+                                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-orange-800">Mentor account</p>
+                                <h2 className="mt-2 font-display text-2xl font-semibold text-stone-900 sm:text-3xl">
+                                    Booking is for mentee accounts
+                                </h2>
+                                <p className="mt-3 max-w-xl text-sm leading-relaxed text-stone-600">
+                                    You signed up as a mentor on Bridge, so you can accept requests and run sessions—not book other mentors from this account. If you also want to learn from someone, use a separate email for a member (mentee) account.
+                                </p>
+                                <div className="mt-6 flex flex-wrap gap-3">
+                                    <Link
+                                        to="/dashboard"
+                                        className={`inline-flex items-center justify-center rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:from-orange-500 hover:to-amber-400 ${focusRing}`}
+                                    >
+                                        Back to your dashboard
+                                    </Link>
+                                </div>
+                            </section>
+                        ) : !selectedType ? (
                             <section className="relative overflow-hidden rounded-[1.75rem] border border-stone-900/90 bg-gradient-to-br from-stone-900 via-stone-900 to-orange-950 p-7 text-amber-50 shadow-2xl ring-1 ring-white/10 sm:p-8">
                                 <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-500/20 blur-3xl" />
                                 <div className="relative flex items-baseline justify-between gap-3">

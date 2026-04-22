@@ -21,6 +21,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
+import { isMentorAccount } from '../utils/accountRole';
 import { getMySession, updateSessionStatus } from '../api/sessions';
 import { SESSION_TYPES } from '../constants/sessionTypes';
 import supabase from '../api/supabase';
@@ -342,7 +343,7 @@ function MentorCard({ mentor }) {
 
 export default function Dashboard() {
   const { user, loading: authLoading, logout } = useAuth();
-  const isMentor = user?.user_metadata?.role === 'mentor';
+  const isMentor = isMentorAccount(user);
 
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
@@ -661,14 +662,29 @@ export default function Dashboard() {
                       ) : (
                           <div className="rounded-[2rem] bg-gradient-to-br from-orange-500 to-amber-500 p-8 text-white shadow-lg shadow-orange-200">
                             <h3 className="font-display text-2xl font-bold">No sessions scheduled</h3>
-                            <p className="mt-2 text-sm text-orange-100/90">Ready to take the next step?</p>
-                            <Link
-                                to="/mentors"
-                                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-sm font-bold text-stone-900 transition hover:bg-orange-50"
-                            >
-                              Browse Mentors
-                              <ArrowUpRight className="h-4 w-4" />
-                            </Link>
+                            <p className="mt-2 text-sm text-orange-100/90">
+                              {isMentor
+                                  ? 'When mentees book you, requests show up here for you to confirm.'
+                                  : 'Ready to take the next step?'}
+                            </p>
+                            {isMentor ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('settings')}
+                                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-sm font-bold text-stone-900 transition hover:bg-orange-50"
+                                >
+                                  View your public profile
+                                  <ArrowUpRight className="h-4 w-4" />
+                                </button>
+                            ) : (
+                                <Link
+                                    to="/mentors"
+                                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-sm font-bold text-stone-900 transition hover:bg-orange-50"
+                                >
+                                  Browse Mentors
+                                  <ArrowUpRight className="h-4 w-4" />
+                                </Link>
+                            )}
                           </div>
                       )}
 

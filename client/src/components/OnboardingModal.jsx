@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { X, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { SESSION_TYPES } from '../constants/sessionTypes';
+import { isMentorAccount } from '../utils/accountRole';
 
 const MENTEE_GOALS = [
   { key: 'job',       emoji: '💼', label: 'Land my first job',  sub: 'Get guidance on job hunting and applications' },
@@ -24,7 +25,7 @@ const focusRing =
 export default function OnboardingModal() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const isMentor = user?.user_metadata?.role === 'mentor';
+  const isMentor = isMentorAccount(user);
 
   const [visible, setVisible] = useState(false);
   const [mounted, setMounted] = useState(false);

@@ -1,7 +1,18 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import supabase from "../api/supabase";
+import { ensureMentorProfileForUser } from "../api/mentorOnboarding";
+import { isMentorAccount } from "../utils/accountRole";
 
 export const AuthContext = createContext(null);
+
+async function syncMentorProfile(user) {
+  if (!user || !isMentorAccount(user)) return;
+  try {
+    await ensureMentorProfileForUser(user);
+  } catch (e) {
+    console.error("Could not ensure mentor profile:", e);
+  }
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -9,12 +20,18 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      const next = session?.user ?? null;
+      setUser(next);
+      if (next) void syncMentorProfile(next);
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const next = session?.user ?? null;
+      setUser(next);
+      if (next && (event === "SIGNED_IN" || event === "USER_UPDATED")) {
+        void syncMentorProfile(next);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -55,10 +72,4 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within <AuthProvider>");
-  return ctx;
 }

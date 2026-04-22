@@ -248,7 +248,7 @@ export default function Register() {
         full_name: fullName.trim(),
         role,
       });
-      navigate('/mentors', { replace: true });
+      navigate(role === 'mentor' ? '/dashboard' : '/mentors', { replace: true });
     } catch (err) {
       setError(err.message ?? 'Something went wrong. Please try again.');
     } finally {
