@@ -1,4 +1,5 @@
 import Reveal from '../../components/Reveal';
+import { pageShell } from '../../ui';
 
 const SECTIONS = [
         { id: 'acceptance', title: '1. Acceptance of Terms', body: `By accessing or using Bridge, you agree to be bound by these Terms. If you don't agree, don't use the service. We may update these Terms; continued use after updates constitutes acceptance.` },
@@ -19,8 +20,8 @@ const SECTIONS = [
 
 export default function Terms() {
         return (
-            <main className="relative min-h-screen bg-gradient-to-b from-[#fffaf3] via-[#fff4e3] to-[#fffaf3] px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-                    <div className="mx-auto max-w-7xl">
+            <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
+                    <div className="mx-auto max-w-bridge">
                             <Reveal className="mb-12">
                                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Legal</p>
                                     <h1 className="mt-3 font-display text-4xl font-semibold text-stone-900 sm:text-5xl">Terms of Use</h1>

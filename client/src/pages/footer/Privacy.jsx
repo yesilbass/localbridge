@@ -1,4 +1,6 @@
 import Reveal from '../../components/Reveal';
+import { pageShell } from '../../ui';
+
 const SECTIONS = [
         { id: 'collection', title: '1. Information We Collect', body: `We collect three types of data:\n\n**Directly from you** — account details (name, email, password), profile information, payment data, and any content you submit (messages, reviews, session notes).\n\n**Generated through use** — session history, booking patterns, preferences, and platform activity.\n\n**Technical data** — IP address, browser type, device identifiers, and usage logs.` },
         { id: 'usage', title: '2. How We Use Information', body: `We use your data to: operate the platform, match you with mentors, process payments, send transactional communications, improve our services, detect fraud, and comply with legal obligations.\n\nWe do not sell personal data to third parties. Ever.` },
@@ -14,8 +16,8 @@ const SECTIONS = [
 
 export default function Privacy() {
         return (
-            <main className="relative min-h-screen bg-gradient-to-b from-[#fffaf3] via-[#fff4e3] to-[#fffaf3] px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-                    <div className="mx-auto max-w-7xl">
+            <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
+                    <div className="mx-auto max-w-bridge">
                             <Reveal className="mb-12">
                                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Legal</p>
                                     <h1 className="mt-3 font-display text-4xl font-semibold text-stone-900 sm:text-5xl">Privacy Policy</h1>

@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import Reveal from '../../components/Reveal';
-
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf3]';
+import { focusRing, pageShell } from '../../ui';
 
 const ARTICLES = {
     'creating-account': { category: 'Getting Started', title: 'Creating an account', body: `Signing up takes under a minute. Click "Sign up" in the top right, enter your email and a password, and confirm your email when our message hits your inbox.\n\nWe never require phone verification or ID upload for mentees. Only mentors go through extended verification.\n\nIf you don't see the confirmation email within 5 minutes, check your spam folder. Still nothing? Contact support@bridge.com.` },
@@ -36,7 +35,7 @@ export default function Help() {
     if (active) {
         const article = ARTICLES[active];
         return (
-            <main className="relative min-h-screen bg-gradient-to-b from-[#fffaf3] via-[#fff4e3] to-[#fffaf3] px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+            <main className={`${pageShell} px-4 py-16 sm:px-6 sm:py-20 lg:px-8`}>
                 <article className="mx-auto max-w-3xl">
                     <button onClick={() => setActive(null)} className={`mb-8 inline-flex items-center gap-1.5 text-sm font-semibold text-orange-700 transition hover:text-orange-900 ${focusRing} rounded`}>← Back to help center</button>
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">{article.category}</p>
@@ -54,7 +53,7 @@ export default function Help() {
     }
 
     return (
-        <main className="relative min-h-screen bg-gradient-to-b from-[#fffaf3] via-[#fff4e3] to-[#fffaf3] px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+        <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
             <div className="mx-auto max-w-5xl">
                 <Reveal className="mb-10 text-center">
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Help center</p>
