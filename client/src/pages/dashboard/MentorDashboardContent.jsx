@@ -17,7 +17,7 @@
  * - `MentorSessionsTab`, `MentorConnectionsTab`, `MentorSettingsTab` are private to this file (not reused by mentees).
  */
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Calendar,
   Clock,
@@ -39,6 +39,7 @@ import {
 import { getAvatarColor, getInitials, formatSessionDate } from './dashboardUtils';
 
 export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout }) {
+  const navigate = useNavigate();
   const {
     sessions,
     mentorMap,
@@ -75,7 +76,19 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout }
                           <CalendarDays className="h-32 w-32" />
                         </div>
                         <div className="relative z-10">
-                          <span className="inline-block rounded-full bg-orange-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider">Next Session</span>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-block rounded-full bg-orange-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider">Next Session</span>
+                            {nextSession.status === 'pending' && (
+                              <span className="inline-block rounded-full bg-amber-400/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-200 ring-1 ring-amber-300/40">
+                                Awaiting your response
+                              </span>
+                            )}
+                            {nextSession.status === 'accepted' && (
+                              <span className="inline-block rounded-full bg-emerald-400/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-200 ring-1 ring-emerald-300/40">
+                                Confirmed
+                              </span>
+                            )}
+                          </div>
                           <h3 className="mt-4 font-display text-2xl font-bold">Session with {nextSession.mentee_name}</h3>
                           <div className="mt-6 flex flex-wrap gap-4">
                             <div className="flex items-center gap-2">
@@ -87,21 +100,46 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout }
                               <span className="text-sm font-medium">{formatSessionDate(nextSession.scheduled_date).split(' · ')[1]}</span>
                             </div>
                           </div>
-                          <div className="mt-8 flex gap-3">
-                            <button
-                                type="button"
-                                onClick={() => alert('The meeting room will be available 5 minutes before the scheduled time.')}
-                                className="rounded-xl bg-white px-6 py-2.5 text-sm font-bold text-stone-900 transition hover:bg-orange-50"
-                            >
-                              Join Meeting
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => alert('Please contact your mentee to reschedule.')}
-                                className="flex items-center justify-center rounded-xl bg-white/10 px-6 py-2.5 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-white/20"
-                            >
-                              Reschedule
-                            </button>
+                          <div className="mt-8 flex flex-wrap gap-3">
+                            {nextSession.status === 'pending' ? (
+                              <>
+                                <button
+                                    type="button"
+                                    onClick={() => handleStatusUpdate(nextSession.id, 'accepted')}
+                                    disabled={actionLoading === nextSession.id}
+                                    className="rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-400 disabled:opacity-50"
+                                >
+                                  {actionLoading === nextSession.id ? 'Accepting…' : 'Accept Session'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleStatusUpdate(nextSession.id, 'declined')}
+                                    disabled={actionLoading === nextSession.id}
+                                    className="rounded-xl bg-white/10 px-6 py-2.5 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-white/20 disabled:opacity-50"
+                                >
+                                  Decline
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                    type="button"
+                                    onClick={() => nextSession.video_room_url
+                                      ? navigate(`/session/${nextSession.id}/video`)
+                                      : alert('Video room is not ready yet. Refresh in a moment.')}
+                                    className="rounded-xl bg-white px-6 py-2.5 text-sm font-bold text-stone-900 transition hover:bg-orange-50"
+                                >
+                                  Join Meeting
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => alert('Please contact your mentee to reschedule.')}
+                                    className="flex items-center justify-center rounded-xl bg-white/10 px-6 py-2.5 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-white/20"
+                                >
+                                  Reschedule
+                                </button>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>

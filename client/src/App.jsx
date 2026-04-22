@@ -23,6 +23,7 @@ import Privacy from './pages/footer/Privacy.jsx';
 import Terms from './pages/footer/Terms.jsx';
 import Cookies from './pages/footer/Cookies.jsx';
 import FeedbackFAB from './components/FeedbackFAB';
+import VideoCall from './pages/VideoCall';
 
 function AppContent() {
   const location = useLocation();
@@ -42,6 +43,7 @@ function AppContent() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/session/:sessionId/video" element={<VideoCall />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/about" element={<About />} />
           <Route path="/careers" element={<Careers />} />

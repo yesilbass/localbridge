@@ -21,11 +21,30 @@ import {
 } from 'lucide-react';
 import supabase from '../api/supabase';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { removeAllResumesForUser } from '../api/resumeStorage';
+import { toJsonbSafe } from '../utils/jsonbSafe';
 import {
   applyAppearance,
   applyThemePreference,
   getStoredAppearanceOverlay,
 } from '../utils/appearance';
+
+/** Never persist password fields to JSONB. */
+function settingsForPersistence(s) {
+  const account = { ...s.account };
+  delete account.current_password;
+  delete account.new_password;
+  delete account.confirm_password;
+  return { ...s, account };
+}
+
+/** PostgREST: table missing from API schema (migration not applied on this project). */
+function isUserSettingsTableMissingError(error) {
+  if (!error) return false;
+  if (error.code === 'PGRST205') return true;
+  const msg = String(error.message || '');
+  return msg.includes("Could not find the table") && msg.includes('user_settings');
+}
 
 const DEFAULT_SETTINGS = {
   account: {
@@ -82,6 +101,7 @@ export default function Settings() {
     };
   });
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [serverSettingsAvailable, setServerSettingsAvailable] = useState(true);
 
   useEffect(() => {
     if (authLoading) return;
@@ -114,9 +134,21 @@ export default function Settings() {
           .from('user_settings')
           .select('*')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error && isUserSettingsTableMissingError(error)) {
+        setServerSettingsAvailable(false);
+        const localTheme = getStoredAppearanceOverlay();
+        setSettings((prev) => ({
+          ...prev,
+          account: {
+            ...prev.account,
+            email: user.email || '',
+            full_name: user.user_metadata?.full_name || '',
+          },
+          appearance: localTheme ? { ...prev.appearance, ...localTheme } : prev.appearance,
+        }));
+      } else if (error) {
         console.error('Error loading settings:', error);
       } else if (data?.settings) {
         // Merge with defaults so newly-added fields don't break old saved rows
@@ -158,20 +190,49 @@ export default function Settings() {
   const saveSettings = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase
-          .from('user_settings')
-          .upsert({
-            user_id: user.id,
-            settings: settings,
-            updated_at: new Date().toISOString()
-          });
+      applyAppearance(settings.appearance);
 
-      if (error) throw error;
+      // Persist full_name to auth metadata so other parts of the app see the updated name
+      const currentName = user.user_metadata?.full_name ?? '';
+      if (settings.account.full_name && settings.account.full_name !== currentName) {
+        await supabase.auth.updateUser({ data: { full_name: settings.account.full_name } });
+      }
+
+      const persisted = toJsonbSafe(settingsForPersistence(settings));
+      let { error } = await supabase.from('user_settings').upsert(
+        {
+          user_id: user.id,
+          settings: persisted,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' },
+      );
+      if (error && !isUserSettingsTableMissingError(error)) {
+        const { data: row } = await supabase.from('user_settings').select('id').eq('user_id', user.id).maybeSingle();
+        if (row?.id) ({ error } = await supabase.from('user_settings').update({ settings: persisted, updated_at: new Date().toISOString() }).eq('user_id', user.id));
+        else ({ error } = await supabase.from('user_settings').insert({ user_id: user.id, settings: persisted, updated_at: new Date().toISOString() }));
+      }
+
+      if (error) {
+        if (isUserSettingsTableMissingError(error)) {
+          setServerSettingsAvailable(false);
+          setMessage({
+            type: 'success',
+            text: 'Preferences saved on this device. Cloud backup is unavailable until the database is updated.',
+          });
+          setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+          return;
+        }
+        throw error;
+      }
       setMessage({ type: 'success', text: 'Settings saved successfully!' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (err) {
       console.error('Error saving settings:', err);
-      setMessage({ type: 'error', text: 'Error saving settings. Please try again.' });
+      setMessage({
+        type: 'error',
+        text: err.message ? `${err.message} (run supabase/BRIDGE_PUBLISH.sql if tables are missing)` : 'Error saving settings.',
+      });
     } finally {
       setSaving(false);
     }
@@ -227,30 +288,53 @@ export default function Settings() {
 
   const handleDeleteAccount = async () => {
     try {
-      await supabase.from('user_profiles').delete().eq('user_id', user.id);
-      await supabase.from('user_settings').delete().eq('user_id', user.id);
+      await removeAllResumesForUser(user.id).catch(() => {});
 
-      const { error } = await supabase.auth.admin.deleteUser(user.id);
-      if (error) throw error;
+      if (asMentor) {
+        const { error: mentorDelErr } = await supabase.from('mentor_profiles').delete().eq('user_id', user.id);
+        if (mentorDelErr) {
+          const msg = String(mentorDelErr.message || '');
+          if (mentorDelErr.code === '23503' || msg.toLowerCase().includes('foreign key')) {
+            setMessage({
+              type: 'error',
+              text: 'You still have sessions linked to your mentor profile. Complete or cancel them on the dashboard, then try again.',
+            });
+            setShowDeleteConfirm(false);
+            return;
+          }
+          throw mentorDelErr;
+        }
+      }
+
+      await supabase.from('user_profiles').delete().eq('user_id', user.id);
+      const { error: delSettingsErr } = await supabase.from('user_settings').delete().eq('user_id', user.id);
+      if (delSettingsErr && !isUserSettingsTableMissingError(delSettingsErr)) throw delSettingsErr;
 
       await logout();
+      setShowDeleteConfirm(false);
       navigate('/');
     } catch (err) {
       console.error('Error deleting account:', err);
-      setMessage({ type: 'error', text: 'Error deleting account. Please contact support.' });
+      setMessage({ type: 'error', text: 'Could not finish account cleanup. Try again or contact support.' });
     }
   };
 
   const exportData = async () => {
     try {
       const [profileData, settingsData] = await Promise.all([
-        supabase.from('user_profiles').select('*').eq('user_id', user.id).single(),
-        supabase.from('user_settings').select('*').eq('user_id', user.id).single()
+        supabase.from('user_profiles').select('*').eq('user_id', user.id).maybeSingle(),
+        supabase.from('user_settings').select('*').eq('user_id', user.id).maybeSingle()
       ]);
+
+      if (profileData.error) throw profileData.error;
+      if (settingsData.error && !isUserSettingsTableMissingError(settingsData.error)) {
+        throw settingsData.error;
+      }
 
       const payload = {
         profile: profileData.data,
         settings: settingsData.data,
+        local_appearance_snapshot: getStoredAppearanceOverlay(),
         export_date: new Date().toISOString()
       };
 
@@ -286,6 +370,18 @@ export default function Settings() {
             <h1 className="text-3xl font-bold text-stone-900 mb-2">Settings</h1>
             <p className="text-stone-600">Manage your account preferences and privacy</p>
           </div>
+
+          {!serverSettingsAvailable && (
+            <div className="mb-6 flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-900">
+              <AlertTriangle className="h-5 w-5 shrink-0" aria-hidden />
+              <p className="text-sm leading-relaxed">
+                Your Supabase project does not have the <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs">user_settings</code> table
+                (or it is not exposed to the API). Theme and other preferences still work in this browser. To enable cloud sync, run
+                the SQL in <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs">supabase/ensure_user_settings.sql</code> in the
+                Supabase SQL Editor, or apply migrations for this repo.
+              </p>
+            </div>
+          )}
 
           {message.text && (
               <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
