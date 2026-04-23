@@ -1,203 +1,203 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Mail, Lock, User as UserIcon, Eye, EyeOff, ArrowRight, GraduationCap, Sparkles, AlertCircle, ShieldCheck, Zap } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
-import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Reveal from '../components/Reveal';
 import { focusRing } from '../ui';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const inputClass =
-    'w-full rounded-2xl border border-stone-200/90 bg-stone-50/50 px-4 py-4 text-base text-stone-900 shadow-inner placeholder:text-stone-400 transition focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400/30 sm:px-5';
+function passwordStrength(pw) {
+  if (!pw) return { label: '—', score: 0, hue: 'bg-stone-200 dark:bg-white/10' };
+  let s = 0;
+  if (pw.length >= 6) s += 1;
+  if (pw.length >= 10) s += 1;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s += 1;
+  if (/\d/.test(pw)) s += 1;
+  if (/[^A-Za-z0-9]/.test(pw)) s += 1;
+  const map = [
+    { label: 'Too short', hue: 'bg-red-400' },
+    { label: 'Weak', hue: 'bg-red-400' },
+    { label: 'Fair', hue: 'bg-amber-400' },
+    { label: 'Good', hue: 'bg-emerald-400' },
+    { label: 'Strong', hue: 'bg-emerald-500' },
+    { label: 'Excellent', hue: 'bg-emerald-500' },
+  ];
+  return { ...map[s], score: s };
+}
 
-function RoleCard({ value, role, onRoleChange, title, description, icon }) {
+function RoleCard({ value, role, onRoleChange, title, description, Icon, accent }) {
   const selected = role === value;
   return (
-      <label
-          className={`group relative flex h-full cursor-pointer flex-col gap-3 rounded-2xl border p-5 transition-all duration-200 sm:flex-row sm:items-start sm:gap-4 sm:p-6 ${
-              selected
-                  ? 'border-orange-400/70 bg-gradient-to-br from-orange-50/98 to-amber-50/45 shadow-[0_12px_40px_-12px_rgba(234,88,12,0.35)] ring-2 ring-orange-400/30'
-                  : 'border-stone-200/85 bg-white/95 hover:border-orange-200/80 hover:bg-orange-50/20 hover:shadow-sm'
-          } ${focusRing}`}
+    <label
+      className={`group relative flex h-full cursor-pointer items-start gap-4 overflow-hidden rounded-[1.25rem] border p-5 transition-all duration-300 sm:p-6 ${
+        selected
+          ? 'border-transparent border-gradient-bridge animate-border-bridge bg-gradient-to-br from-orange-50/95 via-amber-50/70 to-white shadow-[0_18px_46px_-14px_rgba(234,88,12,0.45)] dark:from-orange-500/15 dark:via-amber-500/8 dark:to-[var(--bridge-surface-raised)] dark:shadow-[0_22px_52px_-14px_rgba(251,146,60,0.55)]'
+          : 'border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] hover:-translate-y-0.5 hover:border-orange-300/70 hover:bg-orange-50/30 hover:shadow-bridge-tile dark:hover:border-orange-400/40 dark:hover:bg-white/[0.04]'
+      } ${focusRing}`}
+    >
+      <input type="radio" name="role" value={value} className="sr-only" checked={selected} onChange={() => onRoleChange(value)} />
+      <span
+        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-all ${
+          selected
+            ? `bg-gradient-to-br ${accent} text-white shadow-[0_10px_26px_-6px_rgba(234,88,12,0.55)]`
+            : 'bg-[var(--bridge-surface-muted)] text-[var(--bridge-text-secondary)] group-hover:bg-orange-100 group-hover:text-orange-700 dark:group-hover:bg-orange-500/15 dark:group-hover:text-orange-200'
+        }`}
+        aria-hidden
       >
-        <input
-            type="radio"
-            name="role"
-            value={value}
-            className="sr-only"
-            checked={selected}
-            onChange={() => onRoleChange(value)}
-        />
-        {selected ? (
-            <span
-                className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-orange-600 to-amber-500 text-white shadow-md sm:right-4 sm:top-4"
-                aria-hidden
-            >
-          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+        <Icon className="h-5 w-5" />
+      </span>
+      <span className="min-w-0 flex-1 pr-7">
+        <span className="flex items-center gap-2">
+          <span className="block text-base font-semibold text-[var(--bridge-text)]">{title}</span>
+          {selected ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow">
+              <span aria-hidden>✓</span> Selected
+            </span>
+          ) : null}
+        </span>
+        <span className="mt-1.5 block text-sm leading-relaxed text-[var(--bridge-text-secondary)]">{description}</span>
+      </span>
+      {selected ? (
+        <span aria-hidden className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-orange-600 to-amber-500 text-white shadow-md">
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
           </svg>
         </span>
-        ) : null}
-        <span
-            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition-colors duration-200 ${
-                selected
-                    ? 'border-orange-200/90 bg-white text-orange-700 shadow-sm'
-                    : 'border-stone-200/80 bg-stone-50/90 text-stone-500 group-hover:border-orange-100 group-hover:text-orange-700'
-            }`}
-            aria-hidden
-        >
-        {icon}
-      </span>
-        <span className="min-w-0 pr-7 sm:pr-8">
-        <span className="block text-base font-semibold text-stone-900">{title}</span>
-        <span className="mt-1.5 block text-sm leading-relaxed text-stone-600 sm:text-[0.9375rem]">{description}</span>
-      </span>
-      </label>
+      ) : null}
+    </label>
   );
 }
 
-function FormSectionTitle({ step, children }) {
+function FormSectionTitle({ step, total = 2, children, hint }) {
   return (
-      <div className="flex items-center gap-3.5">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-stone-800 to-stone-900 text-sm font-bold text-amber-100 shadow-md">
-        {step}
+    <div className="flex items-center gap-3.5">
+      <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-stone-900 to-stone-800 text-sm font-bold text-amber-100 shadow-md">
+        <span className="relative">{step}</span>
+        <span aria-hidden className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent" />
       </span>
-        <h3 className="font-display text-lg font-semibold text-stone-900 sm:text-xl">{children}</h3>
+      <div className="flex-1">
+        <div className="flex items-baseline gap-2">
+          <h3 className="font-display text-lg font-semibold text-[var(--bridge-text)] sm:text-xl">{children}</h3>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">
+            Step {step} / {total}
+          </span>
+        </div>
+        {hint ? <p className="mt-0.5 text-sm text-[var(--bridge-text-muted)]">{hint}</p> : null}
       </div>
+    </div>
   );
 }
 
 function RegisterSignupAside({ mentorIntent }) {
+  const items = mentorIntent
+    ? [
+        'Your profile is the pitch: story, focus areas, what you\u2019re actually good at',
+        'Session types spell out length and format so nobody\u2019s guessing',
+        'Same app as mentees — no second portal to check',
+      ]
+    : [
+        'Browse for free; hearts keep a shortlist without a spreadsheet',
+        'Reviews when people leave them — not a leaderboard for show',
+        'Requests show up with context so you\u2019re not starting from zero',
+      ];
+
   return (
-      <div className="space-y-4 sm:space-y-5">
-        <div className="relative overflow-hidden rounded-[1.75rem] border border-stone-800/80 bg-gradient-to-br from-stone-900 via-stone-900 to-orange-950 p-7 text-white shadow-bridge-card sm:p-8">
-          <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 opacity-[0.12]"
-              style={{
-                backgroundImage:
-                    'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-              }}
-          />
-          <div
-              aria-hidden
-              className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-orange-500/25 blur-3xl"
-          />
-          <div
-              aria-hidden
-              className="pointer-events-none absolute -bottom-20 left-1/4 h-40 w-40 rounded-full bg-amber-400/15 blur-3xl"
-          />
-          <p className="relative text-[11px] font-bold uppercase tracking-[0.2em] text-amber-200/90">
-            {mentorIntent ? 'For mentors' : 'Why people stay'}
-          </p>
-          <p className="relative mt-3 font-display text-xl font-medium leading-snug text-white sm:text-2xl">
-            {mentorIntent
-                ? 'They read your bio and pick a session type before they message you—so you get fewer vague “quick coffee?” asks and more real requests.'
-                : 'Read real bios, save people you like, and book a format that spells out what the hour is for—less scheduling ping-pong.'}
-          </p>
-          <ul className="relative mt-5 space-y-3 text-sm leading-relaxed text-stone-300">
-            {(mentorIntent
-                    ? [
-                      'Your profile is the pitch: story, focus areas, what you’re actually good at',
-                      'Session types spell out length and format so nobody’s guessing',
-                      'Same app as mentees—you’re not siloed in some “mentor portal” nobody visits',
-                    ]
-                    : [
-                      'Browse for free; hearts keep a shortlist without a spreadsheet',
-                      'Reviews when people leave them—not a leaderboard for show',
-                      'Requests show up with context so you’re not starting from zero every time',
-                    ]
-            ).map((item) => (
-                <li key={item} className="flex gap-3">
-              <span
-                  className="mt-1.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-amber-300"
-                  aria-hidden
-              >
+    <div className="space-y-4 sm:space-y-5">
+      <div className="relative overflow-hidden rounded-[1.75rem] border border-orange-400/20 bg-gradient-to-br from-stone-900 via-stone-900 to-orange-950 p-7 text-white shadow-bridge-float sm:p-8">
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.14] mix-blend-overlay" />
+        <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-orange-500/25 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-20 left-1/4 h-40 w-40 rounded-full bg-amber-400/15 blur-3xl" />
+
+        <p className="relative text-xs font-bold uppercase tracking-[0.2em] text-amber-200/90">
+          {mentorIntent ? 'For mentors' : 'Why people stay'}
+        </p>
+        <p className="relative mt-3 font-display text-xl font-medium leading-snug text-white sm:text-2xl">
+          {mentorIntent
+            ? 'They read your bio and pick a session type before they message you — so you get fewer vague "quick coffee?" asks and more real requests.'
+            : 'Read real bios, save people you like, and book a format that spells out what the hour is for — less scheduling ping-pong.'}
+        </p>
+        <ul className="relative mt-6 space-y-3 text-sm leading-relaxed text-stone-300">
+          {items.map((item) => (
+            <li key={item} className="flex gap-3">
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-300/15 text-amber-300 ring-1 ring-amber-300/25" aria-hidden>
                 <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>
               </span>
-                  {item}
-                </li>
-            ))}
-          </ul>
-
-          {mentorIntent ? (
-              <figure className="relative mt-6 border-t border-white/10 pt-5">
-                <blockquote className="text-sm leading-relaxed text-stone-400">
-                  If your bio reads like a generic LinkedIn headline, people keep scrolling.{' '}
-                  <span className="italic text-stone-300">Specific beats polished.</span>
-                </blockquote>
-              </figure>
-          ) : null}
-        </div>
-
-        <div className="rounded-2xl border border-stone-200/85 bg-white/95 px-5 py-4 text-sm leading-relaxed text-stone-600 shadow-sm backdrop-blur-sm">
-          <p>
-            {mentorIntent ? (
-                <>
-                  Want to see who&apos;s on Bridge first?{' '}
-                  <Link to="/mentors" className={`font-semibold text-orange-900 hover:text-orange-950 ${focusRing} rounded-sm`}>
-                    Browse the directory
-                  </Link>
-                </>
-            ) : (
-                <>
-                  Not ready to sign up?{' '}
-                  <Link to="/mentors" className={`font-semibold text-orange-900 hover:text-orange-950 ${focusRing} rounded-sm`}>
-                    Browse mentors first
-                  </Link>
-                </>
-            )}
-          </p>
-        </div>
+              {item}
+            </li>
+          ))}
+        </ul>
+        {mentorIntent ? (
+          <figure className="relative mt-6 border-t border-white/10 pt-5">
+            <blockquote className="text-sm leading-relaxed text-stone-400">
+              If your bio reads like a generic LinkedIn headline, people keep scrolling.{' '}
+              <span className="italic text-stone-300">Specific beats polished.</span>
+            </blockquote>
+          </figure>
+        ) : null}
       </div>
+
+      <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-4 text-sm leading-relaxed text-[var(--bridge-text-secondary)] shadow-bridge-tile backdrop-blur-sm">
+        <p>
+          {mentorIntent ? (
+            <>
+              Want to see who&apos;s on Bridge first?{' '}
+              <Link to="/mentors" className={`font-semibold text-orange-700 transition hover:text-orange-800 dark:text-orange-300 dark:hover:text-orange-200 ${focusRing} rounded-sm`}>
+                Browse the directory →
+              </Link>
+            </>
+          ) : (
+            <>
+              Not ready to sign up?{' '}
+              <Link to="/mentors" className={`font-semibold text-orange-700 transition hover:text-orange-800 dark:text-orange-300 dark:hover:text-orange-200 ${focusRing} rounded-sm`}>
+                Browse mentors first →
+              </Link>
+            </>
+          )}
+        </p>
+      </div>
+    </div>
   );
 }
 
 function RegisterAlreadySignedIn({ user, mentorIntent }) {
   const display = user.user_metadata?.full_name?.trim() || user.email || 'your account';
-
   return (
-      <main className="relative min-h-screen overflow-x-hidden" aria-labelledby="register-heading">
-        <PageGutterAtmosphere />
-        <section className="relative scroll-mt-20 overflow-hidden bg-bridge-hero-mesh px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-          <div className="relative z-[1] mx-auto max-w-lg">
-            <div className="relative overflow-hidden rounded-[1.75rem] border border-stone-200/90 bg-white/95 p-8 shadow-[0_24px_60px_-12px_rgba(28,25,23,0.12)] ring-1 ring-white/80 backdrop-blur-md sm:p-10">
-              <div className="absolute left-0 right-0 top-0 h-0.5 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500" />
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-orange-700">Already signed in</p>
-              <h1 id="register-heading" className="mt-3 font-display text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
-                {mentorIntent ? 'You don’t need to sign up again' : 'You’re already on Bridge'}
+    <main className="relative min-h-screen overflow-x-hidden" aria-labelledby="register-heading">
+      <section className="relative overflow-hidden px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div className="relative z-[1] mx-auto max-w-lg">
+          <Reveal>
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-8 shadow-bridge-float sm:p-10">
+              <div aria-hidden className="absolute left-0 right-0 top-0 h-0.5 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500" />
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-700 dark:text-orange-300">Already signed in</p>
+              <h1 id="register-heading" className="mt-3 font-display text-3xl font-bold tracking-tight text-[var(--bridge-text)] sm:text-4xl">
+                {mentorIntent ? "You don't need to sign up again" : "You're already on Bridge"}
               </h1>
-              <p className="mt-4 text-base leading-relaxed text-stone-600">
-                This page is for new accounts. You’re logged in as{' '}
-                <span className="font-medium text-stone-900">{display}</span>.
-                {mentorIntent
-                    ? ' Nothing here will create a second login—use the directory or your dashboard instead.'
-                    : ' Use the links below to keep going.'}
+              <p className="mt-4 text-base leading-relaxed text-[var(--bridge-text-secondary)]">
+                This page is for new accounts. You&apos;re logged in as <span className="font-semibold text-[var(--bridge-text)]">{display}</span>.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
-                    to="/mentors"
-                    className={`inline-flex flex-1 items-center justify-center rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/25 transition hover:from-orange-500 hover:to-amber-400 sm:flex-none ${focusRing}`}
+                  to="/mentors"
+                  className={`btn-sheen inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_12px_32px_-8px_rgba(234,88,12,0.5)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_44px_-10px_rgba(234,88,12,0.65)] ${focusRing}`}
                 >
-                  Browse mentors
+                  Browse mentors <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
-                    to="/dashboard"
-                    className={`inline-flex flex-1 items-center justify-center rounded-full border-2 border-stone-900/10 bg-white px-6 py-3.5 text-sm font-semibold text-stone-900 shadow-sm transition hover:border-orange-300/60 hover:shadow-md sm:flex-none ${focusRing}`}
+                  to="/dashboard"
+                  className={`inline-flex flex-1 items-center justify-center rounded-full border-2 border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-6 py-3.5 text-sm font-semibold text-[var(--bridge-text)] transition hover:-translate-y-0.5 hover:border-orange-400/70 hover:shadow-md ${focusRing}`}
                 >
                   Dashboard
                 </Link>
               </div>
-              <p className="mt-8 text-center text-sm text-stone-500">
-                Wrong account? Sign out from the menu in the header, then come back.
-              </p>
             </div>
-          </div>
-        </section>
-      </main>
+          </Reveal>
+        </div>
+      </section>
+    </main>
   );
 }
 
@@ -209,6 +209,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -220,6 +221,7 @@ export default function Register() {
   }, [searchParams]);
 
   const mentorIntent = searchParams.get('intent') === 'mentor';
+  const pwMeta = passwordStrength(password);
 
   function validate() {
     if (!fullName.trim()) return 'Please enter your full name.';
@@ -242,10 +244,7 @@ export default function Register() {
     setError('');
     setSubmitting(true);
     try {
-      await register(email.trim(), password, {
-        full_name: fullName.trim(),
-        role,
-      });
+      await register(email.trim(), password, { full_name: fullName.trim(), role });
       navigate(role === 'mentor' ? '/dashboard' : '/mentors', { replace: true });
     } catch (err) {
       setError(err.message ?? 'Something went wrong. Please try again.');
@@ -256,290 +255,314 @@ export default function Register() {
 
   if (loading) {
     return (
-        <main className="relative min-h-screen overflow-x-hidden">
-          <PageGutterAtmosphere />
-          <LoadingSpinner label="Checking your session…" className="min-h-[calc(100vh-4rem)]" />
-        </main>
+      <main className="relative min-h-screen overflow-x-hidden">
+        <LoadingSpinner label="Checking your session…" className="min-h-[calc(100vh-4rem)]" size="lg" />
+      </main>
     );
   }
 
-  if (user) {
-    return <RegisterAlreadySignedIn user={user} mentorIntent={mentorIntent} />;
-  }
+  if (user) return <RegisterAlreadySignedIn user={user} mentorIntent={mentorIntent} />;
 
   return (
-      <main className="relative min-h-screen overflow-x-hidden" aria-labelledby="register-heading">
-        <PageGutterAtmosphere />
+    <main className="relative min-h-screen overflow-x-hidden" aria-labelledby="register-heading">
+      <section className="relative overflow-hidden px-4 pb-16 pt-8 sm:px-6 sm:pb-24 lg:px-8 lg:pt-12">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-[-30%] -z-10 h-[80vmax] w-[80vmax] -translate-x-1/2 opacity-55 dark:opacity-80"
+          style={{
+            background:
+              'conic-gradient(from 180deg at 50% 50%, rgba(251,146,60,0.14), rgba(253,230,138,0.1), rgba(234,88,12,0.18), rgba(251,146,60,0.14))',
+            filter: 'blur(100px)',
+          }}
+        />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.05] mix-blend-overlay dark:opacity-[0.1]" />
 
-        <section className="relative scroll-mt-20 overflow-hidden bg-bridge-hero-mesh px-4 pb-14 pt-6 sm:px-6 sm:pb-16 sm:pt-8 lg:px-8 lg:pb-20">
-          <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 opacity-[0.35]"
-              style={{
-                backgroundImage:
-                    'url("data:image/svg+xml,%3Csvg width=\'72\' height=\'72\' viewBox=\'0 0 72 72\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' stroke=\'%23d6d3d1\' stroke-opacity=\'0.35\'%3E%3Cpath d=\'M36 0v72M0 36h72\'/%3E%3C/g%3E%3C/svg%3E")',
-                backgroundSize: '72px 72px',
-              }}
-          />
-          <div
-              aria-hidden
-              className="pointer-events-none absolute -right-28 top-10 h-[min(420px,72vw)] w-[min(420px,72vw)] rounded-full bg-gradient-to-br from-amber-300/45 via-orange-200/28 to-transparent blur-3xl"
-          />
-          <div
-              aria-hidden
-              className="pointer-events-none absolute -left-32 bottom-0 h-80 w-80 rounded-full bg-orange-200/35 blur-3xl"
-          />
-
-          <div className="relative z-[1] mx-auto grid max-w-bridge grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-x-8 xl:gap-x-10 lg:items-start">
-            <div className="flex flex-col gap-3 sm:gap-4 lg:col-span-5">
-              <nav aria-label="Breadcrumb" className="mb-4 lg:mb-5">
-                <ol className="flex flex-wrap items-center gap-2 text-sm text-stone-500">
+        <div className="relative z-[1] mx-auto grid max-w-bridge grid-cols-1 gap-8 lg:grid-cols-12 lg:items-start lg:gap-x-10">
+          {/* Left column */}
+          <div className="flex flex-col gap-4 lg:col-span-5">
+            <Reveal>
+              <nav aria-label="Breadcrumb" className="mb-2">
+                <ol className="flex flex-wrap items-center gap-2 text-sm text-[var(--bridge-text-muted)]">
                   <li>
-                    <Link
-                        to="/"
-                        className={`rounded-md font-medium text-stone-600 transition hover:text-orange-800 ${focusRing}`}
-                    >
-                      Home
-                    </Link>
+                    <Link to="/" className={`rounded-md font-medium transition hover:text-orange-700 dark:hover:text-orange-300 ${focusRing}`}>Home</Link>
                   </li>
-                  <li aria-hidden className="text-stone-300">
+                  <li aria-hidden>
                     <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
                     </svg>
                   </li>
-                  <li className="font-medium text-stone-800">{mentorIntent ? 'Mentor signup' : 'Sign up'}</li>
+                  <li className="font-semibold text-[var(--bridge-text-secondary)]">{mentorIntent ? 'Mentor signup' : 'Sign up'}</li>
                 </ol>
               </nav>
 
               <div className="flex flex-wrap items-center gap-2">
-                {mentorIntent ? (
-                    <span className="rounded-full border border-orange-200/90 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-orange-900 shadow-sm backdrop-blur-sm">
-                  Mentors
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-orange-700 shadow-sm backdrop-blur-md dark:text-orange-300">
+                  <Sparkles className="h-3 w-3" />
+                  {mentorIntent ? 'Mentors' : 'Join Bridge'}
                 </span>
-                ) : (
-                    <span className="rounded-full border border-orange-200/90 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-orange-900 shadow-sm backdrop-blur-sm">
-                  Join Bridge
-                </span>
-                )}
-                <span className="text-xs font-medium text-stone-500">Free · No card</span>
+                <span className="text-xs font-medium text-[var(--bridge-text-muted)]">Free · No card</span>
               </div>
 
               <h1
-                  id="register-heading"
-                  className="mt-3 max-w-xl font-display text-balance text-[2.1rem] font-semibold leading-[1.08] tracking-tight text-stone-900 sm:mt-4 sm:max-w-2xl sm:text-4xl sm:leading-[1.06] lg:max-w-[20rem] lg:text-[2.35rem] lg:leading-[1.07] xl:max-w-sm"
+                id="register-heading"
+                className="mt-5 font-display text-[2.25rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[2.85rem] sm:leading-[1.08] lg:text-[3.2rem]"
               >
                 {mentorIntent ? (
-                    <>
-                      You&apos;re already the person people tap for advice.{' '}
-                      <span className="text-gradient-bridge">On Bridge, they can book you for it.</span>
-                    </>
+                  <>
+                    You&apos;re already the person people tap for advice.{' '}
+                    <span className="font-editorial italic text-gradient-bridge">On Bridge, they can book you.</span>
+                  </>
                 ) : (
-                    <>
-                      Get an account and{' '}
-                      <span className="text-gradient-bridge">talk to someone who’s been there</span>
-                    </>
+                  <>
+                    Get an account and{' '}
+                    <span className="font-editorial italic text-gradient-bridge">talk to someone who&apos;s been there</span>.
+                  </>
                 )}
               </h1>
-              <p className="mt-4 max-w-xl text-base leading-relaxed text-stone-600 sm:text-[0.98rem] lg:max-w-[22rem]">
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-[var(--bridge-text-secondary)] sm:text-lg">
                 {mentorIntent
-                    ? 'Same signup as everyone else. Tell us you’re a mentor in the form—we’ll drop you in on the right side after you’re in.'
-                    : 'Mentor or mentee, it’s the same form. Browse the directory first if you want; this will still be here.'}
+                  ? 'Same signup as everyone else. Tell us you\u2019re a mentor in the form — we\u2019ll drop you in on the right side after.'
+                  : 'Mentor or mentee, it\u2019s the same form. Browse the directory first if you want; this will still be here.'}
               </p>
 
-              <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-stone-600 lg:mt-5">
-                {['No credit card', 'Under a minute', 'Secure sign-in'].map((t) => (
-                    <li key={t} className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-700" aria-hidden>
-                    <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                    </svg>
-                  </span>
-                      {t}
-                    </li>
+              <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-[var(--bridge-text-secondary)]">
+                {[
+                  { icon: ShieldCheck, label: 'No credit card' },
+                  { icon: Zap, label: 'Under a minute' },
+                  { icon: Sparkles, label: 'Secure sign-in' },
+                ].map((t) => (
+                  <li key={t.label} className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" aria-hidden>
+                      <t.icon className="h-3.5 w-3.5" />
+                    </span>
+                    {t.label}
+                  </li>
                 ))}
               </ul>
-
-              <Reveal delay={100} className="hidden lg:block">
-                <RegisterSignupAside mentorIntent={mentorIntent} />
-              </Reveal>
-            </div>
-
-            <Reveal
-                className="lg:col-span-7 lg:col-start-6 lg:self-start lg:sticky lg:top-24 lg:z-10"
-                delay={40}
-            >
-              <div className="relative overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white shadow-[0_36px_90px_-20px_rgba(28,25,23,0.22)] ring-1 ring-orange-100/40 backdrop-blur-md">
-                <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500" />
-                <div className="p-7 sm:p-9 lg:p-11 xl:p-12">
-                  <div className="flex flex-col gap-2 border-b border-stone-100 pb-7 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
-                    <div>
-                      <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-orange-700 sm:text-xs">Sign up</p>
-                      <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl lg:text-[1.85rem] xl:text-[2rem]">
-                        Create your account
-                      </h2>
-                    </div>
-                    <p className="max-w-[14rem] text-sm leading-snug text-stone-500 sm:text-right">We’ll never sell your email.</p>
-                  </div>
-
-                  <form onSubmit={handleSubmit} className="mt-9 flex flex-col gap-9 lg:mt-10 lg:gap-10">
-                    {error ? (
-                        <div
-                            className="rounded-2xl border border-red-200/90 bg-red-50/95 px-4 py-3 text-sm text-red-900"
-                            role="alert"
-                        >
-                          {error}
-                        </div>
-                    ) : null}
-
-                    <div className="space-y-6">
-                      <FormSectionTitle step="1">Who you are</FormSectionTitle>
-                      <div>
-                        <label htmlFor="register-name" className="mb-2 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                          Full name
-                        </label>
-                        <input
-                            id="register-name"
-                            type="text"
-                            autoComplete="name"
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
-                            className={inputClass}
-                            placeholder="Alex Rivera"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor="register-email" className="mb-2 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                          Email
-                        </label>
-                        <input
-                            id="register-email"
-                            type="email"
-                            autoComplete="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className={inputClass}
-                            placeholder="you@example.com"
-                        />
-                      </div>
-
-                      <div className="grid gap-6 sm:grid-cols-2">
-                        <div>
-                          <label htmlFor="register-password" className="mb-2 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                            Password
-                          </label>
-                          <input
-                              id="register-password"
-                              type="password"
-                              autoComplete="new-password"
-                              value={password}
-                              onChange={(e) => setPassword(e.target.value)}
-                              className={inputClass}
-                              placeholder="At least 6 characters"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="register-confirm" className="mb-2 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                            Confirm
-                          </label>
-                          <input
-                              id="register-confirm"
-                              type="password"
-                              autoComplete="new-password"
-                              value={confirmPassword}
-                              onChange={(e) => setConfirmPassword(e.target.value)}
-                              className={inputClass}
-                              placeholder="Repeat password"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <fieldset className="space-y-5 border-0 border-t border-stone-100 p-0 pt-9">
-                      <FormSectionTitle step="2">How you&apos;ll use Bridge</FormSectionTitle>
-                      <p className="-mt-0.5 text-base text-stone-500">Tap one—switch later if your situation changes.</p>
-                      <div className="grid grid-cols-1 gap-4 sm:gap-5">
-                        <RoleCard
-                            value="mentee"
-                            role={role}
-                            onRoleChange={setRole}
-                            title="Find a mentor"
-                            description="I want to book someone who’s already walked my kind of path."
-                            icon={
-                              <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.118a7.5 7.5 0 0 1 15 0A18 18 0 0 1 12 21.75a18 18 0 0 1-7.5-1.632Z"
-                                />
-                              </svg>
-                            }
-                        />
-                        <RoleCard
-                            value="mentor"
-                            role={role}
-                            onRoleChange={setRole}
-                            title="Be a mentor"
-                            description="I’m ready to offer sessions and build a profile people can trust."
-                            icon={
-                              <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm6 0a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm6 0a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
-                                />
-                              </svg>
-                            }
-                        />
-                      </div>
-                    </fieldset>
-
-                    <div className="border-t border-stone-100 pt-3">
-                      <button
-                          type="submit"
-                          disabled={submitting}
-                          className={`w-full rounded-full bg-gradient-to-r from-orange-600 to-amber-500 py-5 text-base font-semibold text-white shadow-xl shadow-orange-500/35 transition hover:from-orange-500 hover:to-amber-400 hover:shadow-orange-500/45 disabled:pointer-events-none disabled:opacity-55 ${focusRing}`}
-                      >
-                        {submitting
-                            ? 'Creating account…'
-                            : mentorIntent
-                                ? 'Create my mentor account'
-                                : 'Create account'}
-                      </button>
-                    </div>
-                  </form>
-
-                  <div className="mt-9 flex flex-col items-center gap-3 border-t border-stone-100 pt-9 sm:flex-row sm:justify-center sm:gap-6">
-                    <p className="text-center text-sm text-stone-600 sm:text-[0.9375rem]">
-                      Already in?{' '}
-                      <Link
-                          to="/login"
-                          className={`font-semibold text-orange-800 underline decoration-orange-300/60 underline-offset-2 hover:text-orange-950 ${focusRing} rounded-sm`}
-                      >
-                        Log in
-                      </Link>
-                    </p>
-                    <span className="hidden text-stone-300 sm:inline" aria-hidden>
-                    ·
-                  </span>
-                    <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm">
-                      <Link to="/mentors" className={`font-medium text-stone-700 hover:text-orange-900 ${focusRing} rounded-sm`}>
-                        Browse mentors
-                      </Link>
-                      <Link to="/pricing" className={`font-medium text-stone-700 hover:text-orange-900 ${focusRing} rounded-sm`}>
-                        Pricing
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </Reveal>
 
-            <Reveal delay={120} className="lg:hidden">
+            <Reveal delay={120} className="mt-6 hidden lg:block">
               <RegisterSignupAside mentorIntent={mentorIntent} />
             </Reveal>
           </div>
-        </section>
-      </main>
+
+          {/* Right column — form card */}
+          <Reveal className="lg:col-span-7 lg:self-start" delay={60}>
+            <div className="relative overflow-hidden rounded-[2rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/95 shadow-bridge-float backdrop-blur-xl">
+              <div aria-hidden className="absolute left-0 right-0 top-0 h-[3px] bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500" />
+              <div aria-hidden className="pointer-events-none absolute -left-20 -top-20 h-56 w-56 rounded-full bg-orange-400/20 blur-3xl dark:bg-orange-500/20" />
+              <div aria-hidden className="pointer-events-none absolute -right-16 bottom-0 h-48 w-48 rounded-full bg-amber-300/15 blur-3xl dark:bg-amber-500/10" />
+
+              <div className="relative p-7 sm:p-10 lg:p-12">
+                <div className="flex flex-col gap-2 border-b border-[var(--bridge-border)] pb-7 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-orange-700 dark:text-orange-300">Sign up</p>
+                    <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-[var(--bridge-text)] sm:text-[2rem] lg:text-[2.15rem]">
+                      Create your account
+                    </h2>
+                  </div>
+                  <p className="max-w-[16rem] text-sm leading-snug text-[var(--bridge-text-muted)] sm:text-right">
+                    We&apos;ll never sell your email. Ever.
+                  </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-9">
+                  {error ? (
+                    <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm text-red-900 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-200" role="alert">
+                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                      <span>{error}</span>
+                    </div>
+                  ) : null}
+
+                  {/* Step 1 */}
+                  <div className="space-y-6">
+                    <FormSectionTitle step="1" hint="Just the basics — no bio yet, that comes after.">
+                      Who you are
+                    </FormSectionTitle>
+
+                    {/* Name */}
+                    <div className="group relative">
+                      <label htmlFor="register-name" className="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">Full name</label>
+                      <div className="relative">
+                        <UserIcon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--bridge-text-faint)] transition group-focus-within:text-orange-500" aria-hidden />
+                        <input
+                          id="register-name"
+                          type="text"
+                          autoComplete="name"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          placeholder="Alex Rivera"
+                          className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-11 py-4 text-base text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <div className="group relative">
+                      <label htmlFor="register-email" className="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">Email</label>
+                      <div className="relative">
+                        <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--bridge-text-faint)] transition group-focus-within:text-orange-500" aria-hidden />
+                        <input
+                          id="register-email"
+                          type="email"
+                          autoComplete="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="you@example.com"
+                          className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-11 py-4 text-base text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Passwords */}
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <div className="group">
+                        <label htmlFor="register-password" className="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">Password</label>
+                        <div className="relative">
+                          <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--bridge-text-faint)] transition group-focus-within:text-orange-500" aria-hidden />
+                          <input
+                            id="register-password"
+                            type={showPassword ? 'text' : 'password'}
+                            autoComplete="new-password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="At least 6 characters"
+                            className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-11 py-4 text-base text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword((v) => !v)}
+                            className={`absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[var(--bridge-text-muted)] transition hover:bg-orange-50 hover:text-orange-700 dark:hover:bg-white/[0.06] dark:hover:text-orange-300 ${focusRing}`}
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                          >
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                        {/* Strength meter */}
+                        <div className="mt-2.5 flex items-center gap-2.5">
+                          <div className="flex flex-1 gap-1">
+                            {[0, 1, 2, 3, 4].map((i) => (
+                              <span
+                                key={i}
+                                className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                                  i < pwMeta.score ? pwMeta.hue : 'bg-stone-200 dark:bg-white/[0.08]'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="min-w-[4rem] text-right text-[11px] font-semibold uppercase tracking-wider text-[var(--bridge-text-muted)]">
+                            {pwMeta.label}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="group">
+                        <label htmlFor="register-confirm" className="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">Confirm</label>
+                        <div className="relative">
+                          <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--bridge-text-faint)] transition group-focus-within:text-orange-500" aria-hidden />
+                          <input
+                            id="register-confirm"
+                            type={showPassword ? 'text' : 'password'}
+                            autoComplete="new-password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            placeholder="Repeat password"
+                            className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-11 py-4 text-base text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                          />
+                        </div>
+                        {confirmPassword && password && confirmPassword === password ? (
+                          <p className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                            <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                            </svg>
+                            Passwords match
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <fieldset className="space-y-5 border-0 border-t border-[var(--bridge-border)] p-0 pt-9">
+                    <FormSectionTitle step="2" hint="Tap one — you can switch later from settings.">
+                      How you&apos;ll use Bridge
+                    </FormSectionTitle>
+                    <div className="grid grid-cols-1 gap-4 sm:gap-5">
+                      <RoleCard
+                        value="mentee"
+                        role={role}
+                        onRoleChange={setRole}
+                        title="Find a mentor"
+                        description="I want to book someone who's already walked my kind of path."
+                        Icon={UserIcon}
+                        accent="from-orange-500 via-amber-500 to-orange-600"
+                      />
+                      <RoleCard
+                        value="mentor"
+                        role={role}
+                        onRoleChange={setRole}
+                        title="Be a mentor"
+                        description="I'm ready to offer sessions and build a profile people can trust."
+                        Icon={GraduationCap}
+                        accent="from-amber-500 via-rose-400 to-orange-500"
+                      />
+                    </div>
+                  </fieldset>
+
+                  <div className="border-t border-[var(--bridge-border)] pt-3">
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className={`btn-sheen group relative inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 py-5 text-base font-semibold text-white shadow-[0_16px_40px_-10px_rgba(234,88,12,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_-10px_rgba(234,88,12,0.7)] disabled:pointer-events-none disabled:opacity-55 ${focusRing}`}
+                    >
+                      {submitting ? (
+                        <>
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          Creating account…
+                        </>
+                      ) : (
+                        <>
+                          {mentorIntent ? 'Create my mentor account' : 'Create account'}
+                          <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                        </>
+                      )}
+                    </button>
+                    <p className="mt-4 text-center text-xs text-[var(--bridge-text-muted)]">
+                      By signing up you agree to our{' '}
+                      <Link to="/terms" className="font-medium text-[var(--bridge-text-secondary)] underline decoration-orange-300/50 underline-offset-2 hover:text-orange-700 dark:hover:text-orange-300">Terms</Link>{' '}
+                      &{' '}
+                      <Link to="/privacy" className="font-medium text-[var(--bridge-text-secondary)] underline decoration-orange-300/50 underline-offset-2 hover:text-orange-700 dark:hover:text-orange-300">Privacy</Link>.
+                    </p>
+                  </div>
+                </form>
+
+                <div className="mt-8 flex flex-col items-center gap-3 border-t border-[var(--bridge-border)] pt-7 sm:flex-row sm:justify-between">
+                  <p className="text-sm text-[var(--bridge-text-secondary)]">
+                    Already in?{' '}
+                    <Link
+                      to="/login"
+                      className={`font-semibold text-orange-700 underline decoration-orange-300/60 underline-offset-4 transition hover:text-orange-800 dark:text-orange-300 dark:hover:text-orange-200 ${focusRing} rounded-sm`}
+                    >
+                      Log in
+                    </Link>
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-x-5 text-sm">
+                    <Link to="/mentors" className={`font-medium text-[var(--bridge-text-secondary)] transition hover:text-orange-700 dark:hover:text-orange-300 ${focusRing} rounded-sm`}>
+                      Browse mentors →
+                    </Link>
+                    <Link to="/pricing" className={`font-medium text-[var(--bridge-text-secondary)] transition hover:text-orange-700 dark:hover:text-orange-300 ${focusRing} rounded-sm`}>
+                      Pricing
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal delay={140} className="lg:hidden">
+            <RegisterSignupAside mentorIntent={mentorIntent} />
+          </Reveal>
+        </div>
+      </section>
+    </main>
   );
 }

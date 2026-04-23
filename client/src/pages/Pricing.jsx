@@ -330,7 +330,7 @@ export default function Pricing() {
               <div>
                 <h1
                     id="pricing-heading"
-                    className="font-display text-balance text-3xl font-semibold leading-tight tracking-tight text-stone-900 sm:text-[2.5rem] sm:leading-[1.08]"
+                    className="font-display text-balance text-3xl font-bold leading-tight tracking-tight text-stone-900 sm:text-[2.5rem] sm:leading-[1.08]"
                 >
                   Simple <span className="text-gradient-bridge">pricing</span>, pick what fits
                 </h1>
@@ -341,15 +341,22 @@ export default function Pricing() {
 
               <div className="flex items-center gap-3 sm:gap-4">
                 <div
-                    className="inline-flex rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] p-1 shadow-inner"
+                    className="relative inline-flex rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] p-1 shadow-inner backdrop-blur-md"
                     role="group"
                     aria-label="Billing period"
                 >
+                  {/* Sliding pill indicator */}
+                  <span
+                    aria-hidden
+                    className={`pointer-events-none absolute inset-y-1 w-[calc(50%-4px)] rounded-full bg-gradient-to-r from-stone-900 to-stone-800 shadow-[0_8px_22px_-6px_rgba(28,25,23,0.5)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] dark:from-orange-500 dark:to-amber-500 dark:shadow-[0_8px_22px_-6px_rgba(234,88,12,0.55)] ${
+                      annual ? 'left-[calc(50%+0px)]' : 'left-1'
+                    }`}
+                  />
                   <button
                       type="button"
                       onClick={() => setAnnual(false)}
-                      className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
-                          !annual ? 'bg-stone-900 text-white shadow-md' : 'text-stone-600 hover:text-stone-900'
+                      className={`relative z-[1] rounded-full px-5 py-1.5 text-sm font-semibold transition ${
+                          !annual ? 'text-white dark:text-stone-950' : 'text-[var(--bridge-text-secondary)] hover:text-[var(--bridge-text)]'
                       } ${focusRing}`}
                   >
                     Monthly
@@ -357,17 +364,17 @@ export default function Pricing() {
                   <button
                       type="button"
                       onClick={() => setAnnual(true)}
-                      className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
-                          annual ? 'bg-stone-900 text-white shadow-md' : 'text-stone-600 hover:text-stone-900'
+                      className={`relative z-[1] rounded-full px-5 py-1.5 text-sm font-semibold transition ${
+                          annual ? 'text-white dark:text-stone-950' : 'text-[var(--bridge-text-secondary)] hover:text-[var(--bridge-text)]'
                       } ${focusRing}`}
                   >
                     Annual
                   </button>
                 </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-200/70 bg-orange-50/70 px-3 py-1.5 text-xs font-semibold text-orange-900">
-                <span className="h-1.5 w-1.5 rounded-full bg-orange-600" aria-hidden />
-                Save {Math.round(ANNUAL_DISCOUNT * 100)}% annual
-              </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-300/50 bg-gradient-to-r from-orange-50 to-amber-50 px-3 py-1.5 text-xs font-bold text-orange-900 shadow-sm dark:border-orange-400/30 dark:from-orange-500/15 dark:to-amber-500/10 dark:text-orange-200">
+                  <span className="h-1.5 w-1.5 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(251,146,60,0.6)] animate-pulse-soft" aria-hidden />
+                  Save {Math.round(ANNUAL_DISCOUNT * 100)}% annual
+                </span>
               </div>
             </div>
           </div>
@@ -382,31 +389,32 @@ export default function Pricing() {
               return (
                   <Reveal key={tier.name} delay={40 + idx * 40}>
                     <div
-                        className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-[var(--bridge-surface)] p-6 shadow-sm ring-1 ring-stone-900/[0.02] transition duration-300 hover:-translate-y-0.5 hover:shadow-md sm:p-7 ${
+                        className={`group relative flex h-full flex-col overflow-hidden rounded-[1.5rem] border p-6 shadow-bridge-tile transition-all duration-500 hover:-translate-y-1 hover:shadow-bridge-card sm:p-7 ${
                             tier.primary
-                                ? 'border-orange-400/50 ring-2 ring-orange-300/25 lg:scale-[1.03] lg:z-[1] dark:border-orange-500/35 dark:ring-orange-500/20'
-                                : 'border-[var(--bridge-border)] hover:border-[var(--bridge-border-strong)]'
+                                ? 'border-transparent border-gradient-bridge animate-border-bridge bg-gradient-to-br from-[var(--bridge-surface)] via-[var(--bridge-surface)] to-orange-50/30 shadow-[0_24px_60px_-16px_rgba(234,88,12,0.4)] lg:scale-[1.04] lg:z-[1] dark:to-orange-500/[0.06]'
+                                : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] hover:border-orange-300/50'
                         }`}
                     >
                       {tier.primary ? (
                           <div
                               aria-hidden
-                              className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[var(--bridge-accent)]/12 via-[var(--bridge-surface)] to-[var(--bridge-surface-muted)] dark:from-[var(--bridge-accent)]/18"
+                              className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-gradient-to-br from-orange-400/30 via-amber-300/15 to-transparent blur-3xl"
                           />
                       ) : null}
                       <div
                           aria-hidden
                           className={`absolute inset-x-0 top-0 z-[1] h-1 ${
                               tier.primary
-                                  ? 'bg-gradient-to-r from-orange-700/90 via-amber-600/75 to-orange-700/90'
+                                  ? 'bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500'
                                   : 'bg-[var(--bridge-border-strong)]'
                           }`}
                       />
 
                       {tier.badge ? (
-                          <span className="absolute right-4 top-4 z-[1] rounded-full bg-gradient-to-r from-orange-800/90 to-amber-800/85 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
-                      {tier.badge}
-                    </span>
+                          <span className="absolute right-4 top-4 z-[1] inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_8px_22px_-4px_rgba(234,88,12,0.55)]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-white/90 animate-pulse-soft" />
+                            {tier.badge}
+                          </span>
                       ) : null}
 
                       <div className="relative z-[1]">
@@ -459,10 +467,10 @@ export default function Pricing() {
                               to={tier.href}
                               className={`relative z-[1] mt-7 block w-full rounded-full py-3 text-center text-sm font-semibold transition ${
                                   tier.primary
-                                      ? 'bg-gradient-to-r from-orange-800/95 to-amber-800/90 text-white shadow-md shadow-orange-950/15 hover:from-orange-800 hover:to-amber-700/90'
+                                      ? 'btn-sheen bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 text-white shadow-[0_12px_32px_-6px_rgba(234,88,12,0.55)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-8px_rgba(234,88,12,0.7)]'
                                       : user
-                                          ? 'border-2 border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] text-[var(--bridge-text-secondary)] hover:border-[var(--bridge-border-strong)] hover:bg-[var(--bridge-surface-raised)]'
-                                          : 'border-2 border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] text-[var(--bridge-text)] hover:border-orange-400/45 hover:shadow-sm'
+                                          ? 'border-2 border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] text-[var(--bridge-text-secondary)] hover:-translate-y-0.5 hover:border-orange-300/70 hover:bg-[var(--bridge-surface-raised)]'
+                                          : 'border-2 border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] text-[var(--bridge-text)] hover:-translate-y-0.5 hover:border-orange-400/60 hover:shadow-md'
                               } ${focusRing}`}
                           >
                             {tier.cta}
@@ -473,8 +481,8 @@ export default function Pricing() {
                               onClick={tier.onClick}
                               className={`relative z-[1] mt-7 w-full rounded-full py-3 text-sm font-semibold transition ${
                                   tier.primary
-                                      ? 'bg-gradient-to-r from-orange-800/95 to-amber-800/90 text-white shadow-md shadow-orange-950/15 hover:from-orange-800 hover:to-amber-700/90'
-                                      : 'border-2 border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] text-[var(--bridge-text)] hover:border-orange-400/45 hover:shadow-sm'
+                                      ? 'btn-sheen bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 text-white shadow-[0_12px_32px_-6px_rgba(234,88,12,0.55)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-8px_rgba(234,88,12,0.7)]'
+                                      : 'border-2 border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] text-[var(--bridge-text)] hover:-translate-y-0.5 hover:border-orange-400/60 hover:shadow-md'
                               } ${focusRing}`}
                           >
                             {tier.cta}
@@ -600,8 +608,9 @@ export default function Pricing() {
               {MENTOR_TIERS.map((tier, idx) => (
                   <Reveal key={tier.name} delay={40 + idx * 40}>
                     <div
-                        className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border p-6 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md ${tier.cardClass}`}
+                        className={`group relative flex h-full flex-col overflow-hidden rounded-[1.5rem] border p-6 shadow-bridge-tile backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-bridge-card ${tier.cardClass}`}
                     >
+                      <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/40 opacity-0 blur-2xl transition group-hover:opacity-100 dark:bg-white/5" />
                       <div
                           aria-hidden
                           className={`absolute inset-x-0 top-0 h-1 ${tier.accentClass}`}

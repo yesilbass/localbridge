@@ -21,8 +21,10 @@ import {
 } from 'lucide-react';
 import supabase from '../api/supabase';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { Settings as SettingsIcon } from 'lucide-react';
 import { removeAllResumesForUser } from '../api/resumeStorage';
 import { toJsonbSafe } from '../utils/jsonbSafe';
+import { focusRing } from '../ui';
 import {
   applyAppearance,
   applyThemePreference,
@@ -365,65 +367,78 @@ export default function Settings() {
 
   return (
       <div data-route-atmo="settings" className="relative isolate min-h-screen">
-        <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8 xl:px-10">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-stone-900 mb-2">Settings</h1>
-            <p className="text-stone-600">Manage your account preferences and privacy</p>
+        <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8 xl:px-10">
+          <div className="mb-10">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-secondary)] shadow-sm backdrop-blur-md">
+              <SettingsIcon className="h-3 w-3 text-orange-500" />
+              Settings
+            </div>
+            <h1 className="font-display text-[2.5rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3rem]">
+              Your <span className="font-editorial italic text-gradient-bridge">preferences</span>
+            </h1>
+            <p className="mt-2 text-[var(--bridge-text-secondary)]">Manage your account, privacy, and how Bridge looks and feels.</p>
           </div>
 
           {!serverSettingsAvailable && (
-            <div className="mb-6 flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-900">
-              <AlertTriangle className="h-5 w-5 shrink-0" aria-hidden />
+            <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-300/60 bg-amber-50 p-4 text-amber-900 shadow-sm dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
               <p className="text-sm leading-relaxed">
-                Your Supabase project does not have the <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs">user_settings</code> table
+                Your Supabase project does not have the <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs dark:bg-amber-400/20">user_settings</code> table
                 (or it is not exposed to the API). Theme and other preferences still work in this browser. To enable cloud sync, run
-                the SQL in <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs">supabase/ensure_user_settings.sql</code> in the
-                Supabase SQL Editor, or apply migrations for this repo.
+                the SQL in <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs dark:bg-amber-400/20">supabase/ensure_user_settings.sql</code> in the
+                Supabase SQL Editor.
               </p>
             </div>
           )}
 
           {message.text && (
-              <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
+              <div
+                role="status"
+                className={`mb-6 flex items-start gap-3 rounded-2xl border p-4 text-sm shadow-sm ${
                   message.type === 'success'
-                      ? 'bg-green-50 text-green-700 border border-green-200'
-                      : 'bg-red-50 text-red-700 border border-red-200'
-              }`}>
+                    ? 'border-emerald-300/60 bg-emerald-50 text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-200'
+                    : 'border-red-300/60 bg-red-50 text-red-800 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-200'
+                }`}
+              >
                 {message.type === 'success' ? (
-                    <CheckCircle className="h-5 w-5" />
+                    <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" />
                 ) : (
-                    <AlertTriangle className="h-5 w-5" />
+                    <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
                 )}
-                {message.text}
+                <span>{message.text}</span>
               </div>
           )}
 
-          <div className="mb-8 border-b border-stone-200">
-            <nav className="flex space-x-8 overflow-x-auto">
+          <div className="mb-8 overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-1.5 shadow-bridge-tile backdrop-blur-md">
+            <nav className="flex gap-1 overflow-x-auto">
               {[
                 { id: 'account', label: 'Account', icon: User },
                 { id: 'notifications', label: 'Notifications', icon: Bell },
                 { id: 'appearance', label: 'Appearance', icon: Palette },
                 { id: 'privacy', label: 'Privacy', icon: Shield },
                 { id: 'billing', label: 'Billing', icon: CreditCard }
-              ].map((section) => (
+              ].map((section) => {
+                const active = activeSection === section.id;
+                return (
                   <button
                       key={section.id}
                       onClick={() => setActiveSection(section.id)}
-                      className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                          activeSection === section.id
-                              ? 'border-orange-500 text-orange-600'
-                              : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-300'
+                      className={`relative flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition-all ${
+                          active
+                              ? 'bg-gradient-to-r from-stone-900 to-stone-800 text-amber-50 shadow-[0_6px_18px_-4px_rgba(28,25,23,0.45)] dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 dark:shadow-[0_8px_20px_-4px_rgba(234,88,12,0.5)]'
+                              : 'text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)]'
                       }`}
                   >
                     <section.icon className="h-4 w-4" />
                     {section.label}
                   </button>
-              ))}
+                );
+              })}
             </nav>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-bridge-card p-8">
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-8 shadow-bridge-card backdrop-blur-sm">
+            <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-gradient-to-br from-orange-400/12 to-transparent blur-3xl" />
             {activeSection === 'account' && (
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
@@ -892,43 +907,65 @@ export default function Settings() {
             )}
           </div>
 
-          <div className="mt-8 flex justify-end">
+          <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
             <button
                 onClick={saveSettings}
                 disabled={saving}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-500 text-white rounded-lg hover:from-orange-500 hover:to-amber-400 transition-colors disabled:opacity-50"
+                className={`btn-sheen group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_36px_-8px_rgba(234,88,12,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_rgba(234,88,12,0.7)] disabled:pointer-events-none disabled:opacity-55 ${focusRing}`}
             >
-              <Save className="h-4 w-4" />
-              {saving ? 'Saving...' : 'Save Settings'}
+              {saving ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  Saving…
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Save settings
+                </>
+              )}
             </button>
           </div>
         </div>
 
         {showDeleteConfirm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-2xl p-6 max-w-md w-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <AlertTriangle className="h-5 w-5 text-red-500" />
-                  <h3 className="text-lg font-semibold text-stone-900">Delete Account</h3>
-                </div>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div
+                className="absolute inset-0 bg-stone-950/60 backdrop-blur-xl"
+                onClick={() => setShowDeleteConfirm(false)}
+                aria-hidden
+              />
+              <div className="relative w-full max-w-md overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-float">
+                <div aria-hidden className="absolute left-0 right-0 top-0 h-[3px] bg-gradient-to-r from-red-500 via-rose-400 to-red-500" />
+                <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-red-500/20 blur-3xl" />
+                <div className="relative p-7 sm:p-8">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-500 text-white shadow-[0_12px_28px_-6px_rgba(239,68,68,0.55)]">
+                      <AlertTriangle className="h-5 w-5" />
+                    </div>
+                    <h3 className="font-display text-xl font-semibold text-[var(--bridge-text)]">Delete account</h3>
+                  </div>
 
-                <p className="text-stone-600 mb-6">
-                  This action cannot be undone. All your data including profile information, session history, and settings will be permanently deleted.
-                </p>
+                  <p className="mt-5 text-sm leading-relaxed text-[var(--bridge-text-secondary)]">
+                    This action cannot be undone. All your data including profile information, session history, and
+                    settings will be permanently deleted.
+                  </p>
 
-                <div className="flex gap-3 justify-end">
-                  <button
-                      onClick={() => setShowDeleteConfirm(false)}
-                      className="px-4 py-2 border border-stone-200 rounded-lg text-stone-700 hover:bg-stone-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                      onClick={handleDeleteAccount}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                  >
-                    Delete Account
-                  </button>
+                  <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                    <button
+                        onClick={() => setShowDeleteConfirm(false)}
+                        className={`inline-flex items-center justify-center rounded-full border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-5 py-2.5 text-sm font-semibold text-[var(--bridge-text-secondary)] transition hover:-translate-y-0.5 hover:border-orange-300/70 hover:text-[var(--bridge-text)] hover:shadow-md ${focusRing}`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                        onClick={handleDeleteAccount}
+                        className={`btn-sheen inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-600 to-rose-500 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_26px_-4px_rgba(239,68,68,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_32px_-6px_rgba(239,68,68,0.7)] ${focusRing}`}
+                    >
+                      <AlertTriangle className="h-4 w-4" />
+                      Delete account
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

@@ -35,11 +35,11 @@ const TIERS = [
 
 function tierBadgeClasses(tier) {
   switch (tier) {
-    case 'rising':      return 'bg-emerald-50 text-emerald-800 border border-emerald-200/80';
-    case 'established': return 'bg-sky-50 text-sky-800 border border-sky-200/80';
-    case 'expert':      return 'bg-violet-50 text-violet-800 border border-violet-200/80';
-    case 'elite':       return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white';
-    default:            return 'bg-stone-100 text-stone-600';
+    case 'rising':      return 'bg-emerald-50 text-emerald-800 border border-emerald-200/80 dark:bg-emerald-500/15 dark:text-emerald-200 dark:border-emerald-400/30';
+    case 'established': return 'bg-sky-50 text-sky-800 border border-sky-200/80 dark:bg-sky-500/15 dark:text-sky-200 dark:border-sky-400/30';
+    case 'expert':      return 'bg-violet-50 text-violet-800 border border-violet-200/80 dark:bg-violet-500/15 dark:text-violet-200 dark:border-violet-400/30';
+    case 'elite':       return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-[0_4px_14px_-2px_rgba(234,88,12,0.55)]';
+    default:            return 'bg-stone-100 text-stone-600 dark:bg-white/[0.06] dark:text-stone-300';
   }
 }
 
@@ -48,32 +48,6 @@ const SORT_OPTIONS = [
   { label: 'Most years in the game', value: 'experience' },
   { label: 'Most sessions logged', value: 'sessions' },
 ];
-
-const AVATAR_COLORS = [
-  'bg-violet-200 text-violet-800',
-  'bg-amber-200 text-amber-800',
-  'bg-emerald-200 text-emerald-800',
-  'bg-sky-200 text-sky-800',
-  'bg-rose-200 text-rose-800',
-  'bg-indigo-200 text-indigo-800',
-  'bg-teal-200 text-teal-800',
-  'bg-orange-200 text-orange-800',
-];
-
-function getAvatarColor(name) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
-
-function getInitials(name) {
-  return name
-      .split(' ')
-      .map((w) => w[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase();
-}
 
 function normalizeMentorId(id) {
   return id == null ? '' : String(id).toLowerCase();
@@ -117,35 +91,40 @@ function MentorGridSkeleton() {
         {Array.from({ length: 6 }).map((_, i) => (
             <div
                 key={i}
-                className="flex flex-col h-[320px] animate-pulse rounded-[1.75rem] border border-stone-200/80 bg-white/90 p-6 shadow-bridge-card"
+                className="relative flex h-[340px] flex-col overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card"
             >
-              <div className="flex gap-4">
-                <div className="h-14 w-14 shrink-0 rounded-2xl bg-stone-200" />
-                <div className="flex-1 space-y-2 pt-0.5">
-                  <div className="h-4 w-3/4 rounded-full bg-stone-200" />
-                  <div className="h-3 w-1/2 rounded-full bg-stone-100" />
-                  <div className="h-3 w-1/3 rounded-full bg-amber-100/50" />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-orange-200/15 to-transparent dark:via-orange-400/10"
+                style={{ animation: 'bridge-sheen 2.2s ease-in-out infinite' }}
+              />
+              <div className="relative flex gap-4">
+                <div className="h-16 w-16 shrink-0 rounded-2xl bg-[var(--bridge-surface-muted)] animate-pulse" />
+                <div className="flex-1 space-y-2.5 pt-1">
+                  <div className="h-4 w-3/4 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
+                  <div className="h-3 w-1/2 rounded-full bg-[var(--bridge-surface-muted)]/70 animate-pulse" />
+                  <div className="h-3 w-1/3 rounded-full bg-amber-100/60 animate-pulse dark:bg-amber-500/15" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center justify-between">
-                <div className="h-3 w-20 rounded-full bg-stone-100" />
-                <div className="h-4 w-24 rounded-full bg-stone-100" />
+              <div className="relative mt-5 flex items-center justify-between">
+                <div className="h-3 w-24 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
+                <div className="h-5 w-20 rounded-full bg-[var(--bridge-surface-muted)]/70 animate-pulse" />
               </div>
-              <div className="mt-4 space-y-2">
-                <div className="h-3 w-full rounded-full bg-stone-100" />
-                <div className="h-3 w-5/6 rounded-full bg-stone-100" />
+              <div className="relative mt-5 space-y-2">
+                <div className="h-3 w-full rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
+                <div className="h-3 w-5/6 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
               </div>
-              <div className="mt-4 flex gap-1.5">
-                <div className="h-6 w-16 rounded-full bg-orange-50" />
-                <div className="h-6 w-16 rounded-full bg-orange-50" />
-                <div className="h-6 w-16 rounded-full bg-orange-50" />
+              <div className="relative mt-5 flex gap-1.5">
+                <div className="h-6 w-20 rounded-full bg-orange-100/70 animate-pulse dark:bg-orange-500/15" />
+                <div className="h-6 w-16 rounded-full bg-orange-100/70 animate-pulse dark:bg-orange-500/15" />
+                <div className="h-6 w-24 rounded-full bg-orange-100/70 animate-pulse dark:bg-orange-500/15" />
               </div>
-              <div className="mt-auto flex items-center justify-between border-t border-stone-100/90 pt-4">
+              <div className="relative mt-auto flex items-center justify-between border-t border-[var(--bridge-border)] pt-4">
                 <div className="space-y-1.5">
-                  <div className="h-3 w-16 rounded-full bg-stone-100" />
-                  <div className="h-3 w-20 rounded-full bg-stone-200" />
+                  <div className="h-3 w-16 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
+                  <div className="h-4 w-24 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
                 </div>
-                <div className="h-9 w-28 rounded-full bg-stone-200" />
+                <div className="h-10 w-32 rounded-full bg-stone-900/10 animate-pulse dark:bg-white/[0.08]" />
               </div>
             </div>
         ))}
@@ -163,15 +142,15 @@ function HeartButton({ filled, onClick, label, disabled }) {
             e.stopPropagation();
             onClick();
           }}
-          className={`rounded-full bg-white/95 p-2 text-stone-400 shadow-sm ring-1 ring-stone-200/80 transition hover:bg-rose-50 hover:text-rose-500 hover:ring-rose-200/60 disabled:pointer-events-none disabled:opacity-40 ${focusRing}`}
+          className={`group/heart relative rounded-full bg-[var(--bridge-surface)]/95 p-2.5 text-[var(--bridge-text-muted)] shadow-sm ring-1 ring-[var(--bridge-border)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:scale-110 hover:bg-rose-50 hover:text-rose-500 hover:ring-rose-300/60 hover:shadow-[0_8px_22px_-4px_rgba(244,63,94,0.35)] disabled:pointer-events-none disabled:opacity-40 dark:hover:bg-rose-500/10 dark:hover:ring-rose-400/40 ${focusRing}`}
           aria-label={label}
       >
         {filled ? (
-            <svg className="h-5 w-5 fill-rose-500 text-rose-500" viewBox="0 0 24 24" aria-hidden>
+            <svg className="h-5 w-5 fill-rose-500 text-rose-500 drop-shadow-[0_2px_6px_rgba(244,63,94,0.45)]" viewBox="0 0 24 24" aria-hidden>
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
         ) : (
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
+            <svg className="h-5 w-5 transition group-hover/heart:fill-rose-500/20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
         )}
@@ -180,8 +159,6 @@ function HeartButton({ filled, onClick, label, disabled }) {
 }
 
 function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favoriteBusy, favoritesEnabled = true }) {
-  const avatarColor = getAvatarColor(mentor.name);
-
   function handleHeart() {
     if (!user) {
       navigate('/login', { state: { from: '/mentors' } });
@@ -191,10 +168,15 @@ function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favo
   }
 
   return (
-      <div className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-[1.75rem] border border-stone-200/80 bg-white/95 p-6 shadow-bridge-card transition duration-300 hover:-translate-y-1 hover:border-orange-200/55 hover:shadow-bridge-glow">
-        <div className="absolute left-0 right-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-orange-400/70 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
+      <div
+        data-tilt="5"
+        className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card tilt-card cursor-glow transition-[box-shadow,border-color] duration-500 hover:border-orange-300/60 hover:shadow-bridge-glow"
+      >
+        {/* Hover aurora */}
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br from-orange-400/20 via-amber-300/10 to-transparent opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/80 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
         {favoritesEnabled ? (
-            <div className="absolute right-4 top-5">
+            <div className="absolute right-4 top-5 z-[2]">
               <HeartButton
                   filled={isFavorite}
                   disabled={Boolean(favoriteBusy)}
@@ -204,24 +186,29 @@ function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favo
             </div>
         ) : null}
 
-        <div className={`flex items-start gap-4 ${favoritesEnabled ? 'pr-12' : ''}`}>
+        <div className={`relative flex items-start gap-4 ${favoritesEnabled ? 'pr-14' : ''}`}>
           {mentor.image_url ? (
               <img
                   src={mentor.image_url}
                   alt=""
-                  className="h-14 w-14 shrink-0 rounded-2xl object-cover ring-2 ring-white shadow-md"
+                  className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-2 ring-[var(--bridge-canvas)] shadow-md transition group-hover:scale-[1.04]"
               />
           ) : (
               <div
-                  className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-sm font-bold shadow-md ring-2 ring-white ${avatarColor}`}
+                  className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-base font-bold shadow-md ring-2 ring-[var(--bridge-canvas)] transition group-hover:scale-[1.04] ${avatarColor}`}
               >
                 {getInitials(mentor.name)}
               </div>
           )}
-          <div className="min-w-0 pt-0.5">
-            <h3 className="truncate font-semibold text-stone-900">{mentor.name}</h3>
-            <p className="truncate text-sm text-stone-500">{mentor.title}</p>
-            <p className="truncate text-sm font-medium text-amber-800">{mentor.company}</p>
+          <div className="min-w-0 pt-1">
+            <h3 className="truncate font-display text-lg font-semibold text-[var(--bridge-text)] transition group-hover:text-orange-800 dark:group-hover:text-orange-200">
+              {mentor.name}
+            </h3>
+            <p className="truncate text-sm text-[var(--bridge-text-muted)]">{mentor.title}</p>
+            <p className="inline-flex max-w-full items-center gap-1 truncate text-sm font-semibold text-amber-700 dark:text-amber-300">
+              <span className="h-1 w-1 shrink-0 rounded-full bg-amber-500" aria-hidden />
+              <span className="truncate">{mentor.company}</span>
+            </p>
           </div>
         </div>
 
@@ -237,36 +224,44 @@ function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favo
           </div>
         </div>
 
-        <p className="line-clamp-2 text-sm leading-relaxed text-stone-600">{mentor.bio}</p>
+        <p className="relative line-clamp-2 text-sm leading-relaxed text-[var(--bridge-text-secondary)]">{mentor.bio}</p>
 
-        <div className="flex flex-wrap gap-1.5">
+        <div className="relative flex flex-wrap gap-1.5">
           {mentor.expertise.slice(0, 3).map((tag) => (
               <span
                   key={tag}
-                  className="rounded-full border border-orange-100 bg-orange-50/80 px-2.5 py-0.5 text-xs font-medium text-orange-900"
+                  className="rounded-full border border-orange-200/70 bg-orange-50/80 px-2.5 py-0.5 text-xs font-semibold text-orange-900 dark:border-orange-400/25 dark:bg-orange-500/10 dark:text-orange-200"
               >
             {tag}
           </span>
           ))}
           {mentor.expertise.length > 3 && (
-              <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs text-stone-500">
+              <span className="rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-2.5 py-0.5 text-xs font-semibold text-[var(--bridge-text-muted)]">
             +{mentor.expertise.length - 3}
           </span>
           )}
         </div>
 
-        <div className="mt-auto flex items-center justify-between border-t border-stone-100/90 pt-4">
+        <div className="relative mt-auto flex items-center justify-between border-t border-[var(--bridge-border)] pt-4">
           <div className="flex flex-col gap-0.5">
-            <span className="text-xs text-stone-400">{mentor.total_sessions} sessions</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--bridge-text-muted)]">
+              {mentor.total_sessions} sessions
+            </span>
             {mentor.session_rate ? (
-                <span className="text-xs font-semibold text-stone-700">${mentor.session_rate} / session</span>
+                <span className="font-display text-base font-semibold tabular-nums text-[var(--bridge-text)]">
+                  ${mentor.session_rate}
+                  <span className="text-xs font-normal text-[var(--bridge-text-muted)]"> / session</span>
+                </span>
             ) : null}
           </div>
           <Link
               to={`/mentors/${mentor.id}`}
-              className={`rounded-full bg-gradient-to-r from-stone-900 to-stone-800 px-4 py-2 text-sm font-semibold text-amber-50 shadow-md transition hover:from-stone-800 hover:to-stone-700 ${focusRing}`}
+              className={`btn-sheen inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-stone-900 to-stone-800 px-4 py-2.5 text-sm font-semibold text-amber-50 shadow-[0_8px_22px_-6px_rgba(28,25,23,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_-8px_rgba(28,25,23,0.55)] dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 dark:shadow-[0_10px_26px_-6px_rgba(234,88,12,0.55)] ${focusRing}`}
           >
             Open profile
+            <svg className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
+            </svg>
           </Link>
         </div>
       </div>
@@ -275,19 +270,30 @@ function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favo
 
 function FetchErrorBanner({ message, onRetry }) {
   return (
-      <div className="mb-8 rounded-[1.75rem] border border-red-200/90 bg-red-50/95 px-5 py-5 text-sm text-red-900 shadow-sm">
-        <p className="font-semibold">Mentors didn&apos;t load</p>
-        <p className="mt-1 text-red-800/90">That&apos;s usually us or the Wi‑Fi. Want to try once more?</p>
-        <p className="mt-2 font-mono text-xs text-red-800/70">{message}</p>
-        {onRetry ? (
-            <button
-                type="button"
-                onClick={onRetry}
-                className={`mt-4 rounded-full bg-red-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-800 ${focusRing}`}
-            >
-              Retry
-            </button>
-        ) : null}
+      <div className="relative mb-8 flex items-start gap-4 overflow-hidden rounded-[1.75rem] border border-red-200/80 bg-red-50/95 px-6 py-5 text-sm text-red-900 shadow-[0_12px_32px_-10px_rgba(239,68,68,0.3)] dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-200">
+        <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-red-500/15 blur-3xl" />
+        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-500 text-white shadow">
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          </svg>
+        </div>
+        <div className="relative min-w-0 flex-1">
+          <p className="font-display text-lg font-semibold">Mentors didn&apos;t load</p>
+          <p className="mt-1 text-red-800/90 dark:text-red-300/90">That&apos;s usually us or the Wi‑Fi. Want to try once more?</p>
+          <p className="mt-2 truncate font-mono text-xs text-red-700/70 dark:text-red-300/70">{message}</p>
+          {onRetry ? (
+              <button
+                  type="button"
+                  onClick={onRetry}
+                  className={`btn-sheen mt-4 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-red-600 to-rose-500 px-5 py-2 text-sm font-semibold text-white shadow-[0_8px_22px_-4px_rgba(239,68,68,0.5)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_-6px_rgba(239,68,68,0.65)] ${focusRing}`}
+              >
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                Retry
+              </button>
+          ) : null}
+        </div>
       </div>
   );
 }
@@ -295,12 +301,12 @@ function FetchErrorBanner({ message, onRetry }) {
 function MatchLabelChip({ label }) {
   const colors =
     label === 'Strong Match'
-      ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
+      ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80 dark:bg-emerald-500/15 dark:text-emerald-200 dark:border-emerald-400/30'
       : label === 'Good Match'
-      ? 'bg-sky-50 text-sky-800 border-sky-200/80'
-      : 'bg-amber-50 text-amber-800 border-amber-200/80';
+      ? 'bg-sky-50 text-sky-800 border-sky-200/80 dark:bg-sky-500/15 dark:text-sky-200 dark:border-sky-400/30'
+      : 'bg-amber-50 text-amber-800 border-amber-200/80 dark:bg-amber-500/15 dark:text-amber-200 dark:border-amber-400/30';
   return (
-    <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${colors}`}>
+    <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ${colors}`}>
       {label}
     </span>
   );
@@ -311,12 +317,15 @@ function AiMatchCard({ mentor, match, navigate }) {
   const avatarColor = getAvatarColor(mentor.name);
 
   return (
-    <div className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-[1.75rem] border border-orange-200/50 bg-white/95 p-6 shadow-bridge-card transition duration-300 hover:-translate-y-1 hover:border-orange-300/60 hover:shadow-bridge-glow">
-      <div className="absolute left-0 right-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-orange-400/60 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
+    <div className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-[1.75rem] border border-transparent border-gradient-bridge animate-border-bridge bg-gradient-to-br from-[var(--bridge-surface)] via-[var(--bridge-surface)] to-orange-50/30 p-6 shadow-[0_20px_54px_-18px_rgba(234,88,12,0.35)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_28px_70px_-20px_rgba(234,88,12,0.5)] dark:to-orange-500/[0.06]">
+      <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br from-orange-400/25 to-amber-300/10 blur-3xl" />
 
       {/* Match score badge */}
-      <div className="absolute right-4 top-4 flex flex-col items-end gap-1">
-        <span className="rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
+      <div className="absolute right-4 top-4 z-[2] flex flex-col items-end gap-1.5">
+        <span className="relative inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-3 py-1 text-xs font-bold text-white shadow-[0_8px_22px_-4px_rgba(234,88,12,0.55)]">
+          <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+          </svg>
           {match.match_score}% Match
         </span>
         <MatchLabelChip label={match.match_label} />
@@ -727,21 +736,30 @@ export default function Mentors() {
 
             <div className="flex flex-col gap-5 pb-6 sm:gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-secondary)] shadow-sm backdrop-blur-md">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span aria-hidden className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/70 animate-pulse-soft" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.55)]" />
+                  </span>
+                  Live directory
+                </div>
                 <h1
                     id="mentors-heading"
-                    className="font-display text-3xl font-semibold leading-tight tracking-tight text-[var(--bridge-text)] sm:text-[2.25rem]"
+                    className="font-display text-[2.25rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[2.75rem]"
                 >
-                  Browse <span className="text-gradient-bridge">mentors</span>
+                  Browse <span className="font-editorial italic text-gradient-bridge">mentors</span>
                 </h1>
-                <p className="mt-1.5 text-sm text-[var(--bridge-text-secondary)] sm:text-base">
+                <p className="mt-2 text-sm text-[var(--bridge-text-secondary)] sm:text-base">
                   {loading ? (
                       <span className="text-[var(--bridge-text-muted)]">Loading the directory…</span>
                   ) : (
                       <>
-                        <span className="font-semibold text-[var(--bridge-text)]">{totalCount.toLocaleString()}</span>{' '}
+                        <span className="font-display text-lg font-semibold tabular-nums text-[var(--bridge-text)]">{totalCount.toLocaleString()}</span>{' '}
                         {totalCount === 1 ? 'person' : 'people'} ready to talk
                         {activeFilterCount > 0 ? (
-                            <span className="text-[var(--bridge-text-muted)]"> · filtered</span>
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-200/70 bg-orange-50/80 px-2 py-0.5 text-[11px] font-bold text-orange-900 dark:border-orange-400/30 dark:bg-orange-500/15 dark:text-orange-200">
+                              <span className="h-1 w-1 rounded-full bg-orange-500" /> filtered
+                            </span>
                         ) : null}
                       </>
                   )}
@@ -750,9 +768,9 @@ export default function Mentors() {
 
               {/* Inline control cluster — search + sort + filter toggle */}
               <div className={`flex flex-col gap-2.5 sm:flex-row sm:items-center ${aiMode ? 'opacity-50 pointer-events-none' : ''}`}>
-                <div className="relative flex-1 sm:w-72 sm:flex-initial">
+                <div className="group relative flex-1 sm:w-80 sm:flex-initial">
                   <svg
-                      className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+                      className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--bridge-text-faint)] transition group-focus-within:text-orange-500"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
@@ -763,16 +781,16 @@ export default function Mentors() {
                   </svg>
                   <input
                       type="text"
-                      placeholder="Name, title, company…"
+                      placeholder="Search by name, role, company…"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      className="w-full rounded-full border border-[var(--bridge-border)] bg-[color-mix(in_srgb,var(--bridge-surface)_92%,transparent)] py-2.5 pl-10 pr-9 text-sm text-[var(--bridge-text)] shadow-sm placeholder:text-[var(--bridge-text-faint)] focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25"
+                      className="w-full rounded-full border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] py-2.5 pl-11 pr-10 text-sm text-[var(--bridge-text)] shadow-sm placeholder:text-[var(--bridge-text-faint)] transition focus:border-orange-400 focus:outline-none focus:shadow-[0_0_0_4px_rgba(251,146,60,0.2)]"
                   />
                   {search ? (
                       <button
                           type="button"
                           onClick={() => setSearch('')}
-                          className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700 ${focusRing}`}
+                          className={`absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[var(--bridge-text-muted)] transition hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)] ${focusRing}`}
                           aria-label="Clear search"
                       >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -786,10 +804,10 @@ export default function Mentors() {
                   <button
                     type="button"
                     onClick={handleAiMatchClick}
-                    className={`inline-flex items-center gap-2 rounded-full border border-transparent bg-gradient-to-r from-orange-600 to-amber-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-orange-500/25 transition hover:from-orange-500 hover:to-amber-400 ${focusRing}`}
+                    className={`btn-sheen group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_26px_-6px_rgba(234,88,12,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-8px_rgba(234,88,12,0.7)] ${focusRing}`}
                   >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                    <svg className="h-4 w-4 transition group-hover:rotate-12" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
                     </svg>
                     AI Match
                   </button>
@@ -803,11 +821,14 @@ export default function Mentors() {
                         onClick={() => setSortOpen((o) => !o)}
                         aria-haspopup="listbox"
                         aria-expanded={sortOpen}
-                        className={`inline-flex w-full items-center justify-between gap-2 rounded-full border border-stone-200 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 shadow-sm transition hover:border-orange-300/70 sm:w-auto ${focusRing}`}
+                        className={`inline-flex w-full items-center justify-between gap-2 rounded-full border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-4 py-2.5 text-sm font-semibold text-[var(--bridge-text)] shadow-sm transition hover:-translate-y-0.5 hover:border-orange-300/70 hover:shadow-md sm:w-auto ${focusRing}`}
                     >
+                      <svg className="h-3.5 w-3.5 shrink-0 text-[var(--bridge-text-muted)]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5h18M6 12h12M10 16.5h4" />
+                      </svg>
                       <span className="truncate">{SORT_OPTIONS.find((o) => o.value === sortBy)?.label ?? 'Sort'}</span>
                       <svg
-                          className={`h-3.5 w-3.5 shrink-0 text-stone-400 transition-transform duration-150 ${sortOpen ? 'rotate-180' : ''}`}
+                          className={`h-3.5 w-3.5 shrink-0 text-[var(--bridge-text-muted)] transition-transform duration-300 ${sortOpen ? 'rotate-180' : ''}`}
                           fill="none"
                           stroke="currentColor"
                           strokeWidth="2"
@@ -822,8 +843,9 @@ export default function Mentors() {
                         <div
                             role="listbox"
                             aria-label="Sort mentors"
-                            className="absolute right-0 top-full z-20 mt-1.5 min-w-[220px] overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-lg ring-1 ring-stone-900/[0.04]"
+                            className="absolute right-0 top-full z-20 mt-2 min-w-[260px] overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-float backdrop-blur-xl animate-pop-in"
                         >
+                          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/50 to-transparent" />
                           {SORT_OPTIONS.map((opt) => (
                               <button
                                   key={opt.value}
@@ -831,16 +853,18 @@ export default function Mentors() {
                                   role="option"
                                   aria-selected={sortBy === opt.value}
                                   onClick={() => { setSortBy(opt.value); setSortOpen(false); }}
-                                  className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm transition first:pt-3.5 last:pb-3.5 ${
+                                  className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm transition ${
                                       sortBy === opt.value
-                                          ? 'bg-orange-50/80 font-semibold text-orange-900'
-                                          : 'font-medium text-stone-700 hover:bg-stone-50'
+                                          ? 'bg-gradient-to-r from-orange-50/90 to-amber-50/40 font-semibold text-orange-900 dark:from-orange-500/10 dark:to-amber-500/5 dark:text-orange-200'
+                                          : 'font-medium text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)]'
                                   } ${focusRing}`}
                               >
                                 {opt.label}
                                 {sortBy === opt.value ? (
-                                    <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white" aria-hidden>
-                                      ✓
+                                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-600 to-amber-500 text-white shadow" aria-hidden>
+                                      <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                      </svg>
                                     </span>
                                 ) : null}
                               </button>
@@ -856,16 +880,16 @@ export default function Mentors() {
                       aria-controls="mentors-filter-panel"
                       className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold shadow-sm transition ${
                           filterPanelOpen || activeFilterCount > 0
-                              ? 'border-transparent bg-gradient-to-r from-stone-900 to-stone-800 text-amber-50 hover:from-stone-800 hover:to-stone-700'
-                              : 'border-stone-200 bg-white text-stone-800 hover:border-orange-300/70'
+                              ? 'btn-sheen border-transparent bg-gradient-to-r from-stone-900 to-stone-800 text-amber-50 shadow-[0_10px_26px_-6px_rgba(28,25,23,0.45)] hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-8px_rgba(28,25,23,0.55)] dark:from-orange-500 dark:to-amber-500 dark:text-stone-950'
+                              : 'border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] text-[var(--bridge-text)] hover:-translate-y-0.5 hover:border-orange-300/70 hover:shadow-md'
                       } ${focusRing}`}
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M6 12h12M10 18h4" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
                     </svg>
                     Filter
                     {activeFilterCount > 0 ? (
-                        <span className="ml-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-amber-400 px-1.5 text-[10px] font-bold text-stone-900">
+                        <span className="ml-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-amber-300 px-1.5 text-[10px] font-bold text-stone-900 shadow-[0_0_10px_rgba(253,230,138,0.6)]">
                           {activeFilterCount}
                         </span>
                     ) : null}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Mail, Phone, MapPin, ShieldAlert, CheckCircle2, Send, ArrowRight } from 'lucide-react';
 import Reveal from '../../components/Reveal';
 import { focusRing, pageShell } from '../../ui';
 
@@ -12,77 +13,168 @@ export default function Contact() {
         setSent(true);
     }
 
+    const cards = [
+        { Icon: Mail, eyebrow: 'Email', primary: 'support@bridge.com', secondary: 'Reply within 24 hours', hue: 'from-orange-500 to-amber-500' },
+        { Icon: Phone, eyebrow: 'Phone', primary: '+1 (555) 123-4567', secondary: 'Mon–Fri, 9am–6pm PT', hue: 'from-sky-500 to-indigo-500' },
+        { Icon: MapPin, eyebrow: 'Office', primary: '525 Market Street', secondary: 'San Francisco, CA 94105', hue: 'from-emerald-500 to-teal-500' },
+    ];
+
     return (
-        <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
-            <div className="mx-auto max-w-bridge">
-                <Reveal className="mb-12 max-w-2xl">
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Contact support</p>
-                    <h1 className="mt-3 font-display text-4xl font-semibold text-stone-900 sm:text-5xl">Reach the humans who can actually help.</h1>
-                    <p className="mt-5 text-lg text-stone-600">We respond to every message within 24 hours, usually faster.</p>
+        <main className={`${pageShell} relative px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
+            <div
+                aria-hidden
+                className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[50vmax] w-[80vmax] -translate-x-1/2 opacity-55 dark:opacity-80"
+                style={{
+                    background:
+                        'conic-gradient(from 160deg at 50% 50%, rgba(251,146,60,0.15), rgba(253,230,138,0.1), rgba(234,88,12,0.18), rgba(251,146,60,0.15))',
+                    filter: 'blur(100px)',
+                }}
+            />
+
+            <div className="relative mx-auto max-w-bridge">
+                <Reveal className="mb-14 max-w-2xl">
+                    <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 shadow-sm backdrop-blur-md">
+                        <Send className="h-3.5 w-3.5 text-orange-500" />
+                        <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-secondary)]">Contact support</span>
+                    </div>
+                    <h1 className="font-display text-[2.5rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.25rem] lg:text-[3.75rem]">
+                        Reach the humans who can{' '}
+                        <span className="font-editorial italic text-gradient-bridge">actually help</span>.
+                    </h1>
+                    <p className="mt-5 text-lg text-[var(--bridge-text-secondary)]">
+                        We respond to every message within 24 hours, usually faster.
+                    </p>
                 </Reveal>
 
                 <div className="grid gap-6 lg:grid-cols-5">
                     <Reveal className="lg:col-span-2">
                         <div className="space-y-4">
-                            <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-sm">
-                                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-700">Email</p>
-                                <p className="mt-2 font-semibold text-[var(--bridge-text)]">support@bridge.com</p>
-                                <p className="mt-1 text-sm text-[var(--bridge-text-muted)]">Reply within 24 hours</p>
-                            </div>
-                            <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-sm">
-                                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-700">Phone</p>
-                                <p className="mt-2 font-semibold text-[var(--bridge-text)]">+1 (555) 123-4567</p>
-                                <p className="mt-1 text-sm text-[var(--bridge-text-muted)]">Mon–Fri, 9am–6pm PT</p>
-                            </div>
-                            <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-sm">
-                                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-700">Office</p>
-                                <p className="mt-2 font-semibold text-[var(--bridge-text)]">525 Market Street</p>
-                                <p className="text-sm text-[var(--bridge-text-muted)]">San Francisco, CA 94105</p>
-                            </div>
-                            <div className="rounded-2xl border border-[var(--bridge-border-strong)] bg-[color-mix(in_srgb,var(--bridge-accent)_11%,var(--bridge-surface))] p-6">
-                                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-800">Urgent?</p>
-                                <p className="mt-2 text-sm leading-relaxed text-[var(--bridge-text-secondary)]">For Trust & Safety issues, email <a href="mailto:trust@bridge.com" className="font-semibold text-orange-800 underline underline-offset-2">trust@bridge.com</a> — reviewed within 4 hours.</p>
+                            {cards.map(({ Icon, eyebrow, primary, secondary, hue }) => (
+                                <div
+                                    key={eyebrow}
+                                    className="group relative flex items-start gap-4 overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-5 shadow-bridge-tile backdrop-blur-sm transition-all duration-500 hover:-translate-y-0.5 hover:shadow-bridge-card cursor-glow"
+                                >
+                                    <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br from-orange-400/15 to-transparent opacity-0 blur-2xl transition group-hover:opacity-100" />
+                                    <div className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${hue} text-white shadow-[0_8px_22px_-6px_rgba(234,88,12,0.4)] transition-transform duration-500 group-hover:scale-[1.04]`}>
+                                        <Icon className="h-5 w-5" />
+                                    </div>
+                                    <div className="relative min-w-0">
+                                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-muted)]">{eyebrow}</p>
+                                        <p className="mt-1 font-display text-lg font-semibold text-[var(--bridge-text)]">{primary}</p>
+                                        <p className="mt-0.5 text-sm text-[var(--bridge-text-muted)]">{secondary}</p>
+                                    </div>
+                                </div>
+                            ))}
+
+                            <div className="relative flex items-start gap-4 overflow-hidden rounded-2xl border border-red-300/40 bg-gradient-to-br from-red-50 to-orange-50 p-5 shadow-bridge-tile dark:border-red-400/30 dark:from-red-500/10 dark:to-orange-500/10">
+                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-500 text-white shadow-[0_8px_22px_-6px_rgba(239,68,68,0.4)]">
+                                    <ShieldAlert className="h-5 w-5" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-800 dark:text-red-200">Urgent?</p>
+                                    <p className="mt-1.5 text-sm leading-relaxed text-red-900/95 dark:text-red-100/90">
+                                        For Trust &amp; Safety issues, email{' '}
+                                        <a href="mailto:trust@bridge.com" className="font-bold underline decoration-red-300 underline-offset-2 hover:text-red-950">
+                                            trust@bridge.com
+                                        </a>{' '}
+                                        — reviewed within 4 hours.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </Reveal>
 
-                    <Reveal delay={80} className="lg:col-span-3">
-                        <div className="rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-8 shadow-bridge-card sm:p-10">
-                            {sent ? (
-                                <div className="py-10 text-center">
-                                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-3xl text-white shadow-lg">✓</div>
-                                    <h2 className="mt-5 font-display text-2xl font-semibold text-stone-900">Message sent</h2>
-                                    <p className="mt-3 text-stone-600">We'll be in touch at <span className="font-semibold text-stone-900">{form.email}</span> shortly.</p>
-                                    <button onClick={() => { setSent(false); setForm({ name: '', email: '', topic: 'General question', message: '' }); }} className={`mt-6 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] px-6 py-2.5 text-sm font-semibold text-[var(--bridge-text)] transition hover:border-[var(--bridge-border-strong)] ${focusRing}`}>Send another</button>
-                                </div>
-                            ) : (
-                                <form onSubmit={handleSubmit} className="space-y-4">
-                                    <div>
-                                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)]">Your name</label>
-                                        <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={`w-full rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] px-4 py-3 text-sm shadow-sm transition focus:border-orange-400 ${focusRing}`} />
+                    <Reveal delay={100} className="lg:col-span-3">
+                        <div className="relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-float backdrop-blur-xl">
+                            <div aria-hidden className="absolute left-0 right-0 top-0 h-[3px] bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500" />
+                            <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-orange-400/20 blur-3xl" />
+                            <div className="relative p-8 sm:p-10">
+                                {sent ? (
+                                    <div className="py-10 text-center">
+                                        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 shadow-[0_16px_40px_-8px_rgba(16,185,129,0.55)]">
+                                            <CheckCircle2 className="h-10 w-10 text-white" />
+                                        </div>
+                                        <h2 className="mt-6 font-display text-3xl font-bold text-[var(--bridge-text)]">Message sent</h2>
+                                        <p className="mt-3 text-[var(--bridge-text-secondary)]">
+                                            We&apos;ll be in touch at <span className="font-semibold text-[var(--bridge-text)]">{form.email}</span> shortly.
+                                        </p>
+                                        <button
+                                            onClick={() => {
+                                                setSent(false);
+                                                setForm({ name: '', email: '', topic: 'General question', message: '' });
+                                            }}
+                                            className={`mt-8 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-6 py-3 text-sm font-semibold text-[var(--bridge-text)] transition hover:-translate-y-0.5 hover:border-orange-300/70 hover:shadow-md ${focusRing}`}
+                                        >
+                                            Send another <ArrowRight className="h-4 w-4" />
+                                        </button>
                                     </div>
-                                    <div>
-                                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)]">Email</label>
-                                        <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={`w-full rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] px-4 py-3 text-sm shadow-sm transition focus:border-orange-400 ${focusRing}`} />
-                                    </div>
-                                    <div>
-                                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)]">Topic</label>
-                                        <select value={form.topic} onChange={(e) => setForm({ ...form, topic: e.target.value })} className={`w-full rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] px-4 py-3 text-sm shadow-sm transition focus:border-orange-400 ${focusRing}`}>
-                                            <option>General question</option>
-                                            <option>Billing issue</option>
-                                            <option>Session problem</option>
-                                            <option>Mentor application</option>
-                                            <option>Partnership</option>
-                                            <option>Other</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)]">Message</label>
-                                        <textarea required rows={5} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className={`w-full rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] px-4 py-3 text-sm shadow-sm transition focus:border-orange-400 ${focusRing}`} />
-                                    </div>
-                                    <button type="submit" className={`w-full rounded-full bg-gradient-to-r from-orange-600 to-amber-500 py-3.5 text-sm font-semibold text-white shadow-md shadow-orange-500/25 transition hover:from-orange-500 hover:to-amber-400 ${focusRing}`}>Send message</button>
-                                </form>
-                            )}
+                                ) : (
+                                    <form onSubmit={handleSubmit} className="space-y-5">
+                                        <div>
+                                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-700 dark:text-orange-300">Send us a message</p>
+                                            <h2 className="mt-2 font-display text-3xl font-bold text-[var(--bridge-text)]">We read every one</h2>
+                                        </div>
+                                        <div className="grid gap-5 sm:grid-cols-2">
+                                            <div>
+                                                <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">Your name</label>
+                                                <input
+                                                    required
+                                                    value={form.name}
+                                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                                    className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">Email</label>
+                                                <input
+                                                    type="email"
+                                                    required
+                                                    value={form.email}
+                                                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                                    className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">Topic</label>
+                                            <select
+                                                value={form.topic}
+                                                onChange={(e) => setForm({ ...form, topic: e.target.value })}
+                                                className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                                            >
+                                                <option>General question</option>
+                                                <option>Billing issue</option>
+                                                <option>Session problem</option>
+                                                <option>Mentor application</option>
+                                                <option>Partnership</option>
+                                                <option>Other</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">Message</label>
+                                            <textarea
+                                                required
+                                                rows={6}
+                                                value={form.message}
+                                                onChange={(e) => setForm({ ...form, message: e.target.value })}
+                                                placeholder="Tell us what's up — the more specific, the better."
+                                                className="w-full resize-none rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                                            />
+                                            <p className="mt-1.5 text-right text-[10px] font-medium text-[var(--bridge-text-faint)]">
+                                                {form.message.length} characters
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            className={`btn-sheen group relative inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 py-4 text-sm font-semibold text-white shadow-[0_14px_36px_-8px_rgba(234,88,12,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_rgba(234,88,12,0.7)] ${focusRing}`}
+                                        >
+                                            <Send className="h-4 w-4" />
+                                            Send message
+                                            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                                        </button>
+                                    </form>
+                                )}
+                            </div>
                         </div>
                     </Reveal>
                 </div>

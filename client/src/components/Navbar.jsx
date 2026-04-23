@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { isMentorAccount } from '../utils/accountRole';
-import { Bell, LogOut, User, Settings, Sparkles } from 'lucide-react';
+import { Bell, LogOut, User, Settings, Sparkles, FileText } from 'lucide-react';
 
 function getInitials(name = '') {
   return name
@@ -35,7 +35,7 @@ export default function Navbar() {
       ? location.pathname === '/'
       : location.pathname === path || location.pathname.startsWith(`${path}/`);
 
-  const navLink = (path, label, extraClass = '') => {
+  const navLink = (path, label, extraClass = '', { ai = false } = {}) => {
     const active = isActive(path);
     return (
       <Link
@@ -46,7 +46,17 @@ export default function Navbar() {
             : 'text-stone-700 hover:text-stone-950 dark:text-stone-300 dark:hover:text-stone-50'
         } ${extraClass}`}
       >
-        <span className="relative z-10">{label}</span>
+        <span className="relative z-10 inline-flex items-center gap-1.5">
+          {label}
+          {ai ? (
+            <span
+              aria-label="AI powered"
+              className="inline-flex items-center rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-1.5 py-px text-[9px] font-bold uppercase tracking-[0.1em] text-white shadow-[0_2px_8px_-1px_rgba(234,88,12,0.55)]"
+            >
+              AI
+            </span>
+          ) : null}
+        </span>
         {active && (
           <>
             <span
@@ -102,9 +112,10 @@ export default function Navbar() {
             <>
               {navLink('/mentors', 'Mentors')}
               {user ? navLink('/dashboard', 'Dashboard') : null}
+              {navLink('/resume', 'Resume', '', { ai: true })}
             </>
           )}
-          {navLink('/about', 'About')}
+          {navLink('/about', 'About', 'hidden lg:inline-flex')}
           {navLink('/pricing', 'Pricing')}
         </div>
 
@@ -189,7 +200,7 @@ export default function Navbar() {
                         {user.email}
                       </p>
                       <p
-                        className={`mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${
+                        className={`mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.12em] ${
                           asMentor
                             ? 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-900 ring-1 ring-amber-300/60 dark:from-amber-500/20 dark:to-orange-500/20 dark:text-amber-200 dark:ring-amber-400/30'
                             : 'bg-stone-100 text-stone-600 ring-1 ring-stone-200 dark:bg-white/[0.06] dark:text-stone-300 dark:ring-white/10'
@@ -261,7 +272,8 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/register"
-                className="btn-sheen relative inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_6px_18px_-4px_rgba(234,88,12,0.5)] transition-all hover:shadow-[0_10px_28px_-6px_rgba(234,88,12,0.65)] hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
+                data-magnet="6"
+                className="magnetic btn-sheen relative inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_6px_18px_-4px_rgba(234,88,12,0.5)] hover:shadow-[0_14px_32px_-6px_rgba(234,88,12,0.7)] hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
               >
                 Sign up
               </Link>

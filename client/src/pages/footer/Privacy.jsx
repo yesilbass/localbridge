@@ -1,3 +1,4 @@
+import { Shield } from 'lucide-react';
 import Reveal from '../../components/Reveal';
 import { pageShell } from '../../ui';
 
@@ -16,21 +17,41 @@ const SECTIONS = [
 
 export default function Privacy() {
         return (
-            <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
-                    <div className="mx-auto max-w-bridge">
-                            <Reveal className="mb-12">
-                                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Legal</p>
-                                    <h1 className="mt-3 font-display text-4xl font-semibold text-stone-900 sm:text-5xl">Privacy Policy</h1>
-                                    <p className="mt-3 text-sm text-stone-500">Last updated: April 21, 2026</p>
+            <main className={`${pageShell} relative px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
+                    <div
+                        aria-hidden
+                        className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[40vmax] w-[80vmax] -translate-x-1/2 opacity-40 dark:opacity-60"
+                        style={{
+                            background:
+                                'conic-gradient(from 240deg at 50% 50%, rgba(251,146,60,0.12), rgba(253,230,138,0.08), rgba(234,88,12,0.14), rgba(251,146,60,0.12))',
+                            filter: 'blur(90px)',
+                        }}
+                    />
+                    <div className="relative mx-auto max-w-bridge">
+                            <Reveal className="mb-14 max-w-3xl">
+                                    <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 shadow-sm backdrop-blur-md">
+                                            <Shield className="h-3.5 w-3.5 text-orange-500" />
+                                            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-secondary)]">Legal</span>
+                                    </div>
+                                    <h1 className="font-display text-[2.75rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.5rem] lg:text-[4rem]">
+                                            Privacy <span className="font-editorial italic text-gradient-bridge">policy</span>
+                                    </h1>
+                                    <p className="mt-4 text-sm font-medium text-[var(--bridge-text-muted)]">Last updated: April 21, 2026</p>
                             </Reveal>
 
                             <div className="grid gap-10 lg:grid-cols-12">
                                     <aside className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
-                                            <nav className="rounded-2xl border border-stone-200/90 bg-white p-4 shadow-sm">
-                                                    <p className="mb-3 px-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">Contents</p>
+                                            <nav className="relative overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-4 shadow-bridge-tile backdrop-blur-md">
+                                                    <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/40 to-transparent" />
+                                                    <p className="mb-3 px-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-muted)]">Contents</p>
                                                     <ul className="space-y-0.5">
                                                             {SECTIONS.map((s) => (
-                                                                <li key={s.id}><a href={`#${s.id}`} className="block rounded-lg px-2 py-1.5 text-sm text-stone-700 transition hover:bg-orange-50/60 hover:text-orange-800">{s.title}</a></li>
+                                                                <li key={s.id}>
+                                                                        <a href={`#${s.id}`} className="group flex items-center justify-between rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--bridge-text-secondary)] transition hover:bg-orange-50/60 hover:text-orange-800 dark:hover:bg-orange-500/10 dark:hover:text-orange-300">
+                                                                                <span>{s.title}</span>
+                                                                                <span aria-hidden className="text-xs opacity-0 transition group-hover:opacity-70">→</span>
+                                                                        </a>
+                                                                </li>
                                                             ))}
                                                     </ul>
                                             </nav>
@@ -38,11 +59,11 @@ export default function Privacy() {
 
                                     <article className="space-y-10 lg:col-span-9">
                                             {SECTIONS.map((s) => (
-                                                <section key={s.id} id={s.id} className="scroll-mt-24">
-                                                        <h2 className="font-display text-2xl font-semibold text-stone-900">{s.title}</h2>
-                                                        <div className="mt-4 space-y-4 leading-relaxed text-stone-700">
+                                                <section key={s.id} id={s.id} className="scroll-mt-24 rounded-[1.5rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-7 shadow-bridge-tile sm:p-8">
+                                                        <h2 className="font-display text-2xl font-semibold text-[var(--bridge-text)]">{s.title}</h2>
+                                                        <div className="mt-4 space-y-4 leading-relaxed text-[var(--bridge-text-secondary)]">
                                                                 {s.body.split('\n\n').map((p, i) => (
-                                                                    <p key={i} dangerouslySetInnerHTML={{ __html: p.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-stone-900">$1</strong>') }} />
+                                                                    <p key={i} dangerouslySetInnerHTML={{ __html: p.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-[var(--bridge-text)]">$1</strong>') }} />
                                                                 ))}
                                                         </div>
                                                 </section>
