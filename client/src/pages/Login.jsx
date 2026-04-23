@@ -209,7 +209,7 @@ export default function Login() {
                 className="mt-5 font-display text-[2.25rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[2.85rem] sm:leading-[1.08] lg:text-[3.2rem]"
               >
                 Hey again —{' '}
-                <span className="italic text-gradient-bridge">pick up where you left off</span>.
+                <span className="font-editorial italic text-gradient-bridge">pick up where you left off</span>.
               </h1>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-[var(--bridge-text-secondary)] sm:text-lg">
                 One email and password. After this, we&apos;ll drop you on the mentor list — or right back where you were trying to go.

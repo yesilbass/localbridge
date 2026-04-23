@@ -45,7 +45,7 @@ export default function Careers() {
                     </div>
                     <h1 className="font-display text-[2.75rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.5rem] lg:text-[4rem]">
                         Build the platform careers are{' '}
-                        <span className="italic text-gradient-bridge">actually</span> built on.
+                        <span className="font-editorial italic text-gradient-bridge">actually</span> built on.
                     </h1>
                     <p className="mt-5 text-lg leading-relaxed text-[var(--bridge-text-secondary)]">
                         We&apos;re small, deliberate, and moving fast. If you want to ship work that changes lives, we should talk.
@@ -116,7 +116,7 @@ export default function Careers() {
                         <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-gradient-to-br from-orange-400/20 to-amber-300/10 blur-3xl" />
                         <p className="relative text-xs font-bold uppercase tracking-[0.22em] text-orange-700 dark:text-orange-300">Why work here</p>
                         <h2 className="relative mt-2 font-display text-3xl font-bold text-[var(--bridge-text)] sm:text-4xl">
-                            Perks we <span className="italic text-gradient-bridge">actually</span> invest in.
+                            Perks we <span className="font-editorial italic text-gradient-bridge">actually</span> invest in.
                         </h2>
                         <div className="relative mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             {perks.map((p, i) => {

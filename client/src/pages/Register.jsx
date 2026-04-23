@@ -310,12 +310,12 @@ export default function Register() {
                 {mentorIntent ? (
                   <>
                     You&apos;re already the person people tap for advice.{' '}
-                    <span className="italic text-gradient-bridge">On Bridge, they can book you.</span>
+                    <span className="font-editorial italic text-gradient-bridge">On Bridge, they can book you.</span>
                   </>
                 ) : (
                   <>
                     Get an account and{' '}
-                    <span className="italic text-gradient-bridge">talk to someone who&apos;s been there</span>.
+                    <span className="font-editorial italic text-gradient-bridge">talk to someone who&apos;s been there</span>.
                   </>
                 )}
               </h1>

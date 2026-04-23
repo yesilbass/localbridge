@@ -34,7 +34,7 @@ export default function Privacy() {
                                             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-secondary)]">Legal</span>
                                     </div>
                                     <h1 className="font-display text-[2.75rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.5rem] lg:text-[4rem]">
-                                            Privacy <span className="italic text-gradient-bridge">policy</span>
+                                            Privacy <span className="font-editorial italic text-gradient-bridge">policy</span>
                                     </h1>
                                     <p className="mt-4 text-sm font-medium text-[var(--bridge-text-muted)]">Last updated: April 21, 2026</p>
                             </Reveal>

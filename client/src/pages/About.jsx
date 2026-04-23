@@ -74,10 +74,10 @@ export default function About() {
               </span>
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-secondary)]">About Bridge</span>
             </div>
-            <h1 className="font-display text-balance text-[2.75rem] font-bold leading-[1.04] tracking-[-0.014em] text-[var(--bridge-text)] sm:text-[3.75rem] sm:leading-[1.04] lg:text-[4.75rem]">
+            <h1 className="font-editorial text-balance text-[3rem] font-normal leading-[0.98] tracking-[-0.024em] text-[var(--bridge-text)] sm:text-[4rem] sm:leading-[0.96] lg:text-[5rem]">
               Careers change in{' '}
               <span className="relative inline-block">
-                <span className="relative z-10 italic text-gradient-bridge">conversation</span>
+                <span className="relative z-10 font-editorial italic text-gradient-bridge">conversation</span>
                 <span aria-hidden className="absolute bottom-1 left-0 right-0 -z-0 h-[0.35em] -rotate-1 bg-[var(--landing-hero-highlight)]" />
               </span>
               , not in courses.
@@ -112,7 +112,7 @@ export default function About() {
               <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-gradient-to-br from-orange-400/25 to-amber-300/10 blur-3xl" />
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-orange-700 dark:text-orange-300">Our mission</p>
               <h2 className="mt-3 font-display text-3xl font-bold text-[var(--bridge-text)] sm:text-4xl">
-                Democratize access to <span className="italic text-gradient-bridge">the right conversation</span>.
+                Democratize access to <span className="font-editorial italic text-gradient-bridge">the right conversation</span>.
               </h2>
               <p className="mt-5 text-base leading-relaxed text-[var(--bridge-text-secondary)] sm:text-lg">
                 The right ten minutes with the right person can alter the trajectory of a life. We're making those ten minutes
@@ -151,7 +151,7 @@ export default function About() {
           <Reveal className="mb-14 max-w-2xl">
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-orange-700 dark:text-orange-300">What we believe</p>
             <h2 className="mt-3 font-display text-4xl font-bold text-[var(--bridge-text)] sm:text-5xl">
-              Values we <span className="italic text-gradient-bridge">actually</span> use.
+              Values we <span className="font-editorial italic text-gradient-bridge">actually</span> use.
             </h2>
           </Reveal>
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -179,7 +179,7 @@ export default function About() {
             <div className="max-w-2xl">
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-orange-700 dark:text-orange-300">Leadership</p>
               <h2 className="mt-3 font-display text-4xl font-bold text-[var(--bridge-text)] sm:text-5xl">
-                The people <span className="italic text-gradient-bridge">behind</span> Bridge.
+                The people <span className="font-editorial italic text-gradient-bridge">behind</span> Bridge.
               </h2>
             </div>
             <p className="text-sm text-[var(--bridge-text-muted)] sm:max-w-xs sm:text-right">

@@ -55,7 +55,7 @@ export default function FAQ() {
                     </div>
                     <h1 className="font-display text-[2.5rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.25rem] lg:text-[3.75rem]">
                         Questions,{' '}
-                        <span className="italic text-gradient-bridge">answered</span>.
+                        <span className="font-editorial italic text-gradient-bridge">answered</span>.
                     </h1>
                     <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-[var(--bridge-text-secondary)]">
                         Can&apos;t find what you&apos;re looking for?{' '}

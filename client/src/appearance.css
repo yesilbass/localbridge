@@ -42,16 +42,16 @@ html {
 html.theme-dark {
   color-scheme: dark;
   /* Dark: obsidian ember — deep warm charcoal with layered elevation. Not gray, not flat. */
-  --bridge-canvas: #0c0a08;
-  --bridge-surface: #1a1614;
-  --bridge-surface-raised: #221d1a;
-  --bridge-surface-muted: #15110f;
-  --bridge-border: rgb(251 146 60 / 0.1);
-  --bridge-border-strong: rgb(251 146 60 / 0.2);
-  --bridge-text: #faf5ec;
-  --bridge-text-secondary: #e7dfd1;
-  --bridge-text-muted: #a8a29e;
-  --bridge-text-faint: #78716c;
+  --bridge-canvas: #0a0806;
+  --bridge-surface: #15110e;
+  --bridge-surface-raised: #1c1714;
+  --bridge-surface-muted: #100d0b;
+  --bridge-border: rgb(251 146 60 / 0.12);
+  --bridge-border-strong: rgb(251 146 60 / 0.22);
+  --bridge-text: #fbf7ed;
+  --bridge-text-secondary: #ebe3d3;
+  --bridge-text-muted: #b5ada2;
+  --bridge-text-faint: #7a726a;
   --bridge-accent: #fb923c;
   --bridge-accent-muted: #fdba74;
   --bridge-accent-soft: #fed7aa;

@@ -82,13 +82,19 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, 
               <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                 <div className="space-y-6 lg:col-span-2">
                   {nextSession ? (
-                      <div className="relative overflow-hidden rounded-[2rem] bg-stone-900 p-8 text-white shadow-xl shadow-stone-900/10">
+                      <div className="group relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-stone-950 via-stone-900 to-[#1a0f08] p-8 text-white shadow-[0_30px_70px_-20px_rgba(234,88,12,0.35),0_0_0_1px_rgba(251,146,60,0.15)] cursor-glow">
+                        <div aria-hidden className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.12] mix-blend-overlay" />
+                        <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-gradient-to-br from-orange-500/30 via-amber-400/15 to-transparent blur-3xl animate-blob-breathe" />
+                        <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-16 h-64 w-64 rounded-full bg-gradient-to-tr from-amber-500/18 via-orange-500/10 to-transparent blur-3xl" />
                         <div className="absolute right-0 top-0 p-8 opacity-10">
                           <CalendarDays className="h-32 w-32" />
                         </div>
                         <div className="relative z-10">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="inline-block rounded-full bg-orange-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider">Next Session</span>
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_6px_20px_-4px_rgba(234,88,12,0.6)]">
+                              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-white animate-pulse-soft" />
+                              Next Session
+                            </span>
                             {nextSession.status === 'pending' && (
                               <span className="inline-block rounded-full bg-amber-400/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-200 ring-1 ring-amber-300/40">
                                 Awaiting your response
@@ -100,7 +106,11 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, 
                               </span>
                             )}
                           </div>
-                          <h3 className="mt-4 font-display text-2xl font-bold">Session with {nextSession.mentee_name}</h3>
+                          <h3 className="mt-4 font-display text-3xl font-bold tracking-[-0.02em]">
+                            {nextSession.mentee_name
+                              ? `Session with ${nextSession.mentee_name}`
+                              : 'Your next mentee session'}
+                          </h3>
                           <div className="mt-6 flex flex-wrap gap-4">
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-orange-400" />

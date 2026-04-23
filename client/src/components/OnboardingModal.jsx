@@ -114,7 +114,7 @@ export default function OnboardingModal() {
               </div>
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-orange-700 dark:text-orange-300">Welcome aboard</p>
               <h2 className="mt-3 font-display text-3xl font-bold text-[var(--bridge-text)] sm:text-4xl">
-                Hey {firstName}! <span className="italic text-gradient-bridge">Let&apos;s get you set up.</span>
+                Hey {firstName}! <span className="font-editorial italic text-gradient-bridge">Let&apos;s get you set up.</span>
               </h2>
               <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-[var(--bridge-text-secondary)]">
                 You&apos;re one step away from connecting with mentors who&apos;ve been exactly where you are.

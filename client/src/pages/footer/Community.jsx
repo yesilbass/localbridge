@@ -46,7 +46,7 @@ export default function Community() {
                     </div>
                     <h1 className="font-display text-[2.75rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.5rem] lg:text-[4rem]">
                         More than a directory. A{' '}
-                        <span className="italic text-gradient-bridge">place</span>.
+                        <span className="font-editorial italic text-gradient-bridge">place</span>.
                     </h1>
                     <p className="mt-5 text-lg leading-relaxed text-[var(--bridge-text-secondary)]">
                         50,000 people pushing each other forward. Here&apos;s how to plug in.
@@ -71,7 +71,7 @@ export default function Community() {
                             <div>
                                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-orange-700 dark:text-orange-300">Upcoming events</p>
                                 <h2 className="mt-2 font-display text-3xl font-bold text-[var(--bridge-text)] sm:text-4xl">
-                                    Meet the community <span className="italic text-gradient-bridge">in person</span>.
+                                    Meet the community <span className="font-editorial italic text-gradient-bridge">in person</span>.
                                 </h2>
                             </div>
                             <p className="text-sm text-[var(--bridge-text-muted)]">RSVP is free — attendance is not.</p>
@@ -161,7 +161,7 @@ export default function Community() {
                             </div>
                             <p className="relative mt-6 text-xs font-bold uppercase tracking-[0.2em] text-orange-700 dark:text-orange-300">Newsletter</p>
                             <h3 className="relative mt-2 font-display text-2xl font-semibold text-[var(--bridge-text)] sm:text-3xl">
-                                Weekly, <span className="italic text-gradient-bridge">actually useful</span>.
+                                Weekly, <span className="font-editorial italic text-gradient-bridge">actually useful</span>.
                             </h3>
                             <p className="relative mt-3 text-[var(--bridge-text-secondary)] leading-relaxed">
                                 Insights from mentors, community highlights, early access to new features. Sent Sundays. Unsubscribe anytime.

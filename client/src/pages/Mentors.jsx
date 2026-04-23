@@ -196,7 +196,10 @@ function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favo
   }
 
   return (
-      <div className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card transition-all duration-500 hover:-translate-y-1.5 hover:border-orange-300/60 hover:shadow-bridge-glow">
+      <div
+        data-tilt="5"
+        className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card tilt-card cursor-glow transition-[box-shadow,border-color] duration-500 hover:border-orange-300/60 hover:shadow-bridge-glow"
+      >
         {/* Hover aurora */}
         <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br from-orange-400/20 via-amber-300/10 to-transparent opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
         <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/80 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
@@ -772,7 +775,7 @@ export default function Mentors() {
                     id="mentors-heading"
                     className="font-display text-[2.25rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[2.75rem]"
                 >
-                  Browse <span className="italic text-gradient-bridge">mentors</span>
+                  Browse <span className="font-editorial italic text-gradient-bridge">mentors</span>
                 </h1>
                 <p className="mt-2 text-sm text-[var(--bridge-text-secondary)] sm:text-base">
                   {loading ? (

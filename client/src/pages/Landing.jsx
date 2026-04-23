@@ -165,11 +165,11 @@ function Hero() {
           <div className="relative mx-auto max-w-4xl text-center">
             <h1
                 id="landing-heading"
-                className="font-display text-balance text-[2.9rem] font-bold leading-[1.04] tracking-[-0.01em] text-[var(--bridge-text)] sm:text-[4rem] sm:leading-[1.05] lg:text-[5rem] lg:leading-[1.04]"
+                className="font-editorial text-balance text-[3.25rem] font-normal leading-[0.98] tracking-[-0.025em] text-[var(--bridge-text)] sm:text-[4.5rem] sm:leading-[0.96] lg:text-[5.75rem] lg:leading-[0.94]"
             >
               The person you need to talk to{' '}
               <span className="relative mx-1 inline-block sm:mx-2">
-                <span className="relative z-10 italic text-gradient-bridge">has already</span>
+                <span className="relative z-10 font-editorial italic text-gradient-bridge">has already</span>
                 <span
                     aria-hidden
                     className="absolute bottom-1 left-0 right-0 -z-0 h-[0.35em] -rotate-1 bg-[var(--landing-hero-highlight)]"
@@ -187,10 +187,11 @@ function Hero() {
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
               <Link
                   to="/mentors"
-                  className={`group btn-sheen relative inline-flex w-full min-h-[3rem] items-center justify-center gap-2 rounded-full bg-stone-900 px-8 py-3.5 text-sm font-semibold text-white shadow-[0_10px_40px_-8px_rgba(28,25,23,0.4)] transition hover:-translate-y-0.5 hover:bg-stone-800 hover:shadow-[0_18px_50px_-10px_rgba(28,25,23,0.5)] dark:bg-gradient-to-r dark:from-orange-500 dark:via-amber-500 dark:to-orange-600 dark:text-stone-950 dark:shadow-[0_12px_40px_-8px_rgba(234,88,12,0.55)] dark:hover:shadow-[0_20px_60px_-10px_rgba(234,88,12,0.7)] dark:hover:brightness-105 sm:w-auto ${focusRing}`}
+                  data-magnet="10"
+                  className={`magnetic group btn-sheen relative inline-flex w-full min-h-[3.25rem] items-center justify-center gap-2.5 rounded-full bg-stone-900 px-8 py-4 text-[0.95rem] font-semibold tracking-[-0.01em] text-white shadow-[0_12px_40px_-8px_rgba(28,25,23,0.45)] hover:bg-stone-800 hover:shadow-[0_22px_56px_-12px_rgba(28,25,23,0.55)] dark:bg-gradient-to-r dark:from-orange-500 dark:via-amber-500 dark:to-orange-600 dark:text-stone-950 dark:shadow-[0_14px_48px_-8px_rgba(234,88,12,0.6)] dark:hover:shadow-[0_24px_70px_-12px_rgba(234,88,12,0.75)] dark:hover:brightness-105 sm:w-auto ${focusRing}`}
               >
                 Browse 2,400+ mentors
-                <span className="transition group-hover:translate-x-0.5" aria-hidden>
+                <span className="transition group-hover:translate-x-1" aria-hidden>
                   →
                 </span>
               </Link>

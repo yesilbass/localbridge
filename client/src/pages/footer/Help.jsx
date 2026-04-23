@@ -99,7 +99,7 @@ export default function Help() {
                         <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-secondary)]">Help center</span>
                     </div>
                     <h1 className="font-display text-[2.5rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.25rem] lg:text-[3.75rem]">
-                        How can we <span className="italic text-gradient-bridge">help</span>?
+                        How can we <span className="font-editorial italic text-gradient-bridge">help</span>?
                     </h1>
                 </Reveal>
 

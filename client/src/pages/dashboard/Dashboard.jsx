@@ -72,7 +72,7 @@ export default function Dashboard() {
               </div>
               <h1 className="font-display text-[2rem] font-bold leading-[1.1] text-[var(--bridge-text)] sm:text-[2.5rem]">
                 Good {greeting},{' '}
-                <span className="italic text-gradient-bridge">{firstName}</span>
+                <span className="font-editorial italic text-gradient-bridge">{firstName}</span>
               </h1>
               <p className="mt-1 text-xs font-medium text-[var(--bridge-text-muted)]">{getTodayLabel()}</p>
             </div>

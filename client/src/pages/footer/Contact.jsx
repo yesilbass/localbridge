@@ -39,7 +39,7 @@ export default function Contact() {
                     </div>
                     <h1 className="font-display text-[2.5rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.25rem] lg:text-[3.75rem]">
                         Reach the humans who can{' '}
-                        <span className="italic text-gradient-bridge">actually help</span>.
+                        <span className="font-editorial italic text-gradient-bridge">actually help</span>.
                     </h1>
                     <p className="mt-5 text-lg text-[var(--bridge-text-secondary)]">
                         We respond to every message within 24 hours, usually faster.

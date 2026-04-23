@@ -45,7 +45,7 @@ export default function Trust() {
                     </div>
                     <h1 className="font-display text-[2.75rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.5rem] lg:text-[4rem]">
                         Your safety isn&apos;t{' '}
-                        <span className="italic text-gradient-bridge">optional</span>.
+                        <span className="font-editorial italic text-gradient-bridge">optional</span>.
                     </h1>
                     <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--bridge-text-secondary)]">
                         Here&apos;s exactly how we protect the community, the technical measures we enforce, and how to report anything that doesn&apos;t feel right.
@@ -81,7 +81,7 @@ export default function Trust() {
                         <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-orange-400/15 to-transparent blur-3xl" />
                         <p className="text-xs font-bold uppercase tracking-[0.22em] text-orange-700 dark:text-orange-300">Community standards</p>
                         <h2 className="mt-3 font-display text-3xl font-bold text-[var(--bridge-text)] sm:text-4xl">
-                            What we expect from <span className="italic text-gradient-bridge">everyone</span>.
+                            What we expect from <span className="font-editorial italic text-gradient-bridge">everyone</span>.
                         </h2>
                         <ul className="relative mt-7 grid gap-3 sm:grid-cols-2">
                             {standards.map((s) => (
@@ -106,7 +106,7 @@ export default function Trust() {
                             <div>
                                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-orange-700 dark:text-orange-300">Report a concern</p>
                                 <h2 className="mt-2 font-display text-3xl font-bold text-[var(--bridge-text)]">
-                                    Something off? <span className="italic text-gradient-bridge">Tell us</span>.
+                                    Something off? <span className="font-editorial italic text-gradient-bridge">Tell us</span>.
                                 </h2>
                                 <p className="mt-2 text-[var(--bridge-text-secondary)]">
                                     All reports are confidential and reviewed within 4 hours. You can report anonymously by leaving contact info blank.

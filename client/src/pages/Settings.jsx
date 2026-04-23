@@ -374,7 +374,7 @@ export default function Settings() {
               Settings
             </div>
             <h1 className="font-display text-[2.5rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3rem]">
-              Your <span className="italic text-gradient-bridge">preferences</span>
+              Your <span className="font-editorial italic text-gradient-bridge">preferences</span>
             </h1>
             <p className="mt-2 text-[var(--bridge-text-secondary)]">Manage your account, privacy, and how Bridge looks and feels.</p>
           </div>
