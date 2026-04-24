@@ -5,10 +5,8 @@
 // not pretending mail is sent *from* that Gmail — Resend sends the message and
 // the **To:** (and optional **Reply-To:**) is what routes reports into Gmail.
 //
-// Uses the official Resend Node SDK via Deno’s npm specifier:
-//   import { Resend } from "npm:resend@4";
-// Do **not** put your key in code like `new Resend('re_xxxxxxxxx')`. Replace
-// `re_xxxxxxxxx` with your real key only when setting the Supabase secret:
+// Uses Resend’s HTTPS API (fetch) — no npm: imports, works cleanly in Deno.
+// Do **not** put your key in code. Set the Supabase secret:
 //   supabase secrets set RESEND_API_KEY=re_xxxxxxxxx
 //
 // Required Supabase secret:
@@ -28,8 +26,16 @@
 // Invoke (client):
 //   await supabase.functions.invoke('send-support-email', { body: {...} })
 
-import { Resend } from "npm:resend@4";
-import { corsHeaders } from "../_shared/cors.ts";
+/// <reference path="./deno-global.d.ts" />
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+} as const;
+
+const RESEND_SEND_URL = "https://api.resend.com/emails";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const TO_EMAIL = Deno.env.get("SUPPORT_TO_EMAIL") ?? "mentors.bridge@gmail.com";
@@ -44,6 +50,8 @@ type Payload = {
   replyTo?: string;
   fromName?: string;
   meta?: Record<string, unknown>;
+  /** Override the delivery address (e.g. mentor's email for review notifications). */
+  toOverride?: string;
 };
 
 function json(body: unknown, status = 200): Response {
@@ -127,6 +135,8 @@ Deno.serve(async (req) => {
   const body = (payload.body || "").trim();
   if (!body) return json({ error: "empty_body" }, 400);
 
+  const deliverTo = payload.toOverride?.trim() || TO_EMAIL;
+
   const html = renderHtml({ ...payload, ticketId });
   const text = [
     `Ticket ID: ${ticketId}`,
@@ -140,27 +150,43 @@ Deno.serve(async (req) => {
     .filter(Boolean)
     .join("\n");
 
-  const resend = new Resend(RESEND_API_KEY);
-
   try {
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: [TO_EMAIL],
-      subject,
-      html,
-      text,
-      ...(payload.replyTo ? { replyTo: payload.replyTo } : {}),
+    const res = await fetch(RESEND_SEND_URL, {
+      method: "POST",
       headers: {
-        "X-Bridge-Ticket": ticketId,
-        "X-Bridge-Kind": payload.kind ?? "contact",
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: [deliverTo],
+        subject,
+        html,
+        text,
+        ...(payload.replyTo ? { reply_to: payload.replyTo } : {}),
+        headers: {
+          "X-Bridge-Ticket": ticketId,
+          "X-Bridge-Kind": payload.kind ?? "contact",
+        },
+      }),
     });
 
-    if (error) {
-      return json({ error: "resend_failed", detail: error }, 502);
+    const bodyJson: { id?: string; message?: string; name?: string } = await res
+      .json()
+      .catch(() => ({}));
+
+    if (!res.ok) {
+      return json(
+        {
+          error: "resend_failed",
+          detail: bodyJson,
+          status: res.status,
+        },
+        502,
+      );
     }
 
-    return json({ ok: true, ticketId, id: data?.id ?? null });
+    return json({ ok: true, ticketId, id: bodyJson?.id ?? null });
   } catch (err) {
     return json(
       { error: "send_failed", message: String((err as Error)?.message ?? err) },

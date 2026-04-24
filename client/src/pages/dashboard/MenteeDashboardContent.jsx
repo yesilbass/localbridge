@@ -39,12 +39,60 @@ import {
 } from './dashboardShared';
 import { formatSessionDate } from './dashboardUtils';
 import DashboardSettingsPanel from './DashboardSettingsPanel';
+import { useState, useEffect, useCallback } from 'react';
+import ReviewModal from '../../components/ReviewModal';
+import { getMyReviewedSessionIds } from '../../api/reviews';
 import { useState } from 'react';
 import { createReview } from '../../api/reviews';
 
-export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, user }) {
+/** Session is within the 5-day post-session review window. */
+function isWithinReviewWindow(session) {
+  if (session.status !== 'completed') return false;
+  const ref = new Date(session.scheduled_date ?? session.created_at);
+  const ageMs = Date.now() - ref.getTime();
+  return ageMs <= 5 * 24 * 60 * 60 * 1000;
+}
+
+export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, user, initialReviewSession }) {
   const navigate = useNavigate();
   const [heroHint, setHeroHint] = useState(null);
+
+  // Review modal state: null = closed, object = open with session data
+  const [reviewModal, setReviewModal] = useState(
+    initialReviewSession ? { ...initialReviewSession } : null,
+  );
+  // Session IDs the current user has already reviewed (fetched once on mount)
+  const [reviewedSessionIds, setReviewedSessionIds] = useState(new Set());
+
+  useEffect(() => {
+    getMyReviewedSessionIds().then(({ data }) => {
+      if (data) setReviewedSessionIds(data);
+    });
+  }, []);
+
+  // Clear navigate state so the modal doesn't re-appear on future renders
+  useEffect(() => {
+    if (initialReviewSession) {
+      window.history.replaceState({}, '');
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const openReviewForSession = useCallback((session, mentorMap) => {
+    const mentor = mentorMap[session.mentor_id];
+    setReviewModal({
+      sessionId: session.id,
+      mentorId: session.mentor_id,
+      mentorName: mentor?.name ?? session.mentor_name ?? 'your mentor',
+      mentorEmail: mentor?.email ?? null,
+    });
+  }, []);
+
+  const handleReviewSubmitted = useCallback((review) => {
+    if (review?.session_id) {
+      setReviewedSessionIds((prev) => new Set([...prev, review.session_id]));
+    }
+  }, []);
+
   const [reviewingSession, setReviewingSession] = useState(null);
   const [reviewedSessionIds, setReviewedSessionIds] = useState(new Set());
   const {
@@ -65,6 +113,18 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
 
   return (
       <>
+        {/* Review modal — shown automatically after call or via Leave Review button */}
+        {reviewModal && (
+          <ReviewModal
+            sessionId={reviewModal.sessionId}
+            mentorId={reviewModal.mentorId}
+            mentorName={reviewModal.mentorName}
+            mentorEmail={reviewModal.mentorEmail}
+            onClose={() => setReviewModal(null)}
+            onSubmitted={handleReviewSubmitted}
+          />
+        )}
+
         {activeTab === 'overview' && (
             <div className="space-y-8 pb-10">
               <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -221,6 +281,8 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
                 setSearchQuery={setSearchQuery}
                 handleStatusUpdate={handleStatusUpdate}
                 actionLoading={actionLoading}
+                reviewedSessionIds={reviewedSessionIds}
+                onReview={(s) => openReviewForSession(s, mentorMap)}
                 onReview={setReviewingSession}
                 reviewedSessionIds={reviewedSessionIds}
             />
@@ -247,6 +309,7 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
 }
 
 /** Sessions list; `SessionCard` is mentee mode (cancel on pending, no accept/decline). `mentorMap` supplies avatar/meta. */
+function MenteeSessionsTab({ upcomingSessions, historySessions, mentorMap, searchQuery, setSearchQuery, handleStatusUpdate, actionLoading, reviewedSessionIds = new Set(), onReview }) {
 function MenteeSessionsTab({ upcomingSessions, historySessions, mentorMap, searchQuery, setSearchQuery, handleStatusUpdate, actionLoading, onReview, reviewedSessionIds }) {
   const match = (s) =>
       s.mentor_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -297,6 +360,15 @@ function MenteeSessionsTab({ upcomingSessions, historySessions, mentorMap, searc
             <div className="space-y-3">
               {historySessions.filter(match).map((s) => (
                   <SessionCard
+                      key={s.id}
+                      session={s}
+                      isMentor={false}
+                      mentorProfile={mentorMap[s.mentor_id]}
+                      onReview={
+                        isWithinReviewWindow(s) && !reviewedSessionIds.has(s.id)
+                          ? () => onReview(s)
+                          : undefined
+                      }
                     key={s.id}
                     session={s}
                     isMentor={false}

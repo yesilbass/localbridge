@@ -131,6 +131,7 @@ export function EmptyState({ message, cta, href, icon: Icon = CalendarDays }) {
   );
 }
 
+export function SessionCard({ session, isMentor = false, mentorProfile, onAccept, onDecline, onCancel, onReview, actionLoading }) {
 export function SessionCard({ session, isMentor = false, mentorProfile, onAccept, onDecline, onCancel, actionLoading, onReview, reviewed }) {
   const navigate = useNavigate();
   const type = SESSION_TYPE_MAP[session.session_type];
@@ -248,7 +249,17 @@ export function SessionCard({ session, isMentor = false, mentorProfile, onAccept
               {actionLoading === session.id ? 'Cancelling…' : 'Cancel'}
             </button>
           )}
-          {!showMentorActions && !showCancelButton && !showJoinCall && !isMentor && (
+          {onReview && (
+            <button
+              type="button"
+              onClick={onReview}
+              className="btn-sheen inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-xs font-bold text-white shadow-[0_6px_16px_-4px_rgba(234,88,12,0.4)] transition hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-6px_rgba(234,88,12,0.55)]"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Leave a Review
+            </button>
+          )}
+          {!showMentorActions && !showCancelButton && !showJoinCall && !onReview && !isMentor && (
             <Link
               to={`/mentors/${session.mentor_id}`}
               className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-bold text-orange-700 transition hover:bg-orange-50 hover:text-orange-800 dark:text-orange-300 dark:hover:bg-orange-500/10 dark:hover:text-orange-200"

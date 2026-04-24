@@ -15,6 +15,7 @@ import { useAuth } from '../context/useAuth';
 import { ArrowLeft, Video, VideoOff, ExternalLink } from 'lucide-react';
 import supabase from '../api/supabase';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { updateSessionStatus } from '../api/sessions';
 
 const FALLBACK_DOMAIN = 'meet.jit.si';
 const externalApiSrc = (domain) => `https://${domain}/external_api.js`;
@@ -109,7 +110,7 @@ export default function VideoCall() {
     try {
       const { data, error: sessErr } = await supabase
         .from('sessions')
-        .select('*, mentor:mentor_id(id, name, user_id)')
+        .select('*, mentor:mentor_id(id, name, user_id, email)')
         .eq('id', sessionId)
         .single();
 
@@ -244,9 +245,31 @@ export default function VideoCall() {
         // so the embedded Jitsi prejoin / permissions UI is visible and interactive.
         overlayTimeout = setTimeout(markReady, 7000);
 
-        api.addListener('readyToClose', () => {
+        api.addListener('readyToClose', async () => {
           if (cancelled) return;
-          navigate('/dashboard');
+
+          const isMentee = session?.mentee_id === user?.id;
+
+          if (isMentee) {
+            // Mark session complete so the review prompt and history are accurate.
+            try {
+              await updateSessionStatus(session.id, 'completed');
+            } catch (err) {
+              console.warn('Could not mark session as completed:', err?.message ?? err);
+            }
+            navigate('/dashboard', {
+              state: {
+                reviewSession: {
+                  sessionId: session.id,
+                  mentorId: session.mentor?.id ?? null,
+                  mentorName: session.mentor?.name ?? 'your mentor',
+                  mentorEmail: session.mentor?.email ?? null,
+                },
+              },
+            });
+          } else {
+            navigate('/dashboard');
+          }
         });
       } catch (err) {
         console.error('Jitsi init failed:', err);
