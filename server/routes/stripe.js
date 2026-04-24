@@ -73,7 +73,7 @@ router.post('/create-subscription-checkout', async (req, res) => {
     res.json({ clientSecret: session.client_secret });
   } catch (error) {
     console.error('Subscription checkout error:', error);
-    res.status(500).json({ error: 'Could not create subscription checkout.' });
+    res.status(500).json({ error: error?.message || 'Could not create subscription checkout.' });
   }
 });
 
@@ -137,7 +137,7 @@ router.post('/create-booking-checkout', async (req, res) => {
     res.json({ clientSecret: session.client_secret });
   } catch (error) {
     console.error('Booking checkout error:', error);
-    res.status(500).json({ error: 'Could not create booking checkout.' });
+    res.status(500).json({ error: error?.message || 'Could not create booking checkout.' });
   }
 });
 
@@ -172,7 +172,7 @@ router.post('/finalize-checkout', async (req, res) => {
     });
   } catch (error) {
     console.error('Finalize checkout error:', error);
-    res.status(500).json({ error: 'Could not finalize checkout.' });
+    res.status(500).json({ error: error?.message || 'Could not finalize checkout.' });
   }
 });
 

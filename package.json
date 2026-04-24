@@ -2,7 +2,12 @@
   "name": "bridge",
   "private": true,
   "description": "Monorepo: install/build run from the client app",
+  "type": "module",
   "scripts": {
     "build": "npm run build --prefix client"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.103.3",
+    "stripe": "^22.1.0"
   }
 }
