@@ -1,4 +1,6 @@
-const BASE = import.meta.env.VITE_SERVER_URL || '';
+import { SERVER_URL } from '../config/api';
+
+const BASE = SERVER_URL;
 
 export async function getCalendarAuthUrl(mentorProfileId) {
   const res = await fetch(

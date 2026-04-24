@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { isMentorAccount } from '../utils/accountRole';
 import Reveal from '../components/Reveal';
 import { focusRing } from '../ui';
 import EmbeddedCheckoutPanel from '../components/EmbeddedCheckoutPanel';
+import { createSubscriptionCheckout, finalizeCheckout } from '../api/stripe';
 
 const ANNUAL_DISCOUNT = 0.2;
 
@@ -161,10 +162,36 @@ function PricingFaq({ headingId, items }) {
 export default function Pricing() {
   const { user } = useAuth();
   const asMentor = user ? isMentorAccount(user) : false;
+  const [searchParams, setSearchParams] = useSearchParams();
   const [annual, setAnnual] = useState(false);
   const [billingNote, setBillingNote] = useState(null);
   const [checkoutClientSecret, setCheckoutClientSecret] = useState(null);
   const [paymentError, setPaymentError] = useState('');
+
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id');
+    if (!sessionId) return;
+
+    let cancelled = false;
+    void (async () => {
+      const result = await finalizeCheckout(sessionId);
+      if (cancelled) return;
+
+      if (!result.ok) {
+        setPaymentError(result.error || 'Could not verify payment.');
+      } else {
+        setBillingNote('Subscription payment successful. Your plan is now active.');
+      }
+
+      const next = new URLSearchParams(searchParams);
+      next.delete('session_id');
+      setSearchParams(next, { replace: true });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, setSearchParams]);
 
   async function handlePaidClick(planName) {
     setPaymentError('');
@@ -175,26 +202,18 @@ export default function Pricing() {
     }
 
     try {
-      const response = await fetch('http://localhost:3001/api/stripe/create-subscription-checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          planName,
-          userId: user.id,
-          userEmail: user.email,
-        }),
+      const result = await createSubscriptionCheckout({
+        planName,
+        userId: user.id,
+        userEmail: user.email,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setPaymentError(data.error || 'Could not start checkout.');
+      if (!result.ok) {
+        setPaymentError(result.error || 'Could not start checkout.');
         return;
       }
 
-      setCheckoutClientSecret(data.clientSecret);
+      setCheckoutClientSecret(result.clientSecret);
     } catch (error) {
       console.error(error);
       setPaymentError('Could not connect to payment server.');

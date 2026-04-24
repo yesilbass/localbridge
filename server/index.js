@@ -7,8 +7,6 @@ import sessionRoutes from './routes/sessions.js';
 import calendarRoutes from './routes/calendar.js';
 import googleAuthRoutes from './routes/googleAuth.js';
 import stripeRoutes from './routes/stripe.js';
-app.use('/api/stripe', stripeRoutes);
-app.use(express.json());
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -29,6 +27,7 @@ app.use('/calendar', calendarRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/mentors', mentorRoutes);
 app.use('/api/sessions', sessionRoutes);
+app.use('/api/stripe', stripeRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Bridge API is running' });

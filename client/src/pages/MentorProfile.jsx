@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useId, useCallback, useRef } from 'react';
 import EmbeddedCheckoutPanel from '../components/EmbeddedCheckoutPanel';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { getMentorById } from '../api/mentors';
 import { getReviewsForMentor } from '../api/reviews';
 import { createSession } from '../api/sessions';
@@ -19,6 +19,8 @@ import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
 import Reveal from '../components/Reveal';
 import MentorAvatar from '../components/MentorAvatar';
 import { focusRing } from '../ui';
+import { createBookingCheckout } from '../api/stripe';
+import { finalizeCheckout } from '../api/stripe';
 const focusRingDark = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900';
 const focusRingWhite = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900';
 
@@ -294,7 +296,7 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
     );
 }
 
-function ConfirmModal({ mentor, user, confirmation, onClose, onConfirmed }) {
+function ConfirmModal({ mentor, user, confirmation, onClose }) {
     const [submitting, setSubmitting] = useState(false);
     const [result, setResult] = useState(null);
     const [message, setMessage] = useState('');
@@ -317,30 +319,24 @@ function ConfirmModal({ mentor, user, confirmation, onClose, onConfirmed }) {
         setResult(null);
 
         try {
-            const response = await fetch('http://localhost:3001/api/stripe/create-booking-checkout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId: user?.id,
-                    userEmail: user?.email,
-                    mentorId: mentor.id,
-                    mentorName: mentor.name,
-                    sessionType: confirmation.sessionType.name,
-                    scheduledDate: confirmation.isoDate,
-                    sessionPrice: mentor.session_price ?? 25,
-                }),
+            const result = await createBookingCheckout({
+                userId: user?.id,
+                userEmail: user?.email,
+                mentorId: mentor.id,
+                mentorName: mentor.name,
+                sessionTypeName: confirmation.sessionType.name,
+                sessionTypeKey: confirmation.sessionType.key,
+                scheduledDate: confirmation.isoDate,
+                sessionPrice: mentor.session_rate ?? mentor.session_price ?? 25,
+                message,
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                setResult({ ok: false, message: data.error || 'Could not start booking checkout.' });
+            if (!result.ok) {
+                setResult({ ok: false, message: result.error || 'Could not start booking checkout.' });
                 return;
             }
 
-            setCheckoutClientSecret(data.clientSecret);
+            setCheckoutClientSecret(result.clientSecret);
         } catch (error) {
             console.error(error);
             setResult({ ok: false, message: 'Could not connect to payment server.' });
@@ -407,7 +403,12 @@ function ConfirmModal({ mentor, user, confirmation, onClose, onConfirmed }) {
                             <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
                                 <button type="button" onClick={handleClose} disabled={submitting} className={`rounded-xl border border-stone-200 bg-white px-5 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 disabled:opacity-60 ${focusRing}`}>Cancel</button>
                                 <button
-                                    {submitting ? 'Opening checkout…' : `Pay $${mentor.session_price ?? 25} & request`}>
+                                    type="button"
+                                    onClick={handleConfirm}
+                                    disabled={submitting}
+                                    className={`rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:brightness-105 disabled:opacity-60 ${focusRing}`}
+                                >
+                                    {submitting ? 'Opening checkout…' : `Pay $${mentor.session_price ?? 25} & request`}
                                 </button>
                             </div>
                         </footer>
@@ -447,6 +448,7 @@ function formatReviewDate(iso) {
 export default function MentorProfile() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { user } = useAuth();
 
     const [profile, setProfile] = useState(null);
@@ -455,6 +457,8 @@ export default function MentorProfile() {
     const [loading, setLoading] = useState(true);
     const [selectedType, setSelectedType] = useState(null);
     const [pendingConfirm, setPendingConfirm] = useState(null);
+    const [checkoutNotice, setCheckoutNotice] = useState(null);
+    const [checkoutError, setCheckoutError] = useState(null);
     const bookingRef = useRef(null);
 
     useEffect(() => {
@@ -484,6 +488,33 @@ export default function MentorProfile() {
         setSelectedType(null);
         setPendingConfirm(null);
     }, [id]);
+
+    useEffect(() => {
+        const sessionId = searchParams.get('session_id');
+        if (!sessionId) return;
+
+        let cancelled = false;
+        void (async () => {
+            const result = await finalizeCheckout(sessionId);
+            if (cancelled) return;
+
+            if (!result.ok) {
+                setCheckoutError(result.error || 'Could not verify booking payment.');
+            } else {
+                setCheckoutNotice('Booking payment successful. Your session request is now in your dashboard.');
+                setPendingConfirm(null);
+                setSelectedType(null);
+            }
+
+            const next = new URLSearchParams(searchParams);
+            next.delete('session_id');
+            setSearchParams(next, { replace: true });
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [searchParams, setSearchParams]);
 
     const displayRating = useMemo(() => {
         if (!profile?.mentor) return 0;
@@ -538,6 +569,16 @@ export default function MentorProfile() {
         <>
             <main id="mentor-profile" data-route-atmo="mentor-profile" className="relative isolate min-h-screen overflow-x-hidden" aria-labelledby="profile-heading">
                 <PageGutterAtmosphere />
+                {checkoutError ? (
+                    <div className="relative z-[4] mx-auto mt-4 max-w-bridge px-4 sm:px-6 lg:px-8">
+                        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{checkoutError}</p>
+                    </div>
+                ) : null}
+                {checkoutNotice ? (
+                    <div className="relative z-[4] mx-auto mt-4 max-w-bridge px-4 sm:px-6 lg:px-8">
+                        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{checkoutNotice}</p>
+                    </div>
+                ) : null}
 
                 <section className="bridge-hero-strip relative px-4 pt-6 sm:px-6 lg:px-8">
                     <div aria-hidden className="bridge-ambient-orb absolute -right-14 -top-10 h-52 w-52" />
@@ -865,9 +906,6 @@ export default function MentorProfile() {
                     user={user}
                     confirmation={pendingConfirm}
                     onClose={() => setPendingConfirm(null)}
-                    onConfirmed={() => {
-                        setSelectedType(null);
-                    }}
                 />
             ) : null}
         </>

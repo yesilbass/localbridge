@@ -515,20 +515,20 @@ html.theme-dark .btn-sheen::after {
 
 /* ── High contrast ───────────────────────────────────────────── */
 html.high-contrast {
-  --hc-bg: #ffffff;
-  --hc-fg: #000000;
-  --hc-border: #000000;
+    --hc-bg: #ffffff;
+    --hc-fg: #000000;
+    --hc-border: #000000;
 }
 
 html.high-contrast.theme-dark {
-  --hc-bg: #000000;
-  --hc-fg: #ffffff;
-  --hc-border: #ffffff;
+    --hc-bg: #000000;
+    --hc-fg: #ffffff;
+    --hc-border: #ffffff;
 }
 
 html.high-contrast body {
-  background-color: var(--hc-bg) !important;
-  color: var(--hc-fg) !important;
+    background-color: var(--hc-bg) !important;
+    color: var(--hc-fg) !important;
 }
 
 html.high-contrast body::before {
@@ -536,13 +536,13 @@ html.high-contrast body::before {
 }
 
 html.high-contrast * {
-  border-color: var(--hc-border) !important;
+    border-color: var(--hc-border) !important;
 }
 
 html.high-contrast a,
 html.high-contrast button {
-  text-decoration: underline;
-  outline: 2px solid transparent;
+    text-decoration: underline;
+    outline: 2px solid transparent;
 }
 
 html.high-contrast a:focus,
@@ -551,13 +551,13 @@ html.high-contrast input:focus,
 html.high-contrast select:focus,
 html.high-contrast textarea:focus {
   outline: 3px solid #f59e0b !important;
-  outline-offset: 2px;
+    outline-offset: 2px;
 }
 
 html.high-contrast .text-stone-400,
 html.high-contrast .text-stone-500,
 html.high-contrast .text-stone-600 {
-  color: var(--hc-fg) !important;
+    color: var(--hc-fg) !important;
 }
 
 /* Scrollbar (custom-scrollbar utility lives in index.css) */
