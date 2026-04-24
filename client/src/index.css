@@ -408,6 +408,34 @@ html.theme-dark {
   animation: bridge-pulse-soft 2.4s ease-in-out infinite;
 }
 
+/* Hero product preview — scene row entrance + live cursor drift */
+@keyframes bridge-scene-row {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bridge-cursor-drift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-12px, -6px);
+  }
+  50% {
+    transform: translate(-4px, -10px);
+  }
+  75% {
+    transform: translate(6px, -4px);
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    Motion system — page-level premium animations
    ═══════════════════════════════════════════════════════════════════ */

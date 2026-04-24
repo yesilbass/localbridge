@@ -58,6 +58,7 @@ function AppContent() {
           <Route path="/mentors" element={<Mentors />} />
           <Route path="/mentors/:id" element={<MentorProfile />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/onboarding" element={<MentorOnboarding />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/session/:sessionId/video" element={<VideoCall />} />

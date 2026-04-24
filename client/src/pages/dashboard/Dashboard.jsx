@@ -41,6 +41,7 @@ export default function Dashboard() {
   if (authLoading) return <LoadingSpinner label="Loading…" className="min-h-screen" size="lg" />;
   if (!user) return <Navigate to="/login" replace />;
   if (dash.dataLoading) return <LoadingSpinner label="Loading your dashboard…" className="min-h-[calc(100vh-4rem)]" size="lg" />;
+  if (isMentor && !dash.mentorOnboardingComplete) return <Navigate to="/onboarding" replace />;
 
   const firstName = getFirstName(user);
   const greeting = getTimeGreeting();

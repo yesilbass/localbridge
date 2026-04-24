@@ -142,3 +142,11 @@ Return ONLY valid JSON — no markdown, no preamble, no code fences.`;
 
   return parsed;
 }
+
+export async function updateMentorProfile(profileId, data) {
+  const { error } = await supabase
+    .from('mentor_profiles')
+    .update(data)
+    .eq('id', profileId);
+  if (error) throw error;
+}
