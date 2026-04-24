@@ -1,21 +1,105 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (Tailwind v4 defaults to media query; we toggle .dark on <html> in JS) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
 }
 
+/* ── Type system ─────────────────────────────────────────────
+   Bridge uses a two-family system like Linear / Stripe / Arc:
+   1. Outfit (sans) for 95% of the product — confident, modern, tight.
+   2. Instrument Serif for the few genuinely editorial moments
+      (Landing hero accent, About hero) — high contrast, modern serif.
+   Fraunces is still available as `font-fraunces` for special cases.
+*/
 @utility font-display {
-  font-family: "Fraunces", Georgia, "Times New Roman", serif;
-  font-optical-sizing: auto;
+  font-family: "Outfit", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: -0.02em;
+  font-feature-settings: "cv11", "ss01", "ss03";
 }
 
-/* Page backdrop: warm cream + soft aurora orbs */
+@utility font-editorial {
+  font-family: "Instrument Serif", "Fraunces", Georgia, "Times New Roman", serif;
+  font-optical-sizing: auto;
+  letter-spacing: -0.015em;
+  font-feature-settings: "ss01", "ss02";
+}
+
+@utility font-fraunces {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 50, "WONK" 0;
+  letter-spacing: -0.004em;
+}
+
+/* Gradient accent spans — now confident sans bold by default.
+   Override with `font-editorial` where we want a serif-italic moment. */
+html .text-gradient-bridge {
+  font-weight: 700;
+}
+html .text-gradient-bridge.italic,
+html i.text-gradient-bridge,
+html em.text-gradient-bridge {
+  font-weight: 700;
+  font-style: italic;
+}
+/* Editorial spans (Landing / About hero) get the serif italic treatment. */
+html .font-editorial.text-gradient-bridge,
+html .font-editorial .text-gradient-bridge {
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+html .font-editorial.text-gradient-bridge.italic,
+html .font-editorial i.text-gradient-bridge,
+html .font-editorial em.text-gradient-bridge {
+  font-weight: 400;
+}
+
+/* Body: Outfit 500 on warm cream; keep stroke confident. */
+body {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-feature-settings: "cv11", "ss01";
+}
+
+p,
+li {
+  font-weight: 500;
+}
+
+button,
+[role="button"],
+a.btn,
+input[type="submit"],
+input[type="button"] {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+input,
+select,
+textarea {
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+/* Numbers love tabular figures + SS nums for a premium SaaS feel. */
+.tabular-nums {
+  font-feature-settings: "tnum", "cv11";
+  font-variant-numeric: tabular-nums;
+}
+
+/* Slightly wider than 7xl (1280px) for nav + page alignment on large monitors; still capped for readability */
+@utility max-w-bridge {
+  max-width: min(100%, 88rem);
+}
+
+/* Shell: transparent — global atmosphere paints the world (see appearance.css + BridgeGlobalAtmosphere) */
 @utility bg-bridge-page {
-  background-color: #fffaf3;
-  background-image:
-    radial-gradient(ellipse 100% 80% at 0% -20%, rgb(254 243 199 / 0.55), transparent 50%),
-    radial-gradient(ellipse 80% 60% at 100% 0%, rgb(255 237 213 / 0.5), transparent 45%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgb(254 215 170 / 0.35), transparent 40%);
+  background-color: transparent;
+  background-image: none;
 }
 
 @utility text-gradient-bridge {
@@ -25,18 +109,164 @@
   color: transparent;
 }
 
+/* ── Premium shadow tiers (all elevations read warmth, not just opacity) ────── */
 @utility shadow-bridge-glow {
   box-shadow:
     0 0 0 1px rgb(255 255 255 / 0.6) inset,
     0 1px 2px rgb(28 25 23 / 0.04),
-    0 20px 50px -12px rgb(234 88 12 / 0.12);
+    0 8px 22px -6px rgb(234 88 12 / 0.14),
+    0 26px 60px -18px rgb(234 88 12 / 0.16);
 }
 
 @utility shadow-bridge-card {
   box-shadow:
     0 0 0 1px rgb(231 229 228 / 0.8),
-    0 4px 6px -1px rgb(28 25 23 / 0.05),
-    0 20px 40px -12px rgb(28 25 23 / 0.08);
+    0 1px 2px rgb(28 25 23 / 0.035),
+    0 6px 14px -6px rgb(28 25 23 / 0.06),
+    0 28px 56px -24px rgb(28 25 23 / 0.1);
+}
+
+/* Heavier float — for hero cards, spotlights, modal-ish surfaces. */
+@utility shadow-bridge-float {
+  box-shadow:
+    0 0 0 1px rgb(231 229 228 / 0.9) inset,
+    0 2px 4px rgb(28 25 23 / 0.04),
+    0 12px 28px -10px rgb(28 25 23 / 0.12),
+    0 40px 80px -20px rgb(234 88 12 / 0.18);
+}
+
+/* Soft ring + elevation for interactive tiles. */
+@utility shadow-bridge-tile {
+  box-shadow:
+    0 0 0 1px rgb(231 229 228 / 0.75),
+    0 1px 2px rgb(28 25 23 / 0.04),
+    0 10px 24px -12px rgb(28 25 23 / 0.12);
+}
+
+/* Accent-first glow for highlighted pills / tier badges. */
+@utility shadow-bridge-accent {
+  box-shadow:
+    0 1px 2px rgb(234 88 12 / 0.25),
+    0 6px 18px -4px rgb(234 88 12 / 0.3),
+    0 16px 44px -16px rgb(234 88 12 / 0.35);
+}
+
+/* ── Fine-grain noise (SVG data URI, inlined, ~420 bytes) ──────────────────── */
+@utility bg-bridge-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.28 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+/* ── Animated mask-based gradient border (used on primary cards + persona active state) ── */
+@utility border-gradient-bridge {
+  position: relative;
+  isolation: isolate;
+}
+.border-gradient-bridge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.25px;
+  background: conic-gradient(
+    from var(--bridge-angle, 90deg),
+    rgba(251, 146, 60, 0.9),
+    rgba(234, 88, 12, 0.35),
+    rgba(253, 230, 138, 0.9),
+    rgba(251, 146, 60, 0.9)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+/* Register a custom property so the conic gradient can animate. */
+@property --bridge-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@keyframes bridge-gradient-spin {
+  to {
+    --bridge-angle: 360deg;
+  }
+}
+
+@utility animate-border-bridge {
+  animation: bridge-gradient-spin 7s linear infinite;
+}
+
+/* ── Sheen / shimmer (used on primary CTA hover) ───────────────────────────── */
+@keyframes bridge-sheen {
+  0% {
+    transform: translateX(-150%) skewX(-16deg);
+  }
+  100% {
+    transform: translateX(250%) skewX(-16deg);
+  }
+}
+
+@utility btn-sheen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-sheen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 45%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  transform: translateX(-150%) skewX(-16deg);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.btn-sheen:hover::after,
+.btn-sheen:focus-visible::after {
+  opacity: 1;
+  animation: bridge-sheen 900ms ease forwards;
+}
+
+/* ── Ambient aurora (full-bleed, theme aware via tokens) ───────────────────── */
+@keyframes bridge-aurora {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate3d(-1.5%, -2%, 0) rotate(2deg);
+    opacity: 1;
+  }
+}
+
+@utility animate-bridge-aurora {
+  animation: bridge-aurora 22s ease-in-out infinite;
+}
+
+@utility bg-bridge-aurora {
+  background-image:
+    radial-gradient(40% 50% at 20% 10%, var(--bridge-aurora-1, rgb(254 215 170 / 0.55)), transparent 60%),
+    radial-gradient(35% 45% at 80% 15%, var(--bridge-aurora-2, rgb(253 230 138 / 0.5)), transparent 60%),
+    radial-gradient(50% 55% at 50% 100%, var(--bridge-aurora-3, rgb(251 191 36 / 0.28)), transparent 65%);
+}
+
+/* ── Text glow (dark-mode-tuned via token) ─────────────────────────────────── */
+@utility text-glow-bridge {
+  text-shadow: 0 0 24px var(--bridge-text-glow, rgba(251, 146, 60, 0));
 }
 
 *,
@@ -49,6 +279,25 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Premium text selection — tinted with accent in both modes. */
+::selection {
+  background: rgb(234 88 12 / 0.25);
+  color: inherit;
+}
+html.theme-dark ::selection {
+  background: rgb(251 146 60 / 0.35);
+  color: #fff7ed;
+}
+
+/* Global scrollbar (outside of .custom-scrollbar) */
+html {
+  scrollbar-color: #d6d3d1 transparent;
+}
+html.theme-dark {
+  scrollbar-color: #3f3b38 transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -101,7 +350,326 @@ body {
 
 @utility bg-bridge-hero-mesh {
   background-image:
-    radial-gradient(ellipse 120% 100% at 50% -30%, rgb(255 237 213 / 0.9), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 100% 20%, rgb(254 215 170 / 0.45), transparent 50%),
-    radial-gradient(ellipse 45% 35% at 0% 80%, rgb(253 230 138 / 0.4), transparent 45%);
+    radial-gradient(ellipse 120% 100% at 50% -30%, rgb(255 237 213 / 0.85), transparent 52%),
+    radial-gradient(ellipse 55% 45% at 100% 15%, rgb(254 215 170 / 0.5), transparent 48%),
+    radial-gradient(ellipse 50% 40% at 0% 85%, rgb(253 230 138 / 0.45), transparent 46%),
+    radial-gradient(ellipse 42% 36% at 88% 72%, rgb(196 181 253 / 0.2), transparent 54%),
+    radial-gradient(ellipse 38% 32% at 10% 28%, rgb(251 113 133 / 0.14), transparent 56%);
+}
+
+@utility custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e7e5e4;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #d6d3d1;
+  }
+}
+
+/* Dropdown entrance — used for navbar + feedback FAB */
+@keyframes bridge-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@utility animate-pop-in {
+  animation: bridge-pop-in 160ms cubic-bezier(0.2, 0.9, 0.32, 1.1) both;
+  transform-origin: top right;
+}
+
+/* Subtle breathing pulse for status dots */
+@keyframes bridge-pulse-soft {
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+}
+
+@utility animate-pulse-soft {
+  animation: bridge-pulse-soft 2.4s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Motion system — page-level premium animations
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Scroll-linked progress bar (fixed top) */
+@utility bridge-scroll-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(234, 88, 12, 0),
+    rgb(234 88 12) 30%,
+    rgb(251 146 60) 50%,
+    rgb(253 230 138) 70%,
+    rgba(234, 88, 12, 0)
+  );
+  transform-origin: 0 50%;
+  transform: scaleX(var(--bridge-scroll-progress, 0));
+  z-index: 100;
+  pointer-events: none;
+  box-shadow: 0 0 14px rgb(251 146 60 / 0.55);
+}
+
+/* 3D card tilt — apply .tilt-card to any element to get a pointer-driven lift */
+@utility tilt-card {
+  transform-style: preserve-3d;
+  transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 240ms cubic-bezier(0.2, 0.9, 0.32, 1);
+  will-change: transform;
+}
+
+/* Fluid ambient blob (ticker / hero atmospheres) */
+@keyframes bridge-blob-breathe {
+  0%,
+  100% {
+    border-radius: 42% 58% 36% 64% / 54% 44% 56% 46%;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    border-radius: 58% 42% 64% 36% / 44% 58% 46% 54%;
+    transform: translate3d(0, -4%, 0) scale(1.04);
+  }
+}
+
+@utility animate-blob-breathe {
+  animation: bridge-blob-breathe 18s ease-in-out infinite;
+  will-change: transform, border-radius;
+}
+
+/* Gradient shift — animate background-position for moving meshes */
+@keyframes bridge-gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@utility animate-gradient-shift {
+  background-size: 220% 220%;
+  animation: bridge-gradient-shift 12s ease-in-out infinite;
+}
+
+/* Float in three dimensions — used on floating feature cards */
+@keyframes bridge-float-3d {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-0.4deg);
+  }
+  50% {
+    transform: translate3d(0, -6px, 0) rotate(0.4deg);
+  }
+}
+
+@utility animate-float-3d {
+  animation: bridge-float-3d 8s ease-in-out infinite;
+}
+
+/* Shine sweep — for premium hero cards. Loops slowly. */
+@keyframes bridge-shine {
+  0% {
+    background-position: -200% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+@utility bridge-shine-overlay {
+  position: relative;
+  isolation: isolate;
+}
+.bridge-shine-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 70%
+  );
+  background-size: 220% 100%;
+  animation: bridge-shine 7.5s ease-in-out infinite;
+  opacity: 0.55;
+  mix-blend-mode: soft-light;
+}
+
+/* Scale-in bounce for dialogs / confirmations */
+@keyframes bridge-scale-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@utility animate-scale-in {
+  animation: bridge-scale-in 280ms cubic-bezier(0.2, 0.9, 0.32, 1.2) both;
+}
+
+/* Marquee slide — for trust logos / expertise tickers */
+@keyframes bridge-slide-x {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@utility animate-slide-x {
+  animation: bridge-slide-x 38s linear infinite;
+}
+
+/* Subtle page-enter — apply to <main> to fade in */
+@keyframes bridge-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-page-enter {
+  animation: bridge-page-enter 520ms cubic-bezier(0.2, 0.9, 0.32, 1) both;
+}
+
+/* Hover lift presets — apply with .lift-sm or .lift-md */
+@utility lift-sm {
+  transition: transform 260ms cubic-bezier(0.2, 0.9, 0.32, 1), box-shadow 260ms ease;
+}
+.lift-sm:hover {
+  transform: translateY(-3px);
+}
+
+@utility lift-md {
+  transition: transform 320ms cubic-bezier(0.2, 0.9, 0.32, 1), box-shadow 320ms ease;
+}
+.lift-md:hover {
+  transform: translateY(-6px);
+}
+
+/* Focus ring preset (consistent across all CTAs) */
+@utility ring-bridge {
+  outline: none;
+}
+.ring-bridge:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--bridge-canvas),
+    0 0 0 4px rgb(251 146 60 / 0.7),
+    0 0 22px rgb(251 146 60 / 0.35);
+}
+
+/* Marquee edge mask — fades logo strips on left/right */
+@utility mask-fade-x {
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 8%,
+    #000 92%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 8%,
+    #000 92%,
+    transparent 100%
+  );
+}
+
+/* Magnetic element — follows cursor via --mag-x / --mag-y set by MagneticPointer */
+@utility magnetic {
+  transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0);
+  transition: transform 260ms cubic-bezier(0.2, 0.9, 0.32, 1);
+  will-change: transform;
+}
+
+/* Cursor glow — paints a radial gradient that tracks the cursor */
+@utility cursor-glow {
+  position: relative;
+  isolation: isolate;
+}
+.cursor-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(251 146 60 / 0.18),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.cursor-glow:hover::before {
+  opacity: 1;
+}
+
+/* Tilt-parent — wrap cards with this utility so data-tilt doesn't fight 2D transforms */
+@utility tilt-surface {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* Shiny gradient text */
+@utility text-sheen {
+  background-image: linear-gradient(
+    90deg,
+    var(--bridge-text) 0%,
+    var(--bridge-text) 40%,
+    var(--bridge-accent) 50%,
+    var(--bridge-text) 60%,
+    var(--bridge-text) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: bridge-shine 4s ease-in-out infinite;
+}
+
+/* Glass surface (deep) */
+@utility bg-bridge-glass {
+  background: color-mix(in srgb, var(--bridge-surface) 68%, transparent);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border-color: color-mix(in srgb, var(--bridge-border-strong) 70%, transparent);
 }

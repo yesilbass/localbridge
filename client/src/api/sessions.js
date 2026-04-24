@@ -10,32 +10,32 @@ export async function getMySession(userId) {
   return data || [];
 }
 
-export async function createSession({ mentor_id, session_type, scheduled_date, message }) {
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return { data: null, error: userError || new Error('Not authenticated') };
-  }
-
+export async function createSession(sessionData) {
   const { data, error } = await supabase
     .from("sessions")
-    .insert([{
-      mentor_id,
-      mentee_id: user.id,
-      session_type,
-      scheduled_date,
-      message: message || null,
-      status: "pending",
-    }])
+    .insert([sessionData])
     .select()
     .single();
-
-  return { data, error };
+  if (error) throw error;
+  return data;
 }
 
 export async function updateSessionStatus(sessionId, status) {
   const { data, error } = await supabase
     .from("sessions")
     .update({ status })
+    .eq("id", sessionId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function acceptSession(sessionId) {
+  const videoRoomUrl = `https://meet.jit.si/bridge-${sessionId.replace(/-/g, '')}`;
+  const { data, error } = await supabase
+    .from("sessions")
+    .update({ status: "accepted", video_room_url: videoRoomUrl })
     .eq("id", sessionId)
     .select()
     .single();

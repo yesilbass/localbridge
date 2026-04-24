@@ -3,36 +3,11 @@ import { Link } from 'react-router-dom';
 import { getFeaturedMentors } from '../api/mentors';
 import Reveal from '../components/Reveal';
 import { useAuth } from '../context/useAuth';
+import { focusRing } from '../ui';
+import MentorAvatar from '../components/MentorAvatar';
 
-const focusRing =
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf3]';
 const focusRingWhite =
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-orange-600';
-
-const AVATAR_COLORS = [
-  'bg-violet-200 text-violet-900',
-  'bg-amber-200 text-amber-900',
-  'bg-emerald-200 text-emerald-900',
-  'bg-sky-200 text-sky-900',
-  'bg-rose-200 text-rose-900',
-  'bg-indigo-200 text-indigo-900',
-];
-
-function avatarColor(name) {
-  let h = 0;
-  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
-  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
-}
-
-function initials(name) {
-  return name
-      .split(' ')
-      .filter(Boolean)
-      .map((w) => w[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase();
-}
 
 // Persona-driven mentor matches for the hero. Each persona maps to 2 representative
 // mentor "preview pills" — this is the identification layer, not a directory.
@@ -84,164 +59,280 @@ function Hero() {
   const [activePersona, setActivePersona] = useState(PERSONAS[0].id);
   const persona = PERSONAS.find((p) => p.id === activePersona) ?? PERSONAS[0];
 
+  const personaMatchCount = useMemo(() => {
+    const n = persona.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    return 172 + (n % 52);
+  }, [persona.id]);
+
   return (
       <section
           aria-labelledby="landing-heading"
-          className="relative scroll-mt-20 overflow-hidden bg-bridge-hero-mesh px-4 pb-20 pt-10 sm:px-6 sm:pb-24 sm:pt-14 lg:px-8"
+          className="landing-hero relative isolate overflow-hidden px-4 pb-24 pt-16 sm:px-6 sm:pb-28 sm:pt-20 lg:px-8 lg:pt-24"
       >
+        {/* Atmosphere: always follows theme tokens so text + background stay paired */}
         <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-[0.35]"
+            className="absolute inset-0 bg-gradient-to-b from-[var(--bridge-surface-muted)] via-[var(--bridge-canvas)] to-[var(--bridge-canvas)]"
+        />
+        {/* Conic aurora — rotates extremely slowly; reads as ambient "energy" behind the headline */}
+        <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-[-18%] -z-10 h-[80rem] w-[80rem] -translate-x-1/2 opacity-50 dark:opacity-60"
             style={{
-              backgroundImage:
-                  'url("data:image/svg+xml,%3Csvg width=\'72\' height=\'72\' viewBox=\'0 0 72 72\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' stroke=\'%23d6d3d1\' stroke-opacity=\'0.35\'%3E%3Cpath d=\'M36 0v72M0 36h72\'/%3E%3C/g%3E%3C/svg%3E")',
-              backgroundSize: '72px 72px',
+              background:
+                'conic-gradient(from 210deg at 50% 50%, rgba(251,146,60,0.14), rgba(253,230,138,0.1), rgba(234,88,12,0.16), rgba(251,146,60,0.14))',
+              filter: 'blur(90px)',
             }}
         />
-        <div aria-hidden className="pointer-events-none absolute -right-24 top-16 h-[min(520px,80vw)] w-[min(520px,80vw)] rounded-full bg-gradient-to-br from-amber-300/40 via-orange-200/30 to-transparent blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -left-40 bottom-10 h-96 w-96 rounded-full bg-orange-200/35 blur-3xl" />
+        <div
+            aria-hidden
+            className="absolute inset-0 opacity-[0.85] dark:opacity-[0.9]"
+            style={{
+              backgroundImage: 'radial-gradient(circle at 1px 1px, var(--landing-hero-dot) 1px, transparent 0)',
+              backgroundSize: '28px 28px',
+              maskImage: 'radial-gradient(ellipse 80% 65% at 50% 40%, #000 40%, transparent 85%)',
+              WebkitMaskImage: 'radial-gradient(ellipse 80% 65% at 50% 40%, #000 40%, transparent 85%)',
+            }}
+        />
+        <div
+            aria-hidden
+            className="pointer-events-none absolute -left-32 top-[-10%] h-[38rem] w-[38rem] rounded-full bg-gradient-to-br from-orange-400/25 via-amber-300/15 to-transparent blur-[100px] dark:from-orange-600/30 dark:via-amber-600/15"
+        />
+        <div
+            aria-hidden
+            className="pointer-events-none absolute -right-20 top-[30%] h-[30rem] w-[30rem] rounded-full bg-gradient-to-tl from-rose-300/20 via-orange-200/12 to-transparent blur-[90px] dark:from-orange-500/20 dark:via-rose-500/12"
+        />
+        {/* Grain overlay — prevents banding in dark and gives a premium print feel */}
+        <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.07] mix-blend-overlay dark:opacity-[0.13]"
+        />
+        <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[var(--bridge-canvas)] to-transparent"
+        />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-12 lg:gap-10">
-          <div className="lg:col-span-6">
-            <div className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-orange-200/80 bg-white/90 px-4 py-1.5 shadow-sm backdrop-blur-md">
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-            </span>
-              <span className="text-xs font-semibold tracking-wide text-stone-700">
-              1-on-1 career mentorship · booked by the hour
-            </span>
+        <div className="relative mx-auto max-w-bridge">
+          {/* Top meta row */}
+          <div className="mb-10 flex flex-wrap items-center justify-between gap-3 sm:mb-14">
+            <div className="group inline-flex items-center gap-2.5 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 shadow-sm backdrop-blur-md transition hover:border-emerald-400/40 hover:shadow-[0_8px_20px_-8px_rgba(16,185,129,0.3)] dark:bg-[var(--bridge-surface-raised)] dark:hover:border-emerald-400/50 dark:hover:shadow-[0_10px_24px_-10px_rgba(16,185,129,0.45)]">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/70 animate-pulse-soft" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
+              </span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--bridge-text-secondary)]">
+                Live · 2,400 mentors
+              </span>
             </div>
+            <div className="hidden items-center gap-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)] sm:flex">
+              <span>Engineering</span>
+              <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] opacity-60" />
+              <span>Product</span>
+              <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] opacity-60" />
+              <span>Design</span>
+              <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] opacity-60" />
+              <span>Finance</span>
+              <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] opacity-60" />
+              <span>+46 more</span>
+            </div>
+          </div>
 
+          {/* Editorial headline */}
+          <div className="relative mx-auto max-w-4xl text-center">
             <h1
                 id="landing-heading"
-                className="font-display text-balance text-[2.65rem] font-semibold leading-[1.03] tracking-tight text-stone-900 sm:text-[3.1rem] sm:leading-[1.03] lg:text-[3.4rem] xl:text-[3.7rem]"
+                className="font-editorial text-balance text-[3.25rem] font-normal leading-[0.98] tracking-[-0.025em] text-[var(--bridge-text)] sm:text-[4.5rem] sm:leading-[0.96] lg:text-[5.75rem] lg:leading-[0.94]"
             >
-              Talk to someone who&apos;s{' '}
-              <span className="text-gradient-bridge">already done</span>{' '}
-              the job you want.
+              The person you need to talk to{' '}
+              <span className="relative mx-1 inline-block sm:mx-2">
+                <span className="relative z-10 font-editorial italic text-gradient-bridge">has already</span>
+                <span
+                    aria-hidden
+                    className="absolute bottom-1 left-0 right-0 -z-0 h-[0.35em] -rotate-1 bg-[var(--landing-hero-highlight)]"
+                />
+              </span>{' '}
+              done the job.
             </h1>
 
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-stone-600 sm:text-xl">
-              Bridge is a directory of vetted professionals you book for short 1-on-1 sessions —
-              career advice, interview prep, resume reviews, and intros. No recruiters, no content creators,
-              no &quot;thought leaders.&quot; Just people who&apos;ve done the exact thing you&apos;re trying to do.
+            <p className="mx-auto mt-7 max-w-2xl text-lg font-medium leading-[1.55] text-[var(--bridge-text-secondary)] sm:text-xl sm:leading-[1.55] lg:text-[1.35rem]">
+              Bridge is a directory of vetted professionals you book by the hour. One session with someone who&apos;s
+              lived your exact next step — not a recruiter, not a coach, not a content creator.
             </p>
 
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            {/* CTAs */}
+            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
               <Link
                   to="/mentors"
-                  className={`inline-flex items-center justify-center rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-9 py-4 text-sm font-semibold text-white shadow-lg shadow-orange-500/35 transition hover:from-orange-500 hover:to-amber-400 hover:shadow-xl ${focusRing}`}
+                  data-magnet="10"
+                  className={`magnetic group btn-sheen relative inline-flex w-full min-h-[3.25rem] items-center justify-center gap-2.5 rounded-full bg-stone-900 px-8 py-4 text-[0.95rem] font-semibold tracking-[-0.01em] text-white shadow-[0_12px_40px_-8px_rgba(28,25,23,0.45)] hover:bg-stone-800 hover:shadow-[0_22px_56px_-12px_rgba(28,25,23,0.55)] dark:bg-gradient-to-r dark:from-orange-500 dark:via-amber-500 dark:to-orange-600 dark:text-stone-950 dark:shadow-[0_14px_48px_-8px_rgba(234,88,12,0.6)] dark:hover:shadow-[0_24px_70px_-12px_rgba(234,88,12,0.75)] dark:hover:brightness-105 sm:w-auto ${focusRing}`}
               >
                 Browse 2,400+ mentors
-                <span className="ml-2" aria-hidden>→</span>
+                <span className="transition group-hover:translate-x-1" aria-hidden>
+                  →
+                </span>
               </Link>
               {!user ? (
                   <Link
                       to="/register?intent=mentor"
-                      className={`inline-flex items-center justify-center rounded-full border-2 border-stone-900/12 bg-white/95 px-9 py-4 text-sm font-semibold text-stone-900 shadow-sm backdrop-blur-sm transition hover:border-orange-300/70 hover:shadow-md ${focusRing}`}
+                      className={`inline-flex w-full min-h-[3rem] items-center justify-center rounded-full border-2 border-stone-300 bg-[var(--bridge-surface)] px-8 py-3.5 text-sm font-semibold text-[var(--bridge-text)] shadow-sm transition hover:-translate-y-0.5 hover:border-orange-400/90 hover:bg-[var(--bridge-surface-raised)] hover:shadow-md dark:border-white/15 dark:bg-white/[0.04] dark:text-stone-100 dark:hover:border-orange-400/60 dark:hover:bg-white/[0.08] dark:hover:shadow-[0_14px_36px_-10px_rgba(251,146,60,0.35)] sm:w-auto ${focusRing}`}
                   >
                     Become a mentor
                   </Link>
               ) : null}
             </div>
 
-            <div className="mt-6 flex items-center gap-4">
-              <div className="flex -space-x-2" aria-hidden>
-                {['SK', 'MR', 'LV', 'JE'].map((ini, idx) => (
-                    <div
-                        key={ini}
-                        className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-bold shadow-sm ${
-                            idx === 0
-                                ? 'bg-amber-200 text-amber-900'
-                                : idx === 1
-                                    ? 'bg-stone-800 text-amber-50'
-                                    : idx === 2
-                                        ? 'bg-orange-200 text-orange-900'
-                                        : 'bg-emerald-200 text-emerald-900'
-                        }`}
-                    >
-                      {ini}
-                    </div>
-                ))}
+            {/* Trust row */}
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 text-sm text-[var(--bridge-text-muted)] sm:flex-row sm:gap-5">
+              <div className="flex items-center gap-2.5">
+                <div className="flex -space-x-2" aria-hidden>
+                  {['SK', 'MR', 'LV', 'JE', 'TN'].map((ini, idx) => (
+                      <div
+                          key={ini}
+                          className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-[var(--bridge-canvas)] text-[9px] font-bold shadow-sm ${
+                              idx === 0
+                                  ? 'bg-amber-200 text-amber-900'
+                                  : idx === 1
+                                      ? 'bg-stone-800 text-amber-50'
+                                      : idx === 2
+                                          ? 'bg-orange-200 text-orange-900'
+                                          : idx === 3
+                                              ? 'bg-emerald-200 text-emerald-900'
+                                              : 'bg-rose-200 text-rose-900'
+                          }`}
+                      >
+                        {ini}
+                      </div>
+                  ))}
+                </div>
+                <span>
+                  <span className="font-semibold text-[var(--bridge-text)]">4,800+</span> sessions booked
+                </span>
               </div>
-              <p className="text-xs text-stone-600">
-                <span className="font-semibold text-stone-900">4,800+ sessions</span> booked · Avg rating{' '}
-                <span className="font-semibold text-stone-900">4.9 ★</span>
-              </p>
+              <span className="hidden h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] sm:block" aria-hidden />
+              <div className="flex items-center gap-1.5">
+                <span className="flex text-amber-500 dark:text-amber-400" aria-hidden>
+                  {[0, 1, 2, 3, 4].map((i) => (
+                      <span key={i} className="text-xs">
+                        ★
+                      </span>
+                  ))}
+                </span>
+                <span>
+                  <span className="font-semibold text-[var(--bridge-text)]">4.9</span> avg rating
+                </span>
+              </div>
+              <span className="hidden h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] sm:block" aria-hidden />
+              <span>
+                <span className="font-semibold text-[var(--bridge-text)]">From $25</span> / session
+              </span>
             </div>
           </div>
 
-          {/* RIGHT — persona chooser. Self-identification, not a decorative mockup. */}
-          <div className="relative lg:col-span-6">
-            <div aria-hidden className="absolute inset-0 -m-2 rounded-[2.5rem] bg-gradient-to-tr from-orange-400/15 via-transparent to-amber-400/15 blur-2xl" />
-
-            <div className="relative rounded-[1.75rem] border border-stone-200/90 bg-white/95 p-6 shadow-bridge-glow backdrop-blur-md sm:p-7">
-              <div className="mb-5">
-                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-800/80">Where are you?</p>
-                <p className="mt-1 font-display text-xl font-semibold text-stone-900">
-                  Pick what fits — we&apos;ll show who to talk to
+          {/* Persona chooser — full-width, horizontal, below headline */}
+          <div className="relative mx-auto mt-20 max-w-5xl sm:mt-24">
+            <div className="mb-5 flex items-baseline justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-700 dark:text-orange-300/95">
+                  Find your match
+                </p>
+                <p className="mt-1 font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
+                  Where are you right now?
                 </p>
               </div>
+              <p className="hidden text-xs font-medium text-[var(--bridge-text-muted)] sm:block">
+                Tap one → see who to talk to
+              </p>
+            </div>
 
-              {/* Persona selector */}
-              <div className="grid grid-cols-2 gap-2">
-                {PERSONAS.map((p) => {
-                  const isActive = p.id === persona.id;
-                  return (
-                      <button
-                          key={p.id}
-                          type="button"
-                          onClick={() => setActivePersona(p.id)}
-                          className={`group flex items-start gap-2.5 rounded-xl border px-3 py-2.5 text-left transition ${
-                              isActive
-                                  ? 'border-orange-300/80 bg-gradient-to-br from-orange-50/90 to-amber-50/40 shadow-sm ring-1 ring-orange-300/35'
-                                  : 'border-stone-200 bg-stone-50/50 hover:border-orange-200/60 hover:bg-white'
-                          } ${focusRing}`}
-                          aria-pressed={isActive}
-                      >
-                    <span className="text-lg leading-none" aria-hidden>
-                      {p.emoji}
-                    </span>
+            {/* Persona tabs */}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {PERSONAS.map((p) => {
+                const isActive = p.id === persona.id;
+                return (
+                    <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setActivePersona(p.id)}
+                        aria-pressed={isActive}
+                        className={`group relative min-h-[5.5rem] overflow-hidden rounded-2xl border px-4 py-4 text-left transition-all duration-300 ${
+                            isActive
+                                ? 'border-transparent border-gradient-bridge animate-border-bridge bg-stone-900 text-amber-50 shadow-[0_12px_30px_-10px_rgba(28,25,23,0.5)] dark:bg-gradient-to-br dark:from-stone-900 dark:via-[#2a1f17] dark:to-stone-900 dark:text-white dark:shadow-[0_18px_42px_-12px_rgba(234,88,12,0.55)]'
+                                : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text)] shadow-sm hover:-translate-y-0.5 hover:border-orange-300/70 hover:bg-[var(--bridge-surface-raised)] hover:shadow-md dark:hover:border-orange-500/30 dark:hover:shadow-[0_10px_26px_-10px_rgba(251,146,60,0.35)]'
+                        } ${focusRing}`}
+                    >
+                      {isActive && (
                         <span
-                            className={`text-xs font-semibold leading-snug ${
-                                isActive ? 'text-stone-900' : 'text-stone-700'
-                            }`}
-                        >
-                      {p.label}
-                    </span>
-                      </button>
-                  );
-                })}
-              </div>
+                            aria-hidden
+                            className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 via-transparent to-white/[0.03] dark:from-orange-400/10 dark:via-transparent dark:to-amber-300/5"
+                        />
+                      )}
+                      <span
+                          aria-hidden
+                          className={`absolute right-3 top-3 text-xl transition-all duration-300 ${
+                            isActive
+                              ? 'opacity-100 drop-shadow-[0_2px_10px_rgba(251,146,60,0.55)]'
+                              : 'opacity-60 group-hover:opacity-100'
+                          }`}
+                      >
+                        {p.emoji}
+                      </span>
+                      <span
+                          className={`relative block text-[11px] font-bold uppercase tracking-[0.18em] ${
+                              isActive ? 'text-amber-300 dark:text-amber-100' : 'text-orange-700 dark:text-orange-300'
+                          }`}
+                      >
+                        Path 0{PERSONAS.indexOf(p) + 1}
+                      </span>
+                      <span className="relative mt-2 block text-sm font-semibold leading-snug">{p.label}</span>
+                    </button>
+                );
+              })}
+            </div>
 
-              {/* Matched mentors — updates when persona changes */}
-              <div className="mt-5 rounded-xl border border-stone-100 bg-stone-50/50 p-3">
-                <p className="mb-2 px-1 text-[11px] font-medium text-stone-500">{persona.blurb}</p>
-                <div className="space-y-2">
+            {/* Match preview */}
+            <div className="relative mt-5 overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-[0_20px_50px_-20px_rgba(28,25,23,0.18)] backdrop-blur-md dark:bg-[var(--bridge-surface)]/90 dark:shadow-[0_28px_70px_-24px_rgba(234,88,12,0.3)]">
+              <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/90 to-transparent dark:via-orange-400/80" />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-white/50 dark:bg-white/[0.04]"
+              />
+              <div className="grid gap-0 md:grid-cols-3">
+                <div className="border-b border-[var(--bridge-border)] p-5 md:border-b-0 md:border-r md:border-[var(--bridge-border)]">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">If you&apos;re…</p>
+                  <p className="mt-2 font-display text-lg font-semibold text-[var(--bridge-text)]">{persona.label}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-[var(--bridge-text-secondary)]">{persona.blurb}</p>
+                  <p className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-orange-700 dark:text-orange-300">
+                    <span>{personaMatchCount} mentors match</span>
+                    <span aria-hidden>→</span>
+                  </p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="border-b border-[var(--bridge-border)] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">
+                    Talk to
+                  </p>
                   {persona.matches.map((m) => {
-                    const color = avatarColor(m.name);
                     return (
                         <div
                             key={m.name}
-                            className="flex items-center gap-3 rounded-lg border border-stone-100 bg-white px-3 py-2.5 transition hover:border-orange-200/60 hover:shadow-sm"
+                            className="flex items-center gap-4 border-b border-[var(--bridge-border)] px-5 py-3.5 transition last:border-b-0 hover:bg-orange-50/50 dark:hover:bg-white/[0.04]"
                         >
-                          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold ${color}`}>
-                            {initials(m.name)}
-                          </div>
+                          <MentorAvatar name={m.name} size="xs" className="shadow-sm" />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-stone-900">{m.name}</p>
-                            <p className="truncate text-xs text-stone-500">{m.role}</p>
+                            <p className="truncate text-sm font-semibold text-[var(--bridge-text)]">{m.name}</p>
+                            <p className="truncate text-xs text-[var(--bridge-text-muted)]">{m.role}</p>
                           </div>
-                          <span className="shrink-0 rounded-full border border-orange-100 bg-orange-50/90 px-2 py-0.5 text-[10px] font-medium text-orange-900">
-                        {m.tag}
-                      </span>
+                          <span className="hidden shrink-0 rounded-full border border-orange-200/80 bg-orange-50/90 px-2.5 py-0.5 text-[10px] font-medium text-orange-900 dark:border-orange-500/30 dark:bg-orange-950/50 dark:text-orange-100 sm:inline-block">
+                            {m.tag}
+                          </span>
+                          <Link
+                              to="/mentors"
+                              className="shrink-0 text-xs font-semibold text-[var(--bridge-text)] underline-offset-4 transition hover:text-orange-600 hover:underline dark:hover:text-orange-300"
+                          >
+                            View →
+                          </Link>
                         </div>
                     );
                   })}
-                  <p className="px-1 pt-1 text-[11px] text-stone-400">
-                    + {Math.floor(Math.random() * 40) + 180} more for this path
-                  </p>
                 </div>
               </div>
             </div>
@@ -250,7 +341,6 @@ function Hero() {
       </section>
   );
 }
-
 /**
  * FeaturedMentor — ONE mentor, full attention.
  * Replaces the 3-card "meet a few" grid. Shows what using Bridge actually looks like.
@@ -270,14 +360,12 @@ function FeaturedMentor({ mentor, loading }) {
         years_experience: 11,
         total_sessions: 86,
       };
-  const color = avatarColor(display.name);
-
   return (
       <section className="relative px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-bridge">
           <Reveal className="mb-10 max-w-2xl">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">This week&apos;s spotlight</p>
-            <h2 className="font-display text-balance text-3xl font-semibold text-stone-900 sm:text-4xl lg:text-[2.5rem] lg:leading-tight">
+            <h2 className="font-display text-balance text-3xl font-bold text-stone-900 sm:text-4xl lg:text-[2.5rem] lg:leading-tight">
               One mentor, up close
             </h2>
             <p className="mt-3 text-base leading-relaxed text-stone-600 sm:text-lg">
@@ -296,9 +384,7 @@ function FeaturedMentor({ mentor, loading }) {
                   <div aria-hidden className="pointer-events-none absolute -left-8 bottom-0 h-40 w-40 rounded-full bg-amber-400/10 blur-3xl" />
 
                   <div className="relative flex items-start gap-5">
-                    <div className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl text-lg font-bold shadow-lg ring-4 ring-white/10 ${color}`}>
-                      {initials(display.name)}
-                    </div>
+                    <MentorAvatar name={display.name} size="lg" className="shadow-lg ring-4 ring-white/10" />
                     <div className="min-w-0">
                       <p className="font-display text-2xl font-semibold tracking-tight text-white">{display.name}</p>
                       <p className="mt-1 text-sm text-stone-300">
@@ -328,11 +414,11 @@ function FeaturedMentor({ mentor, loading }) {
 
                 {/* RIGHT: bio, tags, stats, CTA */}
                 <div className="p-8 lg:col-span-7 lg:p-10">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-800/80">About</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-800/80">About</p>
                   <p className="mt-3 text-base leading-relaxed text-stone-700">{display.bio}</p>
 
                   <div className="mt-6">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-800/80">Focus areas</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-800/80">Focus areas</p>
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {display.expertise.slice(0, 5).map((tag) => (
                           <span
@@ -395,160 +481,165 @@ function FeaturedMentor({ mentor, loading }) {
  * Three stacked UI mockups showing search → profile → confirmation.
  */
 function HowItWorks() {
+  const STEPS = [
+    {
+      n: '01',
+      title: 'Search who you need',
+      desc: 'Filter by industry, role, company, or skill. Read real bios — not LinkedIn word-salad.',
+      mock: (
+          <>
+            <div className="rounded-xl border border-stone-200 bg-white p-2 shadow-sm">
+              <div className="flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2">
+                <svg className="h-3.5 w-3.5 text-stone-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" strokeLinecap="round" />
+                </svg>
+                <span className="text-xs font-medium text-stone-600">Product manager, Series B</span>
+              </div>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {['Product', 'Strategy', 'Promo prep'].map((t) => (
+                  <span key={t} className="rounded-full border border-orange-200/70 bg-white/90 px-2 py-0.5 text-[10px] font-medium text-orange-900">
+                {t}
+              </span>
+              ))}
+            </div>
+            <div className="mt-3 space-y-1.5">
+              {[0, 1].map((i) => (
+                  <div key={i} className="flex items-center gap-2 rounded-lg border border-stone-100 bg-white/80 p-1.5">
+                    <div className={`h-6 w-6 rounded ${i === 0 ? 'bg-amber-200' : 'bg-violet-200'}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="h-1.5 w-2/3 rounded bg-stone-200" />
+                      <div className="mt-1 h-1 w-1/2 rounded bg-stone-100" />
+                    </div>
+                    <span className="rounded-full bg-stone-900 px-1.5 py-0.5 text-[8px] font-bold text-amber-50">View</span>
+                  </div>
+              ))}
+            </div>
+          </>
+      ),
+    },
+    {
+      n: '02',
+      title: 'Pick a format and time',
+      desc: 'Career advice, interview prep, resume review, or networking. Grab an open slot.',
+      mock: (
+          <div className="rounded-xl border border-stone-200 bg-white p-3 shadow-sm">
+            <div className="flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-rose-400 to-orange-500" />
+              <div className="min-w-0 flex-1">
+                <div className="h-1.5 w-3/4 rounded bg-stone-300" />
+                <div className="mt-1 h-1 w-1/2 rounded bg-stone-100" />
+              </div>
+            </div>
+            <div className="mt-2.5 grid grid-cols-7 gap-0.5">
+              {[0, 1, 2, 3, 4, 5, 6].map((d) => {
+                const states = ['bg-emerald-200', 'bg-emerald-200', 'bg-amber-200', 'bg-stone-200', 'bg-emerald-200', 'bg-amber-200', 'bg-stone-200'];
+                const isSelected = d === 2;
+                return (
+                    <div
+                        key={d}
+                        className={`flex aspect-square items-center justify-center rounded text-[8px] font-bold ${states[d]} ${isSelected ? 'ring-2 ring-orange-500' : ''}`}
+                    >
+                      {d + 15}
+                    </div>
+                );
+              })}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-1">
+              {['Career', 'Interview', 'Resume'].map((t, i) => (
+                  <span
+                      key={t}
+                      className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${
+                          i === 1 ? 'bg-stone-900 text-amber-50' : 'border border-stone-200 bg-white text-stone-600'
+                      }`}
+                  >
+                {t}
+              </span>
+              ))}
+            </div>
+          </div>
+      ),
+    },
+    {
+      n: '03',
+      title: 'Meet and leave with a plan',
+      desc: '30–45 min over video. You leave with a next step — not a vague "let\u2019s circle back."',
+      mock: (
+          <div className="rounded-xl border border-white/10 bg-white/[0.07] p-3 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400 text-[9px] font-bold text-emerald-950">✓</div>
+                <span className="text-[10px] font-semibold text-white">Confirmed</span>
+              </div>
+              <span className="text-[9px] text-stone-400">Tue, 2:00 PM</span>
+            </div>
+            <div className="mt-3 flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-rose-400 to-orange-500" />
+              <div className="min-w-0 flex-1">
+                <div className="h-1.5 w-2/3 rounded bg-white/25" />
+                <div className="mt-1 h-1 w-1/2 rounded bg-white/15" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center gap-1 rounded-lg bg-gradient-to-r from-amber-400 to-orange-400 px-2.5 py-1.5">
+              <svg className="h-3 w-3 text-stone-900" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span className="text-[10px] font-bold text-stone-900">Join video call</span>
+            </div>
+          </div>
+      ),
+      dark: true,
+    },
+  ];
+
   return (
-      <section id="how-it-works" className="relative scroll-mt-20 overflow-hidden border-y border-stone-200/70 bg-gradient-to-b from-white via-amber-50/40 to-white px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <div className="mx-auto max-w-6xl">
+      <section
+          id="how-it-works"
+          className="relative scroll-mt-20 overflow-hidden border-y border-[var(--bridge-border)] bg-gradient-to-b from-[var(--bridge-surface)] via-[var(--bridge-surface-muted)] to-[var(--bridge-surface)] px-4 py-20 sm:px-6 sm:py-24 lg:px-8"
+      >
+        <div className="mx-auto max-w-bridge">
           <Reveal className="mb-14 max-w-2xl">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">How it works</p>
-            <h2 className="font-display text-balance text-3xl font-semibold text-stone-900 sm:text-4xl lg:text-[2.65rem] lg:leading-tight">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-orange-700 dark:text-orange-300/90">
+              How it works
+            </p>
+            <h2 className="font-display text-balance text-3xl font-bold text-[var(--bridge-text)] sm:text-4xl lg:text-[2.65rem] lg:leading-tight">
               From search to session in three steps.
             </h2>
           </Reveal>
 
           <div className="grid gap-8 lg:grid-cols-3 lg:gap-6">
-            {/* Step 1 — search UI mock */}
-            <Reveal>
-              <div className="group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-stone-200/80 bg-white shadow-bridge-card transition hover:-translate-y-1 hover:shadow-bridge-glow">
-                <div className="relative h-48 overflow-hidden bg-gradient-to-br from-stone-50 via-orange-50/40 to-amber-50/30 p-5">
-                  <div className="rounded-xl border border-stone-200 bg-white p-2 shadow-sm">
-                    <div className="flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2">
-                      <svg className="h-3.5 w-3.5 text-stone-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" strokeLinecap="round" />
-                      </svg>
-                      <span className="text-xs font-medium text-stone-600">Product manager, Series B</span>
+            {STEPS.map(({ n, title, desc, mock, dark }, i) => (
+                <Reveal key={n} delay={i * 100}>
+                  <div className="group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card transition hover:-translate-y-1 hover:shadow-bridge-glow">
+                    <div
+                        className={`relative h-48 overflow-hidden p-5 ${
+                            dark
+                                ? 'bg-gradient-to-br from-stone-900 via-stone-900 to-orange-950'
+                                : i === 0
+                                    ? 'bg-gradient-to-br from-stone-50 via-orange-50/40 to-amber-50/30'
+                                    : 'bg-gradient-to-br from-amber-50/40 via-orange-50/40 to-white'
+                        }`}
+                    >
+                      {mock}
                     </div>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {['Product', 'Strategy', 'Promo prep'].map((t) => (
-                        <span key={t} className="rounded-full border border-orange-200/70 bg-white/90 px-2 py-0.5 text-[10px] font-medium text-orange-900">
-                      {t}
-                    </span>
-                    ))}
-                  </div>
-                  <div className="mt-3 space-y-1.5">
-                    {[0, 1].map((i) => (
-                        <div key={i} className="flex items-center gap-2 rounded-lg border border-stone-100 bg-white/80 p-1.5">
-                          <div className={`h-6 w-6 rounded ${i === 0 ? 'bg-amber-200' : 'bg-violet-200'}`} />
-                          <div className="min-w-0 flex-1">
-                            <div className="h-1.5 w-2/3 rounded bg-stone-200" />
-                            <div className="mt-1 h-1 w-1/2 rounded bg-stone-100" />
-                          </div>
-                          <span className="rounded-full bg-stone-900 px-1.5 py-0.5 text-[8px] font-bold text-amber-50">View</span>
-                        </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="p-6 sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <span className="font-display text-3xl font-semibold leading-none text-orange-300">01</span>
-                    <span className="h-px flex-1 bg-stone-200" />
-                  </div>
-                  <h3 className="mt-4 font-display text-lg font-semibold text-stone-900 sm:text-xl">Search who you need</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                    Filter by industry, role, company, or specific skill. Read real bios written by real people.
-                  </p>
-                </div>
-              </div>
-            </Reveal>
-
-            {/* Step 2 — profile + calendar mock */}
-            <Reveal delay={100}>
-              <div className="group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-stone-200/80 bg-white shadow-bridge-card transition hover:-translate-y-1 hover:shadow-bridge-glow">
-                <div className="relative h-48 overflow-hidden bg-gradient-to-br from-amber-50/40 via-orange-50/40 to-white p-5">
-                  <div className="rounded-xl border border-stone-200 bg-white p-3 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-rose-400 to-orange-500" />
-                      <div className="min-w-0 flex-1">
-                        <div className="h-1.5 w-3/4 rounded bg-stone-300" />
-                        <div className="mt-1 h-1 w-1/2 rounded bg-stone-100" />
+                    <div className="p-6 sm:p-7">
+                      <div className="flex items-center gap-3">
+                        <span className="font-display text-3xl font-bold leading-none text-orange-500 dark:text-orange-300/90">
+                          {n}
+                        </span>
+                        <span className="h-px flex-1 bg-[var(--bridge-border)]" />
                       </div>
-                    </div>
-                    <div className="mt-2.5 grid grid-cols-7 gap-0.5">
-                      {[0, 1, 2, 3, 4, 5, 6].map((d) => {
-                        const states = ['bg-emerald-200', 'bg-emerald-200', 'bg-amber-200', 'bg-stone-200', 'bg-emerald-200', 'bg-amber-200', 'bg-stone-200'];
-                        const isSelected = d === 2;
-                        return (
-                            <div
-                                key={d}
-                                className={`flex aspect-square items-center justify-center rounded text-[8px] font-bold ${states[d]} ${isSelected ? 'ring-2 ring-orange-500' : ''}`}
-                            >
-                              {d + 15}
-                            </div>
-                        );
-                      })}
-                    </div>
-                    <div className="mt-2 flex flex-wrap items-center gap-1">
-                      {['Career', 'Interview', 'Resume'].map((t, i) => (
-                          <span
-                              key={t}
-                              className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${
-                                  i === 1 ? 'bg-stone-900 text-amber-50' : 'border border-stone-200 bg-white text-stone-600'
-                              }`}
-                          >
-                        {t}
-                      </span>
-                      ))}
+                      <h3 className="mt-4 font-display text-lg font-semibold text-[var(--bridge-text)] sm:text-xl">{title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-[var(--bridge-text-secondary)]">{desc}</p>
                     </div>
                   </div>
-                </div>
-                <div className="p-6 sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <span className="font-display text-3xl font-semibold leading-none text-orange-300">02</span>
-                    <span className="h-px flex-1 bg-stone-200" />
-                  </div>
-                  <h3 className="mt-4 font-display text-lg font-semibold text-stone-900 sm:text-xl">Pick a format and time</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                    Career advice, interview prep, resume review, or networking. Grab an open day from their calendar.
-                  </p>
-                </div>
-              </div>
-            </Reveal>
-
-            {/* Step 3 — confirmation / video call mock */}
-            <Reveal delay={200}>
-              <div className="group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-stone-200/80 bg-white shadow-bridge-card transition hover:-translate-y-1 hover:shadow-bridge-glow">
-                <div className="relative h-48 overflow-hidden bg-gradient-to-br from-stone-900 via-stone-900 to-orange-950 p-5">
-                  <div className="rounded-xl border border-white/10 bg-white/[0.07] p-3 backdrop-blur-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400 text-[9px] font-bold text-emerald-950">✓</div>
-                        <span className="text-[10px] font-semibold text-white">Confirmed</span>
-                      </div>
-                      <span className="text-[9px] text-stone-400">Tue, 2:00 PM</span>
-                    </div>
-                    <div className="mt-3 flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-rose-400 to-orange-500" />
-                      <div className="min-w-0 flex-1">
-                        <div className="h-1.5 w-2/3 rounded bg-white/25" />
-                        <div className="mt-1 h-1 w-1/2 rounded bg-white/15" />
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center gap-1 rounded-lg bg-gradient-to-r from-amber-400 to-orange-400 px-2.5 py-1.5">
-                      <svg className="h-3 w-3 text-stone-900" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                      <span className="text-[10px] font-bold text-stone-900">Join video call</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6 sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <span className="font-display text-3xl font-semibold leading-none text-orange-300">03</span>
-                    <span className="h-px flex-1 bg-stone-200" />
-                  </div>
-                  <h3 className="mt-4 font-display text-lg font-semibold text-stone-900 sm:text-xl">Meet and leave with a plan</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                    30-45 minutes over video. You walk out with a concrete next step, not a vague &quot;let&apos;s circle back.&quot;
-                  </p>
-                </div>
-              </div>
-            </Reveal>
+                </Reveal>
+            ))}
           </div>
         </div>
       </section>
   );
 }
-
 /**
  * WhyBridge — honest comparison vs. the real alternatives a user has in mind.
  */
@@ -564,10 +655,10 @@ function WhyBridge() {
 
   return (
       <section id="why-bridge" className="relative scroll-mt-20 px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-bridge">
           <Reveal className="mb-12 max-w-3xl">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Why Bridge</p>
-            <h2 className="font-display text-balance text-3xl font-semibold text-stone-900 sm:text-4xl lg:text-[2.65rem] lg:leading-tight">
+            <h2 className="font-display text-balance text-3xl font-bold text-stone-900 sm:text-4xl lg:text-[2.65rem] lg:leading-tight">
               You have three options right now. Here&apos;s how they compare.
             </h2>
             <p className="mt-4 text-base leading-relaxed text-stone-600 sm:text-lg">
@@ -667,12 +758,11 @@ function Outcomes() {
             }}
         />
         <div aria-hidden className="pointer-events-none absolute -right-24 top-1/4 h-[min(480px,70vw)] w-[min(480px,70vw)] rounded-full bg-orange-500/25 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-amber-400/15 blur-3xl" />
 
-        <div className="relative mx-auto max-w-6xl">
+        <div className="relative mx-auto max-w-bridge">
           <Reveal className="mb-14 max-w-2xl">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">Outcomes</p>
-            <h2 className="font-display text-balance text-3xl font-semibold text-white sm:text-4xl lg:text-[2.5rem]">
+            <h2 className="font-display text-balance text-3xl font-bold text-white sm:text-4xl lg:text-[2.5rem]">
               What people walked away with
             </h2>
           </Reveal>
@@ -781,7 +871,7 @@ function FinalCTA() {
 
             <h2
                 id="final-cta-heading"
-                className="relative font-display text-balance text-3xl font-semibold leading-tight text-white sm:text-4xl lg:text-[2.6rem] lg:leading-[1.12]"
+                className="relative font-display text-balance text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-[2.6rem] lg:leading-[1.12]"
             >
               One conversation with the right person changes things.
             </h2>
@@ -827,6 +917,7 @@ function FinalCTA() {
   );
 }
 
+
 export default function Landing() {
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -853,14 +944,14 @@ export default function Landing() {
   }, [featured]);
 
   return (
-      <main id="main-content" aria-label="Bridge — home" className="overflow-x-hidden">
-        <Hero />
-        <FeaturedMentor mentor={spotlightMentor} loading={loading} />
-        <HowItWorks />
-        <WhyBridge />
-        <Outcomes />
-        <PricingBlock />
-        <FinalCTA />
-      </main>
+    <main id="main-content" aria-label="Bridge — home" className="overflow-x-hidden">
+      <Hero />
+      <FeaturedMentor mentor={spotlightMentor} loading={loading} />
+      <HowItWorks />
+      <WhyBridge />
+      <Outcomes />
+      <PricingBlock />
+      <FinalCTA />
+    </main>
   );
 }
