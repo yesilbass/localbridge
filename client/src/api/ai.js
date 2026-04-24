@@ -1,35 +1,36 @@
-const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
+const OPENAI_API = 'https://api.openai.com/v1/chat/completions';
 
 function apiKey() {
-  const k = import.meta.env.VITE_ANTHROPIC_API_KEY;
-  if (!k) throw new Error('VITE_ANTHROPIC_API_KEY is not set.');
+  const k = import.meta.env.VITE_OPENAI_API_KEY;
+  if (!k) throw new Error('VITE_OPENAI_API_KEY is not set.');
   return k;
 }
 
-async function callClaude(prompt, systemPrompt) {
-  const res = await fetch(ANTHROPIC_API, {
+async function callOpenAI(prompt, systemPrompt) {
+  const res = await fetch(OPENAI_API, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': apiKey(),
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
+      'Authorization': `Bearer ${apiKey()}`,
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'gpt-4o-mini',
       max_tokens: 2000,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: prompt },
+      ],
+      response_format: { type: 'json_object' },
     }),
   });
 
   if (!res.ok) {
     const body = await res.text().catch(() => '');
-    throw new Error(`Claude API error ${res.status}: ${body}`);
+    throw new Error(`OpenAI API error ${res.status}: ${body}`);
   }
 
   const json = await res.json();
-  const raw = json.content?.[0]?.text ?? '';
+  const raw = json.choices?.[0]?.message?.content ?? '';
   const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
 
   try {
@@ -66,7 +67,7 @@ export async function extractResumeData(resumeText) {
 Resume text:
 ${resumeText.slice(0, 8000)}`;
 
-  return callClaude(prompt, system);
+  return callOpenAI(prompt, system);
 }
 
 export async function polishMentorProfile(rawData) {
@@ -84,5 +85,5 @@ Keep all other fields exactly as provided. The bio should be warm, specific, and
 Raw data:
 ${JSON.stringify(rawData, null, 2)}`;
 
-  return callClaude(prompt, system);
+  return callOpenAI(prompt, system);
 }

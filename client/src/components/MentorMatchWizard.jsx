@@ -181,7 +181,7 @@ export default function MentorMatchWizard({ onComplete, onClose, prefill }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/70 px-4 py-8 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative flex w-full max-w-lg flex-col overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white shadow-2xl">
+      <div className="relative flex w-full max-w-lg flex-col overflow-y-auto max-h-[90vh] rounded-[2rem] border border-stone-200/80 bg-white shadow-2xl">
 
         {/* Header */}
         <div className="border-b border-stone-100 px-7 pb-5 pt-7">

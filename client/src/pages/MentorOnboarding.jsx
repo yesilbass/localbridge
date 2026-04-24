@@ -12,7 +12,6 @@ import {
   DEFAULT_BIO,
   getMentorOnboardingProfile,
   saveMentorOnboardingStep,
-  completeMentorOnboarding,
   updateMentorProfile,
 } from '../api/mentorOnboarding';
 import { extractResumeData, polishMentorProfile } from '../api/ai';
@@ -393,7 +392,7 @@ export default function MentorOnboarding() {
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [error, setError]                   = useState('');
 
-  // 'choose' | 'resume' | 'manual-1' | 'manual-2' | 'manual-3' | 'manual-4' | 'manual-5' | 'polish' | 'preview'
+  // 'choose' | 'resume' | 'manual-1' | 'manual-2' | 'manual-3' | 'manual-4' | 'polish' | 'preview'
   const [screen, setScreen] = useState('choose');
 
   // Shared form data (populated by either path)
@@ -526,9 +525,6 @@ export default function MentorOnboarding() {
     }
     if (s === 'manual-4') {
       if (form.expertise.length === 0) return 'Please add at least one skill tag.';
-    }
-    if (s === 'manual-5') {
-      if (form.bio.trim().length < 30) return 'Please write at least 30 characters for your bio.';
     }
     return null;
   }
@@ -701,7 +697,7 @@ export default function MentorOnboarding() {
               </div>
             }
           >
-            <SectionHeader icon={User} label="Basic info" sub="Step 1 of 5" />
+            <SectionHeader icon={User} label="Basic info" sub="Step 1 of 4" />
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
@@ -769,7 +765,7 @@ export default function MentorOnboarding() {
               </div>
             }
           >
-            <SectionHeader icon={Briefcase} label="Work experience" sub="Step 2 of 5 · up to 3 jobs" />
+            <SectionHeader icon={Briefcase} label="Work experience" sub="Step 2 of 4 · up to 3 jobs" />
 
             <div className="space-y-3">
               {form.work_experience.map((job, i) => (
@@ -817,7 +813,7 @@ export default function MentorOnboarding() {
               </div>
             }
           >
-            <SectionHeader icon={GraduationCap} label="Education" sub="Step 3 of 5 · up to 2 entries" />
+            <SectionHeader icon={GraduationCap} label="Education" sub="Step 3 of 4 · up to 2 entries" />
 
             <div className="space-y-3">
               {form.education.map((edu, i) => (
@@ -858,11 +854,11 @@ export default function MentorOnboarding() {
             footer={
               <div className="flex items-center justify-between">
                 <BackBtn onClick={() => go('manual-3')} />
-                <NextBtn onClick={() => advance('manual-4', 'manual-5')} label="Continue" />
+                <NextBtn onClick={() => advance('manual-4', 'polish')} label="Continue" />
               </div>
             }
           >
-            <SectionHeader icon={Tag} label="Skills & languages" sub="Step 4 of 5" />
+            <SectionHeader icon={Tag} label="Skills & languages" sub="Step 4 of 4" />
 
             <div>
               <label className={labelCls}>Expertise tags * <span className="normal-case font-normal text-[var(--bridge-text-faint)]">(max 8)</span></label>
@@ -887,38 +883,12 @@ export default function MentorOnboarding() {
           </Card>
         )}
 
-        {/* ── MANUAL STEP 5: Bio ── */}
-        {screen === 'manual-5' && (
-          <Card
-            footer={
-              <div className="flex items-center justify-between">
-                <BackBtn onClick={() => go('manual-4')} />
-                <NextBtn onClick={() => advance('manual-5', 'polish')} label="Polish with AI" />
-              </div>
-            }
-          >
-            <SectionHeader icon={BookOpen} label="Your story" sub="Step 5 of 5" />
-
-            <div>
-              <label className={labelCls}>Bio * <span className="normal-case font-normal text-[var(--bridge-text-faint)]">(2–3 sentences)</span></label>
-              <textarea
-                rows={5}
-                value={form.bio}
-                onChange={(e) => patchForm({ bio: e.target.value })}
-                className={`${inputCls} resize-none`}
-                placeholder="I've spent 8 years in product at startups and large tech companies. I care about career transitions, PM frameworks, and helping people break into product without a traditional background…"
-              />
-              <p className="mt-1.5 text-right text-xs text-[var(--bridge-text-faint)]">{form.bio.length} chars</p>
-            </div>
-          </Card>
-        )}
-
         {/* ── AI POLISH ── */}
         {screen === 'polish' && (
           <Card
             footer={
               <div className="flex items-center justify-between">
-                <BackBtn onClick={() => go(form.work_experience !== undefined ? 'manual-5' : 'resume')} />
+                <BackBtn onClick={() => go(form.work_experience.length > 0 ? 'manual-4' : 'resume')} />
                 <NextBtn
                   onClick={acceptPolish}
                   disabled={polishLoading}

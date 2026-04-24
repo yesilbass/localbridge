@@ -5,7 +5,13 @@
       "Bash(git checkout *)",
       "Bash(git merge *)",
       "Bash(git *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(npx vite *)",
+      "Bash(npm install *)",
+      "Bash(timeout 4 node index.js)",
+      "Bash(node index.js)",
+      "Bash(kill %1)",
+      "Bash(wait)"
     ]
   }
 }

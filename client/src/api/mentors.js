@@ -8,9 +8,32 @@ export async function getMentorById(mentorProfileId) {
     .single();
   if (error) return { data: null, error };
   if (!data) return { data: null, error: null };
+
+  const schedule = data.availability_schedule;
+  const hasSchedule =
+    schedule &&
+    schedule.weekly &&
+    Object.keys(schedule.weekly).length > 0;
+
+  const mentor = hasSchedule
+    ? data
+    : {
+        ...data,
+        availability_schedule: {
+          weekly: {
+            "1": ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"],
+            "2": ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"],
+            "3": ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"],
+            "4": ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"],
+            "5": ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"],
+          },
+          timezone: "UTC",
+        },
+      };
+
   return {
     data: {
-      mentor: data,
+      mentor,
       reviews: {
         count: data.total_sessions ?? 0,
         average: data.rating ?? null,
