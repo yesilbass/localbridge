@@ -163,10 +163,32 @@ export default function Pricing() {
   const [annual, setAnnual] = useState(false);
   const [billingNote, setBillingNote] = useState(null);
 
-  function handlePaidClick() {
-    setBillingNote('Checkout is not wired up yet — you can keep using Bridge on the free tier for now.');
-    window.setTimeout(() => setBillingNote(null), 5000);
+  async function handlePaidClick(planName, price) {
+    try {
+      const response = await fetch('http://localhost:3001/api/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planName,
+          price,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Payment simulation failed.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Payment simulation failed.');
+    }
   }
+
 
   const tiers = [
     {
@@ -210,7 +232,7 @@ export default function Pricing() {
         'Mentor sessions booked separately',
       ],
       cta: 'Choose Starter',
-      onClick: handlePaidClick,
+      onClick: () => handlePaidClick('Starter', 12),
       primary: false,
     },
     {
@@ -228,7 +250,7 @@ export default function Pricing() {
         'Mentor sessions booked separately',
       ],
       cta: 'Choose Pro',
-      onClick: handlePaidClick,
+      onClick: () => handlePaidClick('Pro', 19),
       primary: true,
       badge: 'Most popular',
     },
@@ -247,7 +269,7 @@ export default function Pricing() {
         'Mentor sessions booked separately',
       ],
       cta: 'Choose Premium',
-      onClick: handlePaidClick,
+      onClick: () => handlePaidClick('Premium', 49),
       primary: false,
     },
   ];

@@ -314,32 +314,30 @@ function ConfirmModal({ mentor, confirmation, onClose, onConfirmed, user }) {
     async function handleConfirm() {
         setSubmitting(true);
         setResult(null);
+
         try {
-            const session = await createSession({
-                mentorId: mentor.id,
-                sessionType: confirmation.sessionType.key,
-                scheduledDate: confirmation.isoDate,
-                message: message || null,
+            const response = await fetch('http://localhost:3001/api/stripe/create-booking-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    mentorName: mentor.name,
+                    sessionPrice: mentor.session_price ?? 25,
+                    sessionType: confirmation.sessionType.name,
+                }),
             });
-            setResult({ ok: true });
-            onConfirmed?.();
-            if (mentor.calendar_connected) {
-                bookCalendarEvent({
-                    mentor_profile_id: mentor.id,
-                    mentee_email: user?.email ?? null,
-                    mentee_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || null,
-                    session_type: confirmation.sessionType.key,
-                    scheduled_date: confirmation.isoDate,
-                    duration_minutes: 60,
-                    bridge_session_id: session?.id ?? null,
-                }).then(({ google_event_id }) => {
-                    if (google_event_id && session?.id) {
-                        supabase.from('sessions').update({ google_event_id }).eq('id', session.id).then(() => {});
-                    }
-                }).catch(() => {});
+
+            const data = await response.json();
+
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                setResult({ ok: false, message: 'Booking payment simulation failed.' });
             }
-        } catch (err) {
-            setResult({ ok: false, message: err.message ?? 'Something went wrong. Please try again.' });
+        } catch (error) {
+            console.error(error);
+            setResult({ ok: false, message: 'Booking payment simulation failed.' });
         } finally {
             setSubmitting(false);
         }
@@ -398,8 +396,17 @@ function ConfirmModal({ mentor, confirmation, onClose, onConfirmed, user }) {
                         <footer className="shrink-0 border-t border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-6 py-4 sm:px-7">
                             <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
                                 <button type="button" onClick={handleClose} disabled={submitting} className={`rounded-xl border border-stone-200 bg-white px-5 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 disabled:opacity-60 ${focusRing}`}>Cancel</button>
-                                <button type="button" onClick={handleConfirm} disabled={submitting} className={`rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:from-amber-400 hover:to-orange-400 disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[180px] ${focusRing}`}>
-                                    {submitting ? 'Sending…' : mentor.session_rate ? `Pay $${mentor.session_rate} & book` : 'Confirm booking'}
+                                <button
+                                    type="button"
+                                    onClick={handleConfirm}
+                                    disabled={submitting}
+                                    className={`rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:from-amber-400 hover:to-orange-400 disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[180px] ${focusRing}`}
+                                >
+                                    {submitting
+                                        ? 'Redirecting…'
+                                        : mentor.session_price
+                                            ? `Pay $${mentor.session_price} & book`
+                                            : 'Confirm booking'}
                                 </button>
                             </div>
                         </footer>
