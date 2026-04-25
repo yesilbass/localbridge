@@ -85,15 +85,14 @@ export default function MentorAvailabilityModal({ open, onClose, mentorProfileId
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex flex-col bg-stone-950/55 backdrop-blur-[2px] sm:flex-row sm:items-center sm:justify-center sm:p-4 sm:bg-stone-900/50 sm:backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/60 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="avail-modal-title"
+      onClick={onClose}
     >
-      <button type="button" className="absolute inset-0 z-0 cursor-default sm:cursor-pointer" aria-label="Close" onClick={onClose} />
-
       <div
-        className="relative z-10 flex min-h-0 w-full flex-1 flex-col overflow-hidden border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-2xl sm:max-h-[min(44rem,90dvh)] sm:max-w-2xl sm:flex-none sm:rounded-3xl sm:border sm:ring-1 sm:ring-black/5 dark:sm:ring-white/10"
+        className="relative z-10 flex max-h-[min(46rem,92dvh)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-2xl ring-1 ring-black/5 dark:ring-white/10"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex shrink-0 items-center justify-between border-b border-[var(--bridge-border)] px-4 py-3 sm:px-5 sm:py-4">

@@ -94,7 +94,7 @@ function HeroProductPreview() {
   ];
 
   return (
-    <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
+    <div className="relative mx-auto w-full max-w-xl lg:max-w-3xl">
       {/* Ambient aura */}
       <div
         aria-hidden
@@ -155,7 +155,7 @@ function HeroProductPreview() {
           </div>
 
           {/* Scene stage */}
-          <div className="relative aspect-[16/10.5] w-full bg-gradient-to-br from-[var(--bridge-canvas)] via-[var(--bridge-surface)] to-[var(--bridge-canvas)] p-4 sm:aspect-[16/9] sm:p-5">
+          <div className="relative aspect-[16/7] w-full bg-gradient-to-br from-[var(--bridge-canvas)] via-[var(--bridge-surface)] to-[var(--bridge-canvas)] p-4 sm:p-5">
             {/* subtle grid */}
             <div
               aria-hidden
@@ -356,7 +356,7 @@ function TrustedByMarquee() {
     </div>
   );
   return (
-    <div className="landing-marquee-hover-pause mt-10 sm:mt-11">
+    <div className="landing-marquee-hover-pause mt-14 sm:mt-16">
       <p className="mb-3 text-center text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--bridge-text-muted)]">
         Built for people shipping the next step
       </p>
@@ -378,304 +378,124 @@ function TrustedByMarquee() {
 
 function Hero() {
   const { user } = useAuth();
-  const [activePersona, setActivePersona] = useState(PERSONAS[0].id);
-  const persona = PERSONAS.find((p) => p.id === activePersona) ?? PERSONAS[0];
-
-  const personaMatchCount = useMemo(() => {
-    const n = persona.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return 172 + (n % 52);
-  }, [persona.id]);
 
   return (
       <section
           aria-labelledby="landing-heading"
-          className="landing-hero relative isolate overflow-hidden px-4 pb-14 pt-4 sm:px-6 sm:pb-16 sm:pt-5 lg:px-8 lg:pb-20 lg:pt-6"
+          className="landing-hero relative isolate overflow-hidden px-4 pb-16 pt-16 sm:px-6 sm:pb-20 sm:pt-24 lg:px-8 lg:pb-24 lg:pt-28"
       >
-        {/* Atmosphere: always follows theme tokens so text + background stay paired */}
+        {/* Background atmosphere */}
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[var(--bridge-surface-muted)] via-[var(--bridge-canvas)] to-[var(--bridge-canvas)]" />
         <div
             aria-hidden
-            className="absolute inset-0 bg-gradient-to-b from-[var(--bridge-surface-muted)] via-[var(--bridge-canvas)] to-[var(--bridge-canvas)]"
-        />
-        {/* Conic aurora — rotates extremely slowly; reads as ambient "energy" behind the headline */}
-        <div
-            aria-hidden
-            className="pointer-events-none absolute left-1/2 top-[-18%] -z-10 h-[80rem] w-[80rem] -translate-x-1/2 opacity-50 dark:opacity-60"
+            className="pointer-events-none absolute left-1/2 top-[-18%] -z-10 h-[80rem] w-[80rem] -translate-x-1/2 opacity-45 dark:opacity-55"
             style={{
-              background:
-                'conic-gradient(from 210deg at 50% 50%, rgba(251,146,60,0.14), rgba(253,230,138,0.1), rgba(234,88,12,0.16), rgba(251,146,60,0.14))',
+              background: 'conic-gradient(from 210deg at 50% 50%, rgba(251,146,60,0.14), rgba(253,230,138,0.1), rgba(234,88,12,0.16), rgba(251,146,60,0.14))',
               filter: 'blur(90px)',
             }}
         />
         <div
             aria-hidden
-            className="absolute inset-0 opacity-[0.85] dark:opacity-[0.9]"
+            className="absolute inset-0 opacity-[0.75] dark:opacity-[0.85]"
             style={{
               backgroundImage: 'radial-gradient(circle at 1px 1px, var(--landing-hero-dot) 1px, transparent 0)',
               backgroundSize: '28px 28px',
-              maskImage: 'radial-gradient(ellipse 80% 65% at 50% 40%, #000 40%, transparent 85%)',
-              WebkitMaskImage: 'radial-gradient(ellipse 80% 65% at 50% 40%, #000 40%, transparent 85%)',
+              maskImage: 'radial-gradient(ellipse 90% 70% at 50% 35%, #000 40%, transparent 88%)',
+              WebkitMaskImage: 'radial-gradient(ellipse 90% 70% at 50% 35%, #000 40%, transparent 88%)',
             }}
         />
-        <div
-            aria-hidden
-            className="pointer-events-none absolute -left-32 top-[-10%] h-[38rem] w-[38rem] rounded-full bg-gradient-to-br from-orange-400/25 via-amber-300/15 to-transparent blur-[100px] dark:from-orange-600/30 dark:via-amber-600/15"
-        />
-        <div
-            aria-hidden
-            className="pointer-events-none absolute -right-20 top-[30%] h-[30rem] w-[30rem] rounded-full bg-gradient-to-tl from-rose-300/20 via-orange-200/12 to-transparent blur-[90px] dark:from-orange-500/20 dark:via-rose-500/12"
-        />
-        {/* Grain overlay — prevents banding in dark and gives a premium print feel */}
-        <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.07] mix-blend-overlay dark:opacity-[0.13]"
-        />
-        <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[var(--bridge-canvas)] to-transparent"
-        />
+        <div aria-hidden className="pointer-events-none absolute -left-40 top-[-5%] h-[36rem] w-[36rem] rounded-full bg-gradient-to-br from-orange-400/20 via-amber-300/12 to-transparent blur-[100px] dark:from-orange-600/25" />
+        <div aria-hidden className="pointer-events-none absolute -right-24 top-[25%] h-[28rem] w-[28rem] rounded-full bg-gradient-to-tl from-rose-300/16 via-orange-200/10 to-transparent blur-[90px] dark:from-orange-500/18" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.06] mix-blend-overlay dark:opacity-[0.12]" />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--bridge-canvas)] to-transparent" />
 
-        <div className="relative mx-auto max-w-bridge">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-12 xl:gap-14">
-            <div className="text-center lg:text-left">
-              {/* Top meta row */}
-              <div className="mb-5 flex flex-wrap items-center justify-center gap-3 lg:mb-6 lg:justify-between">
-                <div className="group inline-flex items-center gap-2.5 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 shadow-sm backdrop-blur-md transition hover:border-emerald-400/40 hover:shadow-[0_8px_20px_-8px_rgba(16,185,129,0.3)] dark:bg-[var(--bridge-surface-raised)] dark:hover:border-emerald-400/50 dark:hover:shadow-[0_10px_24px_-10px_rgba(16,185,129,0.45)]">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/70 animate-pulse-soft" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
-                  </span>
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--bridge-text-secondary)]">
-                    Live · 2,400 mentors
-                  </span>
-                </div>
-                <div className="hidden items-center gap-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)] sm:flex">
-                  <span>Engineering</span>
-                  <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] opacity-60" />
-                  <span>Product</span>
-                  <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] opacity-60" />
-                  <span>Design</span>
-                  <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] opacity-60" />
-                  <span>Finance</span>
-                  <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] opacity-60" />
-                  <span>+46 more</span>
-                </div>
-              </div>
-
-              {/* Editorial headline */}
-              <div className="relative mx-auto max-w-4xl lg:mx-0 lg:max-w-none">
-                <h1
-                    id="landing-heading"
-                    className="animate-scale-in font-editorial text-balance text-[2.85rem] font-normal leading-[0.98] tracking-[-0.025em] text-[var(--bridge-text)] sm:text-[3.75rem] sm:leading-[0.96] lg:text-[4.25rem] lg:leading-[0.94] xl:text-[4.75rem]"
-                >
-                  The person you need to talk to{' '}
-                  <span className="relative mx-1 inline-block sm:mx-2">
-                    <span className="relative z-10 font-editorial italic text-gradient-bridge">has already</span>
-                    <span
-                        aria-hidden
-                        className="absolute bottom-1 left-0 right-0 -z-0 h-[0.35em] -rotate-1 bg-[var(--landing-hero-highlight)]"
-                    />
-                  </span>{' '}
-                  done the job.
-                </h1>
-
-                <p className="mx-auto mt-5 max-w-2xl text-base font-medium leading-[1.55] text-[var(--bridge-text-secondary)] sm:mt-6 sm:text-lg sm:leading-[1.55] lg:mx-0 lg:text-[1.2rem]">
-                  Bridge is a directory of vetted professionals you book by the hour. One session with someone who&apos;s
-                  lived your exact next step — not a recruiter, not a coach, not a content creator.
-                </p>
-
-                {/* CTAs */}
-                <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 lg:justify-start">
-                  <Link
-                      to="/mentors"
-                      data-magnet="10"
-                      className={`magnetic group btn-sheen relative inline-flex w-full min-h-[3.25rem] items-center justify-center gap-2.5 rounded-full bg-stone-900 px-8 py-4 text-[0.95rem] font-semibold tracking-[-0.01em] text-white shadow-[0_12px_40px_-8px_rgba(28,25,23,0.45)] hover:bg-stone-800 hover:shadow-[0_22px_56px_-12px_rgba(28,25,23,0.55)] dark:bg-gradient-to-r dark:from-orange-500 dark:via-amber-500 dark:to-orange-600 dark:text-stone-950 dark:shadow-[0_14px_48px_-8px_rgba(234,88,12,0.6)] dark:hover:shadow-[0_24px_70px_-12px_rgba(234,88,12,0.75)] dark:hover:brightness-105 sm:w-auto ${focusRing}`}
-                  >
-                    Browse 2,400+ mentors
-                    <span className="transition group-hover:translate-x-1" aria-hidden>
-                      →
-                    </span>
-                  </Link>
-                  {!user ? (
-                      <Link
-                          to="/register?intent=mentor"
-                          className={`group inline-flex w-full min-h-[3rem] items-center justify-center gap-2 rounded-full border-2 border-stone-300 bg-[var(--bridge-surface)] px-8 py-3.5 text-sm font-semibold text-[var(--bridge-text)] shadow-sm transition hover:-translate-y-0.5 hover:border-orange-400/90 hover:bg-[var(--bridge-surface-raised)] hover:shadow-md dark:border-white/15 dark:bg-white/[0.04] dark:text-stone-100 dark:hover:border-orange-400/60 dark:hover:bg-white/[0.08] dark:hover:shadow-[0_14px_36px_-10px_rgba(251,146,60,0.35)] sm:w-auto ${focusRing}`}
-                      >
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500/15 text-orange-600 transition group-hover:bg-orange-500 group-hover:text-white dark:bg-orange-400/15 dark:text-orange-300">
-                          +
-                        </span>
-                        Become a mentor
-                      </Link>
-                  ) : null}
-                </div>
-
-                {/* Trust row */}
-                <div className="mt-8 flex flex-col items-center justify-center gap-3 text-sm text-[var(--bridge-text-muted)] sm:flex-row sm:gap-5 lg:justify-start">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex -space-x-2" aria-hidden>
-                      {['SK', 'MR', 'LV', 'JE', 'TN'].map((ini, idx) => (
-                          <div
-                              key={ini}
-                              className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-[var(--bridge-canvas)] text-[9px] font-bold shadow-sm ${
-                                  idx === 0
-                                      ? 'bg-amber-200 text-amber-900'
-                                      : idx === 1
-                                          ? 'bg-stone-800 text-amber-50'
-                                          : idx === 2
-                                              ? 'bg-orange-200 text-orange-900'
-                                              : idx === 3
-                                                  ? 'bg-emerald-200 text-emerald-900'
-                                                  : 'bg-rose-200 text-rose-900'
-                              }`}
-                          >
-                            {ini}
-                          </div>
-                      ))}
-                    </div>
-                    <span>
-                      <span className="font-semibold text-[var(--bridge-text)]">4,800+</span> sessions booked
-                    </span>
-                  </div>
-                  <span className="hidden h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] sm:block" aria-hidden />
-                  <div className="flex items-center gap-1.5">
-                    <span className="flex text-amber-500 dark:text-amber-400" aria-hidden>
-                      {[0, 1, 2, 3, 4].map((i) => (
-                          <span key={i} className="text-xs">
-                            ★
-                          </span>
-                      ))}
-                    </span>
-                    <span>
-                      <span className="font-semibold text-[var(--bridge-text)]">4.9</span> avg rating
-                    </span>
-                  </div>
-                  <span className="hidden h-1 w-1 rounded-full bg-[var(--bridge-text-faint)] sm:block" aria-hidden />
-                  <span>
-                    <span className="font-semibold text-[var(--bridge-text)]">From $25</span> / session
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative animate-scale-in [animation-delay:120ms] lg:pl-2">
-              <HeroProductPreview />
+        <div className="relative mx-auto max-w-4xl text-center">
+          {/* Live badge */}
+          <div className="mb-8 flex justify-center">
+            <div className="group inline-flex items-center gap-2.5 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-4 py-2 shadow-sm backdrop-blur-md transition hover:border-emerald-400/50 hover:shadow-[0_8px_24px_-8px_rgba(16,185,129,0.35)] dark:bg-[var(--bridge-surface-raised)]">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/70 animate-pulse-soft" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
+              </span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--bridge-text-secondary)]">
+                Live · 2,400 vetted mentors
+              </span>
             </div>
           </div>
 
-          <TrustedByMarquee />
-
-          {/* Persona chooser — full-width, horizontal, below headline */}
-          <div className="relative mx-auto mt-11 max-w-5xl sm:mt-12 lg:mt-14">
-            <div className="mb-5 flex items-baseline justify-between gap-4">
-              <div>
-                <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-orange-700 dark:text-orange-300/95">
-                  <span className="h-[3px] w-7 rounded-full bg-gradient-to-r from-orange-500 to-amber-400" />
-                  Find your match
-                </p>
-                <p className="mt-1 font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
-                  Where are you right now?
-                </p>
-              </div>
-              <p className="hidden items-center gap-1.5 text-xs font-medium text-[var(--bridge-text-muted)] sm:inline-flex">
-                Tap one
-                <span aria-hidden className="inline-flex h-5 items-center gap-0.5 rounded-md border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-1.5 font-mono text-[10px] font-bold text-[var(--bridge-text-secondary)] shadow-sm">→</span>
-                see who to talk to
-              </p>
-            </div>
-
-            {/* Persona tabs */}
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {PERSONAS.map((p) => {
-                const isActive = p.id === persona.id;
-                return (
-                    <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => setActivePersona(p.id)}
-                        aria-pressed={isActive}
-                        className={`group relative min-h-[5.5rem] overflow-hidden rounded-2xl border px-4 py-4 text-left transition-all duration-300 ${
-                            isActive
-                                ? 'border-transparent border-gradient-bridge animate-border-bridge bg-stone-900 text-amber-50 shadow-[0_12px_30px_-10px_rgba(28,25,23,0.5)] dark:bg-gradient-to-br dark:from-stone-900 dark:via-[#2a1f17] dark:to-stone-900 dark:text-white dark:shadow-[0_18px_42px_-12px_rgba(234,88,12,0.55)]'
-                                : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text)] shadow-sm hover:-translate-y-0.5 hover:border-orange-300/70 hover:bg-[var(--bridge-surface-raised)] hover:shadow-md dark:hover:border-orange-500/30 dark:hover:shadow-[0_10px_26px_-10px_rgba(251,146,60,0.35)]'
-                        } ${focusRing}`}
-                    >
-                      {isActive && (
-                        <span
-                            aria-hidden
-                            className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 via-transparent to-white/[0.03] dark:from-orange-400/10 dark:via-transparent dark:to-amber-300/5"
-                        />
-                      )}
-                      <span
-                          aria-hidden
-                          className={`absolute right-3 top-3 text-xl transition-all duration-300 ${
-                            isActive
-                              ? 'opacity-100 drop-shadow-[0_2px_10px_rgba(251,146,60,0.55)]'
-                              : 'opacity-60 group-hover:opacity-100'
-                          }`}
-                      >
-                        {p.emoji}
-                      </span>
-                      <span
-                          className={`relative block text-[11px] font-bold uppercase tracking-[0.18em] ${
-                              isActive ? 'text-amber-300 dark:text-amber-100' : 'text-orange-700 dark:text-orange-300'
-                          }`}
-                      >
-                        Path 0{PERSONAS.indexOf(p) + 1}
-                      </span>
-                      <span className="relative mt-2 block text-sm font-semibold leading-snug">{p.label}</span>
-                    </button>
-                );
-              })}
-            </div>
-
-            {/* Match preview */}
-            <div className="relative mt-5 overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-[0_20px_50px_-20px_rgba(28,25,23,0.18)] backdrop-blur-md dark:bg-[var(--bridge-surface)]/90 dark:shadow-[0_28px_70px_-24px_rgba(234,88,12,0.3)]">
-              <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/90 to-transparent dark:via-orange-400/80" />
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-white/50 dark:bg-white/[0.04]"
+          {/* Headline */}
+          <h1
+              id="landing-heading"
+              className="animate-scale-in font-editorial text-balance text-[3rem] font-normal leading-[0.97] tracking-[-0.028em] text-[var(--bridge-text)] sm:text-[4.25rem] sm:leading-[0.95] lg:text-[5.5rem] lg:leading-[0.93]"
+          >
+            The person you need to talk to{' '}
+            <span className="relative inline-block">
+              <span className="relative z-10 font-editorial italic text-gradient-bridge">has already</span>
+              <span
+                  aria-hidden
+                  className="absolute bottom-1 left-0 right-0 -z-0 h-[0.32em] -rotate-1 bg-[var(--landing-hero-highlight)]"
               />
-              <div className="grid gap-0 md:grid-cols-3">
-                <div className="border-b border-[var(--bridge-border)] p-5 md:border-b-0 md:border-r md:border-[var(--bridge-border)]">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">If you&apos;re…</p>
-                  <p className="mt-2 font-display text-lg font-semibold text-[var(--bridge-text)]">{persona.label}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-[var(--bridge-text-secondary)]">{persona.blurb}</p>
-                  <p className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-orange-700 dark:text-orange-300">
-                    <span>{personaMatchCount} mentors match</span>
-                    <span aria-hidden>→</span>
-                  </p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="border-b border-[var(--bridge-border)] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">
-                    Talk to
-                  </p>
-                  {persona.matches.map((m) => {
-                    return (
-                        <div
-                            key={m.name}
-                            className="flex items-center gap-4 border-b border-[var(--bridge-border)] px-5 py-3.5 transition last:border-b-0 hover:bg-orange-50/50 dark:hover:bg-white/[0.04]"
-                        >
-                          <MentorAvatar name={m.name} size="xs" className="shadow-sm" />
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-[var(--bridge-text)]">{m.name}</p>
-                            <p className="truncate text-xs text-[var(--bridge-text-muted)]">{m.role}</p>
-                          </div>
-                          <span className="hidden shrink-0 rounded-full border border-orange-200/80 bg-orange-50/90 px-2.5 py-0.5 text-[10px] font-medium text-orange-900 dark:border-orange-500/30 dark:bg-orange-950/50 dark:text-orange-100 sm:inline-block">
-                            {m.tag}
-                          </span>
-                          <Link
-                              to="/mentors"
-                              className="shrink-0 text-xs font-semibold text-[var(--bridge-text)] underline-offset-4 transition hover:text-orange-600 hover:underline dark:hover:text-orange-300"
-                          >
-                            View →
-                          </Link>
-                        </div>
-                    );
-                  })}
-                </div>
+            </span>{' '}
+            done the job.
+          </h1>
+
+          {/* Sub-headline */}
+          <p className="mx-auto mt-8 max-w-2xl text-base font-medium leading-[1.65] text-[var(--bridge-text-secondary)] sm:mt-9 sm:text-xl sm:leading-[1.6]">
+            Bridge is a directory of vetted professionals you book by the hour.
+            One session with someone who&apos;s lived your exact next step — not a recruiter, not a coach.
+          </p>
+
+          {/* CTAs */}
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+            <Link
+                to="/mentors"
+                data-magnet="10"
+                className={`magnetic group btn-sheen relative inline-flex w-full min-h-[3.4rem] items-center justify-center gap-2.5 rounded-full bg-stone-900 px-9 py-4 text-[0.95rem] font-semibold tracking-[-0.01em] text-white shadow-[0_14px_44px_-8px_rgba(28,25,23,0.5)] hover:bg-stone-800 hover:shadow-[0_24px_60px_-12px_rgba(28,25,23,0.6)] dark:bg-gradient-to-r dark:from-orange-500 dark:via-amber-500 dark:to-orange-600 dark:text-stone-950 dark:shadow-[0_16px_52px_-8px_rgba(234,88,12,0.65)] dark:hover:brightness-105 sm:w-auto ${focusRing}`}
+            >
+              Browse 2,400+ mentors
+              <span className="transition group-hover:translate-x-1" aria-hidden>→</span>
+            </Link>
+            {!user ? (
+                <Link
+                    to="/register?intent=mentor"
+                    className={`group inline-flex w-full min-h-[3.25rem] items-center justify-center gap-2 rounded-full border-2 border-stone-300 bg-[var(--bridge-surface)] px-9 py-3.5 text-sm font-semibold text-[var(--bridge-text)] shadow-sm transition hover:-translate-y-0.5 hover:border-orange-400/90 hover:bg-[var(--bridge-surface-raised)] hover:shadow-md dark:border-white/15 dark:bg-white/[0.04] dark:text-stone-100 dark:hover:border-orange-400/60 sm:w-auto ${focusRing}`}
+                >
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500/15 text-orange-600 transition group-hover:bg-orange-500 group-hover:text-white dark:bg-orange-400/15 dark:text-orange-300">+</span>
+                  Become a mentor
+                </Link>
+            ) : null}
+          </div>
+
+          {/* Trust row */}
+          <div className="mt-11 flex flex-wrap items-center justify-center gap-4 text-sm text-[var(--bridge-text-muted)] sm:gap-6">
+            <div className="flex items-center gap-2.5">
+              <div className="flex -space-x-2" aria-hidden>
+                {['SK', 'MR', 'LV', 'JE', 'TN'].map((ini, idx) => (
+                    <div
+                        key={ini}
+                        className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-[var(--bridge-canvas)] text-[9px] font-bold shadow-sm ${
+                            idx === 0 ? 'bg-amber-200 text-amber-900'
+                            : idx === 1 ? 'bg-stone-800 text-amber-50'
+                            : idx === 2 ? 'bg-orange-200 text-orange-900'
+                            : idx === 3 ? 'bg-emerald-200 text-emerald-900'
+                            : 'bg-rose-200 text-rose-900'
+                        }`}
+                    >{ini}</div>
+                ))}
               </div>
+              <span><span className="font-semibold text-[var(--bridge-text)]">4,800+</span> sessions booked</span>
             </div>
+            <span className="hidden h-3 w-px bg-[var(--bridge-border-strong)] sm:block" aria-hidden />
+            <div className="flex items-center gap-1.5">
+              <span className="flex text-amber-500 dark:text-amber-400" aria-hidden>{[0,1,2,3,4].map(i => <span key={i} className="text-xs">★</span>)}</span>
+              <span><span className="font-semibold text-[var(--bridge-text)]">4.9</span> avg rating</span>
+            </div>
+            <span className="hidden h-3 w-px bg-[var(--bridge-border-strong)] sm:block" aria-hidden />
+            <span><span className="font-semibold text-[var(--bridge-text)]">From $25</span> / session</span>
           </div>
         </div>
+
+        <TrustedByMarquee />
       </section>
   );
 }
@@ -885,168 +705,41 @@ function FeaturedMentor({ mentor, loading }) {
   );
 }
 
-/**
- * HowItWorks — visual walkthrough, not descriptions.
- * Three stacked UI mockups showing search → profile → confirmation.
- */
-function HowItWorks() {
-  const STEPS = [
-    {
-      n: '01',
-      title: 'Search who you need',
-      desc: 'Filter by industry, role, company, or skill. Read real bios — not LinkedIn word-salad.',
-      mock: (
-          <>
-            <div className="rounded-xl border border-stone-200 bg-white p-2 shadow-sm">
-              <div className="flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2">
-                <svg className="h-3.5 w-3.5 text-stone-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" strokeLinecap="round" />
-                </svg>
-                <span className="text-xs font-medium text-stone-600">Product manager, Series B</span>
-              </div>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-1">
-              {['Product', 'Strategy', 'Promo prep'].map((t) => (
-                  <span key={t} className="rounded-full border border-orange-200/70 bg-white/90 px-2 py-0.5 text-[10px] font-medium text-orange-900">
-                {t}
-              </span>
-              ))}
-            </div>
-            <div className="mt-3 space-y-1.5">
-              {[0, 1].map((i) => (
-                  <div key={i} className="flex items-center gap-2 rounded-lg border border-stone-100 bg-white/80 p-1.5">
-                    <div className={`h-6 w-6 rounded ${i === 0 ? 'bg-amber-200' : 'bg-violet-200'}`} />
-                    <div className="min-w-0 flex-1">
-                      <div className="h-1.5 w-2/3 rounded bg-stone-200" />
-                      <div className="mt-1 h-1 w-1/2 rounded bg-stone-100" />
-                    </div>
-                    <span className="rounded-full bg-stone-900 px-1.5 py-0.5 text-[8px] font-bold text-amber-50">View</span>
-                  </div>
-              ))}
-            </div>
-          </>
-      ),
-    },
-    {
-      n: '02',
-      title: 'Pick a format and time',
-      desc: 'Career advice, interview prep, resume review, or networking. Grab an open slot.',
-      mock: (
-          <div className="rounded-xl border border-stone-200 bg-white p-3 shadow-sm">
-            <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-rose-400 to-orange-500" />
-              <div className="min-w-0 flex-1">
-                <div className="h-1.5 w-3/4 rounded bg-stone-300" />
-                <div className="mt-1 h-1 w-1/2 rounded bg-stone-100" />
-              </div>
-            </div>
-            <div className="mt-2.5 grid grid-cols-7 gap-0.5">
-              {[0, 1, 2, 3, 4, 5, 6].map((d) => {
-                const states = ['bg-emerald-200', 'bg-emerald-200', 'bg-amber-200', 'bg-stone-200', 'bg-emerald-200', 'bg-amber-200', 'bg-stone-200'];
-                const isSelected = d === 2;
-                return (
-                    <div
-                        key={d}
-                        className={`flex aspect-square items-center justify-center rounded text-[8px] font-bold ${states[d]} ${isSelected ? 'ring-2 ring-orange-500' : ''}`}
-                    >
-                      {d + 15}
-                    </div>
-                );
-              })}
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-1">
-              {['Career', 'Interview', 'Resume'].map((t, i) => (
-                  <span
-                      key={t}
-                      className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${
-                          i === 1 ? 'bg-stone-900 text-amber-50' : 'border border-stone-200 bg-white text-stone-600'
-                      }`}
-                  >
-                {t}
-              </span>
-              ))}
-            </div>
-          </div>
-      ),
-    },
-    {
-      n: '03',
-      title: 'Meet and leave with a plan',
-      desc: '30–45 min over video. You leave with a next step — not a vague "let\u2019s circle back."',
-      mock: (
-          <div className="rounded-xl border border-white/10 bg-white/[0.07] p-3 backdrop-blur-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400 text-[9px] font-bold text-emerald-950">✓</div>
-                <span className="text-[10px] font-semibold text-white">Confirmed</span>
-              </div>
-              <span className="text-[9px] text-stone-400">Tue, 2:00 PM</span>
-            </div>
-            <div className="mt-3 flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-rose-400 to-orange-500" />
-              <div className="min-w-0 flex-1">
-                <div className="h-1.5 w-2/3 rounded bg-white/25" />
-                <div className="mt-1 h-1 w-1/2 rounded bg-white/15" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1 rounded-lg bg-gradient-to-r from-amber-400 to-orange-400 px-2.5 py-1.5">
-              <svg className="h-3 w-3 text-stone-900" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              <span className="text-[10px] font-bold text-stone-900">Join video call</span>
-            </div>
-          </div>
-      ),
-      dark: true,
-    },
-  ];
-
+function ProductPreview() {
   return (
-      <section
-          id="how-it-works"
-          className="relative scroll-mt-20 overflow-hidden border-y border-[var(--bridge-border)] bg-gradient-to-b from-[var(--bridge-surface)] via-[var(--bridge-surface-muted)] to-[var(--bridge-surface)] px-4 py-14 sm:px-6 sm:py-16 lg:px-8"
-      >
-        <div className="mx-auto max-w-bridge">
-          <Reveal className="mb-10 max-w-2xl">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-orange-700 dark:text-orange-300/90">
-              How it works
-            </p>
-            <h2 className="font-display text-balance text-3xl font-bold text-[var(--bridge-text)] sm:text-4xl lg:text-[2.65rem] lg:leading-tight">
-              From search to session in three steps.
-            </h2>
-          </Reveal>
+    <section
+      id="product-preview"
+      className="relative scroll-mt-20 overflow-hidden border-y border-[var(--bridge-border)] bg-gradient-to-b from-[var(--bridge-surface)] via-[var(--bridge-surface-muted)] to-[var(--bridge-surface)] px-4 py-10 sm:px-6 sm:py-14 lg:px-8"
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[36rem] w-[56rem] -translate-x-1/2 opacity-40"
+        style={{
+          background: 'conic-gradient(from 190deg at 50% 0%, rgba(251,146,60,0.18), rgba(253,230,138,0.1), rgba(234,88,12,0.2), rgba(251,146,60,0.18))',
+          filter: 'blur(80px)',
+        }}
+      />
 
-          <div className="grid gap-6 lg:grid-cols-3 lg:gap-5">
-            {STEPS.map(({ n, title, desc, mock, dark }, i) => (
-                <Reveal key={n} delay={i * 100}>
-                  <div className="group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card transition hover:-translate-y-1 hover:shadow-bridge-glow">
-                    <div
-                        className={`relative h-48 overflow-hidden p-5 ${
-                            dark
-                                ? 'bg-gradient-to-br from-stone-900 via-stone-900 to-orange-950'
-                                : i === 0
-                                    ? 'bg-gradient-to-br from-stone-50 via-orange-50/40 to-amber-50/30'
-                                    : 'bg-gradient-to-br from-amber-50/40 via-orange-50/40 to-white'
-                        }`}
-                    >
-                      {mock}
-                    </div>
-                    <div className="p-6 sm:p-7">
-                      <div className="flex items-center gap-3">
-                        <span className="font-display text-3xl font-bold leading-none text-orange-500 dark:text-orange-300/90">
-                          {n}
-                        </span>
-                        <span className="h-px flex-1 bg-[var(--bridge-border)]" />
-                      </div>
-                      <h3 className="mt-4 font-display text-lg font-semibold text-[var(--bridge-text)] sm:text-xl">{title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-[var(--bridge-text-secondary)]">{desc}</p>
-                    </div>
-                  </div>
-                </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      <div className="mx-auto max-w-bridge">
+        <Reveal className="mb-8 text-center">
+          <p className="mb-3 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.28em] text-orange-700 dark:text-orange-300/95">
+            <span className="h-[3px] w-7 rounded-full bg-gradient-to-r from-orange-500 to-amber-400" />
+            See it in action
+            <span className="h-[3px] w-7 rounded-full bg-gradient-to-r from-amber-400 to-orange-500" />
+          </p>
+          <h2 className="font-display text-balance text-3xl font-bold text-[var(--bridge-text)] sm:text-4xl lg:text-[2.65rem] lg:leading-tight">
+            From search to session booked in minutes.
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-[var(--bridge-text-secondary)] sm:text-lg">
+            Discover the right mentor, read real bios and reviews, pick a time, and book — all in one place.
+          </p>
+        </Reveal>
+
+        <Reveal delay={100}>
+          <HeroProductPreview />
+        </Reveal>
+      </div>
+    </section>
   );
 }
 /**
@@ -1392,7 +1085,7 @@ export default function Landing() {
       <Hero />
       <MetricsRibbon />
       <FeaturedMentor mentor={spotlightMentor} loading={loading} />
-      <HowItWorks />
+      <ProductPreview />
       <WhyBridge />
       <Outcomes />
       <PricingBlock />
