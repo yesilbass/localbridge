@@ -6,6 +6,7 @@ import { isMentorAccount } from '../utils/accountRole';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Reveal from '../components/Reveal';
 import { focusRing } from '../ui';
+import { devLogin } from './DevPortal/devAuth.js';
 
 const PERKS = [
   'Your shortlist and favorites stay on this account',
@@ -132,6 +133,25 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Hidden developer portal access — click the secret dot 5× to reveal
+  const [devTaps, setDevTaps] = useState(0);
+  const [devOverlay, setDevOverlay] = useState(false);
+  const [devCode, setDevCode] = useState('');
+  const [devError, setDevError] = useState('');
+
+  function handleSecretTap() {
+    const next = devTaps + 1;
+    setDevTaps(next);
+    if (next >= 5) { setDevOverlay(true); setDevTaps(0); }
+  }
+
+  function handleDevSubmit(e) {
+    e.preventDefault();
+    const ok = devLogin(devCode.trim());
+    if (ok) { navigate('/bridge-internal'); }
+    else { setDevError('Invalid code.'); setDevCode(''); }
+  }
 
   const fromRaw = location.state?.from;
   const redirectPath =
@@ -363,9 +383,56 @@ export default function Login() {
                     Browse mentors →
                   </Link>
                 </div>
+
+                {/* Hidden dev portal trigger — invisible dot, click 5× */}
+                <button
+                  type="button"
+                  onClick={handleSecretTap}
+                  aria-hidden="true"
+                  tabIndex={-1}
+                  className="absolute bottom-2 right-2 h-4 w-4 rounded-full opacity-0 select-none focus:outline-none"
+                />
               </div>
             </div>
           </Reveal>
+
+          {/* Dev portal overlay */}
+          {devOverlay && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-stone-950/80 backdrop-blur-sm p-4">
+              <div className="w-full max-w-xs rounded-2xl border border-white/8 bg-[#0d0d14] p-6 shadow-2xl">
+                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.3em] text-stone-500">Bridge Internal</p>
+                <p className="mb-5 text-sm font-semibold text-white">Enter access code</p>
+                <form onSubmit={handleDevSubmit} className="space-y-3">
+                  <input
+                    type="password"
+                    value={devCode}
+                    onChange={e => setDevCode(e.target.value)}
+                    placeholder="Access code"
+                    autoFocus
+                    autoComplete="off"
+                    className="w-full rounded-xl border border-white/8 bg-white/4 px-4 py-3 text-sm text-white placeholder-stone-600 outline-none focus:border-orange-500/50"
+                  />
+                  {devError && <p className="text-xs text-red-400">{devError}</p>}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setDevOverlay(false); setDevCode(''); setDevError(''); }}
+                      className="flex-1 rounded-xl border border-white/8 py-2.5 text-xs text-stone-400 hover:text-white transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!devCode.trim()}
+                      className="flex-1 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 py-2.5 text-xs font-bold text-stone-950 disabled:opacity-40"
+                    >
+                      Enter
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
 
           <Reveal delay={140} className="lg:hidden">
             <LoginAside />

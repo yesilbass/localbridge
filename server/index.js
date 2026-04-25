@@ -1,38 +1,16 @@
 import 'dotenv/config';
-import express from 'express';
-import cors from 'cors';
+import app from './app.js';
 import authRoutes from './routes/auth.js';
 import mentorRoutes from './routes/mentors.js';
 import sessionRoutes from './routes/sessions.js';
-import calendarRoutes from './routes/calendar.js';
-import googleAuthRoutes from './routes/googleAuth.js';
-import stripeRoutes from './routes/stripe.js';
 
-const app = express();
-const PORT = process.env.PORT || 3001;
-
-const allowedOrigins = process.env.CLIENT_URL
-  ? [process.env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:5175']
-  : ['http://localhost:5173', 'http://localhost:5175'];
-app.use(cors({ origin: allowedOrigins, credentials: true }));
-app.use(express.json());
-
-// Google OAuth — must be accessible without /api prefix so the redirect URI matches
-app.use('/auth/google', googleAuthRoutes);
-
-// Calendar — availability + booking
-app.use('/calendar', calendarRoutes);
-
-// Legacy routes (kept for other features)
+// Legacy MySQL routes — local dev only, not deployed on Vercel (mysql2 is not
+// in root node_modules, so these never run in the serverless function).
 app.use('/api/auth', authRoutes);
 app.use('/api/mentors', mentorRoutes);
 app.use('/api/sessions', sessionRoutes);
-app.use('/api/stripe', stripeRoutes);
 
-app.get('/', (req, res) => {
-  res.json({ message: 'Bridge API is running' });
-});
-
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });

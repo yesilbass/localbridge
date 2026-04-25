@@ -30,6 +30,7 @@ import Cookies from './pages/footer/Cookies.jsx';
 import FeedbackFAB from './components/FeedbackFAB';
 import VideoCall from './pages/VideoCall';
 import MentorOnboarding from './pages/MentorOnboarding';
+import DevPortal from './pages/DevPortal/index.jsx';
 
 function AppContent() {
   const location = useLocation();
@@ -88,7 +89,12 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <AppContent />
+        <Routes>
+          {/* Hidden developer portal — completely outside normal layout */}
+          <Route path="/bridge-internal/*" element={<DevPortal />} />
+          {/* All regular app routes */}
+          <Route path="/*" element={<AppContent />} />
+        </Routes>
       </BrowserRouter>
     </AuthProvider>
   );

@@ -11,7 +11,7 @@ export async function createBookingCheckout({
   sessionPrice,
   message,
 }) {
-  const res = await fetch('/api/create-booking-checkout', {
+  const res = await fetch('/api/stripe/create-booking-checkout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -33,7 +33,7 @@ export async function createBookingCheckout({
 }
 
 export async function createSubscriptionCheckout({ planName, userId, userEmail }) {
-  const res = await fetch('/api/create-subscription-checkout', {
+  const res = await fetch('/api/stripe/create-subscription-checkout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ planName, userId, userEmail }),
@@ -45,7 +45,7 @@ export async function createSubscriptionCheckout({ planName, userId, userEmail }
 }
 
 export async function finalizeCheckout(sessionId) {
-  const res = await fetch('/api/finalize-checkout', {
+  const res = await fetch('/api/stripe/finalize-checkout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ sessionId }),

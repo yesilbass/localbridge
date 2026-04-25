@@ -1,18 +1,22 @@
-{             
-    "name": "bridge",                                                                                                         
-    "private": true,                                                                                                          
-    "description": "Monorepo root — Vercel serverless functions for Stripe",                                                  
-    "type": "module",                                                                                                         
-    "scripts": {                                                                                                              
-      "build": "npm run build --prefix client",             
-      "dev": "npx concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\""
-    },                                                                                                                        
-    "dependencies": {
-      "@supabase/supabase-js": "^2.103.3",                                                                                    
-      "stripe": "^22.1.0",                                                                                                    
-      "googleapis": "^171.4.0"
-    },                                                                                                                        
-    "devDependencies": {                                    
-      "concurrently": "^9.0.0"
-    }
-  }           
+{
+  "name": "bridge",
+  "private": true,
+  "description": "Monorepo root — shared deps for Vercel serverless functions",
+  "type": "module",
+  "scripts": {
+    "build": "npm run build --prefix client",
+    "dev": "npx concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.103.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.2",
+    "googleapis": "^171.4.0",
+    "stripe": "^22.1.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
