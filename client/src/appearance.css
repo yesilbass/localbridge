@@ -71,6 +71,7 @@ html.theme-dark {
   --bridge-text-glow: rgba(251, 146, 60, 0.18);
   --landing-hero-dot: rgba(255, 255, 255, 0.085);
   --landing-hero-highlight: rgb(251 146 60 / 0.32);
+  --bridge-hero-bg: #060403;
   --bridge-gutter-l: linear-gradient(to right, rgb(234 88 12 / 0.08), transparent 55%);
   --bridge-gutter-r: linear-gradient(to left, rgb(234 88 12 / 0.07), transparent 55%);
   --bridge-gutter-vline: linear-gradient(to bottom, transparent, rgb(251 146 60 / 0.18), transparent);
