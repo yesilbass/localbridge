@@ -600,7 +600,7 @@ export default function MentorProfile() {
         {/* ════════════════════════════════════════════════════════
             ALWAYS-DARK HERO
         ════════════════════════════════════════════════════════ */}
-        <section style={{ backgroundColor: 'var(--bridge-hero-bg)' }} className="relative overflow-hidden pb-28 pt-10">
+        <section style={{ backgroundColor: 'var(--bridge-hero-bg)' }} className="relative overflow-hidden pb-10 pt-10">
 
           {/* Grid lines */}
           <div aria-hidden className="pointer-events-none absolute inset-0"
@@ -788,7 +788,7 @@ export default function MentorProfile() {
         </section>
 
         {/* Gradient transition strip */}
-        <div aria-hidden className="pointer-events-none h-48"
+        <div aria-hidden className="pointer-events-none h-10"
           style={{ background: 'linear-gradient(to bottom, var(--bridge-hero-bg), var(--bridge-canvas))' }} />
 
         {/* ════════════════════════════════════════════════════════

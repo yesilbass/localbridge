@@ -78,11 +78,11 @@ function StarRating({ rating }) {
 function HeartButton({ filled, onClick, label, disabled }) {
   return (
     <button type="button" disabled={disabled} onClick={e => { e.preventDefault(); e.stopPropagation(); onClick(); }}
-      className={`group/heart relative flex h-8 w-8 items-center justify-center rounded-full bg-[var(--bridge-surface)]/90 text-[var(--bridge-text-muted)] ring-1 ring-[var(--bridge-border)] backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-rose-50 hover:text-rose-500 hover:ring-rose-300/60 hover:shadow-[0_4px_16px_rgba(244,63,94,0.3)] disabled:pointer-events-none disabled:opacity-40 dark:hover:bg-rose-500/10 ${focusRing}`}
+      className={`group/heart relative flex h-7 w-7 items-center justify-center rounded-full bg-[var(--bridge-surface)]/90 text-[var(--bridge-text-faint)] ring-1 ring-[var(--bridge-border)] backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-rose-50 hover:text-rose-500 hover:ring-rose-300/60 hover:shadow-[0_4px_12px_rgba(244,63,94,0.25)] disabled:pointer-events-none disabled:opacity-40 dark:hover:bg-rose-500/10 ${focusRing}`}
       aria-label={label}>
       {filled
-        ? <svg className="h-4 w-4 fill-rose-500 drop-shadow-[0_1px_4px_rgba(244,63,94,0.4)]" viewBox="0 0 24 24" aria-hidden><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
-        : <svg className="h-4 w-4 transition group-hover/heart:fill-rose-500/20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+        ? <svg className="h-3.5 w-3.5 fill-rose-500" viewBox="0 0 24 24" aria-hidden><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+        : <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
       }
     </button>
   );
@@ -97,7 +97,7 @@ function MentorGridSkeleton() {
           <div aria-hidden className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-orange-200/10 to-transparent dark:via-orange-400/8"
             style={{ animation: 'bridge-sheen 2.2s ease-in-out infinite', animationDelay: `${i * 0.15}s` }} />
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 shrink-0 rounded-xl bg-[var(--bridge-surface-muted)] animate-pulse" />
+            <div className="h-11 w-11 shrink-0 rounded-xl bg-[var(--bridge-surface-muted)] animate-pulse" />
             <div className="flex-1 space-y-2">
               <div className="h-3.5 w-3/4 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
               <div className="h-3 w-1/2 rounded-full bg-[var(--bridge-surface-muted)]/70 animate-pulse" />
@@ -108,12 +108,12 @@ function MentorGridSkeleton() {
             <div className="h-3 w-4/5 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
           </div>
           <div className="mt-4 flex gap-1.5">
-            <div className="h-5 w-16 rounded-full bg-orange-100/60 animate-pulse dark:bg-orange-500/10" />
-            <div className="h-5 w-20 rounded-full bg-orange-100/60 animate-pulse dark:bg-orange-500/10" />
+            <div className="h-5 w-16 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
+            <div className="h-5 w-20 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
           </div>
           <div className="mt-4 flex items-center justify-between border-t border-[var(--bridge-border)] pt-4">
             <div className="h-4 w-16 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
-            <div className="h-8 w-24 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
+            <div className="h-7 w-24 rounded-lg bg-[var(--bridge-surface-muted)] animate-pulse" />
           </div>
         </div>
       ))}
@@ -129,37 +129,28 @@ function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favo
   }
 
   return (
-    <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card transition-all duration-300 hover:-translate-y-1 hover:border-orange-400/40 hover:shadow-bridge-glow">
+    <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--bridge-border-strong)] hover:shadow-bridge-float">
 
-      {/* Top gradient accent on hover */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-      {/* Hover aurora glow */}
-      <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-gradient-to-br from-orange-400/20 to-amber-300/8 blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="relative flex flex-col gap-3.5 p-5">
 
-      <div className="relative flex flex-col gap-4 p-5">
-
-        {/* Header: avatar + info + heart */}
+        {/* Header */}
         <div className="flex items-start gap-3">
           <div className="relative shrink-0">
             <MentorAvatar name={mentor.name} size="card"
-              className="rounded-xl ring-2 ring-[var(--bridge-canvas)] shadow-md transition-transform duration-300 group-hover:scale-[1.05]" />
+              className="rounded-xl ring-2 ring-[var(--bridge-canvas)] shadow-sm" />
             {mentor.available && (
-              <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-[var(--bridge-surface)] bg-emerald-400">
+              <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full border-2 border-[var(--bridge-surface)] bg-emerald-400">
                 <span aria-hidden className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
               </span>
             )}
           </div>
 
           <div className="min-w-0 flex-1 pt-0.5">
-            <h3 className="truncate font-display text-[15px] font-bold text-[var(--bridge-text)] transition-colors group-hover:text-orange-600 dark:group-hover:text-orange-300">
-              {mentor.name}
-            </h3>
+            <h3 className="truncate text-[14px] font-bold text-[var(--bridge-text)]">{mentor.name}</h3>
             <p className="truncate text-[12px] text-[var(--bridge-text-muted)]">{mentor.title}</p>
-            <p className="mt-0.5 inline-flex items-center gap-1 text-[12px] font-semibold text-amber-600 dark:text-amber-400">
-              <span aria-hidden className="h-1 w-1 shrink-0 rounded-full bg-amber-500" />
-              <span className="truncate">{mentor.company}</span>
-            </p>
+            <p className="truncate text-[12px] font-medium text-[var(--bridge-text-secondary)]">{mentor.company}</p>
           </div>
 
           {favoritesEnabled && (
@@ -184,36 +175,38 @@ function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favo
         </div>
 
         {/* Bio */}
-        <p className="line-clamp-2 text-[13px] leading-relaxed text-[var(--bridge-text-secondary)]">{mentor.bio}</p>
+        <p className="line-clamp-2 text-[12px] leading-relaxed text-[var(--bridge-text-secondary)]">{mentor.bio}</p>
 
         {/* Expertise tags */}
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1">
           {mentor.expertise.slice(0, 3).map(tag => (
-            <span key={tag} className="rounded-full bg-orange-500/8 px-2.5 py-0.5 text-[11px] font-semibold text-orange-600 ring-1 ring-orange-400/20 dark:text-orange-300 dark:ring-orange-400/15">
+            <span key={tag} className="rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-2 py-0.5 text-[11px] font-medium text-[var(--bridge-text-secondary)]">
               {tag}
             </span>
           ))}
           {mentor.expertise.length > 3 && (
-            <span className="rounded-full bg-[var(--bridge-surface-muted)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--bridge-text-faint)] ring-1 ring-[var(--bridge-border)]">
+            <span className="rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-2 py-0.5 text-[11px] font-medium text-[var(--bridge-text-faint)]">
               +{mentor.expertise.length - 3}
             </span>
           )}
         </div>
 
         {/* Footer */}
-        <div className="mt-auto flex items-center justify-between border-t border-[var(--bridge-border)] pt-4">
+        <div className="mt-auto flex items-center justify-between border-t border-[var(--bridge-border)] pt-3.5">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--bridge-text-faint)]">{mentor.total_sessions} sessions</p>
-            {mentor.session_rate && (
+            {mentor.session_rate ? (
               <p className="font-display text-[15px] font-bold tabular-nums text-[var(--bridge-text)]">
-                ${mentor.session_rate}<span className="text-[11px] font-normal text-[var(--bridge-text-muted)]">/session</span>
+                ${mentor.session_rate}<span className="text-[11px] font-normal text-[var(--bridge-text-faint)]">/session</span>
               </p>
+            ) : (
+              <p className="text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">Free</p>
             )}
+            <p className="text-[10px] text-[var(--bridge-text-faint)]">{mentor.total_sessions} sessions</p>
           </div>
           <Link to={`/mentors/${mentor.id}`}
-            className={`btn-sheen group/btn inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-4 py-2 text-[12px] font-bold text-white shadow-[0_4px_16px_-4px_rgba(234,88,12,0.5)] transition hover:shadow-[0_8px_24px_-4px_rgba(234,88,12,0.65)] hover:brightness-105 ${focusRing}`}>
+            className={`inline-flex items-center gap-1 rounded-lg bg-[var(--bridge-surface-muted)] px-3.5 py-2 text-[12px] font-semibold text-[var(--bridge-text)] ring-1 ring-[var(--bridge-border)] transition hover:bg-[var(--bridge-surface-raised)] hover:ring-[var(--bridge-border-strong)] ${focusRing}`}>
             View profile
-            <svg className="h-3 w-3 transition-transform group-hover/btn:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden>
+            <svg className="h-3 w-3 text-[var(--bridge-text-faint)]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
             </svg>
           </Link>
@@ -223,40 +216,38 @@ function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favo
   );
 }
 
-// ─── AI match card ────────────────────────────────────────────────────────────
+// ─── AI match cards ────────────────────────────────────────────────────────────
 function MatchChip({ label }) {
   const c = label === 'Strong Match'
-    ? 'bg-emerald-500/15 text-emerald-600 ring-emerald-400/30 dark:text-emerald-300'
+    ? 'bg-emerald-500/12 text-emerald-600 ring-emerald-400/30 dark:text-emerald-300'
     : label === 'Good Match'
-    ? 'bg-sky-500/15 text-sky-600 ring-sky-400/30 dark:text-sky-300'
-    : 'bg-amber-500/15 text-amber-600 ring-amber-400/30 dark:text-amber-300';
+    ? 'bg-sky-500/12 text-sky-600 ring-sky-400/30 dark:text-sky-300'
+    : 'bg-amber-500/12 text-amber-600 ring-amber-400/30 dark:text-amber-300';
   return <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1 ${c}`}>{label}</span>;
 }
 
 function AiMatchCard({ mentor, match }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-5 shadow-bridge-card transition-all duration-300 hover:-translate-y-1 hover:border-orange-400/50 hover:shadow-[0_20px_48px_-16px_rgba(234,88,12,0.35)]">
-      {/* Animated gradient border */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{ background: 'linear-gradient(var(--bridge-surface), var(--bridge-surface)) padding-box, linear-gradient(135deg, rgba(234,88,12,0.6), rgba(251,146,60,0.3), rgba(253,186,116,0.6)) border-box', border: '1px solid transparent' }} />
-      <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br from-orange-400/25 to-transparent blur-3xl" />
+    <div className="group relative flex h-full flex-col gap-3.5 overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-5 shadow-bridge-card transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-400/40 hover:shadow-[0_16px_40px_-12px_rgba(139,92,246,0.2)]">
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-violet-400/8 blur-3xl" />
 
       {/* Score badge */}
       <div className="absolute right-4 top-4 z-10 flex flex-col items-end gap-1.5">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-3 py-1 text-[11px] font-bold text-white shadow-[0_4px_14px_rgba(234,88,12,0.45)]">
-          <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" /></svg>
-          {match.match_score}% match
+        <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-violet-600 to-purple-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-[0_4px_12px_rgba(139,92,246,0.4)]">
+          <svg className="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
+          {match.match_score}%
         </span>
         <MatchChip label={match.match_label} />
       </div>
 
-      <div className="flex items-start gap-3 pr-28">
-        <MentorAvatar name={mentor.name} size="card" className="rounded-xl ring-2 ring-[var(--bridge-canvas)] shadow-md" />
+      <div className="flex items-start gap-3 pr-24">
+        <MentorAvatar name={mentor.name} size="card" className="rounded-xl ring-2 ring-[var(--bridge-canvas)] shadow-sm" />
         <div className="min-w-0 pt-0.5">
-          <h3 className="truncate font-display text-[15px] font-bold text-[var(--bridge-text)]">{mentor.name}</h3>
+          <h3 className="truncate text-[14px] font-bold text-[var(--bridge-text)]">{mentor.name}</h3>
           <p className="truncate text-[12px] text-[var(--bridge-text-muted)]">{mentor.title}</p>
-          <p className="mt-0.5 truncate text-[12px] font-semibold text-amber-600 dark:text-amber-400">{mentor.company}</p>
+          <p className="mt-0.5 truncate text-[12px] font-medium text-[var(--bridge-text-secondary)]">{mentor.company}</p>
         </div>
       </div>
 
@@ -265,12 +256,11 @@ function AiMatchCard({ mentor, match }) {
         {mentor.tier && <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tierBadge(mentor.tier)}`}>{mentor.tier}</span>}
       </div>
 
-      <p className="line-clamp-2 text-[13px] leading-relaxed text-[var(--bridge-text-secondary)]">{mentor.bio}</p>
+      <p className="line-clamp-2 text-[12px] leading-relaxed text-[var(--bridge-text-secondary)]">{mentor.bio}</p>
 
-      {/* Why this mentor */}
       <div className="rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/60">
         <button type="button" onClick={() => setExpanded(v => !v)}
-          className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-[12px] font-semibold text-orange-600 transition hover:text-orange-700 dark:text-orange-400 ${focusRing}`}>
+          className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-[12px] font-semibold text-violet-600 transition hover:text-violet-700 dark:text-violet-400 ${focusRing}`}>
           Why this mentor?
           <svg className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -280,19 +270,19 @@ function AiMatchCard({ mentor, match }) {
           <ul className="border-t border-[var(--bridge-border)] px-3.5 pb-3 pt-2.5 space-y-1.5">
             {match.reasons.map((r, i) => (
               <li key={i} className="flex items-start gap-2 text-[12px] text-[var(--bridge-text-secondary)]">
-                <span className="mt-0.5 shrink-0 text-orange-500">•</span>{r}
+                <span className="mt-0.5 shrink-0 text-violet-500">•</span>{r}
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      <div className="mt-auto flex items-center justify-between border-t border-[var(--bridge-border)] pt-4">
+      <div className="mt-auto flex items-center justify-between border-t border-[var(--bridge-border)] pt-3.5">
         <span className="text-[11px] text-[var(--bridge-text-faint)]">{mentor.total_sessions} sessions</span>
         <Link to={`/mentors/${mentor.id}`}
-          className={`btn-sheen inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-4 py-2 text-[12px] font-bold text-white shadow-[0_4px_16px_-4px_rgba(234,88,12,0.5)] transition hover:brightness-105 ${focusRing}`}>
+          className={`inline-flex items-center gap-1 rounded-lg bg-[var(--bridge-surface-muted)] px-3.5 py-2 text-[12px] font-semibold text-[var(--bridge-text)] ring-1 ring-[var(--bridge-border)] transition hover:bg-[var(--bridge-surface-raised)] hover:ring-violet-400/40 ${focusRing}`}>
           View profile
-          <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" /></svg>
+          <svg className="h-3 w-3 text-[var(--bridge-text-faint)]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" /></svg>
         </Link>
       </div>
     </div>
@@ -301,18 +291,18 @@ function AiMatchCard({ mentor, match }) {
 
 function AiHonorableCard({ mentor, match }) {
   return (
-    <div className="group flex items-center gap-3.5 rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-3.5 transition-all hover:-translate-y-0.5 hover:border-orange-400/40 hover:shadow-bridge-card">
+    <div className="group flex items-center gap-3.5 rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-3.5 transition-all hover:-translate-y-0.5 hover:border-[var(--bridge-border-strong)] hover:shadow-bridge-card">
       <MentorAvatar name={mentor.name} size="sm" className="ring-2 ring-[var(--bridge-canvas)] shadow" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <h4 className="truncate text-[13px] font-semibold text-[var(--bridge-text)]">{mentor.name}</h4>
-          <span className="shrink-0 rounded-full bg-orange-500/10 px-2 py-0.5 text-[10px] font-bold text-orange-600 dark:text-orange-300">{match.match_score}%</span>
+          <span className="shrink-0 rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-600 dark:text-violet-300">{match.match_score}%</span>
         </div>
         <p className="truncate text-[12px] text-[var(--bridge-text-muted)]">{mentor.title} · {mentor.company}</p>
-        {match.reason && <p className="mt-1 line-clamp-1 text-[11px] text-[var(--bridge-text-faint)]">{match.reason}</p>}
+        {match.reason && <p className="mt-0.5 line-clamp-1 text-[11px] text-[var(--bridge-text-faint)]">{match.reason}</p>}
       </div>
       <Link to={`/mentors/${mentor.id}`}
-        className={`shrink-0 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-3 py-1.5 text-[11px] font-semibold text-[var(--bridge-text-secondary)] transition hover:border-orange-400/40 hover:text-[var(--bridge-text)] ${focusRing}`}>
+        className={`shrink-0 rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-3 py-1.5 text-[11px] font-semibold text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-raised)] ${focusRing}`}>
         View
       </Link>
     </div>
@@ -323,9 +313,8 @@ function AiHonorableCard({ mentor, match }) {
 function FetchErrorBanner({ message, onRetry }) {
   return (
     <div className="relative mb-6 flex items-start gap-4 overflow-hidden rounded-2xl border border-red-200/80 bg-red-50/90 px-5 py-4 shadow-sm dark:border-red-400/25 dark:bg-red-500/8">
-      <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-red-400/15 blur-3xl" />
-      <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-500 text-white shadow-sm">
-        <svg className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
+      <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-red-500 text-white">
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
       </div>
       <div className="relative min-w-0 flex-1">
         <p className="font-semibold text-red-800 dark:text-red-200">Mentors didn't load</p>
@@ -333,7 +322,6 @@ function FetchErrorBanner({ message, onRetry }) {
         {onRetry && (
           <button type="button" onClick={onRetry}
             className={`mt-3 inline-flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-1.5 text-[12px] font-semibold text-white transition hover:bg-red-500 ${focusRing}`}>
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
             Retry
           </button>
         )}
@@ -345,41 +333,41 @@ function FetchErrorBanner({ message, onRetry }) {
 // ─── Main ──────────────────────────────────────────────────────────────────────
 export default function Mentors() {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const asMentor = user ? isMentorAccount(user) : false;
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const asMentor  = user ? isMentorAccount(user) : false;
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch]                   = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [activeIndustry, setActiveIndustry] = useState('');
-  const [activeTier, setActiveTier] = useState('');
-  const [sortBy, setSortBy] = useState('rating');
-  const [page, setPage] = useState(0);
-  const [mentors, setMentors] = useState([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [reloadKey, setReloadKey] = useState(0);
-  const [favoriteIds, setFavoriteIds] = useState(() => new Set());
-  const [favoriteBusyId, setFavoriteBusyId] = useState(null);
+  const [activeIndustry, setActiveIndustry]   = useState('');
+  const [activeTier, setActiveTier]           = useState('');
+  const [sortBy, setSortBy]                   = useState('rating');
+  const [page, setPage]                       = useState(0);
+  const [mentors, setMentors]                 = useState([]);
+  const [totalCount, setTotalCount]           = useState(0);
+  const [loading, setLoading]                 = useState(true);
+  const [error, setError]                     = useState(null);
+  const [reloadKey, setReloadKey]             = useState(0);
+  const [favoriteIds, setFavoriteIds]         = useState(() => new Set());
+  const [favoriteBusyId, setFavoriteBusyId]   = useState(null);
   const [favoriteMessage, setFavoriteMessage] = useState(null);
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
-  const [rateMin, setRateMin] = useState('');
-  const [rateMax, setRateMax] = useState('');
-  const [availableOnly, setAvailableOnly] = useState(false);
-  const gridRef = useRef(null);
-  const sortRef = useRef(null);
+  const [filterOpen, setFilterOpen]           = useState(false);
+  const [sortOpen, setSortOpen]               = useState(false);
+  const [rateMin, setRateMin]                 = useState('');
+  const [rateMax, setRateMax]                 = useState('');
+  const [availableOnly, setAvailableOnly]     = useState(false);
+  const gridRef  = useRef(null);
+  const sortRef  = useRef(null);
 
-  const [wizardOpen, setWizardOpen] = useState(false);
-  const [aiMode, setAiMode] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState(null);
-  const [remainingUses, setRemainingUses] = useState(null);
-  const [aiResults, setAiResults] = useState(null);
+  const [wizardOpen, setWizardOpen]           = useState(false);
+  const [aiMode, setAiMode]                   = useState(false);
+  const [aiLoading, setAiLoading]             = useState(false);
+  const [aiError, setAiError]                 = useState(null);
+  const [remainingUses, setRemainingUses]     = useState(null);
+  const [aiResults, setAiResults]             = useState(null);
   const [allMentorsForAi, setAllMentorsForAi] = useState([]);
   const [savedMenteeProfile, setSavedMenteeProfile] = useState(null);
-  const [prefillData, setPrefillData] = useState(null);
+  const [prefillData, setPrefillData]         = useState(null);
   const didAutoOpenRef = useRef(false);
 
   useEffect(() => { const t = setTimeout(() => setDebouncedSearch(search), 350); return () => clearTimeout(t); }, [search]);
@@ -388,7 +376,7 @@ export default function Mentors() {
   useEffect(() => {
     if (!user || isMentorAccount(user)) { setFavoriteIds(new Set()); return; }
     void getMyFavorites().then(({ data, error: e }) => {
-      if (e) { const m = e.message || String(e); if (m.includes('favorites') || m.includes('schema cache') || m.includes('does not exist')) setFavoriteMessage("Hearts need a favorites table. If you're admin, run bridge_schema.sql."); setFavoriteIds(new Set()); return; }
+      if (e) { const m = e.message || String(e); if (m.includes('favorites') || m.includes('schema cache') || m.includes('does not exist')) setFavoriteMessage("Hearts need a favorites table."); setFavoriteIds(new Set()); return; }
       setFavoriteMessage(null); setFavoriteIds(new Set(data ?? []));
     });
   }, [user]);
@@ -453,7 +441,7 @@ export default function Mentors() {
     const key = normalizeMentorId(mentorId);
     setFavoriteBusyId(key); setFavoriteMessage(null);
     const { error: err } = await toggleFavorite(mentorId);
-    if (err) { const msg = err.message || String(err); setFavoriteMessage(msg.includes('favorites') || msg.includes('does not exist') || msg.includes('schema cache') ? 'Could not save — favorites table missing (see bridge_schema.sql).' : msg); }
+    if (err) { const msg = err.message || String(err); setFavoriteMessage(msg.includes('favorites') || msg.includes('does not exist') || msg.includes('schema cache') ? 'Could not save — favorites table missing.' : msg); }
     const { data, error: reloadErr } = await getMyFavorites();
     if (!reloadErr && data) setFavoriteIds(new Set(data));
     setFavoriteBusyId(null);
@@ -468,9 +456,9 @@ export default function Mentors() {
   function resetFilters() { setSearch(''); setActiveIndustry(''); setActiveTier(''); setSortBy('rating'); setRateMin(''); setRateMax(''); setAvailableOnly(false); setPage(0); }
 
   const startIdx = totalCount === 0 ? 0 : page * PAGE_SIZE + 1;
-  const endIdx = Math.min((page + 1) * PAGE_SIZE, totalCount);
-  const canPrev = page > 0;
-  const canNext = endIdx < totalCount;
+  const endIdx   = Math.min((page + 1) * PAGE_SIZE, totalCount);
+  const canPrev  = page > 0;
+  const canNext  = endIdx < totalCount;
   const activeFilterCount = (activeIndustry ? 1 : 0) + (activeTier ? 1 : 0) + (debouncedSearch ? 1 : 0) + (rateMin !== '' || rateMax !== '' ? 1 : 0) + (availableOnly ? 1 : 0);
   const visibleMentors = mentors.filter(m => {
     if (asMentor && user?.id && m.user_id === user.id) return false;
@@ -486,33 +474,96 @@ export default function Mentors() {
 
       {/* Ambient background */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10"
-        style={{ background: 'radial-gradient(ellipse 80% 50% at 50% -20%, var(--bridge-aurora-1), transparent 60%)' }} />
+        style={{ background: 'radial-gradient(ellipse 70% 40% at 50% -10%, var(--bridge-aurora-1), transparent 60%)' }} />
 
       {/* ═══════════════════════════════════════════════════════════
-          STICKY CONTROL BAR — search, industry chips, sort, AI
+          HERO HEADER
+      ═══════════════════════════════════════════════════════════ */}
+      {!aiMode && (
+        <section style={{ backgroundColor: 'var(--bridge-hero-bg)' }} className="relative overflow-hidden pb-8 pt-8">
+          {/* Grid */}
+          <div aria-hidden className="pointer-events-none absolute inset-0"
+            style={{ backgroundImage: 'linear-gradient(rgba(234,88,12,0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(234,88,12,0.055) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+          {/* Orbs */}
+          <div aria-hidden className="pointer-events-none absolute -left-24 top-0 h-72 w-72 animate-blob-breathe rounded-full opacity-20" style={{ background: 'radial-gradient(circle, rgba(234,88,12,0.6) 0%, transparent 70%)' }} />
+          <div aria-hidden className="pointer-events-none absolute right-0 top-0 h-64 w-64 animate-blob-breathe rounded-full opacity-15 [animation-delay:-2s]" style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.5) 0%, transparent 70%)' }} />
+          {/* Top edge */}
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(234,88,12,0.3) 30%, rgba(251,146,60,0.7) 50%, rgba(234,88,12,0.3) 70%, transparent 100%)' }} />
+
+          <div className="relative mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-soft" />
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-400">
+                    {totalCount > 0 ? `${totalCount} mentors available` : 'Browse mentors'}
+                  </span>
+                </div>
+                <h1 className="font-display text-4xl font-black tracking-tight text-white sm:text-5xl">
+                  Find your <span className="text-gradient-bridge">mentor</span>
+                </h1>
+                <p className="mt-3 max-w-md text-[15px] leading-relaxed text-stone-400">
+                  Connect with professionals who've been where you want to go. Real advice, real experience.
+                </p>
+              </div>
+
+              {/* AI Match CTA in header */}
+              {!asMentor && (
+                <div className="flex flex-col items-start gap-2 sm:items-end">
+                  {remainingUses !== null && remainingUses > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      {Array.from({ length: LIMITS.mentor_match }).map((_, i) => (
+                        <span key={i} className={`h-1.5 w-1.5 rounded-full transition-all ${i < LIMITS.mentor_match - remainingUses ? 'bg-white/20' : 'bg-violet-400 shadow-[0_0_4px_rgba(139,92,246,0.6)]'}`} />
+                      ))}
+                      <span className="text-[11px] text-stone-500">{remainingUses} use{remainingUses !== 1 ? 's' : ''} left</span>
+                    </div>
+                  )}
+                  {remainingUses === 0 ? (
+                    <span className="rounded-full border border-white/10 px-4 py-2 text-[12px] font-medium text-stone-500">AI matching used up</span>
+                  ) : (
+                    <button type="button" onClick={handleAiMatchClick}
+                      className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-purple-500 px-5 py-2.5 text-[13px] font-semibold text-white shadow-[0_4px_20px_-4px_rgba(139,92,246,0.6)] transition hover:brightness-110 hover:shadow-[0_8px_28px_-4px_rgba(139,92,246,0.75)] ${focusRing}`}>
+                      <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
+                      AI Match
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Gradient transition */}
+      {!aiMode && (
+        <div aria-hidden className="pointer-events-none h-6"
+          style={{ background: 'linear-gradient(to bottom, var(--bridge-hero-bg), var(--bridge-canvas))' }} />
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════
+          STICKY CONTROL BAR
       ═══════════════════════════════════════════════════════════ */}
       <div className={`sticky top-[3.75rem] z-30 border-b border-[var(--bridge-border)] bg-[var(--bridge-canvas)]/95 backdrop-blur-xl sm:top-16 ${aiMode ? 'opacity-60 pointer-events-none' : ''}`}>
-        {/* Top accent */}
         <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 dark:opacity-100"
-          style={{ background: 'linear-gradient(90deg, transparent, rgba(251,146,60,0.15) 40%, rgba(251,146,60,0.15) 60%, transparent)' }} />
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(251,146,60,0.12) 40%, rgba(251,146,60,0.12) 60%, transparent)' }} />
 
         <div className="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
 
-          {/* Row 1: search + right-side controls */}
-          <div className="flex items-center gap-2.5 py-3">
+          {/* Search + controls row */}
+          <div className="flex items-center gap-2 py-2.5">
 
             {/* Search */}
             <div className="group relative flex-1">
-              <svg className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--bridge-text-faint)] transition group-focus-within:text-orange-500"
+              <svg className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--bridge-text-faint)] transition group-focus-within:text-orange-500"
                 fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" strokeLinecap="round" />
               </svg>
               <input type="text" placeholder="Search by name, role, company…" value={search} onChange={e => setSearch(e.target.value)}
-                className="w-full rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-2 pl-10 pr-9 text-[13px] text-[var(--bridge-text)] placeholder:text-[var(--bridge-text-faint)] transition focus:border-orange-400/60 focus:outline-none focus:shadow-[0_0_0_3px_rgba(251,146,60,0.15)]" />
+                className="h-9 w-full rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-0 pl-9 pr-8 text-[13px] text-[var(--bridge-text)] placeholder:text-[var(--bridge-text-faint)] transition focus:border-orange-400/60 focus:outline-none focus:shadow-[0_0_0_3px_rgba(251,146,60,0.12)]" />
               {search && (
                 <button type="button" onClick={() => setSearch('')} aria-label="Clear"
-                  className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-[var(--bridge-text-faint)] transition hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)]">
-                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                  className="absolute right-2 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded text-[var(--bridge-text-faint)] transition hover:text-[var(--bridge-text)]">
+                  <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" d="M6 18 18 6M6 6l12 12" /></svg>
                 </button>
               )}
             </div>
@@ -520,22 +571,23 @@ export default function Mentors() {
             {/* Sort */}
             <div ref={sortRef} className="relative hidden sm:block">
               <button type="button" onClick={() => setSortOpen(o => !o)} aria-haspopup="listbox" aria-expanded={sortOpen}
-                className={`inline-flex items-center gap-1.5 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-2 text-[13px] font-medium text-[var(--bridge-text-secondary)] transition hover:border-orange-400/40 hover:text-[var(--bridge-text)] ${focusRing}`}>
-                <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5h18M6 12h12M10 16.5h4" /></svg>
-                <span className="hidden md:inline">{SORT_OPTIONS.find(o => o.value === sortBy)?.label}</span>
-                <svg className={`h-3.5 w-3.5 shrink-0 transition-transform ${sortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                className={`inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3 text-[12px] font-medium text-[var(--bridge-text-secondary)] transition hover:border-[var(--bridge-border-strong)] hover:text-[var(--bridge-text)] ${focusRing}`}>
+                <svg className="h-3.5 w-3.5 shrink-0 text-[var(--bridge-text-faint)]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5h18M6 12h12M10 16.5h4" /></svg>
+                <span className="hidden lg:inline">{SORT_OPTIONS.find(o => o.value === sortBy)?.label}</span>
+                <span className="lg:hidden">Sort</span>
+                <svg className={`h-3 w-3 shrink-0 text-[var(--bridge-text-faint)] transition-transform ${sortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
               </button>
               {sortOpen && (
-                <div role="listbox" className="animate-pop-in absolute right-0 top-full z-20 mt-2 w-52 overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)]/97 shadow-bridge-float backdrop-blur-xl">
-                  <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/50 to-transparent" />
+                <div role="listbox" className="animate-pop-in absolute right-0 top-full z-20 mt-1.5 w-48 overflow-hidden rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)] shadow-bridge-float backdrop-blur-xl">
+                  <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/40 to-transparent" />
                   {SORT_OPTIONS.map(opt => (
                     <button key={opt.value} type="button" role="option" aria-selected={sortBy === opt.value}
                       onClick={() => { setSortBy(opt.value); setSortOpen(false); }}
-                      className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-[13px] transition ${sortBy === opt.value ? 'bg-orange-500/8 font-semibold text-orange-600 dark:text-orange-300' : 'font-medium text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)]'} ${focusRing}`}>
+                      className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-[13px] transition ${sortBy === opt.value ? 'bg-[var(--bridge-surface-muted)] font-semibold text-[var(--bridge-text)]' : 'text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)]'} ${focusRing}`}>
                       {opt.label}
                       {sortBy === opt.value && (
-                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-white" aria-hidden>
-                          <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                        <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-orange-500 text-white" aria-hidden>
+                          <svg className="h-2 w-2" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                         </span>
                       )}
                     </button>
@@ -546,42 +598,36 @@ export default function Mentors() {
 
             {/* Filter toggle */}
             <button type="button" onClick={() => setFilterOpen(o => !o)} aria-expanded={filterOpen}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-[13px] font-semibold transition ${filterOpen || activeFilterCount > 0 ? 'border-orange-500/50 bg-orange-500/10 text-orange-600 dark:text-orange-300' : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)] hover:border-orange-400/40 hover:text-[var(--bridge-text)]'} ${focusRing}`}>
+              className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-[12px] font-medium transition ${filterOpen || activeFilterCount > 0 ? 'border-orange-400/50 bg-orange-500/8 text-orange-600 dark:text-orange-300' : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)] hover:border-[var(--bridge-border-strong)] hover:text-[var(--bridge-text)]'} ${focusRing}`}>
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" /></svg>
               Filters
               {activeFilterCount > 0 && (
-                <span className="flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-orange-500 px-1 text-[10px] font-bold text-white">{activeFilterCount}</span>
+                <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-orange-500 px-1 text-[9px] font-bold text-white">{activeFilterCount}</span>
               )}
             </button>
 
-            {/* AI Match */}
-            {!asMentor && (
-              <div className="flex items-center gap-2">
-                {remainingUses !== null && remainingUses > 0 && (
-                  <div className="hidden items-center gap-1 sm:flex" aria-label={`${remainingUses} AI matches remaining`}>
-                    {Array.from({ length: LIMITS.mentor_match }).map((_, i) => (
-                      <span key={i} className={`h-1.5 w-1.5 rounded-full transition-all ${i < LIMITS.mentor_match - remainingUses ? 'bg-[var(--bridge-border-strong)]' : 'bg-gradient-to-br from-orange-500 to-amber-400 shadow-[0_0_4px_rgba(234,88,12,0.5)]'}`} />
-                    ))}
-                  </div>
-                )}
-                {remainingUses === 0 ? (
-                  <span className="hidden rounded-full border border-[var(--bridge-border)] px-3 py-2 text-[12px] font-medium text-[var(--bridge-text-faint)] sm:inline-flex">No AI uses left</span>
-                ) : (
-                  <button type="button" onClick={handleAiMatchClick}
-                    className={`btn-sheen group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-4 py-2 text-[13px] font-bold text-white shadow-[0_4px_18px_-4px_rgba(234,88,12,0.55)] transition hover:shadow-[0_8px_26px_-4px_rgba(234,88,12,0.7)] hover:brightness-105 ${focusRing}`}>
-                    <svg className="h-3.5 w-3.5 transition-transform group-hover:rotate-12" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
-                    <span className="hidden sm:inline">AI Match</span>
-                  </button>
-                )}
-              </div>
+            {/* Divider */}
+            <div className="hidden h-5 w-px bg-[var(--bridge-border)] sm:block" />
+
+            {/* Industry chips row label (hidden, shown below) */}
+            {activeFilterCount > 0 && (
+              <button type="button" onClick={resetFilters}
+                className={`hidden items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-medium text-[var(--bridge-text-faint)] transition hover:text-[var(--bridge-text)] sm:inline-flex ${focusRing}`}>
+                <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                Clear
+              </button>
             )}
           </div>
 
-          {/* Row 2: Industry chips — horizontal scroll */}
-          <div className="flex gap-1.5 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {/* Industry chips */}
+          <div className="flex gap-1 overflow-x-auto pb-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {INDUSTRIES.map(({ label, value }) => (
               <button key={value || 'all'} type="button" onClick={() => { setActiveIndustry(value); setPage(0); }}
-                className={`inline-flex shrink-0 items-center rounded-full px-3 py-1 text-[12px] font-semibold transition ${activeIndustry === value ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white shadow-[0_2px_12px_rgba(234,88,12,0.4)]' : 'border border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-muted)] hover:border-orange-400/40 hover:text-[var(--bridge-text)]'} ${focusRing}`}>
+                className={`inline-flex shrink-0 items-center rounded-md px-2.5 py-1 text-[12px] font-medium transition ${
+                  activeIndustry === value
+                    ? 'bg-[var(--bridge-text)] text-[var(--bridge-canvas)]'
+                    : 'text-[var(--bridge-text-muted)] hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)]'
+                } ${focusRing}`}>
                 {label}
               </button>
             ))}
@@ -590,7 +636,7 @@ export default function Mentors() {
 
         {/* Collapsible advanced filters */}
         {filterOpen && (
-          <div className="border-t border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/50">
+          <div className="border-t border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/40">
             <div className="mx-auto max-w-[90rem] px-4 py-4 sm:px-6 lg:px-8">
               <div className="flex flex-wrap items-start gap-6">
 
@@ -600,7 +646,7 @@ export default function Mentors() {
                   <div className="flex flex-wrap gap-1.5">
                     {TIERS.map(({ label, value }) => (
                       <button key={value || 'all-t'} type="button" onClick={() => setActiveTier(value)}
-                        className={`rounded-full px-3 py-1 text-[12px] font-semibold transition ${activeTier === value ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white shadow-[0_2px_10px_rgba(234,88,12,0.4)]' : 'border border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-muted)] hover:border-orange-400/40'} ${focusRing}`}>
+                        className={`rounded-md px-2.5 py-1 text-[12px] font-medium transition ${activeTier === value ? 'bg-[var(--bridge-text)] text-[var(--bridge-canvas)]' : 'border border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)]'} ${focusRing}`}>
                         {label}
                       </button>
                     ))}
@@ -613,9 +659,9 @@ export default function Mentors() {
                   <div className="flex items-center gap-2">
                     {[['rateMin', rateMin, setRateMin, 'Min'], ['rateMax', rateMax, setRateMax, 'Max']].map(([key, val, set, ph]) => (
                       <div key={key} className="relative">
-                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-[var(--bridge-text-faint)]">$</span>
+                        <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[12px] text-[var(--bridge-text-faint)]">$</span>
                         <input type="number" min="0" placeholder={ph} value={val} onChange={e => set(e.target.value)} aria-label={`${ph} rate`}
-                          className="w-20 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-1.5 pl-6 pr-3 text-[13px] text-[var(--bridge-text)] placeholder:text-[var(--bridge-text-faint)] focus:border-orange-400/60 focus:outline-none" />
+                          className="w-20 rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-1.5 pl-5 pr-2.5 text-[13px] text-[var(--bridge-text)] placeholder:text-[var(--bridge-text-faint)] focus:border-orange-400/60 focus:outline-none" />
                       </div>
                     ))}
                   </div>
@@ -625,22 +671,13 @@ export default function Mentors() {
                 <div>
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-faint)]">Status</p>
                   <button type="button" role="switch" aria-checked={availableOnly} onClick={() => setAvailableOnly(v => !v)}
-                    className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${availableOnly ? 'bg-emerald-500/15 text-emerald-600 ring-1 ring-emerald-400/30 dark:text-emerald-300' : 'border border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-muted)]'} ${focusRing}`}>
-                    <span className={`flex h-3.5 w-6 rounded-full transition-colors ${availableOnly ? 'bg-emerald-500' : 'bg-[var(--bridge-border-strong)]'}`}>
-                      <span className={`m-0.5 h-2.5 w-2.5 rounded-full bg-white shadow transition-transform ${availableOnly ? 'translate-x-2.5' : ''}`} />
+                    className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-[12px] font-medium transition ${availableOnly ? 'bg-emerald-500/12 text-emerald-600 ring-1 ring-emerald-400/30 dark:text-emerald-300' : 'border border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)]'} ${focusRing}`}>
+                    <span className={`flex h-3 w-5 rounded-full transition-colors ${availableOnly ? 'bg-emerald-500' : 'bg-[var(--bridge-border-strong)]'}`}>
+                      <span className={`m-0.5 h-2 w-2 rounded-full bg-white shadow transition-transform ${availableOnly ? 'translate-x-2' : ''}`} />
                     </span>
                     Available now
                   </button>
                 </div>
-
-                {activeFilterCount > 0 && (
-                  <div className="flex items-end">
-                    <button type="button" onClick={resetFilters}
-                      className={`rounded-full px-3 py-1.5 text-[12px] font-semibold text-[var(--bridge-text-faint)] transition hover:bg-[var(--bridge-surface)] hover:text-[var(--bridge-text)] ${focusRing}`}>
-                      Clear all
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -652,22 +689,19 @@ export default function Mentors() {
       ═══════════════════════════════════════════════════════════ */}
       {aiMode && (
         <div className="mx-auto max-w-[90rem] px-4 py-8 sm:px-6 lg:px-8">
-
-          {/* Loading */}
           {aiLoading && (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-24 text-center shadow-bridge-card">
-              <div className="animate-blob-breathe relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-400 shadow-[0_0_40px_rgba(234,88,12,0.4)]">
-                <svg className="h-10 w-10 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+              <div className="animate-blob-breathe relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-purple-500 shadow-[0_0_32px_rgba(139,92,246,0.4)]">
+                <svg className="h-8 w-8 animate-spin text-white" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
               </div>
-              <p className="mt-6 font-display text-xl font-bold text-[var(--bridge-text)]">Finding your best mentors…</p>
-              <p className="mt-2 text-[13px] text-[var(--bridge-text-muted)]">Our AI is reviewing all profiles for you.</p>
+              <p className="mt-5 font-display text-xl font-bold text-[var(--bridge-text)]">Finding your best mentors…</p>
+              <p className="mt-1.5 text-[13px] text-[var(--bridge-text-muted)]">Our AI is reviewing all profiles for you.</p>
             </div>
           )}
 
-          {/* Error */}
           {!aiLoading && aiError && (
             <div className="rounded-2xl border border-red-200/80 bg-red-50/90 px-6 py-8 text-center dark:border-red-400/25 dark:bg-red-500/8">
               <p className="font-semibold text-red-800 dark:text-red-200">Something went wrong.</p>
@@ -681,13 +715,11 @@ export default function Mentors() {
             </div>
           )}
 
-          {/* Results */}
           {!aiLoading && !aiError && aiResults && (
             <>
-              {/* AI results header */}
               <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-orange-400/30 bg-orange-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.15em] text-orange-600 dark:text-orange-300">
+                  <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-violet-400/30 bg-violet-500/8 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.15em] text-violet-600 dark:text-violet-300">
                     <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
                     AI-Powered Matches
                   </div>
@@ -701,9 +733,9 @@ export default function Mentors() {
                 </div>
                 <div className="flex gap-2">
                   <button type="button" onClick={handleAiMatchClick}
-                    className={`rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-4 py-2 text-[13px] font-semibold text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] ${focusRing}`}>Retake</button>
+                    className={`rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-4 py-2 text-[13px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] ${focusRing}`}>Retake</button>
                   <button type="button" onClick={exitAiMode}
-                    className={`rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-4 py-2 text-[13px] font-semibold text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] ${focusRing}`}>← Browse all</button>
+                    className={`rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-4 py-2 text-[13px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] ${focusRing}`}>← Browse all</button>
                 </div>
               </div>
 
@@ -716,7 +748,7 @@ export default function Mentors() {
               </div>
 
               {aiResults.honorable_mentions.length > 0 && (
-                <div className="mt-12">
+                <div className="mt-10">
                   <h3 className="mb-4 font-display text-lg font-bold text-[var(--bridge-text-secondary)]">Honorable Mentions</h3>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {aiResults.honorable_mentions.map(match => {
@@ -737,19 +769,18 @@ export default function Mentors() {
       ═══════════════════════════════════════════════════════════ */}
       <div ref={gridRef} className={`mx-auto max-w-[90rem] scroll-mt-28 px-4 py-6 sm:px-6 lg:px-8 ${aiMode ? 'hidden' : ''}`}>
 
-        {/* Mentor banner (for mentors browsing) */}
         {asMentor && (
-          <div className="mb-5 flex items-start gap-3 rounded-2xl border border-amber-400/25 bg-amber-500/8 px-4 py-3.5">
+          <div className="mb-5 flex items-start gap-3 rounded-xl border border-amber-400/25 bg-amber-500/6 px-4 py-3">
             <svg className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
             <p className="text-[13px] text-amber-700 dark:text-amber-300">
-              You're signed in as a mentor. Browse for inspiration — you can't book sessions on this account.{' '}
+              You're signed in as a mentor.{' '}
               <Link to="/dashboard" className={`font-semibold underline underline-offset-2 hover:no-underline ${focusRing} rounded-sm`}>Open your dashboard →</Link>
             </p>
           </div>
         )}
 
         {favoriteMessage && (
-          <div className="mb-5 rounded-2xl border border-amber-400/25 bg-amber-500/8 px-4 py-3 text-[13px] text-amber-700 dark:text-amber-300" role="status">{favoriteMessage}</div>
+          <div className="mb-5 rounded-xl border border-amber-400/25 bg-amber-500/6 px-4 py-3 text-[13px] text-amber-700 dark:text-amber-300" role="status">{favoriteMessage}</div>
         )}
 
         {error && <FetchErrorBanner message={error} onRetry={loadMentors} />}
@@ -758,27 +789,26 @@ export default function Mentors() {
         {!loading && !error && totalCount > 0 && (
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <p className="text-[13px] text-[var(--bridge-text-muted)]">
-              Showing <span className="font-bold text-[var(--bridge-text)]">{startIdx}–{endIdx}</span> of <span className="font-bold text-[var(--bridge-text)]">{totalCount}</span> mentors
-              {activeFilterCount > 0 && <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-orange-500/10 px-2 py-0.5 text-[11px] font-bold text-orange-600 dark:text-orange-300"><span className="h-1 w-1 rounded-full bg-orange-500" />filtered</span>}
+              Showing <span className="font-semibold text-[var(--bridge-text)]">{startIdx}–{endIdx}</span> of <span className="font-semibold text-[var(--bridge-text)]">{totalCount}</span> mentors
+              {activeFilterCount > 0 && <span className="ml-2 text-[11px] text-[var(--bridge-text-faint)]">· filtered</span>}
             </p>
             {(canPrev || canNext) && (
               <div className="flex items-center gap-2">
                 <button type="button" disabled={!canPrev} onClick={() => changePage(Math.max(0, page - 1))}
-                  className={`rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-4 py-1.5 text-[13px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>← Prev</button>
-                <span className="rounded-full bg-[var(--bridge-surface-muted)] px-3 py-1.5 text-[12px] font-bold text-[var(--bridge-text-faint)]">{page + 1}</span>
+                  className={`rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 text-[12px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>← Prev</button>
+                <span className="rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-3 py-1.5 text-[12px] font-semibold text-[var(--bridge-text-faint)]">{page + 1}</span>
                 <button type="button" disabled={!canNext} onClick={() => changePage(page + 1)}
-                  className={`rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-4 py-1.5 text-[13px] font-semibold text-white shadow-[0_2px_10px_rgba(234,88,12,0.35)] transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>Next →</button>
+                  className={`rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 text-[12px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>Next →</button>
               </div>
             )}
           </div>
         )}
 
-        {/* Grid */}
         {loading ? (
           <MentorGridSkeleton />
         ) : visibleMentors.length > 0 ? (
           <div>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {visibleMentors.map((mentor, i) => (
                 <Reveal key={mentor.id} delay={Math.min(i * 25, 120)} className="h-full">
                   <MentorCard mentor={mentor} isFavorite={favoriteIds.has(normalizeMentorId(mentor.id))}
@@ -788,27 +818,25 @@ export default function Mentors() {
               ))}
             </div>
 
-            {/* Bottom pagination */}
             {(canPrev || canNext) && (
               <div className="mt-10 flex items-center justify-center gap-2">
                 <button type="button" disabled={!canPrev} onClick={() => changePage(Math.max(0, page - 1))}
-                  className={`rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-2.5 text-[13px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>← Previous</button>
-                <span className="rounded-full bg-[var(--bridge-surface-muted)] px-4 py-2 text-[12px] font-bold text-[var(--bridge-text-faint)]">Page {page + 1}</span>
+                  className={`rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-2.5 text-[13px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>← Previous</button>
+                <span className="rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-2 text-[12px] font-bold text-[var(--bridge-text-faint)]">Page {page + 1}</span>
                 <button type="button" disabled={!canNext} onClick={() => changePage(page + 1)}
-                  className={`btn-sheen rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-5 py-2.5 text-[13px] font-semibold text-white shadow-[0_4px_16px_-4px_rgba(234,88,12,0.5)] transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>Next →</button>
+                  className={`rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-2.5 text-[13px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>Next →</button>
               </div>
             )}
           </div>
         ) : !error ? (
           <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-2xl border border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface)]/60 px-6 py-24 text-center">
-            <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-400/8 blur-3xl" />
-            <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card">
-              <svg className="h-7 w-7 text-orange-500" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.35-4.35" strokeLinecap="round" /></svg>
+            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]">
+              <svg className="h-6 w-6 text-[var(--bridge-text-faint)]" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.35-4.35" strokeLinecap="round" /></svg>
             </div>
-            <p className="relative mt-5 font-display text-xl font-bold text-[var(--bridge-text)]">Nobody fits that combo</p>
-            <p className="relative mt-2 max-w-sm text-[13px] leading-relaxed text-[var(--bridge-text-muted)]">Loosen a filter or try a different keyword — sometimes the best profiles have unusual titles.</p>
+            <p className="relative mt-4 font-display text-xl font-bold text-[var(--bridge-text)]">Nobody fits that combo</p>
+            <p className="relative mt-2 max-w-sm text-[13px] leading-relaxed text-[var(--bridge-text-muted)]">Try loosening a filter or using a different keyword.</p>
             <button type="button" onClick={resetFilters}
-              className={`relative mt-6 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-6 py-2.5 text-[13px] font-semibold text-[var(--bridge-text-secondary)] transition hover:border-orange-400/40 hover:text-[var(--bridge-text)] ${focusRing}`}>
+              className={`relative mt-5 rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-2 text-[13px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] ${focusRing}`}>
               Reset filters
             </button>
           </div>
