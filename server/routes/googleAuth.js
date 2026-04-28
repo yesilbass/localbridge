@@ -12,10 +12,16 @@ function getOAuth2Client() {
   );
 }
 
+const LOCAL_DEV_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+];
+
 const ALLOWED_ORIGINS = new Set(
   process.env.CLIENT_URL
-    ? [process.env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:5175']
-    : ['http://localhost:5173', 'http://localhost:5175']
+    ? [process.env.CLIENT_URL, ...LOCAL_DEV_ORIGINS]
+    : LOCAL_DEV_ORIGINS,
 );
 
 // GET /auth/google?mentor_profile_id=<uuid>
