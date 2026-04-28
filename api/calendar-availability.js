@@ -1,27 +1,6 @@
 import { google } from 'googleapis';
-import { createClient } from '@supabase/supabase-js';
-
-function getSupabase() {
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-}
-
-function buildAuthedClient(refreshToken, mentorProfileId) {
-  const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
-  );
-  oauth2Client.setCredentials({ refresh_token: refreshToken });
-  oauth2Client.on('tokens', async (tokens) => {
-    if (tokens.refresh_token) {
-      await getSupabase()
-        .from('mentor_profiles')
-        .update({ google_refresh_token: tokens.refresh_token })
-        .eq('id', mentorProfileId);
-    }
-  });
-  return oauth2Client;
-}
+import supabase from './_lib/supabase.js';
+import { buildAuthedClient } from './_lib/oauth.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -37,7 +16,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'mentor_profile_id and date are required' });
   }
 
-  const { data: profile, error } = await getSupabase()
+  const { data: profile, error } = await supabase
     .from('mentor_profiles')
     .select('google_refresh_token')
     .eq('id', mentor_profile_id)
@@ -48,7 +27,7 @@ export default async function handler(req, res) {
   }
 
   if (!profile.google_refresh_token) {
-    return res.status(400).json({ busy: null, reason: 'Calendar not connected for this mentor' });
+    return res.status(200).json({ busy: null, reason: 'Calendar not connected' });
   }
 
   try {

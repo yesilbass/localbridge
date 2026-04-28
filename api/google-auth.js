@@ -1,10 +1,5 @@
-import { google } from 'googleapis';
-
-const ALLOWED_ORIGINS = new Set(
-  process.env.CLIENT_URL
-    ? [process.env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:5175']
-    : ['http://localhost:5173', 'http://localhost:5175']
-);
+import { getOAuth2Client } from './_lib/oauth.js';
+import { ALLOWED_ORIGINS, getClientUrl } from './_lib/allowedOrigins.js';
 
 export default function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
@@ -15,18 +10,15 @@ export default function handler(req, res) {
   }
 
   const origin = req.headers.origin || '';
-  const safeOrigin = ALLOWED_ORIGINS.has(origin) ? origin : (process.env.CLIENT_URL || 'http://localhost:5173');
+  const safeOrigin = getClientUrl(origin);
   const state = JSON.stringify({ profileId: mentor_profile_id, origin: safeOrigin });
 
-  const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
-  );
+  const oauth2Client = getOAuth2Client();
 
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
+    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
     scope: [
       'https://www.googleapis.com/auth/calendar.readonly',
       'https://www.googleapis.com/auth/calendar.events',

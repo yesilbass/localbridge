@@ -43,13 +43,6 @@ import { isMentorAccount } from '../../utils/accountRole';
 import { getMySession, updateSessionStatus, acceptSession } from '../../api/sessions';
 import supabase from '../../api/supabase';
 
-/** PostgREST needs sessions.mentee_id → auth.users FK for mentee:mentee_id(...) embeds (PGRST200 if missing). */
-function isSessionsMenteeEmbedError(err) {
-  if (!err) return false;
-  if (err.code === 'PGRST200') return true;
-  const m = String(err.message ?? '');
-  return m.includes('Could not find a relationship') && m.includes('mentee_id');
-}
 
 export function useDashboardData(user, authLoading) {
   const isMentor = user ? isMentorAccount(user) : false;
@@ -86,6 +79,7 @@ export function useDashboardData(user, authLoading) {
               .select('id, calendar_connected, onboarding_complete')
               .eq('user_id', user.id)
               .maybeSingle();
+          console.log('[Dashboard] mentor profile query result:', { profileData, profileErr, userId: user.id });
           if (profileErr) throw profileErr;
           if (!profileData?.id) {
             setMentorProfileId(null);
@@ -99,42 +93,20 @@ export function useDashboardData(user, authLoading) {
           setCalendarConnected(!!profileData.calendar_connected);
           setMentorOnboardingComplete(profileData.onboarding_complete ?? false);
 
-          let sessErr;
-          let data;
-          const withMentee = await supabase
+          const { data, error: sessErr } = await supabase
               .from('sessions')
-              .select('*, mentee:mentee_id(id, raw_user_meta_data)')
-              .eq('mentor_id', mpId);
-          ({ data, error: sessErr } = withMentee);
+              .select('*')
+              .eq('mentor_id', mpId)
+              .order('scheduled_date', { ascending: true });
 
-          if (sessErr && isSessionsMenteeEmbedError(sessErr)) {
-            const { data: plain, error: plainErr } = await supabase
-                .from('sessions')
-                .select('*')
-                .eq('mentor_id', mpId);
-            if (plainErr) throw plainErr;
-            console.warn(
-                'Dashboard: mentee embed unavailable (add FK sessions.mentee_id → auth.users). Using generic labels. See supabase/ensure_sessions_mentee_fk.sql',
-            );
-            setSessions(
-                (plain ?? []).map((s) => ({
-                  ...s,
-                  mentee_name: s.mentee_name ?? 'Mentee',
-                })),
-            );
-          } else if (sessErr) {
-            throw sessErr;
-          } else {
-            // Normalize a human-readable mentee label for cards (raw_user_meta_data shape from Supabase Auth).
-            setSessions(
-                (data ?? []).map((s) => ({
-                  ...s,
-                  mentee_name: s.mentee?.raw_user_meta_data?.first_name
-                      ? `${s.mentee.raw_user_meta_data.first_name} ${s.mentee.raw_user_meta_data.last_name ?? ''}`.trim()
-                      : s.mentee?.raw_user_meta_data?.full_name ?? s.mentee_name ?? 'Mentee',
-                })),
-            );
-          }
+          if (sessErr) throw sessErr;
+
+          setSessions(
+            (data ?? []).map((s) => ({
+              ...s,
+              mentee_name: s.mentee_name ?? 'Mentee',
+            }))
+          );
         } else {
           const rows = await getMySession(user.id);
           setSessions(rows);

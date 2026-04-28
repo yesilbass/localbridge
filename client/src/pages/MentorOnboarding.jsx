@@ -537,6 +537,7 @@ export default function MentorOnboarding() {
 
   /* ── Save to Supabase ── */
   async function handlePublish() {
+    console.log('[handlePublish] profileId:', profileId, 'form:', form);
     setSaving(true);
     setError('');
     try {
