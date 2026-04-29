@@ -101,10 +101,25 @@ export function useDashboardData(user, authLoading) {
 
           if (sessErr) throw sessErr;
 
+          const menteeIds = [...new Set((data ?? []).map(s => s.mentee_id).filter(Boolean))];
+          let nameMap = {};
+          if (menteeIds.length > 0) {
+            const { data: profiles } = await supabase
+              .from('user_profiles')
+              .select('user_id, personal_info')
+              .in('user_id', menteeIds);
+            if (profiles) {
+              profiles.forEach(p => {
+                const name = p.personal_info?.full_name;
+                if (name) nameMap[p.user_id] = name;
+              });
+            }
+          }
+
           setSessions(
             (data ?? []).map((s) => ({
               ...s,
-              mentee_name: s.mentee_name ?? 'Mentee',
+              mentee_name: nameMap[s.mentee_id] || s.mentee_name || 'Mentee',
             }))
           );
         } else {

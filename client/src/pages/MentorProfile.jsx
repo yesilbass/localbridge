@@ -167,7 +167,14 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
     setCalLoading(true); setCalBusy(null);
     const dateStr = localDateStr(pickedDate);
     getMentorAvailability(mentor.id, dateStr)
-      .then(({ busy }) => { setCalBusy(busy ?? []); setCalLoading(false); })
+      .then(({ busy, notConnected }) => {
+        if (notConnected) {
+          setCalBusy(null);
+        } else {
+          setCalBusy(busy ?? []);
+        }
+        setCalLoading(false);
+      })
       .catch(() => { setCalBusy(null); setCalLoading(false); });
   }, [pickedDate, mentor.calendar_connected, mentor.id]);
 
@@ -773,16 +780,16 @@ export default function MentorProfile() {
                   </div>
                 </div>
               )}
-              {/* Rate */}
+              {/* Availability */}
               <div className="flex flex-1 items-center gap-3 px-5 py-3.5">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-                  <svg className="h-4 w-4 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${mentor.available ? 'bg-emerald-500/10' : 'bg-[var(--bridge-surface-muted)]'}`}>
+                  <span className={`h-3 w-3 rounded-full ${mentor.available ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-[var(--bridge-text-faint)]'}`} />
                 </div>
                 <div>
-                  <p className="font-display text-xl font-black tabular-nums text-gradient-bridge leading-none">
-                    {mentor.session_rate ? `$${mentor.session_rate}` : 'Free'}
+                  <p className={`font-display text-xl font-black leading-none ${mentor.available ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--bridge-text-muted)]'}`}>
+                    {mentor.available ? 'Open' : 'Closed'}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-[var(--bridge-text-muted)]">Per session</p>
+                  <p className="mt-0.5 text-[11px] text-[var(--bridge-text-muted)]">New sessions</p>
                 </div>
               </div>
             </div>
@@ -793,7 +800,7 @@ export default function MentorProfile() {
         {/* ════════════════════════════════════════════════════════
             MAIN CONTENT — theme-aware
         ════════════════════════════════════════════════════════ */}
-        <div className="mx-auto max-w-[90rem] px-4 pb-28 pt-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[90rem] px-4 pb-28 pt-8 sm:px-6 lg:px-8">
 
           {/* ── Booking section ─────────────────────────────────── */}
           <div ref={bookingRef} className="mb-10 scroll-mt-24">
@@ -900,35 +907,35 @@ export default function MentorProfile() {
             {/* Main column */}
             <div className="space-y-6 lg:col-span-2">
 
-              {/* Bio */}
-              <div className="group relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-7 shadow-bridge-card transition hover:border-orange-300/30 sm:p-8">
+              {/* Bio + Expertise */}
+              <div className="group relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card transition hover:border-orange-300/30">
                 <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-orange-600 dark:text-orange-400">About</p>
-                <h2 className="mt-1.5 font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">Their story</h2>
-                <div className="mt-5 border-l-[3px] border-orange-400/40 pl-5">
-                  <p className="whitespace-pre-line text-base leading-relaxed text-[var(--bridge-text-secondary)] sm:text-lg">
-                    {mentor.bio?.trim() || 'No bio yet — book a session and ask what you would normally read here.'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Expertise */}
-              <div className="group relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-7 shadow-bridge-card transition hover:border-orange-300/30 sm:p-8">
-                <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-orange-600 dark:text-orange-400">Focus areas</p>
-                <h2 className="mt-1.5 font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">Expertise</h2>
-                {mentor.expertise?.length > 0 ? (
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {mentor.expertise.map((tag) => (
-                      <span key={tag}
-                        className="rounded-full border border-orange-200/60 bg-orange-50/60 px-3.5 py-1.5 text-sm font-medium text-orange-900 dark:border-orange-400/20 dark:bg-orange-500/10 dark:text-orange-300">
-                        {tag}
-                      </span>
-                    ))}
+                <div className="p-7 sm:p-8">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-orange-600 dark:text-orange-400">About</p>
+                  <h2 className="mt-1.5 font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">Their story</h2>
+                  <div className="mt-5 border-l-[3px] border-orange-400/40 pl-5">
+                    <p className="whitespace-pre-line text-base leading-relaxed text-[var(--bridge-text-secondary)] sm:text-lg">
+                      {mentor.bio?.trim() || 'No bio yet — book a session and ask what you would normally read here.'}
+                    </p>
                   </div>
-                ) : (
-                  <p className="mt-4 text-sm text-[var(--bridge-text-muted)]">No focus areas listed yet.</p>
-                )}
+                </div>
+                <div className="mx-7 border-t border-[var(--bridge-border)] sm:mx-8" />
+                <div className="p-7 sm:p-8">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-orange-600 dark:text-orange-400">Focus areas</p>
+                  <h2 className="mt-1.5 font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">Expertise</h2>
+                  {mentor.expertise?.length > 0 ? (
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {mentor.expertise.map((tag) => (
+                        <span key={tag}
+                          className="rounded-full border border-orange-200/60 bg-orange-50/60 px-3.5 py-1.5 text-sm font-medium text-orange-900 dark:border-orange-400/20 dark:bg-orange-500/10 dark:text-orange-300">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-4 text-sm text-[var(--bridge-text-muted)]">No focus areas listed yet.</p>
+                  )}
+                </div>
               </div>
 
               {/* Work experience */}
@@ -976,26 +983,31 @@ export default function MentorProfile() {
               {/* Reviews */}
               <div className="group relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-7 shadow-bridge-card transition hover:border-orange-300/30 sm:p-8">
                 <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <div className="flex items-baseline justify-between gap-4">
+                <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-orange-600 dark:text-orange-400">Reviews</p>
-                    <h2 className="mt-1.5 font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">After sessions</h2>
+                    <h2 className="mt-1.5 font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">What people say</h2>
                   </div>
                   {displayRating > 0 && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 flex-col items-end gap-1">
                       <StarRow rating={displayRating} size="lg" />
-                      <span className="font-display text-xl font-bold tabular-nums text-[var(--bridge-text)]">{displayRating.toFixed(1)}</span>
+                      <span className="text-xs text-[var(--bridge-text-muted)]">
+                        {displayRating.toFixed(1)} · {reviewMeta?.count ?? 0} review{reviewMeta?.count !== 1 ? 's' : ''}
+                      </span>
                     </div>
                   )}
                 </div>
 
                 {mentorReviews.length > 0 ? (
-                  <ul className="mt-5 space-y-3">
+                  <ul className="mt-6 space-y-3">
                     {mentorReviews.map((rev) => (
                       <li key={rev.id}
-                        className="group/rev rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] p-5 transition hover:border-orange-300/40 hover:bg-orange-50/20 dark:hover:bg-orange-500/5">
+                        className="relative overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] p-5 transition hover:border-orange-300/40 hover:bg-orange-50/20 dark:hover:bg-orange-500/5">
+                        {rev.comment?.trim() && (
+                          <span aria-hidden className="pointer-events-none absolute right-4 top-1 select-none font-serif text-6xl font-black leading-none text-orange-100 dark:text-orange-400/10">"</span>
+                        )}
                         <figure>
-                          <figcaption className="mb-2 flex flex-wrap items-center gap-2.5">
+                          <figcaption className="mb-3 flex flex-wrap items-center gap-2.5">
                             <StarRow rating={rev.rating} />
                             <span className="text-xs text-[var(--bridge-text-faint)]">{formatReviewDate(rev.created_at)}</span>
                           </figcaption>
@@ -1011,12 +1023,12 @@ export default function MentorProfile() {
                     ))}
                   </ul>
                 ) : (
-                  <div className="mt-5 rounded-2xl border border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-6 py-10 text-center">
+                  <div className="mt-6 rounded-2xl border border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-6 py-10 text-center">
                     <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--bridge-surface)]">
                       <svg className="h-6 w-6 text-[var(--bridge-text-faint)]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" /></svg>
                     </div>
                     <p className="font-semibold text-[var(--bridge-text)]">No reviews yet</p>
-                    <p className="mt-1.5 text-sm text-[var(--bridge-text-secondary)]">After you meet, they can leave feedback — it'll show up here.</p>
+                    <p className="mt-1.5 text-sm text-[var(--bridge-text-secondary)]">After a session wraps up, mentees can leave a review — it'll appear here.</p>
                   </div>
                 )}
               </div>
@@ -1026,48 +1038,79 @@ export default function MentorProfile() {
             <aside className="lg:col-span-1">
               <div className="sticky top-24 space-y-4">
 
-                {/* Mini stats card */}
-                <div className="rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-faint)]">Quick stats</p>
-                  <dl className="mt-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <dt className="text-sm text-[var(--bridge-text-muted)]">Rating</dt>
-                      <dd className="flex items-center gap-1.5">
-                        <StarRow rating={displayRating} />
-                        <span className="text-sm font-bold tabular-nums text-[var(--bridge-text)]">{displayRating > 0 ? displayRating.toFixed(1) : '—'}</span>
-                      </dd>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-[var(--bridge-border)] pt-3">
-                      <dt className="text-sm text-[var(--bridge-text-muted)]">Total sessions</dt>
-                      <dd className="text-sm font-bold tabular-nums text-[var(--bridge-text)]">{mentor.total_sessions ?? '—'}</dd>
-                    </div>
-                    {mentor.years_experience != null && (
-                      <div className="flex items-center justify-between border-t border-[var(--bridge-border)] pt-3">
-                        <dt className="text-sm text-[var(--bridge-text-muted)]">Experience</dt>
-                        <dd className="text-sm font-bold tabular-nums text-[var(--bridge-text)]">{mentor.years_experience} yrs</dd>
+                {/* At a glance */}
+                <div className="overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-faint)]">At a glance</p>
+                  <div className="mt-4 space-y-4">
+
+                    {/* Experience + Industry */}
+                    {(mentor.years_experience != null || industryLabel) && (
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-500/10">
+                          <svg className="h-4 w-4 text-sky-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                        </span>
+                        <div className="min-w-0">
+                          {mentor.years_experience != null && (
+                            <p className="text-sm font-semibold text-[var(--bridge-text)]">{mentor.years_experience} yrs experience</p>
+                          )}
+                          {industryLabel && <p className="text-xs text-[var(--bridge-text-muted)]">{industryLabel}</p>}
+                        </div>
                       </div>
                     )}
-                    {industryLabel && (
-                      <div className="flex items-center justify-between border-t border-[var(--bridge-border)] pt-3">
-                        <dt className="text-sm text-[var(--bridge-text-muted)]">Industry</dt>
-                        <dd className="text-sm font-bold text-[var(--bridge-text)]">{industryLabel}</dd>
+
+                    {/* Availability days */}
+                    {mentor.availability_schedule?.weekly && (
+                      <div className="border-t border-[var(--bridge-border)] pt-4">
+                        <p className="mb-2.5 text-[11px] text-[var(--bridge-text-muted)]">Available days</p>
+                        <div className="flex gap-1.5">
+                          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => {
+                            const active = mentor.availability_schedule.weekly[String(i)]?.length > 0;
+                            return (
+                              <span key={i} className={`flex h-7 w-7 items-center justify-center rounded-lg text-[10px] font-bold ${
+                                active
+                                  ? 'bg-orange-500/15 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400'
+                                  : 'bg-[var(--bridge-surface-muted)] text-[var(--bridge-text-faint)]'
+                              }`}>{day}</span>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
-                    <div className="flex items-center justify-between border-t border-[var(--bridge-border)] pt-3">
-                      <dt className="text-sm text-[var(--bridge-text-muted)]">Availability</dt>
-                      <dd>
-                        {mentor.available ? (
-                          <span className="inline-flex items-center gap-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse-soft" />
-                            Open
-                          </span>
-                        ) : (
-                          <span className="text-sm font-bold text-[var(--bridge-text-muted)]">Closed</span>
-                        )}
-                      </dd>
-                    </div>
-                  </dl>
+
+                    {/* Top skills */}
+                    {mentor.expertise?.length > 0 && (
+                      <div className="border-t border-[var(--bridge-border)] pt-4">
+                        <p className="mb-2.5 text-[11px] text-[var(--bridge-text-muted)]">Top skills</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {mentor.expertise.slice(0, 4).map((tag) => (
+                            <span key={tag} className="rounded-full border border-orange-200/60 bg-orange-50/60 px-2.5 py-1 text-[11px] font-medium text-orange-900 dark:border-orange-400/20 dark:bg-orange-500/10 dark:text-orange-300">
+                              {tag}
+                            </span>
+                          ))}
+                          {mentor.expertise.length > 4 && (
+                            <span className="rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-2.5 py-1 text-[11px] font-medium text-[var(--bridge-text-muted)]">
+                              +{mentor.expertise.length - 4} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
                 </div>
+
+                {/* Browse more mentors */}
+                <Link
+                  to="/mentors"
+                  className={`group flex items-center justify-between gap-3 rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-6 py-4 shadow-bridge-card transition hover:border-orange-300/40 hover:bg-orange-50/30 dark:hover:bg-orange-500/5 ${focusRing}`}
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--bridge-text)]">Browse all mentors</p>
+                    <p className="text-xs text-[var(--bridge-text-muted)]">Explore the full directory</p>
+                  </div>
+                  <svg className="h-4 w-4 shrink-0 text-[var(--bridge-text-faint)] transition group-hover:translate-x-0.5 group-hover:text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" /></svg>
+                </Link>
+
               </div>
             </aside>
           </div>
