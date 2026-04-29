@@ -8,11 +8,11 @@ const fabFocus =
 
 export default function FeedbackFAB() {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const bottom = useFooterOffset(24);
+  const bottomRef = useFooterOffset(24);
 
   return (
     <>
-      <div className="pointer-events-none fixed right-6 z-40" style={{ bottom }}>
+      <div ref={bottomRef} className="pointer-events-none fixed right-6 z-40" style={{ bottom: 24 }}>
         <button
           type="button"
           onClick={() => setFeedbackOpen(true)}
