@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useMotionTemplate } from 'motion/react';
 import { useAuth } from '../context/useAuth';
@@ -395,7 +396,7 @@ function SplitText({ text, delay = 0, className = '', charDelay = 28 }) {
 /* ─── Floating Nav Dock ──────────────────────────────────────── */
 function FloatingDock() {
   const [mounted, setMounted] = useState(false);
-  const bottom = useFooterOffset(24);
+  const bottomRef = useFooterOffset(24);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 600);
@@ -415,14 +416,15 @@ function FloatingDock() {
     { label: 'Get Started',  id: 'get-started', primary: true },
   ];
 
-  return (
+  return createPortal(
     <div
-      className="pointer-events-none fixed left-1/2 z-40"
+      ref={bottomRef}
+      className="pointer-events-none fixed left-1/2 z-[9999]"
       style={{
-        bottom,
+        bottom: 24,
         transform: `translateX(-50%) translateY(${mounted ? '0px' : '5rem'})`,
         opacity: mounted ? 1 : 0,
-        transition: 'transform 500ms cubic-bezier(0.16,1,0.3,1), opacity 380ms ease, bottom 150ms ease',
+        transition: 'transform 500ms cubic-bezier(0.16,1,0.3,1), opacity 380ms ease',
       }}
     >
       <nav
@@ -443,7 +445,8 @@ function FloatingDock() {
           </button>
         ))}
       </nav>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
