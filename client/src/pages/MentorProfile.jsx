@@ -167,7 +167,14 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
     setCalLoading(true); setCalBusy(null);
     const dateStr = localDateStr(pickedDate);
     getMentorAvailability(mentor.id, dateStr)
-      .then(({ busy }) => { setCalBusy(busy ?? []); setCalLoading(false); })
+      .then(({ busy, notConnected }) => {
+        if (notConnected) {
+          setCalBusy(null);
+        } else {
+          setCalBusy(busy ?? []);
+        }
+        setCalLoading(false);
+      })
       .catch(() => { setCalBusy(null); setCalLoading(false); });
   }, [pickedDate, mentor.calendar_connected, mentor.id]);
 
