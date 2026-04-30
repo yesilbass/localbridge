@@ -12,6 +12,8 @@ import {
   StatCard, EmptyState, SessionCard, MentorCard, SectionHeading,
 } from './dashboardShared';
 import { formatSessionDate, getAvatarColor, getInitials } from './dashboardUtils';
+import { LiveCountdown, AddToCalendarButton, useSessionTrends, getRelativeSession } from './dashboardLive.jsx';
+import { GoalRing, Sparkline, Tilt3D, Magnetic, useDailyActivity, useGoalProgress, KineticNumber } from './dashboardCinematic.jsx';
 import DashboardSettingsPanel from './DashboardSettingsPanel';
 import { useState, useEffect, useCallback } from 'react';
 import ReviewModal from '../../components/ReviewModal';
@@ -57,6 +59,14 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
     historySessions, visibleHistory, uniqueMentors, handleStatusUpdate,
   } = dash;
 
+  // 30-day trend deltas (pure derivation — no API).
+  const trends = useSessionTrends(sessions);
+  const completedTotal = sessions.filter((s) => s.status === 'completed').length;
+  const completedPriorTotal = Math.max(0, completedTotal - trends.completedLast30);
+  const daily = useDailyActivity(sessions, 14);
+  const dailyTotal = daily.reduce((a, b) => a + b, 0);
+  const goal = useGoalProgress(sessions, 4);
+
   return (
     <>
       {reviewModal && (
@@ -74,30 +84,79 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
       {activeTab === 'overview' && (
         <div className="space-y-8 pb-12">
 
-          {/* Stats grid */}
+          {/* Stats grid — kinetic counters + 30d trend deltas */}
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-            <StatCard label="Total Sessions"    value={sessions.length}                                     icon={CalendarDays}  gradient="from-orange-500 to-amber-500" />
-            <StatCard label="Upcoming"          value={upcomingSessions.length}                             icon={Clock}         gradient="from-sky-500 to-blue-500" />
-            <StatCard label="Completed"         value={sessions.filter(s => s.status === 'completed').length} icon={CheckCircle2} gradient="from-emerald-500 to-teal-500" />
-            <StatCard label="My Mentors"        value={uniqueMentors.length}                                icon={Users}         gradient="from-violet-500 to-purple-500" />
+            <StatCard label="Total Sessions" value={sessions.length}
+              icon={CalendarDays} gradient="from-orange-500 to-amber-500"
+              trend={{ current: trends.bookedLast30, previous: trends.bookedPrior30, label: '30d' }} />
+            <StatCard label="Upcoming" value={upcomingSessions.length}
+              icon={Clock} gradient="from-sky-500 to-blue-500" />
+            <StatCard label="Completed" value={completedTotal}
+              icon={CheckCircle2} gradient="from-emerald-500 to-teal-500"
+              trend={{ current: trends.completedLast30, previous: trends.completedPrior30, label: '30d' }} />
+            <StatCard label="My Mentors" value={uniqueMentors.length}
+              icon={Users} gradient="from-violet-500 to-purple-500" />
           </div>
 
-          {/* Hero: next session */}
+          {/* Pulse — monthly goal ring + 14-day activity sparkline */}
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
+            <Tilt3D max={4} className="rounded-3xl">
+              <div className="bd-card-edge relative flex h-full items-center gap-5 overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--bridge-surface)] via-[var(--bridge-surface)] to-orange-500/[0.04] p-6 ring-1 ring-[var(--bridge-border)] shadow-sm">
+                <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-500/15 blur-3xl" />
+                <GoalRing value={goal.completed} max={goal.target} label="Monthly" sub={`${goal.completed} / ${goal.target}`} />
+                <div className="relative">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-500">Monthly goal</p>
+                  <h3 className="mt-1 font-display text-lg font-black tracking-tight text-[var(--bridge-text)]">
+                    {goal.completed >= goal.target ? 'Goal hit. Stack the next.' : `${goal.target - goal.completed} to go this month.`}
+                  </h3>
+                  <p className="mt-1 text-[12px] text-[var(--bridge-text-muted)]">Sessions completed roll forward into your record.</p>
+                </div>
+              </div>
+            </Tilt3D>
+            <Tilt3D max={4} className="rounded-3xl lg:col-span-2">
+              <div className="bd-card-edge relative flex h-full flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--bridge-surface)] to-[var(--bridge-surface-muted)]/40 p-6 ring-1 ring-[var(--bridge-border)] shadow-sm">
+                <div aria-hidden className="pointer-events-none absolute -bottom-12 -left-8 h-44 w-44 rounded-full bg-amber-400/12 blur-3xl" />
+                <div className="relative flex flex-wrap items-baseline justify-between gap-2">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-500">Activity · last 14 days</p>
+                    <h3 className="mt-1 flex items-baseline gap-2 font-display text-2xl font-black tracking-tight text-[var(--bridge-text)]">
+                      <KineticNumber to={dailyTotal} ms={900} />
+                      <span className="text-sm font-bold text-[var(--bridge-text-muted)]">bookings</span>
+                    </h3>
+                  </div>
+                  <span className="rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-2.5 py-1 text-[10px] font-bold text-[var(--bridge-text-secondary)]">
+                    {dailyTotal === 0 ? 'No movement yet' : 'Keep going'}
+                  </span>
+                </div>
+                <div className="relative mt-5 flex-1">
+                  <Sparkline data={daily} height={84} />
+                  <div className="mt-2 flex justify-between text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--bridge-text-faint)]">
+                    <span>14d ago</span>
+                    <span>Today</span>
+                  </div>
+                </div>
+              </div>
+            </Tilt3D>
+          </div>
+
+          {/* Hero: next session — cinematic 3D tilt */}
           {nextSession ? (
-            <NextSessionHero
-              session={nextSession}
-              mentorProfile={mentorMap[nextSession.mentor_id]}
-              heroHint={heroHint}
-              setHeroHint={setHeroHint}
-              onJoin={() => {
-                if (nextSession.video_room_url) {
-                  setHeroHint(null);
-                  navigate(`/session/${nextSession.id}/video`);
-                } else {
-                  setHeroHint('Your mentor needs to accept the session before the video room opens.');
-                }
-              }}
-            />
+            <Tilt3D max={3} className="rounded-[2rem]">
+              <NextSessionHero
+                session={nextSession}
+                mentorProfile={mentorMap[nextSession.mentor_id]}
+                heroHint={heroHint}
+                setHeroHint={setHeroHint}
+                onJoin={() => {
+                  if (nextSession.video_room_url) {
+                    setHeroHint(null);
+                    navigate(`/session/${nextSession.id}/video`);
+                  } else {
+                    setHeroHint('Your mentor needs to accept the session before the video room opens.');
+                  }
+                }}
+              />
+            </Tilt3D>
           ) : (
             <NoSessionCTA role="mentee" />
           )}
@@ -138,43 +197,38 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
             {/* Right sidebar */}
             <div className="space-y-5">
 
-              {/* Quick actions */}
-              <div className="rounded-2xl bg-[var(--bridge-surface)] p-5 shadow-sm ring-1 ring-[var(--bridge-border)]">
-                <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.14em] text-[var(--bridge-text-muted)]">Quick Actions</h3>
-                <div className="space-y-2">
-                  <Link to="/mentors"
-                    className="group flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-orange-50 dark:hover:bg-orange-500/10">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-sm">
-                      <Search className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[var(--bridge-text)]">Find a Mentor</p>
-                      <p className="text-xs text-[var(--bridge-text-muted)]">Browse 2,400+ experts</p>
-                    </div>
-                    <ArrowUpRight className="ml-auto h-4 w-4 text-[var(--bridge-text-faint)] transition group-hover:text-orange-500" />
-                  </Link>
-                  <Link to="/resume"
-                    className="group flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-sky-50 dark:hover:bg-sky-500/10">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-500 text-white shadow-sm">
-                      <BookOpen className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[var(--bridge-text)]">AI Resume Review</p>
-                      <p className="text-xs text-[var(--bridge-text-muted)]">Free analysis</p>
-                    </div>
-                    <ArrowUpRight className="ml-auto h-4 w-4 text-[var(--bridge-text-faint)] transition group-hover:text-sky-500" />
-                  </Link>
-                  <button type="button" onClick={() => setActiveTab('connections')}
-                    className="group flex w-full items-center gap-3 rounded-xl p-3 transition-all hover:bg-violet-50 dark:hover:bg-violet-500/10">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 text-white shadow-sm">
-                      <Users className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[var(--bridge-text)] text-left">My Mentors</p>
-                      <p className="text-xs text-[var(--bridge-text-muted)] text-left">{uniqueMentors.length} connection{uniqueMentors.length !== 1 ? 's' : ''}</p>
-                    </div>
-                    <ArrowUpRight className="ml-auto h-4 w-4 text-[var(--bridge-text-faint)] transition group-hover:text-violet-500" />
-                  </button>
+              {/* Quick actions — cinematic bento */}
+              <div className="bd-card-edge relative overflow-hidden rounded-3xl bg-[var(--bridge-surface)] p-5 shadow-sm ring-1 ring-[var(--bridge-border)]">
+                <div aria-hidden className="pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full bg-orange-400/15 blur-3xl" />
+                <div className="relative mb-4 flex items-center justify-between">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-orange-500">Quick actions</p>
+                  <span className="text-[9px] font-bold text-[var(--bridge-text-faint)]">Tap to jump</span>
+                </div>
+                <div className="relative space-y-1.5">
+                  {[
+                    { to: '/mentors', icon: Search, title: 'Find a Mentor', sub: 'Browse 2,400+ experts', g: 'from-orange-500 to-amber-500', hover: 'hover:bg-orange-500/8', accent: 'text-orange-500', cursor: 'Browse' },
+                    { to: '/resume', icon: BookOpen, title: 'AI Resume Review', sub: 'Free analysis', g: 'from-sky-500 to-blue-500', hover: 'hover:bg-sky-500/8', accent: 'text-sky-500', cursor: 'Resume' },
+                    { onClick: () => setActiveTab('connections'), icon: Users, title: 'My Mentors', sub: `${uniqueMentors.length} connection${uniqueMentors.length !== 1 ? 's' : ''}`, g: 'from-violet-500 to-purple-500', hover: 'hover:bg-violet-500/8', accent: 'text-violet-500', cursor: 'Mentors' },
+                  ].map((q, i) => {
+                    const Icon = q.icon;
+                    const inner = (
+                      <div className={`group flex w-full items-center gap-3 rounded-2xl p-3 transition-all duration-300 ${q.hover}`}>
+                        <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${q.g} text-white shadow-[0_8px_22px_-6px_rgba(234,88,12,0.45)] ring-1 ring-white/15 transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-4deg]`}>
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1 text-left">
+                          <p className="text-sm font-bold text-[var(--bridge-text)]">{q.title}</p>
+                          <p className="text-xs text-[var(--bridge-text-muted)]">{q.sub}</p>
+                        </div>
+                        <ArrowUpRight className={`ml-auto h-4 w-4 text-[var(--bridge-text-faint)] transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${`group-hover:${q.accent}`}`} />
+                      </div>
+                    );
+                    return q.to ? (
+                      <Link key={i} to={q.to} data-cursor={q.cursor}>{inner}</Link>
+                    ) : (
+                      <button key={i} type="button" onClick={q.onClick} data-cursor={q.cursor} className="w-full">{inner}</button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -236,7 +290,7 @@ function NextSessionHero({ session, mentorProfile, heroHint, setHeroHint, onJoin
       />
 
       <div className="relative z-10">
-        {/* Header row */}
+        {/* Header row — status chips + live countdown */}
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/25 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-orange-200 ring-1 ring-orange-400/30">
             <span className="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse-soft" />
@@ -252,6 +306,9 @@ function NextSessionHero({ session, mentorProfile, heroHint, setHeroHint, onJoin
               Confirmed
             </span>
           )}
+          <span className="ml-auto">
+            <LiveCountdown targetIso={session.scheduled_date} tone={isAccepted ? 'emerald' : 'amber'} />
+          </span>
         </div>
 
         {/* Mentor info */}
@@ -292,19 +349,24 @@ function NextSessionHero({ session, mentorProfile, heroHint, setHeroHint, onJoin
           </div>
         </div>
 
-        {/* Actions */}
+        {/* Actions — magnetic */}
         <div className="mt-6 flex flex-wrap gap-3">
           {isAccepted && (
-            <button type="button" onClick={onJoin}
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-sm font-bold text-stone-900 shadow-sm transition hover:bg-orange-50">
-              <Video className="h-4 w-4" />
-              Join Meeting
-            </button>
+            <Magnetic strength={0.18}>
+              <button type="button" onClick={onJoin} data-cursor="Join"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-black text-stone-900 shadow-[0_8px_24px_-6px_rgba(255,255,255,0.5)] transition hover:bg-orange-50 hover:shadow-[0_12px_32px_-8px_rgba(255,255,255,0.65)]">
+                <Video className="h-4 w-4" />
+                Join Meeting
+              </button>
+            </Magnetic>
           )}
-          <Link to={`/mentors/${session.mentor_id}`}
-            className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-6 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20">
-            View Profile
-          </Link>
+          <Magnetic strength={0.14}>
+            <Link to={`/mentors/${session.mentor_id}`} data-cursor="Profile"
+              className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-6 py-3 text-sm font-bold text-white ring-1 ring-white/15 backdrop-blur-sm transition hover:bg-white/20">
+              View Profile
+            </Link>
+          </Magnetic>
+          {isAccepted && <AddToCalendarButton session={session} label="Add to calendar" />}
         </div>
 
         {heroHint && (
@@ -324,48 +386,57 @@ function NextSessionHero({ session, mentorProfile, heroHint, setHeroHint, onJoin
 // ─── NoSessionCTA ─────────────────────────────────────────────────────────────
 function NoSessionCTA() {
   return (
-    <div className="relative overflow-hidden rounded-[2rem] p-7 sm:p-8"
-      style={{ background: 'linear-gradient(135deg, #f97316 0%, #f59e0b 50%, #ea580c 100%)' }}>
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.07]"
-        style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40' fill='%23000' fill-opacity='1'/%3E%3C/svg%3E\")" }}
-      />
-      <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/15 blur-2xl" />
-      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white/90">
-            <Zap className="h-3 w-3" />Ready to start
-          </p>
-          <h3 className="mt-2 font-display text-2xl font-bold text-white sm:text-3xl">No sessions scheduled yet.</h3>
-          <p className="mt-1.5 text-sm text-orange-50/90">Book your first session with a vetted mentor — from $25.</p>
+    <Tilt3D max={4} className="rounded-[2rem]">
+      <div className="relative overflow-hidden rounded-[2rem] p-7 sm:p-9"
+        style={{ background: 'linear-gradient(135deg, #f97316 0%, #f59e0b 45%, #ea580c 100%)' }}>
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08]"
+          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40' fill='%23000' fill-opacity='1'/%3E%3C/svg%3E\")" }}
+        />
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/22 blur-3xl bd-aurora" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-amber-200/30 blur-3xl bd-aurora" style={{ animationDelay: '-8s' }} />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/95 ring-1 ring-white/20">
+              <Zap className="h-3 w-3" />Ready to start
+            </p>
+            <h3 className="mt-3 font-display text-3xl font-black tracking-[-0.025em] text-white sm:text-[2.4rem] sm:leading-[1.05]">No sessions yet.<br/><span className="italic">Let's change that.</span></h3>
+            <p className="mt-2 text-sm text-orange-50/95">Book your first session with a vetted mentor — from $25.</p>
+          </div>
+          <Magnetic strength={0.2}>
+            <Link to="/mentors" data-cursor="Browse"
+              className="btn-sheen inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-black text-orange-700 shadow-[0_18px_40px_-10px_rgba(0,0,0,0.4)] ring-1 ring-white/40 transition-all hover:-translate-y-0.5 hover:bg-orange-50">
+              Browse Mentors
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </Magnetic>
         </div>
-        <Link to="/mentors"
-          className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-orange-700 shadow-lg transition hover:bg-orange-50">
-          Browse Mentors
-          <ArrowUpRight className="h-4 w-4" />
-        </Link>
       </div>
-    </div>
+    </Tilt3D>
   );
 }
 
 // ─── ActivityFeed ──────────────────────────────────────────────────────────────
 function ActivityFeed({ history, role, total, showAll, onToggle }) {
   return (
-    <div className="rounded-2xl bg-[var(--bridge-surface)] p-5 shadow-sm ring-1 ring-[var(--bridge-border)]">
-      <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.14em] text-[var(--bridge-text-muted)]">Recent Activity</h3>
+    <div className="bd-card-edge relative overflow-hidden rounded-3xl bg-[var(--bridge-surface)] p-5 shadow-sm ring-1 ring-[var(--bridge-border)]">
+      <div aria-hidden className="pointer-events-none absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-amber-400/12 blur-3xl" />
+      <div className="relative mb-4 flex items-center justify-between">
+        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-orange-500">Recent activity</p>
+        <span className="text-[9px] font-bold text-[var(--bridge-text-faint)]">{total} total</span>
+      </div>
       {history.length > 0 ? (
         <div className="relative space-y-4">
-          <div aria-hidden className="absolute left-[1.1rem] top-2 bottom-2 w-px bg-[var(--bridge-border)]" />
+          <div aria-hidden className="absolute left-[0.6rem] top-2 bottom-2 w-px bg-gradient-to-b from-orange-400/40 via-[var(--bridge-border)] to-transparent" />
           {history.map((s) => {
             const done = s.status === 'completed';
             const name = role === 'mentor' ? s.mentee_name : s.mentor_name;
             return (
-              <div key={s.id} className="flex items-start gap-3.5 pl-1">
-                <div className={`relative z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 ring-[var(--bridge-canvas)] ${done ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'}`}>
+              <div key={s.id} className="group relative flex items-start gap-3.5 pl-1">
+                <div className={`relative z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 ring-[var(--bridge-canvas)] transition-all duration-300 group-hover:scale-110 ${done ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-[0_0_14px_rgba(16,185,129,0.5)]' : 'bg-stone-300 dark:bg-stone-600'}`}>
                   {done ? <CheckCircle2 className="h-3 w-3 text-white" /> : <Clock className="h-3 w-3 text-white" />}
                 </div>
                 <div className="min-w-0 pt-0.5">
-                  <p className="text-xs font-semibold text-[var(--bridge-text)]">
+                  <p className="text-xs font-bold text-[var(--bridge-text)]">
                     {done ? 'Session completed' : 'Session ' + s.status}
                   </p>
                   <p className="mt-0.5 text-[11px] text-[var(--bridge-text-muted)]">with {name}</p>
@@ -375,11 +446,11 @@ function ActivityFeed({ history, role, total, showAll, onToggle }) {
           })}
         </div>
       ) : (
-        <p className="text-xs italic text-[var(--bridge-text-muted)]">No recent activity yet.</p>
+        <p className="relative text-xs italic text-[var(--bridge-text-muted)]">No recent activity yet.</p>
       )}
       {total > 5 && (
-        <button type="button" onClick={onToggle}
-          className="mt-4 text-xs font-semibold text-orange-600 transition hover:text-orange-700 dark:text-orange-400">
+        <button type="button" onClick={onToggle} data-cursor="hover"
+          className="relative mt-4 inline-flex items-center gap-1 text-xs font-black text-orange-600 transition hover:text-orange-700 dark:text-orange-400">
           {showAll ? '↑ Show less' : `Show all ${total} →`}
         </button>
       )}
@@ -398,17 +469,20 @@ function MenteeSessionsTab({
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Header */}
+      {/* Header — editorial */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="font-display text-2xl font-bold text-[var(--bridge-text)] sm:text-3xl">Sessions</h2>
-          <p className="mt-1 text-sm text-[var(--bridge-text-secondary)]">Your mentorship session history and upcoming bookings.</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-orange-500">Your sessions</p>
+          <h2 className="mt-2 font-display font-black tracking-[-0.025em] text-[var(--bridge-text)]" style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: '1.02' }}>
+            Sessions <span className="text-gradient-bridge italic">in motion</span>
+          </h2>
+          <p className="mt-1.5 text-sm text-[var(--bridge-text-secondary)]">Your mentorship history and upcoming bookings, all in one place.</p>
         </div>
         <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search by mentor or type…" />
       </div>
 
       <section>
-        <SectionHeading count={upcomingSessions.filter(match).length}>Upcoming</SectionHeading>
+        <SectionHeading kicker="Coming up" count={upcomingSessions.filter(match).length}>Upcoming</SectionHeading>
         <div className="space-y-3">
           {upcomingSessions.filter(match).map((s) => (
             <SessionCard key={s.id} session={s} isMentor={false}
@@ -423,7 +497,7 @@ function MenteeSessionsTab({
       </section>
 
       <section>
-        <SectionHeading count={historySessions.filter(match).length}>History</SectionHeading>
+        <SectionHeading kicker="Already done" count={historySessions.filter(match).length}>History</SectionHeading>
         <div className="space-y-3">
           {historySessions.filter(match).map((s) => (
             <SessionCard key={s.id} session={s} isMentor={false}
@@ -449,27 +523,37 @@ function MenteeConnectionsTab({ uniqueMentors, searchQuery, setSearchQuery }) {
     <div className="space-y-8 pb-12">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="font-display text-2xl font-bold text-[var(--bridge-text)] sm:text-3xl">My Mentors</h2>
-          <p className="mt-1 text-sm text-[var(--bridge-text-secondary)]">People you've collaborated with on Bridge.</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-orange-500">Your network</p>
+          <h2 className="mt-2 font-display font-black tracking-[-0.025em] text-[var(--bridge-text)]" style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: '1.02' }}>
+            My <span className="text-gradient-bridge italic">Mentors</span>
+          </h2>
+          <p className="mt-1.5 text-sm text-[var(--bridge-text-secondary)]">People you've collaborated with on Bridge.</p>
         </div>
         <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search by name…" />
       </div>
 
       {uniqueMentors.length > 0 && (
-        <div className="rounded-2xl bg-[var(--bridge-surface)] p-4 ring-1 ring-[var(--bridge-border)] sm:p-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 text-white shadow-sm">
-              <TrendingUp className="h-5 w-5" />
+        <Tilt3D max={3} className="rounded-3xl">
+          <div className="bd-card-edge relative overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--bridge-surface)] via-[var(--bridge-surface)] to-violet-500/[0.04] p-5 ring-1 ring-[var(--bridge-border)] shadow-sm sm:p-6">
+            <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-violet-400/15 blur-3xl" />
+            <div className="relative flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-purple-500 text-white shadow-[0_8px_24px_-6px_rgba(139,92,246,0.55)] ring-1 ring-white/15">
+                <TrendingUp className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-display text-lg font-black tracking-tight text-[var(--bridge-text)]">
+                  <KineticNumber to={uniqueMentors.length} ms={900} /> mentor{uniqueMentors.length !== 1 ? 's' : ''} connected
+                </p>
+                <p className="text-xs text-[var(--bridge-text-muted)]">Keep growing your network</p>
+              </div>
+              <Magnetic strength={0.16}>
+                <Link to="/mentors" data-cursor="More" className="ml-auto inline-flex items-center gap-1 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-4 py-2 text-xs font-black text-orange-600 transition hover:border-orange-400/45 hover:text-orange-700 dark:text-orange-400">
+                  Explore more <ArrowUpRight className="h-3 w-3" />
+                </Link>
+              </Magnetic>
             </div>
-            <div>
-              <p className="font-semibold text-[var(--bridge-text)]">{uniqueMentors.length} mentor{uniqueMentors.length !== 1 ? 's' : ''} connected</p>
-              <p className="text-xs text-[var(--bridge-text-muted)]">Keep growing your network</p>
-            </div>
-            <Link to="/mentors" className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-orange-600 transition hover:text-orange-700 dark:text-orange-400">
-              Explore more <ArrowUpRight className="h-3 w-3" />
-            </Link>
           </div>
-        </div>
+        </Tilt3D>
       )}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -490,15 +574,26 @@ function MenteeConnectionsTab({ uniqueMentors, searchQuery, setSearchQuery }) {
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 function SearchBar({ value, onChange, placeholder }) {
   return (
-    <div className="relative max-w-xs flex-1 sm:min-w-[14rem]">
-      <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--bridge-text-muted)]" />
+    <div className="relative max-w-xs flex-1 sm:min-w-[16rem]">
+      <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--bridge-text-muted)] transition-colors peer-focus:text-orange-500" />
       <input type="text" placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)}
-        className="w-full rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-2.5 pl-10 pr-4 text-sm transition focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/20"
+        className="peer w-full rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-3 pl-11 pr-4 text-sm font-semibold text-[var(--bridge-text)] shadow-sm transition focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25"
       />
+      {value && (
+        <button type="button" onClick={() => onChange('')} aria-label="Clear"
+          className="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-[var(--bridge-text-muted)] transition hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)]">
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
     </div>
   );
 }
 
 function NoMatch() {
-  return <p className="py-8 text-center text-sm italic text-[var(--bridge-text-muted)]">No results match your search.</p>;
+  return (
+    <div className="flex flex-col items-center gap-2 py-10 text-center">
+      <Search className="h-5 w-5 text-[var(--bridge-text-faint)]" />
+      <p className="text-sm font-bold italic text-[var(--bridge-text-muted)]">No results match your search.</p>
+    </div>
+  );
 }

@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { motion, useMotionValue, useSpring, useMotionTemplate, AnimatePresence } from 'motion/react';
+import { motion, useMotionValue, useSpring, useMotionTemplate, useScroll, useTransform, AnimatePresence } from 'motion/react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAuth } from '../context/useAuth';
 import { useFooterOffset } from '../utils/useFooterOffset';
+import CustomCursor from '../components/CustomCursor.jsx';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -47,7 +48,10 @@ const OUTCOMES=[
   {result:'Changed industries',metric:'Banking → PM',name:'Priya S.',role:'Ex-Analyst, now PM',tone:'emerald',quote:'I was terrified to leave finance. One session with someone who made the exact same jump saved me six months of second-guessing.'},
   {result:'Got promoted',metric:'IC → Staff',name:'Jordan E.',role:'Staff Engineer',tone:'sky',quote:"Stuck at Senior for four years. My mentor called out exactly which work didn't count. Promoted in the next cycle."},
   {result:'Landed dream role',metric:'PM at Stripe',name:'Anika R.',role:'Product Manager',tone:'violet',quote:'I had 12 final rounds in my career and bombed 11. After two sessions on frameworks and positioning, I closed my dream offer.'},
+  {result:'+$70k jump',metric:'Negotiated comp',name:'Marcus W.',role:'Staff Engineer',tone:'rose',quote:"My mentor walked me through every comp negotiation lever I didn't know existed. I left $70k on the table at my last job."},
+  {result:'YC W24 batch',metric:'Founded startup',name:'Lina O.',role:'Founder & CEO',tone:'teal',quote:"I needed someone who'd actually raised — not a coach. Two calls and I had a deck investors actually opened."},
 ];
+const BRANDS=['Stripe','Linear','Figma','Notion','Vercel','Airbnb','Anthropic','Spotify','Meta','Google','OpenAI','Salesforce'];
 const WHY_ROWS=[
   {label:'You get a response',dm:'~10% reply rate',coaching:'Always',bridge:'Always — mentors opt in'},
   {label:"They've done your job",dm:'Maybe',coaching:'Rarely',bridge:"Yes — that's the filter"},
@@ -129,6 +133,166 @@ function useCountUp(target,duration=2200){
   return[ref,val];
 }
 
+/* ─── Scroll progress hook ──────────────────────────────────── */
+function useScrollProgress(){
+  const[p,setP]=useState(0);
+  useEffect(()=>{
+    const fn=()=>{const h=document.documentElement.scrollHeight-window.innerHeight;setP(h>0?Math.min(window.scrollY/h,1):0);};
+    window.addEventListener('scroll',fn,{passive:true});fn();
+    return()=>window.removeEventListener('scroll',fn);
+  },[]);
+  return p;
+}
+
+/* ─── Intro Loader — cinematic brand reveal ─────────────────── */
+function IntroLoader(){
+  const[done,setDone]=useState(false);
+  useEffect(()=>{
+    if(typeof window==='undefined')return;
+    if(sessionStorage.getItem('bridge_intro_seen')){setDone(true);return;}
+    const t=setTimeout(()=>{sessionStorage.setItem('bridge_intro_seen','1');setDone(true);},1750);
+    return()=>clearTimeout(t);
+  },[]);
+  return(
+    <AnimatePresence>
+      {!done&&(
+        <motion.div className="fixed inset-0 z-[10000] flex items-center justify-center" style={{background:'#060302'}}
+          initial={{opacity:1}} exit={{opacity:0,transition:{duration:0.7,ease:[0.22,1,0.36,1]}}}>
+          <div aria-hidden className="absolute inset-0 pointer-events-none" style={{background:'radial-gradient(circle at 50% 50%,rgba(234,88,12,.18),transparent 60%)'}}/>
+          <div className="relative flex flex-col items-center gap-6">
+            <motion.div initial={{scale:0,rotate:-90}} animate={{scale:1,rotate:0}} transition={{duration:0.9,ease:[0.16,1,0.3,1]}} className="relative">
+              <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-orange-500 via-amber-400 to-orange-500 shadow-[0_0_80px_rgba(234,88,12,.7)] flex items-center justify-center">
+                <span className="font-display text-3xl font-black text-white">B</span>
+              </div>
+              <motion.div className="absolute inset-0 rounded-2xl border border-orange-500/40"
+                animate={{scale:[1,1.6,1.6],opacity:[1,0,0]}} transition={{duration:1.5,repeat:Infinity,ease:'easeOut'}}/>
+            </motion.div>
+            <div className="overflow-hidden">
+              <motion.p initial={{y:30,opacity:0}} animate={{y:0,opacity:1}} transition={{delay:0.4,duration:0.7,ease:[0.16,1,0.3,1]}}
+                className="font-display text-sm font-black uppercase tracking-[0.4em] text-white/80">Bridge</motion.p>
+            </div>
+            <div className="h-px w-32 bg-white/10 overflow-hidden">
+              <motion.div initial={{x:'-100%'}} animate={{x:'100%'}} transition={{duration:1.2,delay:0.5,ease:'linear'}}
+                className="h-full w-1/2 bg-gradient-to-r from-transparent via-orange-400 to-transparent"/>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ─── Scroll Progress Bar ───────────────────────────────────── */
+function ScrollProgressBar(){
+  const p=useScrollProgress();
+  return(
+    <div aria-hidden className="fixed left-0 right-0 top-0 z-[9998] h-[2px] bg-transparent pointer-events-none">
+      <div className="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 shadow-[0_0_18px_rgba(234,88,12,.65)]"
+        style={{width:`${p*100}%`,transition:'width 90ms linear'}}/>
+    </div>
+  );
+}
+
+/* ─── Sticky CTA Bar — appears after hero ───────────────────── */
+function StickyCTABar({user}){
+  const[show,setShow]=useState(false);
+  const bRef=useFooterOffset(20);
+  useEffect(()=>{
+    const fn=()=>{const h=window.innerHeight;const y=window.scrollY;const max=document.documentElement.scrollHeight-h-300;setShow(y>h*0.9&&y<max);};
+    window.addEventListener('scroll',fn,{passive:true});fn();
+    return()=>window.removeEventListener('scroll',fn);
+  },[]);
+  return createPortal(
+    <div ref={bRef} className="pointer-events-none fixed inset-x-0 z-[9990] flex justify-center px-4"
+      style={{bottom:'88px',transform:`translateY(${show?'0':'120%'})`,opacity:show?1:0,transition:'transform 600ms cubic-bezier(0.16,1,0.3,1),opacity 400ms ease'}}>
+      <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-orange-500/30 bg-[#0c0906]/95 px-3 py-2.5 shadow-[0_24px_70px_rgba(0,0,0,.6),0_0_60px_rgba(234,88,12,.25)] backdrop-blur-2xl">
+        <div className="flex -space-x-2 pl-1">
+          {['MC','JR','EV'].map((i,k)=>(
+            <div key={i} className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#0c0906] bg-gradient-to-br ${['from-amber-400 to-orange-500','from-orange-400 to-rose-500','from-rose-400 to-pink-500'][k]} text-[9px] font-bold text-white`}>{i}</div>
+          ))}
+        </div>
+        <div className="hidden sm:flex flex-col">
+          <p className="text-[11px] font-bold text-white/90 leading-tight">3 mentors available now</p>
+          <p className="text-[9px] text-white/40 leading-tight">Avg response: 11 min · 4.9 ★</p>
+        </div>
+        <Link to={user?'/mentors':'/register'} data-cursor="Book"
+          className="b-pulse inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-2.5 text-[12px] font-bold text-white shadow-[0_0_30px_rgba(234,88,12,.6)] hover:shadow-[0_0_50px_rgba(234,88,12,.85)] transition-all hover:scale-[1.03]">
+          Book a session
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.6"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </Link>
+      </div>
+    </div>,document.body
+  );
+}
+
+/* ─── Brand Logo Strip ──────────────────────────────────────── */
+function BrandStrip(){
+  return(
+    <div className="b-marq relative">
+      <div className="overflow-hidden b-mask-x">
+        <div className="b-ticker flex w-max gap-12 pr-12 items-center">
+          {[...BRANDS,...BRANDS].map((b,i)=>(
+            <span key={i} className="font-display text-2xl font-black uppercase tracking-tight text-[var(--bridge-text-muted)]/55 hover:text-[var(--bridge-text-secondary)] transition-colors whitespace-nowrap">{b}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Outcomes — dense bento grid ───────────────────────────── */
+function OutcomesScroller(){
+  // Bento spans: 6 cards in an asymmetric grid. lg cols=6.
+  const SPANS=['lg:col-span-3 lg:row-span-2','lg:col-span-3','lg:col-span-3','lg:col-span-2','lg:col-span-2','lg:col-span-2'];
+  return(
+    <section id="outcomes" className="relative overflow-hidden py-24"
+      style={{background:'linear-gradient(180deg,var(--bridge-canvas) 0%,#160a04 8%,#0d0603 100%)'}}>
+      <div aria-hidden className="pointer-events-none absolute inset-0"
+        style={{backgroundImage:'linear-gradient(rgba(234,88,12,.036) 1px,transparent 1px),linear-gradient(90deg,rgba(234,88,12,.036) 1px,transparent 1px)',backgroundSize:'88px 88px'}}/>
+      <div aria-hidden className="b-blob pointer-events-none absolute left-1/2 top-1/2 h-[820px] w-[820px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-14"
+        style={{background:'radial-gradient(circle,rgba(234,88,12,.5) 0%,transparent 65%)'}}/>
+      <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8">
+        <Rev>
+          <div className="mb-12 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-400">Real outcomes · {OUTCOMES.length} stories</p>
+              <h2 className="mt-3 font-display font-black leading-[0.94] tracking-[-0.025em] text-white" style={{fontSize:'clamp(2.4rem,6vw,5rem)'}}>
+                People who <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500">got unstuck</span>.
+              </h2>
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-emerald-500/22 bg-emerald-500/[0.06] px-4 py-2 text-[11px] font-bold text-emerald-300">
+              <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-65"/><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"/></span>
+              <span>97% would recommend</span>
+            </div>
+          </div>
+        </Rev>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6 lg:auto-rows-[260px]">
+          {OUTCOMES.map((o,i)=>(
+            <Rev key={i} delay={i*70} className={SPANS[i]||'lg:col-span-2'}>
+              <Tilt n={3} className={`group relative h-full overflow-hidden rounded-3xl border bg-[var(--bridge-surface)] p-7 lg:p-8 shadow-bridge-card hover:shadow-bridge-glow transition-all ${i===0?'border-orange-500/24 shadow-bridge-glow':'border-[var(--bridge-border)] hover:border-orange-500/30'}`}>
+                {i===0&&<div aria-hidden className="pointer-events-none absolute inset-0" style={{background:'radial-gradient(ellipse 60% 70% at 100% 0%,rgba(234,88,12,.10),transparent 70%)'}}/>}
+                <div aria-hidden className="pointer-events-none absolute -top-8 -left-3 font-editorial font-black leading-none text-orange-500/[0.06] select-none" style={{fontSize:i===0?'14rem':'9rem'}}>&ldquo;</div>
+                <div className="relative z-10 flex h-full flex-col">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex gap-0.5">{[0,1,2,3,4].map(k=><svg key={k} className="h-3.5 w-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>)}</div>
+                    <div className={`rounded-full border border-emerald-500/22 bg-emerald-500/10 px-2.5 py-1 text-[9px] font-black text-emerald-300 whitespace-nowrap`}>{o.result}</div>
+                  </div>
+                  <p className={`flex-1 text-[var(--bridge-text)] leading-relaxed ${i===0?'text-lg lg:text-xl':'text-[13px] lg:text-sm'}`}>&ldquo;{o.quote}&rdquo;</p>
+                  <div className="mt-5 flex items-center gap-3 pt-4 border-t border-[var(--bridge-border)]">
+                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${AVATAR_GRAD[o.tone]} text-[10px] font-bold text-white shadow-md`}>{o.name.split(' ').map(n=>n[0]).join('')}</div>
+                    <div className="min-w-0 flex-1"><p className="truncate text-[12px] font-bold text-[var(--bridge-text)]">{o.name}</p><p className="truncate text-[10px] text-[var(--bridge-text-faint)]">{o.role}</p></div>
+                    <span className="text-[10px] font-black text-orange-400 whitespace-nowrap">{o.metric}</span>
+                  </div>
+                </div>
+              </Tilt>
+            </Rev>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─── Magnetic Wrap ─────────────────────────────────────────── */
 function Mag({children,s=0.3}){
   const r=useRef(null),f=useRef(null);
@@ -195,7 +359,7 @@ function FloatingDock(){
       style={{bottom:24,transform:`translateX(-50%) translateY(${on?'0':'5rem'})`,opacity:on?1:0,transition:'transform 500ms cubic-bezier(0.16,1,0.3,1),opacity 380ms ease'}}>
       <nav className="pointer-events-auto flex items-center gap-1 rounded-full border border-white/[0.07] bg-[#0c0906]/95 px-2 py-2 shadow-[0_24px_80px_rgba(0,0,0,0.85),0_0_100px_rgba(234,88,12,0.12)] backdrop-blur-2xl">
         {items.map((item,i)=>(
-          <button key={i} onClick={()=>go(item.id)}
+          <button key={i} onClick={()=>go(item.id)} data-cursor="hover"
             className={`whitespace-nowrap rounded-full px-4 py-2 text-[11px] font-semibold transition-all duration-200 ${item.p?'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-[0_0_30px_rgba(234,88,12,0.5)]':'text-white/38 hover:bg-white/[0.06] hover:text-white/80'}`}>
             {item.l}
           </button>
@@ -232,7 +396,7 @@ function MCard({m}){
     el.style.setProperty('--my',`${((e.clientY-b.top)/b.height)*100}%`);};
   const ml=()=>{const el=r.current;if(!el)return;el.style.setProperty('--tx','0deg');el.style.setProperty('--ty','0deg');};
   return(
-    <div ref={r} onMouseMove={mm} onMouseLeave={ml}
+    <div ref={r} onMouseMove={mm} onMouseLeave={ml} data-cursor="View"
       className="tilt-card cursor-glow inline-flex shrink-0 w-60 flex-col gap-3 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-4 shadow-bridge-card transition-all hover:border-orange-500/35 hover:shadow-bridge-glow">
       <div className="flex items-center gap-2.5">
         <div className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${AVATAR_GRAD[m.tone]} text-[11px] font-bold text-white`}>
@@ -342,14 +506,8 @@ export default function Landing(){
   const[ready,setReady]=useState(false);
   const heroRef=useRef(null);
   const headRef=useRef(null);
-  const[activeQ,setActiveQ]=useState(0);
 
   useEffect(()=>{const t=setTimeout(()=>setReady(true),60);return()=>clearTimeout(t);},[]);
-
-  useEffect(()=>{
-    const id=setInterval(()=>setActiveQ(i=>(i+1)%OUTCOMES.length),5500);
-    return()=>clearInterval(id);
-  },[]);
 
   // GSAP: stagger hero headline words on load
   useEffect(()=>{
@@ -394,8 +552,17 @@ export default function Landing(){
         .b-scan{animation:bScanLine 10s linear infinite;animation-delay:-4s}
         .b-mask-x{-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%)}
         [data-w]{display:inline-block;perspective:600px}
+        @keyframes bShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+        @keyframes bPulseFlow{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}
+        .b-pulse-flow{animation:bPulseFlow 3.5s cubic-bezier(.45,.05,.55,.95) infinite}
+        .shimmer-text{background:linear-gradient(90deg,rgba(234,88,12,.5) 0%,rgba(255,255,255,.95) 25%,rgba(251,191,36,.95) 50%,rgba(255,255,255,.95) 75%,rgba(234,88,12,.5) 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:bShimmer 4.5s linear infinite}
+        @media (prefers-reduced-motion: reduce){.b-ticker,.b-ticker-r,.b-float,.b-float-b,.b-blob,.b-pulse,.b-scan,.shimmer-text{animation:none!important}}
       `}</style>
 
+      <CustomCursor/>
+      <IntroLoader/>
+      <ScrollProgressBar/>
+      <StickyCTABar user={user}/>
       <FloatingDock/>
 
       {/* ══════════════════════════════════════════
@@ -416,26 +583,32 @@ export default function Landing(){
         <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-60"
           style={{background:'linear-gradient(to bottom,transparent,#060302)'}}/>
 
-        <div className="relative z-10 mx-auto max-w-7xl px-5 pt-36 pb-28 sm:px-8 lg:pt-44">
-          {/* Live badge */}
-          <div className={`flex justify-center lg:justify-start transition-all duration-700 ${ready?'opacity-100 translate-y-0':'opacity-0 translate-y-4'}`}>
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-5 py-2 backdrop-blur-xl">
+        {/* Top utility bar: live badge + 5-star rating */}
+        <div className="relative z-10 mx-auto max-w-7xl px-5 pt-10 sm:px-8">
+          <div className="flex items-center justify-between gap-4">
+            <div className={`inline-flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-1.5 backdrop-blur-xl transition-all duration-700 ${ready?'opacity-100 translate-y-0':'opacity-0 -translate-y-4'}`}>
               <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-65"/><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,.9)]"/></span>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Live · 2,400+ vetted mentors</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Live · 2,400+ vetted</span>
+            </div>
+            <div className={`hidden md:flex items-center gap-3 transition-all duration-700 delay-200 ${ready?'opacity-100 translate-y-0':'opacity-0 -translate-y-4'}`}>
+              <div className="flex items-center gap-1.5">{[0,1,2,3,4].map(i=><svg key={i} className="h-3 w-3 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>)}</div>
+              <span className="text-[11px] font-semibold text-white/55"><span className="text-white/85 font-bold">4.9</span> · 4,800+ sessions</span>
             </div>
           </div>
+        </div>
 
-          {/* Headline */}
-          <div className="mt-10 lg:max-w-4xl" ref={headRef} style={{perspective:'800px',overflow:'hidden'}}>
-            <h1 className="font-display font-black leading-[0.84] tracking-[-0.035em] text-white/88"
-              style={{fontSize:'clamp(3.6rem,9.5vw,9rem)'}}>
+        <div className="relative z-10 mx-auto max-w-7xl px-5 pt-20 pb-28 sm:px-8 lg:pt-28">
+          {/* Headline — shimmer kinetic */}
+          <div className="lg:max-w-5xl" ref={headRef} style={{perspective:'1000px',overflow:'hidden'}}>
+            <h1 className="font-display font-black leading-[0.84] tracking-[-0.038em] text-white/92"
+              style={{fontSize:'clamp(3.6rem,10vw,9.5rem)'}}>
               <span data-w className="block">Your next</span>
-              <span data-w className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500"
-                style={{filter:'drop-shadow(0 0 100px rgba(234,88,12,.75))'}}>
+              <span data-w className="block shimmer-text"
+                style={{filter:'drop-shadow(0 0 100px rgba(234,88,12,.7))'}}>
                 career move
               </span>
               <span data-w className="block">starts with</span>
-              <span data-w className="block font-editorial italic text-white/14" style={{fontSize:'0.78em'}}>one conversation.</span>
+              <span data-w className="block font-editorial italic text-white/16" style={{fontSize:'0.78em'}}>one conversation.</span>
             </h1>
           </div>
 
@@ -447,26 +620,35 @@ export default function Landing(){
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Mag>
-                  <Link to={user?'/mentors':'/register'}
+                  <Link to={user?'/mentors':'/register'} data-cursor="Start"
                     className="b-pulse btn-sheen inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-9 py-4 text-[0.95rem] font-bold text-white shadow-[0_0_80px_rgba(234,88,12,.6)] transition-all hover:scale-[1.05] hover:shadow-[0_0_110px_rgba(234,88,12,.85)] active:scale-[0.97]">
                     Find your mentor
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </Link>
                 </Mag>
                 <Mag>
-                  <Link to="/mentors"
+                  <Link to="/mentors" data-cursor="Browse"
                     className="inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.04] px-8 py-4 text-[0.95rem] font-semibold backdrop-blur-sm transition-all hover:border-white/[0.18] hover:bg-white/[0.07]"
-                    style={{color:'rgba(255,255,255,.48)'}}>
+                    style={{color:'rgba(255,255,255,.55)'}}>
                     Browse mentors →
                   </Link>
                 </Mag>
               </div>
               <div className="mt-5 flex flex-wrap gap-x-5 gap-y-1">
                 {['No credit card required','First session guaranteed','Cancel anytime'].map((t,i)=>(
-                  <span key={i} className="flex items-center gap-2 text-[10px]" style={{color:'rgba(255,255,255,.2)'}}>
+                  <span key={i} className="flex items-center gap-2 text-[10px]" style={{color:'rgba(255,255,255,.28)'}}>
                     {i>0&&<span className="h-1 w-1 rounded-full bg-white/15"/>}{t}
                   </span>
                 ))}
+              </div>
+              {/* Above-the-fold trust testimonial */}
+              <div className="mt-10 flex items-start gap-4 max-w-md rounded-2xl border border-white/[0.06] bg-white/[0.025] backdrop-blur-xl p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 text-xs font-bold text-white">PS</div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1 mb-1">{[0,1,2,3,4].map(i=><svg key={i} className="h-2.5 w-2.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>)}</div>
+                  <p className="text-[12px] text-white/55 leading-relaxed">"One session saved me <span className="font-bold text-white/85">six months</span> of second-guessing. Banking → PM in 8 weeks."</p>
+                  <p className="mt-1.5 text-[10px] font-bold text-white/30">Priya S. · Ex-Analyst, now PM</p>
+                </div>
               </div>
             </div>
 
@@ -508,9 +690,21 @@ export default function Landing(){
       </section>
 
       {/* ══════════════════════════════════════════
+          BRAND TRUST STRIP
+      ══════════════════════════════════════════ */}
+      <section className="relative border-y border-[var(--bridge-border)] bg-[var(--bridge-canvas)] py-10">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <p className="mb-6 text-center text-[10px] font-black uppercase tracking-[0.32em] text-[var(--bridge-text-faint)]">
+            Mentors from the world's best companies
+          </p>
+          <BrandStrip/>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════
           ACTIVITY TICKER
       ══════════════════════════════════════════ */}
-      <div className="b-marq relative border-y border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/35 py-2.5">
+      <div className="b-marq relative border-b border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/35 py-2.5">
         <div className="overflow-hidden b-mask-x">
           <div className="b-ticker flex w-max gap-2.5 pr-3">
             {[...ACTIVITY,...ACTIVITY].map((a,i)=>(
@@ -590,31 +784,92 @@ export default function Landing(){
       </section>
 
       {/* ══════════════════════════════════════════
-          STATS — dark section, huge numbers
+          STATS — cinematic bento with hero stat
       ══════════════════════════════════════════ */}
-      <section className="relative overflow-hidden py-24"
+      <section className="relative overflow-hidden py-28"
         style={{background:'linear-gradient(180deg,var(--bridge-canvas) 0%,#0d0703 12%,#080503 100%)'}}>
-        <div aria-hidden className="b-blob pointer-events-none absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-20"
-          style={{background:'radial-gradient(circle,rgba(234,88,12,.45) 0%,transparent 65%)'}}/>
+        <div aria-hidden className="b-blob pointer-events-none absolute left-1/3 top-1/2 h-[820px] w-[820px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-25"
+          style={{background:'radial-gradient(circle,rgba(234,88,12,.55) 0%,transparent 65%)'}}/>
         <div aria-hidden className="pointer-events-none absolute inset-0"
           style={{backgroundImage:'linear-gradient(rgba(234,88,12,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(234,88,12,.04) 1px,transparent 1px)',backgroundSize:'88px 88px'}}/>
         <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
           <Rev>
-            <div className="mb-16 text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">By the numbers</p>
-              <h2 className="mt-4 font-display text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
-                A platform people <span className="text-gradient-bridge">actually use</span>
-              </h2>
+            <div className="mb-12 flex flex-col items-start gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">By the numbers</p>
+                <h2 className="mt-3 font-display text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
+                  A platform people <span className="text-gradient-bridge">actually use</span>
+                </h2>
+              </div>
+              <p className="max-w-xs text-[12px] leading-relaxed text-white/40">No vanity metrics. Just signal: people show up, book again, and recommend.</p>
             </div>
           </Rev>
 
-          {/* Stats grid — responsive, no overlap */}
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 sm:gap-12">
-            <Rev delay={0}><StatCell target={2400} suffix="+" label="Vetted mentors" accent="from-orange-500 to-amber-400"/></Rev>
-            <Rev delay={80}><StatCell target={4800} suffix="+" label="Sessions booked" accent="from-amber-500 to-orange-400"/></Rev>
-            <Rev delay={160}><StatCell target={4.9} suffix="/5" label="Average rating" accent="from-rose-400 to-orange-500" decimal/></Rev>
-            <Rev delay={240}><StatCell target={97} suffix="%" label="Would recommend" accent="from-emerald-400 to-teal-500"/></Rev>
+          {/* Bento: hero stat (lg col-span-2 row-span-2) + 3 stats + spotlight bar */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:auto-rows-[176px]">
+            <Rev delay={0} className="col-span-2 lg:row-span-2">
+              <Tilt n={4} className="group relative h-full overflow-hidden rounded-3xl border border-orange-500/22 bg-gradient-to-br from-[#1a0a04] to-[#0a0402] p-7 sm:p-9 shadow-bridge-glow">
+                <div aria-hidden className="pointer-events-none absolute inset-0" style={{background:'radial-gradient(ellipse 60% 80% at 100% 100%,rgba(234,88,12,.15),transparent 70%)'}}/>
+                <div aria-hidden className="b-blob pointer-events-none absolute -bottom-20 -right-20 h-72 w-72 rounded-full opacity-50" style={{background:'radial-gradient(circle,rgba(234,88,12,.32) 0%,transparent 65%)'}}/>
+                <div className="relative flex h-full flex-col justify-between gap-6">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-55"/><span className="relative inline-flex h-2 w-2 rounded-full bg-orange-400"/></span>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-400">Mentor network</p>
+                  </div>
+                  <StatCell target={2400} suffix="+" label="Vetted mentors across 60+ industries" accent="from-orange-400 via-amber-300 to-orange-500"/>
+                  <div className="flex items-center gap-3">
+                    <div className="flex -space-x-2">{['MC','JR','EV','MK'].map((i,k)=>(<div key={i} className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#0c0906] bg-gradient-to-br ${['from-amber-400 to-orange-500','from-orange-400 to-rose-500','from-rose-400 to-pink-500','from-emerald-400 to-teal-500'][k]} text-[9px] font-bold text-white`}>{i}</div>))}</div>
+                    <p className="text-[11px] text-white/45"><span className="font-bold text-white/85">12 new</span> joined this week</p>
+                  </div>
+                </div>
+              </Tilt>
+            </Rev>
+            <Rev delay={120}>
+              <Tilt n={3} className="relative h-full overflow-hidden rounded-3xl border border-white/[0.07] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-amber-500/30 hover:shadow-bridge-glow">
+                <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{background:'radial-gradient(ellipse 70% 50% at 50% 0%,rgba(251,191,36,.08),transparent 70%)'}}/>
+                <div className="relative flex h-full flex-col justify-between">
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-amber-400/80">Total bookings</p>
+                  <StatCell target={4800} suffix="+" label="Sessions booked" accent="from-amber-500 to-orange-400"/>
+                </div>
+              </Tilt>
+            </Rev>
+            <Rev delay={200}>
+              <Tilt n={3} className="relative h-full overflow-hidden rounded-3xl border border-white/[0.07] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-rose-400/30 hover:shadow-bridge-glow">
+                <div className="relative flex h-full flex-col justify-between">
+                  <div className="flex items-center gap-1">{[0,1,2,3,4].map(i=><svg key={i} className="h-3 w-3 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>)}</div>
+                  <StatCell target={4.9} suffix="/5" label="Average rating" accent="from-rose-400 to-orange-500" decimal/>
+                </div>
+              </Tilt>
+            </Rev>
+            <Rev delay={280}>
+              <Tilt n={3} className="relative h-full overflow-hidden rounded-3xl border border-white/[0.07] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-emerald-500/30 hover:shadow-bridge-glow">
+                <div className="relative flex h-full flex-col justify-between">
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-400/80">Net Promoter</p>
+                  <StatCell target={97} suffix="%" label="Would recommend" accent="from-emerald-400 to-teal-500"/>
+                </div>
+              </Tilt>
+            </Rev>
+            <Rev delay={360}>
+              <Tilt n={3} className="relative h-full overflow-hidden rounded-3xl border border-white/[0.07] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-sky-500/30 hover:shadow-bridge-glow">
+                <div className="relative flex h-full flex-col justify-between">
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-sky-400/80">Median response</p>
+                  <StatCell target={11} suffix=" min" label="Avg time to first reply" accent="from-sky-400 to-blue-500"/>
+                </div>
+              </Tilt>
+            </Rev>
           </div>
+
+          {/* Spotlight bar — milestone strip */}
+          <Rev delay={420}>
+            <div className="mt-4 grid grid-cols-2 gap-3 rounded-3xl border border-white/[0.06] bg-white/[0.025] px-5 py-5 backdrop-blur-xl sm:grid-cols-4 sm:gap-6 sm:px-8">
+              {[{k:'$2.1M+',v:'in offer increases unlocked'},{k:'47',v:'industries covered'},{k:'92%',v:'rebook within 30 days'},{k:'24/7',v:'global mentor coverage'}].map((s,i)=>(
+                <div key={i} className="flex flex-col gap-1 border-b border-white/[0.05] pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3 last:border-0">
+                  <p className="font-display text-2xl font-black tabular-nums text-white sm:text-3xl">{s.k}</p>
+                  <p className="text-[11px] text-white/40 leading-tight">{s.v}</p>
+                </div>
+              ))}
+            </div>
+          </Rev>
         </div>
       </section>
 
@@ -691,7 +946,7 @@ export default function Landing(){
         </div>
         <div className="mt-12 flex justify-center px-5">
           <Mag>
-            <Link to="/mentors"
+            <Link to="/mentors" data-cursor="Browse"
               className="btn-sheen group inline-flex items-center gap-2.5 rounded-full border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-8 py-4 text-sm font-bold text-[var(--bridge-text)] shadow-bridge-card transition-all hover:border-orange-500/42 hover:shadow-bridge-glow">
               Browse all 2,400+ mentors
               <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -701,36 +956,53 @@ export default function Landing(){
       </section>
 
       {/* ══════════════════════════════════════════
-          HOW IT WORKS
+          HOW IT WORKS — cinematic timeline
       ══════════════════════════════════════════ */}
-      <section id="how" className="relative overflow-hidden py-24 bg-[var(--bridge-canvas)]">
-        <div aria-hidden className="b-blob pointer-events-none absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-12"
-          style={{background:'radial-gradient(circle,var(--bridge-aurora-2) 0%,transparent 65%)'}}/>
-        <div className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8">
+      <section id="how" className="relative overflow-hidden py-28 bg-[var(--bridge-canvas)]">
+        <div aria-hidden className="b-blob pointer-events-none absolute left-1/2 top-1/2 h-[760px] w-[760px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-14"
+          style={{background:'radial-gradient(circle,rgba(234,88,12,.4) 0%,transparent 65%)'}}/>
+        <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
           <Rev>
-            <div className="mb-16 text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">How it works</p>
-              <h2 className="mt-4 font-display text-3xl font-black tracking-tight text-[var(--bridge-text)] sm:text-4xl lg:text-5xl">
-                Three steps.<br/><span className="text-gradient-bridge">One hour.</span> Real momentum.
-              </h2>
+            <div className="mb-16 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">How it works</p>
+                <h2 className="mt-3 font-display font-black leading-[0.96] tracking-[-0.025em] text-[var(--bridge-text)]" style={{fontSize:'clamp(2.4rem,6vw,5rem)'}}>
+                  Three steps.<br/><span className="text-gradient-bridge">One hour.</span> Real momentum.
+                </h2>
+              </div>
+              <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-2 text-[11px] font-bold text-emerald-600 dark:text-emerald-300">
+                <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-65"/><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"/></span>
+                Avg. time-to-session: <span className="font-black">53 sec</span>
+              </div>
             </div>
           </Rev>
-          <div className="relative grid gap-6 sm:grid-cols-3">
-            <div aria-hidden className="pointer-events-none absolute top-11 left-[calc(16.67%+3rem)] right-[calc(16.67%+3rem)] hidden h-px sm:block"
-              style={{background:'linear-gradient(90deg,transparent 0%,var(--bridge-border-strong) 20%,var(--bridge-border-strong) 80%,transparent 100%)'}}/>
+
+          <div className="relative grid gap-5 sm:grid-cols-3">
+            {/* Animated flow line connecting all steps */}
+            <div aria-hidden className="pointer-events-none absolute top-[110px] left-[16%] right-[16%] hidden h-[2px] sm:block overflow-hidden rounded-full">
+              <div className="absolute inset-0" style={{background:'linear-gradient(90deg,transparent 0%,rgba(234,88,12,.18) 18%,rgba(234,88,12,.18) 82%,transparent 100%)'}}/>
+              <div className="absolute inset-y-0 w-1/3 b-pulse-flow" style={{background:'linear-gradient(90deg,transparent 0%,rgba(234,88,12,.85) 50%,transparent 100%)'}}/>
+            </div>
             {[
-              {num:'01',chip:'"PM at a Series B"',icon:<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8" strokeLinecap="round"/><path d="m21 21-4.35-4.35" strokeLinecap="round"/></svg>,title:'Tell us your goal',desc:'Plain English. Our AI searches 2,400+ professionals and ranks the exact few most likely to move the needle.',accent:'from-orange-500 to-amber-400'},
-              {num:'02',chip:'98% match · $60/session',icon:<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" strokeLinecap="round" strokeLinejoin="round"/></svg>,title:'Pick your mentor',desc:'Real bios, honest reviews, exact rates — all visible before you commit. No surprises.',accent:'from-amber-400 to-orange-400'},
-              {num:'03',chip:'Session confirmed ✓',icon:<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2" strokeLinecap="round"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4" strokeLinecap="round" strokeLinejoin="round"/></svg>,title:'Book and get unstuck',desc:'Real-time availability. Built-in video room. No Zoom links, no scheduling back-and-forth.',accent:'from-emerald-400 to-teal-500'},
+              {num:'01',chip:'"PM at a Series B"',time:'10 sec',icon:<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8" strokeLinecap="round"/><path d="m21 21-4.35-4.35" strokeLinecap="round"/></svg>,title:'Tell us your goal',desc:'Plain English. Our AI searches 2,400+ professionals and ranks the exact few most likely to move the needle.',accent:'from-orange-500 to-amber-400',ring:'ring-orange-500/22'},
+              {num:'02',chip:'98% match · $60/session',time:'30 sec',icon:<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" strokeLinecap="round" strokeLinejoin="round"/></svg>,title:'Pick your mentor',desc:'Real bios, honest reviews, exact rates — all visible before you commit. No surprises.',accent:'from-amber-400 to-orange-400',ring:'ring-amber-500/22'},
+              {num:'03',chip:'Session confirmed ✓',time:'13 sec',icon:<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2" strokeLinecap="round"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4" strokeLinecap="round" strokeLinejoin="round"/></svg>,title:'Book and get unstuck',desc:'Real-time availability. Built-in video room. No Zoom links, no scheduling back-and-forth.',accent:'from-emerald-400 to-teal-500',ring:'ring-emerald-500/22'},
             ].map((step,i)=>(
-              <Rev key={i} delay={i*120}>
-                <Tilt className="group relative overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-orange-500/28 hover:shadow-bridge-glow">
-                  <div className={`font-display text-[5.5rem] font-black leading-none text-transparent bg-clip-text bg-gradient-to-br ${step.accent} opacity-[0.07] transition-opacity group-hover:opacity-[0.16]`}>{step.num}</div>
-                  <div className="mt-3 flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500 ring-1 ring-orange-500/13">{step.icon}</div>
-                  <h3 className="mt-4 text-base font-bold text-[var(--bridge-text)]">{step.title}</h3>
-                  <p className="mt-2 text-[13px] text-[var(--bridge-text-muted)] leading-relaxed">{step.desc}</p>
-                  <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-3 py-1 text-[9px] font-bold text-[var(--bridge-text-faint)]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-orange-400"/>{step.chip}
+              <Rev key={i} delay={i*140}>
+                <Tilt n={5} className="group relative h-full overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-7 shadow-bridge-card hover:border-orange-500/30 hover:shadow-bridge-glow transition-all">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100" style={{background:`radial-gradient(ellipse 70% 50% at 50% 0%,rgba(234,88,12,.06),transparent 70%)`}}/>
+                  <div className={`pointer-events-none absolute -top-2 -right-2 font-display text-[8.5rem] font-black leading-none text-transparent bg-clip-text bg-gradient-to-br ${step.accent} opacity-[0.07] transition-all duration-700 group-hover:opacity-[0.18] group-hover:scale-110`}>{step.num}</div>
+                  <div className="relative">
+                    <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${step.accent} text-white shadow-[0_8px_28px_rgba(234,88,12,.32)] ring-2 ${step.ring}`}>{step.icon}</div>
+                    <div className="mt-5 flex items-baseline gap-2">
+                      <span className={`font-display text-xs font-black text-transparent bg-clip-text bg-gradient-to-r ${step.accent}`}>{step.num}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-faint)]">• {step.time}</span>
+                    </div>
+                    <h3 className="mt-2 text-lg font-bold tracking-tight text-[var(--bridge-text)]">{step.title}</h3>
+                    <p className="mt-2 text-[13px] text-[var(--bridge-text-muted)] leading-relaxed">{step.desc}</p>
+                    <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/60 px-3 py-1.5 text-[10px] font-bold text-[var(--bridge-text-secondary)]">
+                      <span className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${step.accent}`}/>{step.chip}
+                    </div>
                   </div>
                 </Tilt>
               </Rev>
@@ -740,181 +1012,216 @@ export default function Landing(){
       </section>
 
       {/* ══════════════════════════════════════════
-          TESTIMONIALS — dark, full-bleed
+          TESTIMONIALS — horizontal cinematic scroller
       ══════════════════════════════════════════ */}
-      <section id="outcomes" className="relative overflow-hidden py-24"
-        style={{background:'linear-gradient(180deg,var(--bridge-canvas) 0%,#160a04 8%,#0d0603 100%)'}}>
-        <div aria-hidden className="pointer-events-none absolute inset-0"
-          style={{backgroundImage:'linear-gradient(rgba(234,88,12,.036) 1px,transparent 1px),linear-gradient(90deg,rgba(234,88,12,.036) 1px,transparent 1px)',backgroundSize:'88px 88px'}}/>
-        <div aria-hidden className="b-blob pointer-events-none absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-14"
-          style={{background:'radial-gradient(circle,rgba(234,88,12,.5) 0%,transparent 65%)'}}/>
-        <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
-          <Rev>
-            <div className="mb-14 text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-400">Real outcomes</p>
-              <h2 className="mt-4 font-display text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
-                People who <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500">got unstuck</span>
-              </h2>
-            </div>
-          </Rev>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {OUTCOMES.map((o,i)=>(
-              <Rev key={i} delay={i*70}>
-                <Tilt onClick={()=>setActiveQ(i)}
-                  className={`group flex flex-col gap-5 overflow-hidden rounded-3xl border p-7 shadow-bridge-card transition-all duration-500 cursor-pointer ${activeQ===i?'border-orange-500/42 bg-[var(--bridge-surface)] shadow-bridge-glow scale-[1.012]':'border-[var(--bridge-border)] bg-[var(--bridge-surface)] hover:border-orange-500/25 hover:shadow-bridge-glow'}`}>
-                  <div aria-hidden className="pointer-events-none absolute -top-6 -left-2 font-editorial text-[8rem] font-black leading-none text-orange-500/[0.06] select-none">&ldquo;</div>
-                  <div className="flex gap-1">{[0,1,2,3,4].map(k=><svg key={k} className="h-3.5 w-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>)}</div>
-                  <p className="flex-1 text-sm text-[var(--bridge-text-secondary)] leading-relaxed">&ldquo;{o.quote}&rdquo;</p>
-                  <div className="flex items-center gap-3">
-                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${AVATAR_GRAD[o.tone]} text-[10px] font-bold text-white`}>
-                      {o.name.split(' ').map(n=>n[0]).join('')}
-                    </div>
-                    <div><p className="text-[12px] font-bold text-[var(--bridge-text)]">{o.name}</p><p className="text-[10px] text-[var(--bridge-text-faint)]">{o.role}</p></div>
-                    <div className="ml-auto rounded-full border border-emerald-500/22 bg-emerald-500/10 px-3 py-1 text-[9px] font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{o.result} · {o.metric}</div>
-                  </div>
-                </Tilt>
-              </Rev>
-            ))}
-          </div>
-          <div className="mt-8 flex justify-center gap-2">
-            {OUTCOMES.map((_,i)=>(
-              <button key={i} onClick={()=>setActiveQ(i)}
-                className={`h-1.5 rounded-full transition-all duration-500 ${i===activeQ?'w-10 bg-orange-400':'w-2 bg-white/14 hover:bg-white/28'}`}/>
-            ))}
-          </div>
-        </div>
-      </section>
+      <OutcomesScroller/>
 
       <div aria-hidden className="pointer-events-none h-20 w-full" style={{background:'linear-gradient(to bottom,#0d0603,var(--bridge-canvas))'}}/>
 
       {/* ══════════════════════════════════════════
-          PRINCIPLES — editorial list
+          MANIFESTO — dense bento (replaces principles + features)
       ══════════════════════════════════════════ */}
-      <section className="relative py-24 bg-[var(--bridge-canvas)]">
-        <div className="mx-auto max-w-4xl px-5 sm:px-8">
+      <section className="relative overflow-hidden py-24 bg-[var(--bridge-canvas)]">
+        <div aria-hidden className="pointer-events-none absolute inset-0"
+          style={{background:'radial-gradient(ellipse 55% 40% at 50% 100%,rgba(234,88,12,.06),transparent 68%)'}}/>
+        <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
           <Rev>
-            <div className="mb-14">
-              <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">Our principles</p>
-              <h2 className="mt-4 font-display text-3xl font-black tracking-tight text-[var(--bridge-text)] sm:text-4xl lg:text-5xl">
-                What we believe<br/><span className="text-gradient-bridge">makes this work</span>
-              </h2>
+            <div className="mb-12 grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">Why Bridge works</p>
+                <h2 className="mt-3 font-display font-black leading-[1.02] tracking-tight text-[var(--bridge-text)]" style={{fontSize:'clamp(2rem,5vw,4rem)'}}>
+                  Six promises.<br/><span className="text-gradient-bridge">Zero exceptions.</span>
+                </h2>
+              </div>
+              <p className="max-w-xs text-[12px] leading-relaxed text-[var(--bridge-text-muted)]">Built around the things career platforms keep getting wrong — because we lived through them too.</p>
             </div>
           </Rev>
-          <div className="divide-y divide-[var(--bridge-border)]">
-            {[
-              {n:'01',title:"Only people who've done your job",desc:"Every mentor has lived the role you're targeting. No generic advice, no unverified bios."},
-              {n:'02',title:'One session at a time',desc:'No packages. No subscriptions. Pay for exactly what you need, nothing more.'},
-              {n:'03',title:'All reviews, unfiltered',desc:"Every review is visible — the glowing ones and the ones that save you from a bad fit."},
-              {n:'04',title:'Price on every profile',desc:'Exact rate shown before you even click. No "contact us for pricing" opacity.'},
-              {n:'05',title:'Sessions with a structure',desc:'Four named formats — Career Advice, Interview Prep, Resume Review, Networking.'},
-              {n:'06',title:'Video built in, zero friction',desc:'Custom room auto-generated per session. No Zoom, no scheduling back-and-forth.'},
-            ].map((p,i)=>(
-              <Rev key={i} delay={i*55}>
-                <div className="group flex items-start gap-6 py-6 transition-all hover:bg-orange-500/[0.02] -mx-4 px-4 rounded-2xl">
-                  <span className="shrink-0 font-display text-[2.1rem] font-black leading-none text-transparent bg-clip-text bg-gradient-to-br from-orange-500/35 to-amber-400/20 transition-all group-hover:from-orange-500 group-hover:to-amber-400"
-                    style={{minWidth:'3rem'}}>{p.n}</span>
-                  <div className="flex-1">
-                    <div className="h-px bg-[var(--bridge-border)] transition-all duration-700 group-hover:bg-orange-500/28"/>
-                    <h3 className="mt-3 text-base font-bold text-[var(--bridge-text)]">{p.title}</h3>
-                    <p className="mt-1.5 text-sm text-[var(--bridge-text-muted)] leading-relaxed max-w-xl">{p.desc}</p>
+
+          {/* Asymmetric bento grid */}
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-6 lg:auto-rows-[200px]">
+            {/* Hero card — AI matching */}
+            <Rev delay={0} className="col-span-2 lg:col-span-3 lg:row-span-2">
+              <Tilt n={4} className="group relative h-full overflow-hidden rounded-3xl border border-orange-500/22 bg-gradient-to-br from-[var(--bridge-surface)] via-[var(--bridge-surface)] to-orange-500/[0.04] p-7 sm:p-9 shadow-bridge-glow">
+                <div aria-hidden className="pointer-events-none absolute inset-0" style={{background:'radial-gradient(ellipse 60% 70% at 100% 0%,rgba(234,88,12,.12),transparent 70%)'}}/>
+                <div aria-hidden className="b-blob pointer-events-none absolute -top-16 -right-16 h-64 w-64 rounded-full opacity-40" style={{background:'radial-gradient(circle,rgba(234,88,12,.32) 0%,transparent 65%)'}}/>
+                <div className="relative flex h-full flex-col justify-between gap-6">
+                  <div>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/22 bg-orange-500/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-orange-500">
+                      <span className="h-1.5 w-1.5 rounded-full bg-orange-400"/> Featured promise
+                    </div>
+                    <h3 className="mt-5 font-display text-2xl font-black leading-tight text-[var(--bridge-text)] sm:text-3xl lg:text-4xl">
+                      Only people who've <span className="text-gradient-bridge">done your job</span>.
+                    </h3>
+                    <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--bridge-text-muted)] sm:text-base">Every mentor has lived the exact role you're targeting. We filter on outcome, not credentials. No generic coaches, no unverified bios.</p>
                   </div>
-                  <svg className="mt-2 h-5 w-5 shrink-0 text-[var(--bridge-border-strong)] transition-all group-hover:text-orange-500 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <div className="flex flex-wrap gap-1.5">
+                    {['PMs at Series B+','EMs at hyperscalers','RNs → UX','VPs of Sales','Founders post-YC','Designers at top studios'].map(t=>(
+                      <span key={t} className="rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/50 px-2.5 py-1 text-[10px] font-medium text-[var(--bridge-text-muted)]">{t}</span>
+                    ))}
+                  </div>
                 </div>
-              </Rev>
-            ))}
+              </Tilt>
+            </Rev>
+            {/* One session at a time */}
+            <Rev delay={80} className="col-span-2 lg:col-span-3">
+              <Tilt n={3} className="group relative h-full overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 sm:p-7 shadow-bridge-card hover:border-orange-500/28 hover:shadow-bridge-glow">
+                <div className="relative flex h-full items-start gap-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 text-xl ring-1 ring-amber-500/15">⚡</div>
+                  <div className="flex flex-1 flex-col justify-between gap-3">
+                    <div>
+                      <h3 className="text-base font-bold text-[var(--bridge-text)] sm:text-lg">One session at a time</h3>
+                      <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--bridge-text-muted)]">No packages. No subscriptions. Pay for exactly what you need.</p>
+                    </div>
+                    <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-faint)]">
+                      <span className="line-through opacity-50">3-month pkg</span>
+                      <svg className="h-3 w-3 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <span className="text-orange-500">1 hour</span>
+                    </div>
+                  </div>
+                </div>
+              </Tilt>
+            </Rev>
+            {/* Pricing transparency */}
+            <Rev delay={140} className="col-span-1 lg:col-span-2">
+              <Tilt n={3} className="group relative h-full overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-emerald-500/28 hover:shadow-bridge-glow">
+                <div className="relative flex h-full flex-col justify-between">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-lg ring-1 ring-emerald-500/15">💵</div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[var(--bridge-text)]">Price on every profile</h3>
+                    <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--bridge-text-muted)]">No "contact us for pricing" opacity.</p>
+                  </div>
+                </div>
+              </Tilt>
+            </Rev>
+            {/* Unfiltered reviews */}
+            <Rev delay={200} className="col-span-1 lg:col-span-1">
+              <Tilt n={3} className="group relative h-full overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-rose-500/28 hover:shadow-bridge-glow">
+                <div className="relative flex h-full flex-col justify-between gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-500/10 text-lg ring-1 ring-rose-500/15">💬</div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[var(--bridge-text)]">Unfiltered</h3>
+                    <p className="mt-1 text-[11px] leading-relaxed text-[var(--bridge-text-muted)]">All reviews, good and brutal.</p>
+                  </div>
+                </div>
+              </Tilt>
+            </Rev>
+            {/* Built-in video */}
+            <Rev delay={260} className="col-span-2 lg:col-span-3">
+              <Tilt n={3} className="group relative h-full overflow-hidden rounded-3xl border border-sky-500/18 bg-[var(--bridge-surface)] p-6 sm:p-7 shadow-bridge-card hover:border-sky-500/35 hover:shadow-bridge-glow">
+                <div aria-hidden className="pointer-events-none absolute inset-0" style={{background:'radial-gradient(ellipse 70% 60% at 100% 50%,rgba(56,189,248,.06),transparent 70%)'}}/>
+                <div className="relative flex h-full items-start gap-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-500/10 text-xl ring-1 ring-sky-500/15">🎥</div>
+                  <div className="flex flex-1 flex-col justify-between gap-3">
+                    <div>
+                      <h3 className="text-base font-bold text-[var(--bridge-text)] sm:text-lg">Built-in video, zero friction</h3>
+                      <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--bridge-text-muted)]">Custom room auto-generated per session. No Zoom links, no scheduling back-and-forth.</p>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-xl border border-sky-500/18 bg-sky-500/[0.04] px-3 py-2 text-[11px] text-[var(--bridge-text-secondary)]">
+                      <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-65"/><span className="relative inline-flex h-2 w-2 rounded-full bg-sky-400"/></span>
+                      <span className="font-bold text-[var(--bridge-text)]">bridge.app/room/maya-tyler-7842</span>
+                      <span className="ml-auto text-[10px] text-[var(--bridge-text-faint)]">auto-created</span>
+                    </div>
+                  </div>
+                </div>
+              </Tilt>
+            </Rev>
+            {/* Structured formats */}
+            <Rev delay={320} className="col-span-2 lg:col-span-3">
+              <Tilt n={3} className="group relative h-full overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 sm:p-7 shadow-bridge-card hover:border-violet-500/28 hover:shadow-bridge-glow">
+                <div className="relative flex h-full items-start gap-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-500/10 text-xl ring-1 ring-violet-500/15">🎯</div>
+                  <div className="flex flex-1 flex-col gap-3">
+                    <div>
+                      <h3 className="text-base font-bold text-[var(--bridge-text)] sm:text-lg">Sessions with a structure</h3>
+                      <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--bridge-text-muted)]">Four named formats so you walk in knowing what you'll walk out with.</p>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {['Career Advice','Interview Prep','Resume Review','Networking'].map(t=>(
+                        <span key={t} className="rounded-full border border-violet-500/15 bg-violet-500/[0.06] px-2.5 py-0.5 text-[10px] font-semibold text-violet-500 dark:text-violet-300">{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Tilt>
+            </Rev>
           </div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════
-          FEATURES — asymmetric bento
+          COMPARISON — Bridge column dominance
       ══════════════════════════════════════════ */}
-      <section className="relative overflow-hidden py-24 bg-[var(--bridge-surface-muted)]/20">
-        <div aria-hidden className="pointer-events-none absolute inset-0"
-          style={{background:'radial-gradient(ellipse 55% 35% at 50% 0%,rgba(234,88,12,.05),transparent 68%)'}}/>
+      <section className="relative overflow-hidden py-24 bg-[var(--bridge-canvas)]">
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{background:'radial-gradient(ellipse 60% 50% at 75% 50%,rgba(234,88,12,.05),transparent 70%)'}}/>
         <div className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8">
           <Rev>
-            <div className="mb-14 text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">Why Bridge</p>
-              <h2 className="mt-4 font-display text-3xl font-black tracking-tight text-[var(--bridge-text)] sm:text-4xl lg:text-5xl">
-                Built for <span className="text-gradient-bridge">real results</span>
-              </h2>
+            <div className="mb-12 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">Why not just DM on LinkedIn?</p>
+                <h2 className="mt-3 font-display font-black leading-[1] tracking-[-0.025em] text-[var(--bridge-text)]" style={{fontSize:'clamp(2.2rem,5.5vw,4.4rem)'}}>
+                  Bridge vs<br/><span className="text-gradient-bridge">the alternatives</span>
+                </h2>
+              </div>
+              <p className="max-w-xs text-[12px] leading-relaxed text-[var(--bridge-text-muted)]">Side-by-side, decided in a minute. The same six questions you'd ask any platform — just answered honestly.</p>
             </div>
           </Rev>
-          {/* Bento: row 1 is 2-col, row 2 is 3-col */}
-          <div className="grid gap-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {[
-                {icon:'🧠',title:'AI-powered matching',desc:'Describe your goal in plain English. Our model ranks 2,400+ mentors by relevance to your exact situation — not by keyword.',accent:'from-orange-500/12 to-amber-500/6',big:true},
-                {icon:'📹',title:'Built-in video rooms',desc:'No Zoom links. Your room is auto-generated and ready the moment your session is accepted. Own your call.',accent:'from-sky-500/8 to-blue-500/4'},
-              ].map((f,i)=>(
-                <Rev key={i} delay={i*60}>
-                  <Tilt className="group relative overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-7 shadow-bridge-card hover:border-orange-500/28 hover:shadow-bridge-glow">
-                    <div aria-hidden className={`pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br ${f.accent} opacity-0 transition-opacity group-hover:opacity-100`}/>
-                    <div className="relative">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/9 text-2xl ring-1 ring-orange-500/12 transition-all group-hover:bg-orange-500/14 group-hover:ring-orange-500/25">{f.icon}</div>
-                      <h3 className="mt-5 text-lg font-bold text-[var(--bridge-text)]">{f.title}</h3>
-                      <p className="mt-2 text-sm text-[var(--bridge-text-muted)] leading-relaxed">{f.desc}</p>
-                    </div>
-                  </Tilt>
-                </Rev>
-              ))}
-            </div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {[
-                {icon:'🔒',title:'Vetted professionals only',desc:'Every mentor is reviewed. Real backgrounds, real outcomes.',accent:'from-violet-500/8 to-purple-500/4'},
-                {icon:'⚡',title:'One session at a time',desc:'No packages, no lock-ins. Pay for one hour, commit to nothing.',accent:'from-amber-500/12 to-orange-500/6'},
-                {icon:'📆',title:'Real-time availability',desc:'Google Calendar sync. Book an actual open slot in 30 seconds.',accent:'from-teal-500/8 to-emerald-500/4'},
-              ].map((f,i)=>(
-                <Rev key={i} delay={60+i*55}>
-                  <Tilt className="group relative overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-orange-500/25 hover:shadow-bridge-glow">
-                    <div aria-hidden className={`pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br ${f.accent} opacity-0 transition-opacity group-hover:opacity-100`}/>
-                    <div className="relative">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500/9 text-xl ring-1 ring-orange-500/12 transition-all group-hover:bg-orange-500/14">{f.icon}</div>
-                      <h3 className="mt-4 text-base font-bold text-[var(--bridge-text)]">{f.title}</h3>
-                      <p className="mt-2 text-[13px] text-[var(--bridge-text-muted)] leading-relaxed">{f.desc}</p>
-                    </div>
-                  </Tilt>
-                </Rev>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          COMPARISON TABLE
-      ══════════════════════════════════════════ */}
-      <section className="relative py-24 bg-[var(--bridge-canvas)]">
-        <div className="mx-auto max-w-4xl px-5 sm:px-8">
-          <Rev>
-            <div className="mb-14 text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">Why not just DM on LinkedIn?</p>
-              <h2 className="mt-4 font-display text-3xl font-black tracking-tight text-[var(--bridge-text)] sm:text-4xl lg:text-5xl">
-                Bridge vs the alternatives
-              </h2>
-            </div>
-          </Rev>
-          <Rev delay={100}>
-            <div className="overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card">
-              <div className="grid grid-cols-4 border-b border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/30">
-                <div className="px-5 py-4"/>
-                {['LinkedIn DMs','Life Coaching','Bridge'].map((h,i)=>(
-                  <div key={h} className={`border-l border-[var(--bridge-border)] px-4 py-4 text-center text-[10px] font-black uppercase tracking-[0.16em] ${i===2?'text-orange-500':'text-[var(--bridge-text-muted)]'}`}>
-                    {i===2?(<span className="inline-flex flex-col items-center gap-1">{h}<span className="rounded-full bg-orange-500/11 px-2 py-0.5 text-[8px] font-black text-orange-500 uppercase tracking-widest">best</span></span>):h}
+          <Rev delay={120}>
+            <div className="relative overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card">
+              {/* Bridge column subtle glow background */}
+              <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-1/4 hidden sm:block" style={{background:'linear-gradient(180deg,rgba(234,88,12,.05),rgba(234,88,12,.02) 50%,rgba(234,88,12,.06))'}}/>
+              {/* Header */}
+              <div className="relative grid grid-cols-4 border-b-2 border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/40">
+                <div className="px-5 py-5"><p className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--bridge-text-faint)]">Compare on</p></div>
+                {[{l:'LinkedIn DMs',sub:'Cold outreach'},{l:'Life Coaching',sub:'Generic advice'},{l:'Bridge',sub:'Done-it mentors',best:true}].map((h,i)=>(
+                  <div key={h.l} className={`border-l border-[var(--bridge-border)] px-4 py-5 text-center ${h.best?'bg-orange-500/[0.04]':''}`}>
+                    {h.best?(
+                      <div className="flex flex-col items-center gap-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[14px] font-black text-orange-500 tracking-tight">{h.l}</span>
+                          <span className="rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-2 py-0.5 text-[8px] font-black text-white uppercase tracking-widest shadow-[0_0_18px_rgba(234,88,12,.45)]">Best</span>
+                        </div>
+                        <span className="text-[10px] font-semibold text-orange-400/80">{h.sub}</span>
+                      </div>
+                    ):(
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-[12px] font-bold text-[var(--bridge-text-muted)] tracking-tight">{h.l}</span>
+                        <span className="text-[9px] text-[var(--bridge-text-faint)]">{h.sub}</span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
               {WHY_ROWS.map((row,i)=>(
-                <div key={i} className={`grid grid-cols-4 border-b border-[var(--bridge-border)]/35 last:border-0 ${i%2===0?'':'bg-[var(--bridge-surface-muted)]/14'}`}>
-                  <div className="px-5 py-4 text-[12px] font-semibold text-[var(--bridge-text-secondary)]">{row.label}</div>
-                  {[row.dm,row.coaching,row.bridge].map((v,j)=>(
-                    <div key={j} className={`border-l border-[var(--bridge-border)]/30 px-4 py-4 text-center text-[12px] ${j===2?'font-bold text-orange-500':'text-[var(--bridge-text-muted)]'}`}>
-                      {j===2&&v!=='—'?(<span className="inline-flex items-center justify-center gap-1.5"><svg className="h-3.5 w-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>{v}</span>):v}
+                <div key={i} className={`relative grid grid-cols-4 border-b border-[var(--bridge-border)]/35 last:border-0 transition-colors hover:bg-[var(--bridge-surface-muted)]/20 ${i%2===0?'':'bg-[var(--bridge-surface-muted)]/14'}`}>
+                  <div className="px-5 py-5 text-[13px] font-bold text-[var(--bridge-text)] flex items-center">{row.label}</div>
+                  {[{v:row.dm,k:'dm'},{v:row.coaching,k:'co'},{v:row.bridge,k:'br',best:true}].map((cell,j)=>(
+                    <div key={cell.k} className={`relative border-l border-[var(--bridge-border)]/30 px-4 py-5 text-center text-[12.5px] transition-all ${cell.best?'font-bold text-orange-600 dark:text-orange-400':'text-[var(--bridge-text-muted)]'}`}>
+                      {cell.best&&cell.v!=='—'?(
+                        <span className="inline-flex items-center justify-center gap-2">
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 ring-1 ring-emerald-500/30">
+                            <svg className="h-3 w-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </span>
+                          {cell.v}
+                        </span>
+                      ):(
+                        <span className="flex items-center justify-center gap-2">
+                          {cell.v!=='—'&&cell.v!=='No'&&cell.v!=='None'&&!cell.v.startsWith('~')?(
+                            <span className="h-1 w-1 rounded-full bg-[var(--bridge-text-faint)]"/>
+                          ):(<svg className="h-3 w-3 text-red-400/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>)}
+                          {cell.v}
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
               ))}
+              {/* Footer summary */}
+              <div className="relative grid grid-cols-4 border-t-2 border-[var(--bridge-border)] bg-orange-500/[0.04]">
+                <div className="px-5 py-4 text-[11px] font-black uppercase tracking-[0.22em] text-[var(--bridge-text-faint)]">Summary</div>
+                <div className="border-l border-[var(--bridge-border)] px-4 py-4 text-center text-[11px] font-semibold text-red-400/80">High effort · low signal</div>
+                <div className="border-l border-[var(--bridge-border)] px-4 py-4 text-center text-[11px] font-semibold text-amber-500/80">Generic · expensive</div>
+                <div className="border-l border-[var(--bridge-border)] px-4 py-4 text-center text-[11px] font-black text-orange-500">Targeted · transparent</div>
+              </div>
             </div>
           </Rev>
         </div>
@@ -925,55 +1232,69 @@ export default function Landing(){
         style={{background:'linear-gradient(to bottom,var(--bridge-canvas) 0%,rgba(145,68,20,.36) 38%,rgba(62,26,8,.83) 62%,#1e0d04 87%,#150803 100%)'}}/>
 
       {/* ══════════════════════════════════════════
-          FINAL CTA
+          FINAL CTA — cinematic kinetic finale
       ══════════════════════════════════════════ */}
       <section id="start" className="relative overflow-hidden py-40" style={{backgroundColor:'var(--bridge-hero-bg)'}}>
         <div aria-hidden className="pointer-events-none absolute inset-0"
           style={{backgroundImage:'linear-gradient(rgba(234,88,12,.038) 1px,transparent 1px),linear-gradient(90deg,rgba(234,88,12,.038) 1px,transparent 1px)',backgroundSize:'88px 88px'}}/>
         <div aria-hidden className="b-blob pointer-events-none absolute left-1/2 top-1/2 h-[960px] w-[960px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{background:'radial-gradient(circle,rgba(234,88,12,.26) 0%,rgba(234,88,12,.04) 42%,transparent 68%)'}}/>
-        {/* Portal rings */}
-        {[640,440].map((s,i)=>(
+          style={{background:'radial-gradient(circle,rgba(234,88,12,.3) 0%,rgba(234,88,12,.05) 42%,transparent 68%)'}}/>
+        {/* Concentric portal rings — cinematic depth */}
+        {[820,640,460,300].map((s,i)=>(
           <div key={i} aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:block">
-            <div style={{width:s,height:s,borderRadius:'50%',border:'1px solid rgba(234,88,12,.12)',animation:`bPortal ${10+i*3}s linear infinite ${i?'reverse':''}`,boxShadow:`0 0 30px rgba(234,88,12,.08)`}}/>
+            <div style={{width:s,height:s,borderRadius:'50%',border:`1px solid rgba(234,88,12,${0.16-i*0.025})`,animation:`bPortal ${12+i*3}s linear infinite ${i%2?'reverse':''}`,boxShadow:`0 0 ${30+i*8}px rgba(234,88,12,${0.1-i*0.018})`}}/>
           </div>
+        ))}
+        {/* Floating ember dots */}
+        {[[12,18,1],[78,32,2],[24,72,1.5],[88,68,1.2],[52,12,1.8],[66,84,1.3]].map(([x,y,d],i)=>(
+          <span key={i} aria-hidden className="b-float pointer-events-none absolute hidden lg:block" style={{left:`${x}%`,top:`${y}%`,animationDelay:`-${d}s`}}>
+            <span className="flex h-1.5 w-1.5 rounded-full bg-orange-400 shadow-[0_0_18px_rgba(234,88,12,.85)]"/>
+          </span>
         ))}
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.022]"/>
         <div className="relative z-10 mx-auto max-w-3xl px-5 text-center sm:px-8">
           <Rev>
-            <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-orange-500/18 bg-orange-500/7 px-5 py-2 backdrop-blur-sm">
+            <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-orange-500/22 bg-orange-500/8 px-5 py-2 backdrop-blur-sm">
               <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-55"/><span className="relative inline-flex h-2 w-2 rounded-full bg-orange-400"/></span>
-              <span className="text-[10px] font-black uppercase tracking-[0.28em] text-orange-400/75">Ready to get unstuck?</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.28em] text-orange-400/85">Ready to get unstuck?</span>
             </div>
-            <h2 className="font-display font-black leading-[0.88] tracking-tight text-white"
-              style={{fontSize:'clamp(2.8rem,7vw,6.2rem)'}}>
+            <h2 className="font-display font-black leading-[0.86] tracking-[-0.035em] text-white"
+              style={{fontSize:'clamp(2.8rem,7.5vw,7rem)'}}>
               One conversation<br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500"
-                style={{filter:'drop-shadow(0 0 55px rgba(234,88,12,.7))'}}>
+              <span className="shimmer-text" style={{filter:'drop-shadow(0 0 55px rgba(234,88,12,.7))'}}>
                 changes everything.
               </span>
             </h2>
-            <p className="mx-auto mt-7 max-w-md text-base leading-relaxed" style={{color:'rgba(255,255,255,.34)'}}>
+            <p className="mx-auto mt-7 max-w-md text-base leading-relaxed" style={{color:'rgba(255,255,255,.42)'}}>
               Stop spinning. Book a session with someone who's walked the exact path you're on — and made it through.
             </p>
             <div className="mt-11 flex flex-wrap items-center justify-center gap-4">
               <Mag>
-                <Link to={user?'/mentors':'/register'}
+                <Link to={user?'/mentors':'/register'} data-cursor="Start"
                   className="btn-sheen b-pulse inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-11 py-5 text-base font-bold text-white shadow-[0_0_88px_rgba(234,88,12,.65)] transition hover:scale-[1.05] hover:shadow-[0_0_120px_rgba(234,88,12,.9)] active:scale-[.97]">
                   Get started for free
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </Link>
               </Mag>
-              <Link to="/about" className="text-sm font-semibold underline underline-offset-4 transition"
-                style={{color:'rgba(255,255,255,.24)'}}
-                onMouseEnter={e=>e.target.style.color='rgba(255,255,255,.55)'}
-                onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.24)'}>
-                Learn more about Bridge
-              </Link>
+              <Mag>
+                <Link to="/about" data-cursor="hover"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.04] px-7 py-5 text-sm font-semibold backdrop-blur-sm transition-all hover:border-white/[0.22] hover:bg-white/[0.08]"
+                  style={{color:'rgba(255,255,255,.65)'}}>
+                  Learn more
+                  <svg className="h-3.5 w-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </Link>
+              </Mag>
             </div>
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[10px]" style={{color:'rgba(255,255,255,.16)'}}>
-              {['No credit card required','First session guaranteed','Cancel any time'].map((t,i)=>(
-                <span key={i} className="flex items-center gap-2">{i>0&&<span className="h-1 w-1 rounded-full bg-white/12"/>}{t}</span>
+            {/* Glassy guarantee badges */}
+            <div className="mt-12 grid gap-2.5 sm:grid-cols-3">
+              {[{i:'💳',l:'No credit card',s:'Sign up free · pay per session'},{i:'🛡️',l:'First session guaranteed',s:'Full refund if it isn\'t a fit'},{i:'🔓',l:'Cancel any time',s:'No subscriptions, ever'}].map((b,i)=>(
+                <div key={i} className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-4 py-3 backdrop-blur-xl text-left">
+                  <span className="text-base">{b.i}</span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-bold text-white/80 leading-tight">{b.l}</p>
+                    <p className="text-[10px] text-white/35 leading-tight mt-0.5">{b.s}</p>
+                  </div>
+                </div>
               ))}
             </div>
           </Rev>
@@ -999,7 +1320,7 @@ function HeroMentorCard(){
   },[rXMV,rYMV,glX,glY]);
   const ml=useCallback(()=>{rXMV.set(0);rYMV.set(0);glX.set(50);glY.set(50);},[rXMV,rYMV,glX,glY]);
   return(
-    <div ref={r} style={{perspective:950}} onMouseMove={mm} onMouseLeave={ml}>
+    <div ref={r} style={{perspective:950}} onMouseMove={mm} onMouseLeave={ml} data-cursor="Drag">
       <motion.div style={{rotateX:rx,rotateY:ry,transformStyle:'preserve-3d'}}
         className="relative overflow-hidden rounded-2xl border border-white/[0.10] bg-white/[0.04] shadow-[0_40px_100px_rgba(0,0,0,.72),0_0_0_1px_rgba(255,255,255,.055)] backdrop-blur-2xl">
         <motion.div className="pointer-events-none absolute inset-0 rounded-2xl" style={{background:bg}}/>
@@ -1031,7 +1352,7 @@ function HeroMentorCard(){
             ))}
           </div>
           <p className="mt-4 text-[11px] text-white/32 leading-relaxed">Former PM at Google → Linear. I help PMs at Series A–C nail their strategy and get promoted.</p>
-          <button className="mt-5 w-full rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 py-3 text-[11px] font-bold text-white shadow-[0_0_36px_rgba(234,88,12,.52)] transition hover:shadow-[0_0_56px_rgba(234,88,12,.78)] hover:scale-[1.02]">
+          <button data-cursor="Book" className="mt-5 w-full rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 py-3 text-[11px] font-bold text-white shadow-[0_0_36px_rgba(234,88,12,.52)] transition hover:shadow-[0_0_56px_rgba(234,88,12,.78)] hover:scale-[1.02]">
             Book a session · $95
           </button>
         </div>
