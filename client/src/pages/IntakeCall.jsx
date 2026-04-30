@@ -73,9 +73,13 @@ export default function IntakeCall() {
   useEffect(() => {
     const style = document.createElement('style')
     style.textContent = `
-      @keyframes pulse {
-        from { transform: scaleY(0.4); }
-        to { transform: scaleY(1); }
+      @keyframes orbPulse {
+        from { transform: scale(0.95); opacity: 0.6; }
+        to { transform: scale(1.15); opacity: 1; }
+      }
+      @keyframes orbBreath {
+        from { transform: scale(0.92); }
+        to { transform: scale(1.08); }
       }
     `
     document.head.appendChild(style)
@@ -475,19 +479,55 @@ export default function IntakeCall() {
 
         {/* Bottom bar — visualizer + controls */}
         <div className="border-t px-6 py-5" style={{ borderColor: 'var(--bridge-border)', background: 'var(--bridge-surface)' }}>
-          {/* Audio visualizer bars */}
-          <div className="flex items-end justify-center gap-1 h-8 mb-4">
-            {[...Array(12)].map((_, i) => (
+          {/* Orb visualizer */}
+          <div className="flex justify-center mb-4">
+            <div className="relative flex items-center justify-center">
+              {/* Outer glow rings */}
               <div
-                key={i}
-                className="w-1 rounded-full bg-amber-400"
+                className="absolute rounded-full"
                 style={{
-                  height: `${20 + Math.random() * 80}%`,
-                  animation: `pulse ${0.6 + i * 0.08}s ease-in-out infinite alternate`,
-                  opacity: flowState === 'speaking' || flowState === 'listening' ? 1 : 0.2
+                  width: '120px',
+                  height: '120px',
+                  background: 'radial-gradient(circle, rgba(251,191,36,0.15) 0%, transparent 70%)',
+                  animation: flowState === 'speaking'
+                    ? 'orbPulse 1.2s ease-in-out infinite alternate'
+                    : 'orbPulse 2.5s ease-in-out infinite alternate',
                 }}
               />
-            ))}
+              <div
+                className="absolute rounded-full"
+                style={{
+                  width: '90px',
+                  height: '90px',
+                  background: 'radial-gradient(circle, rgba(251,191,36,0.2) 0%, transparent 70%)',
+                  animation: flowState === 'speaking'
+                    ? 'orbPulse 0.9s ease-in-out infinite alternate'
+                    : 'orbPulse 2s ease-in-out infinite alternate',
+                  animationDelay: '0.2s',
+                }}
+              />
+              {/* Core orb */}
+              <div
+                className="rounded-full"
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  background: flowState === 'speaking'
+                    ? 'radial-gradient(circle at 35% 35%, #fde68a, #f59e0b, #d97706)'
+                    : flowState === 'listening'
+                    ? 'radial-gradient(circle at 35% 35%, #6ee7b7, #10b981, #059669)'
+                    : 'radial-gradient(circle at 35% 35%, #fde68a, #f59e0b, #d97706)',
+                  animation: flowState === 'speaking'
+                    ? 'orbBreath 1s ease-in-out infinite alternate'
+                    : 'orbBreath 2.5s ease-in-out infinite alternate',
+                  boxShadow: flowState === 'speaking'
+                    ? '0 0 30px rgba(245,158,11,0.6), 0 0 60px rgba(245,158,11,0.3)'
+                    : flowState === 'listening'
+                    ? '0 0 30px rgba(16,185,129,0.6), 0 0 60px rgba(16,185,129,0.3)'
+                    : '0 0 20px rgba(245,158,11,0.4)',
+                }}
+              />
+            </div>
           </div>
           {/* Status + end button */}
           <div className="flex items-center justify-between">
