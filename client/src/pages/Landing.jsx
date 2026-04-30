@@ -155,7 +155,7 @@ function IntroLoader(){
     document.body.style.overflow='hidden';
     document.documentElement.style.overflow='hidden';
     const finish=()=>{sessionStorage.setItem('bridge_intro_seen','1');setDone(true);};
-    const timer=setTimeout(finish,5600);
+    const timer=setTimeout(finish,2950);
     const skip=()=>{clearTimeout(timer);finish();};
     window.addEventListener('keydown',skip,{once:true});
     return()=>{
@@ -169,141 +169,179 @@ function IntroLoader(){
   if(done)return null;
 
   const dismiss=()=>{sessionStorage.setItem('bridge_intro_seen','1');setDone(true);};
-  const LETTERS=['B','R','I','D','G','E'];
-  const WORDS='Where careers take their next leap.'.split(' ');
-  const PARTICLES=Array.from({length:24},(_,i)=>{
-    const a=(i/24)*Math.PI*2;const d=240+(i%3)*40;
-    return{tx:Math.cos(a)*d,ty:Math.sin(a)*d,big:i%3===0,gold:i%4===0};
+  const BRIDGE=['B','R','I','D','G','E'];
+  // Letters assemble outward from center
+  const STAGGER=[0.18,0.10,0.03,0.00,0.07,0.14];
+  const SPARK_BURST=1.15;
+  const SPARKS=Array.from({length:24},(_,i)=>{
+    const a=(i/24)*Math.PI*2;
+    const d=160+((i*47)%120);
+    return{tx:Math.cos(a)*d,ty:Math.sin(a)*d*0.85,delay:(i%5)*0.018};
   });
+  // Liquid metal gradient — chrome/holographic with brand warmth
+  const CHROME='linear-gradient(160deg,#ffffff 0%,#fef3c7 18%,#fcd34d 35%,#fb923c 55%,#ea580c 75%,#9a3412 100%)';
 
   return createPortal(
     <div onClick={dismiss}
       className="fixed inset-0 z-[10000] flex flex-col items-center justify-center cursor-pointer select-none overflow-hidden"
-      style={{background:'radial-gradient(ellipse at center,#0a0503 0%,#000 70%)',animation:'introOut 0.85s cubic-bezier(.22,1,.36,1) 5.0s forwards'}}>
+      style={{
+        background:'radial-gradient(ellipse 90% 70% at 50% 50%,#180a05 0%,#0a0503 45%,#000 85%)',
+        animation:'introOut 0.7s cubic-bezier(.55,0,.2,1) 2.35s forwards',
+      }}>
       <style>{`
-        @keyframes introOut{to{opacity:0;visibility:hidden;filter:blur(16px);}}
-        @keyframes introBars{to{transform:scaleY(0);}}
-        @keyframes introEdge{to{transform:scaleX(1);}}
-        @keyframes introBloom{to{opacity:1;}}
-        @keyframes introBin{0%{opacity:0;transform:scale(0.04) rotateX(-80deg) rotateY(25deg);}100%{opacity:1;transform:scale(1) rotateX(0) rotateY(0);}}
-        @keyframes introBout{0%{opacity:1;transform:scale(1);filter:blur(0);}40%{transform:scale(1.4);}100%{opacity:0;transform:scale(6);filter:blur(20px);}}
-        @keyframes introRing{0%{opacity:0;transform:scale(0.3);}30%{opacity:0.55;}100%{opacity:0;transform:scale(3.5);}}
-        @keyframes introSpin{to{transform:rotate(360deg);}}
-        @keyframes introBurst{0%{opacity:1;transform:translate(0,0) scale(1.6);}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0);}}
-        @keyframes introLetter{0%{opacity:0;transform:translateY(-60px) rotateX(90deg);filter:blur(16px);}100%{opacity:1;transform:translateY(0) rotateX(0);filter:blur(0);}}
-        @keyframes introLine{to{transform:scaleX(1);}}
-        @keyframes introWord{0%{opacity:0;transform:translateY(8px);filter:blur(8px);}100%{opacity:1;transform:translateY(0);filter:blur(0);}}
-        @keyframes introScan{0%{transform:scaleX(0);opacity:0;}50%{transform:scaleX(1.5);opacity:1;}100%{transform:scaleX(0);opacity:0;}}
+        @keyframes introOut{0%{opacity:1;transform:scale(1);filter:blur(0);}55%{opacity:0.55;transform:scale(1.08);filter:blur(6px);}100%{opacity:0;transform:scale(1.18);filter:blur(18px);visibility:hidden;}}
+        @keyframes introStageOut{0%{opacity:1;transform:scale(1);filter:blur(0);}100%{opacity:0;transform:scale(1.4);filter:blur(14px);}}
+        @keyframes introExitFlash{0%{opacity:0;}40%{opacity:0.55;}100%{opacity:0;}}
+        @keyframes introOrbIn{0%{opacity:0;transform:translate(-50%,-50%) scale(0.5);}100%{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+        @keyframes introOrbDrift{0%{transform:translate(-50%,-50%) translate(0,0);}50%{transform:translate(-50%,-50%) translate(3vmin,-2vmin);}100%{transform:translate(-50%,-50%) translate(0,0);}}
+        @keyframes introHeroIn{0%{opacity:0;transform:scale(0.5);filter:blur(24px);}60%{opacity:1;filter:blur(0);}100%{opacity:1;transform:scale(1);filter:blur(0);}}
+        @keyframes introHeroMorph{0%{opacity:1;transform:scale(1);filter:blur(0);}100%{opacity:0;transform:scale(0.32);filter:blur(8px);}}
+        @keyframes introLetterAssemble{0%{opacity:0;transform:scale(0.2);filter:blur(14px);}60%{opacity:1;}100%{opacity:1;transform:scale(1);filter:blur(0);}}
+        @keyframes introSpark{0%{opacity:0;transform:translate(0,0) scale(0);}20%{opacity:1;transform:translate(calc(var(--tx) * 0.4),calc(var(--ty) * 0.4)) scale(1.6);}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0);}}
+        @keyframes introShockwave{0%{opacity:0;transform:scale(0.2);}25%{opacity:0.85;}100%{opacity:0;transform:scale(2.6);}}
+        @keyframes introFlash{0%,100%{opacity:0;}15%{opacity:0.4;}50%{opacity:0;}}
+        @keyframes introScale{0%{opacity:0;transform:scaleX(0);}100%{opacity:1;transform:scaleX(1);}}
+        @keyframes introTaglineIn{0%{opacity:0;transform:scale(0.96);filter:blur(6px);}100%{opacity:1;transform:scale(1);filter:blur(0);}}
+        @media (prefers-reduced-motion: reduce){*{animation-duration:0.01ms!important;animation-iteration-count:1!important;}}
       `}</style>
 
-      {/* Letterbox bars */}
-      <div aria-hidden className="absolute top-0 inset-x-0 bg-black z-10"
-        style={{height:'12vh',transformOrigin:'top',animation:'introBars 1.1s cubic-bezier(.22,1,.36,1) 0.2s forwards'}}/>
-      <div aria-hidden className="absolute bottom-0 inset-x-0 bg-black z-10"
-        style={{height:'12vh',transformOrigin:'bottom',animation:'introBars 1.1s cubic-bezier(.22,1,.36,1) 0.2s forwards'}}/>
+      {/* Three drifting gradient orbs — minimal, purposeful */}
+      {[
+        {x:'30%',y:'35%',c:'rgba(234,88,12,.32)',s:'46vmin',d:'14s'},
+        {x:'70%',y:'65%',c:'rgba(251,146,60,.26)',s:'52vmin',d:'18s'},
+        {x:'50%',y:'50%',c:'rgba(251,191,36,.20)',s:'62vmin',d:'22s'},
+      ].map((o,i)=>(
+        <div key={i} aria-hidden className="absolute rounded-full pointer-events-none"
+          style={{
+            left:o.x,top:o.y,width:o.s,height:o.s,
+            background:`radial-gradient(circle,${o.c} 0%,transparent 70%)`,
+            filter:'blur(50px)',
+            opacity:0,
+            animation:`introOrbIn 0.9s cubic-bezier(.22,1,.36,1) ${0.05+i*0.06}s forwards, introOrbDrift ${o.d} ease-in-out ${0.9+i*0.06}s infinite`,
+          }}/>
+      ))}
 
-      {/* Ambient bloom */}
+      {/* Frosted-glass conic gradient — holographic titanium feel */}
+      <div aria-hidden className="absolute inset-[-15%] pointer-events-none"
+        style={{
+          background:'conic-gradient(from 90deg at 50% 50%,transparent 0deg,rgba(234,88,12,.05) 80deg,transparent 160deg,rgba(251,191,36,.04) 240deg,transparent 320deg,transparent 360deg)',
+          opacity:0,
+          mixBlendMode:'screen',
+          animation:'introOrbIn 1.2s ease 0.3s forwards',
+        }}/>
+
+      {/* Vignette for depth */}
       <div aria-hidden className="absolute inset-0 pointer-events-none"
-        style={{background:'radial-gradient(ellipse 55% 45% at 50% 52%,rgba(234,88,12,.32) 0%,rgba(180,60,8,.08) 45%,transparent 70%)',opacity:0,animation:'introBloom 1.8s ease 0.3s forwards'}}/>
+        style={{
+          background:'radial-gradient(ellipse 90% 75% at 50% 50%,transparent 50%,rgba(0,0,0,.8) 100%)',
+        }}/>
 
-      {/* Edge accent lines */}
-      <div aria-hidden className="absolute top-0 inset-x-0 h-px"
-        style={{background:'linear-gradient(90deg,transparent,rgba(234,88,12,.7) 40%,rgba(251,191,36,.95) 50%,rgba(234,88,12,.7) 60%,transparent)',transform:'scaleX(0)',transformOrigin:'center',animation:'introEdge 1.3s cubic-bezier(.22,1,.36,1) 0.4s forwards'}}/>
-      <div aria-hidden className="absolute bottom-0 inset-x-0 h-px"
-        style={{background:'linear-gradient(90deg,transparent,rgba(234,88,12,.7) 40%,rgba(251,191,36,.95) 50%,rgba(234,88,12,.7) 60%,transparent)',transform:'scaleX(0)',transformOrigin:'center',animation:'introEdge 1.3s cubic-bezier(.22,1,.36,1) 0.55s forwards'}}/>
+      {/* Flash at the moment of transformation */}
+      <div aria-hidden className="absolute inset-0 pointer-events-none"
+        style={{
+          background:'radial-gradient(circle 36vmin at 50% 50%,rgba(255,237,213,.45) 0%,rgba(251,191,36,.18) 35%,transparent 65%)',
+          opacity:0,
+          animation:`introFlash 0.7s cubic-bezier(.22,1,.36,1) ${SPARK_BURST}s forwards`,
+        }}/>
 
-      {/* Horizontal scan flash on explosion */}
-      <div aria-hidden className="absolute inset-x-0 z-30 pointer-events-none"
-        style={{top:'50%',height:'2px',background:'linear-gradient(90deg,transparent,rgba(251,191,36,.95) 50%,transparent)',transform:'scaleX(0)',transformOrigin:'center',animation:'introScan 0.7s ease 1.7s forwards'}}/>
+      {/* Exit flash — brief light pulse during transition out */}
+      <div aria-hidden className="absolute inset-0 pointer-events-none"
+        style={{
+          background:'radial-gradient(circle 50vmin at 50% 50%,rgba(255,237,213,.45) 0%,rgba(251,191,36,.18) 35%,transparent 70%)',
+          opacity:0,
+          animation:'introExitFlash 0.7s cubic-bezier(.55,0,.2,1) 2.35s forwards',
+        }}/>
 
       {/* Center stage */}
-      <div className="relative z-10 flex flex-col items-center" style={{perspective:'1200px'}}>
-        <div className="relative flex items-center justify-center" style={{width:'clamp(220px,32vw,360px)',height:'clamp(220px,32vw,360px)'}}>
+      <div className="relative z-10 flex flex-col items-center"
+        style={{animation:'introStageOut 0.7s cubic-bezier(.55,0,.2,1) 2.35s forwards',willChange:'transform,opacity,filter'}}>
+        <div className="relative flex items-center justify-center" style={{width:'clamp(280px,42vw,520px)',height:'clamp(200px,28vw,320px)'}}>
 
-          {/* Pulse rings */}
-          {[0,1,2,3].map(i=>(
-            <div key={i} aria-hidden className="absolute rounded-full"
-              style={{
-                width:`${48+i*22}%`,height:`${48+i*22}%`,
-                border:'1px solid rgba(234,88,12,0.45)',
-                boxShadow:'0 0 20px rgba(234,88,12,.15) inset',
-                opacity:0,
-                animation:`introRing 2.4s ease ${0.4+i*0.1}s forwards, introSpin ${10-i*2}s linear ${0.4+i*0.1}s infinite`,
-              }}/>
-          ))}
+          {/* Shockwave rings at transformation */}
+          <div aria-hidden className="absolute rounded-full"
+            style={{
+              width:'28%',height:'28%',
+              border:'2px solid rgba(251,191,36,.85)',
+              boxShadow:'0 0 40px rgba(234,88,12,.55), inset 0 0 28px rgba(251,191,36,.25)',
+              opacity:0,
+              animation:`introShockwave 0.95s cubic-bezier(.22,1,.36,1) ${SPARK_BURST}s forwards`,
+            }}/>
+          <div aria-hidden className="absolute rounded-full"
+            style={{
+              width:'28%',height:'28%',
+              border:'1px solid rgba(234,88,12,.65)',
+              opacity:0,
+              animation:`introShockwave 1.15s cubic-bezier(.22,1,.36,1) ${SPARK_BURST+0.1}s forwards`,
+            }}/>
 
-          {/* Particle burst */}
-          {PARTICLES.map((p,i)=>(
+          {/* Sparks burst outward at the morph moment */}
+          {SPARKS.map((s,i)=>(
             <span key={i} aria-hidden className="absolute rounded-full"
               style={{
-                width:p.big?'4px':'2.5px',height:p.big?'4px':'2.5px',
-                background:p.gold?'#fbbf24':'#ea580c',
-                boxShadow:`0 0 12px ${p.gold?'rgba(251,191,36,.95)':'rgba(234,88,12,.95)'}`,
+                width:i%4===0?'4px':'2px',height:i%4===0?'4px':'2px',
+                background:i%3===0?'#fbbf24':'#fb923c',
+                boxShadow:`0 0 ${i%4===0?16:10}px ${i%3===0?'rgba(251,191,36,.95)':'rgba(251,146,60,.9)'}`,
                 opacity:0,
-                '--tx':`${p.tx}px`,'--ty':`${p.ty}px`,
-                animation:`introBurst 1.3s cubic-bezier(.16,1,.3,1) 1.7s forwards`,
+                '--tx':`${s.tx}px`,'--ty':`${s.ty}px`,
+                animation:`introSpark 1.1s cubic-bezier(.22,1,.36,1) ${SPARK_BURST+s.delay}s forwards`,
               }}/>
           ))}
 
-          {/* The giant B (drops in, then explodes) */}
-          <div className="absolute inset-0 flex items-center justify-center"
+          {/* Hero B — chrome/liquid-metal, scales in then morphs into BRIDGE */}
+          <span aria-hidden className="absolute font-display font-black leading-none pointer-events-none"
             style={{
+              fontSize:'clamp(6.5rem,16vw,12rem)',
+              background:CHROME,
+              WebkitBackgroundClip:'text',backgroundClip:'text',color:'transparent',
+              filter:'drop-shadow(0 0 50px rgba(234,88,12,.7)) drop-shadow(0 2px 0 rgba(255,255,255,.15))',
               opacity:0,
-              animation:'introBin 0.95s cubic-bezier(.16,1,.3,1) 0.2s forwards, introBout 0.85s cubic-bezier(.4,0,1,1) 1.7s forwards',
-            }}>
-            <span className="font-display font-black leading-none"
-              style={{
-                fontSize:'clamp(8rem,20vw,15rem)',
-                background:'linear-gradient(160deg,#fff9f5 0%,#fde68a 30%,#fb923c 65%,#ea580c 100%)',
-                WebkitBackgroundClip:'text',backgroundClip:'text',color:'transparent',
-                filter:'drop-shadow(0 0 55px rgba(234,88,12,.85)) drop-shadow(0 0 20px rgba(251,191,36,.6))',
-              }}>B</span>
-          </div>
+              animation:`introHeroIn 0.85s cubic-bezier(.22,1,.36,1) 0.15s forwards, introHeroMorph 0.55s cubic-bezier(.6,0,.4,1) ${SPARK_BURST}s forwards`,
+              willChange:'transform,opacity,filter',
+            }}>B</span>
 
-          {/* BRIDGE letters cascade */}
-          <div className="absolute inset-0 flex items-center justify-center" style={{perspective:'1000px'}}>
-            <div className="flex items-center" style={{gap:'clamp(1px,0.5vw,5px)'}}>
-              {LETTERS.map((ch,i)=>(
-                <span key={i} className="font-display font-black leading-none"
-                  style={{
-                    fontSize:'clamp(2.8rem,7.5vw,6rem)',
-                    background:'linear-gradient(175deg,#fff9f5 0%,#fde68a 35%,#fb923c 70%,#c2410c 100%)',
-                    WebkitBackgroundClip:'text',backgroundClip:'text',color:'transparent',
-                    filter:'drop-shadow(0 0 32px rgba(234,88,12,.6))',
-                    opacity:0,
-                    animation:`introLetter 0.7s cubic-bezier(.16,1,.3,1) ${2.5+i*0.07}s forwards`,
-                  }}>{ch}</span>
-              ))}
-            </div>
+          {/* BRIDGE word — letters assemble in place from center outward */}
+          <div className="absolute font-display font-black leading-none flex items-baseline"
+            style={{fontSize:'clamp(2.4rem,6.6vw,5.2rem)'}}>
+            {BRIDGE.map((ch,i)=>(
+              <span key={i} style={{
+                background:CHROME,
+                WebkitBackgroundClip:'text',backgroundClip:'text',color:'transparent',
+                filter:`drop-shadow(0 0 ${22+(i===0?12:0)}px rgba(234,88,12,.55)) drop-shadow(0 1px 0 rgba(255,255,255,.12))`,
+                display:'inline-block',
+                opacity:0,
+                animation:`introLetterAssemble 0.7s cubic-bezier(.22,1,.36,1) ${SPARK_BURST+0.18+STAGGER[i]}s forwards`,
+                willChange:'transform,opacity,filter',
+              }}>{ch}</span>
+            ))}
           </div>
         </div>
 
-        {/* Divider line */}
-        <div className="relative mt-8 overflow-hidden bg-white/10" style={{height:'1px',width:'clamp(180px,28vw,300px)'}}>
+        {/* Frosted-glass tagline pill */}
+        <div className="mt-7 px-5 py-2 rounded-full"
+          style={{
+            background:'rgba(255,255,255,0.04)',
+            border:'1px solid rgba(255,255,255,0.08)',
+            backdropFilter:'blur(14px)',
+            WebkitBackdropFilter:'blur(14px)',
+            opacity:0,
+            animation:'introTaglineIn 0.6s cubic-bezier(.22,1,.36,1) 2.05s forwards',
+          }}>
+          <p className="text-center font-display font-semibold uppercase text-white/75"
+            style={{fontSize:'clamp(0.55rem,1vw,0.72rem)',letterSpacing:'0.36em'}}>
+            Mentorship. Networking. Outcomes.
+          </p>
+        </div>
+
+        {/* Subtle accent line */}
+        <div className="mt-5 overflow-hidden" style={{height:'1px',width:'clamp(140px,20vw,220px)',background:'rgba(255,255,255,0.05)'}}>
           <div style={{
-            position:'absolute',inset:0,
-            background:'linear-gradient(90deg,transparent,rgba(234,88,12,.85) 30%,rgba(251,191,36,.95) 50%,rgba(234,88,12,.85) 70%,transparent)',
-            transform:'scaleX(0)',transformOrigin:'left',
-            animation:'introLine 0.9s cubic-bezier(.22,1,.36,1) 3.0s forwards',
+            height:'100%',
+            background:'linear-gradient(90deg,transparent,rgba(234,88,12,.85) 35%,rgba(251,191,36,.95) 50%,rgba(234,88,12,.85) 65%,transparent)',
+            transformOrigin:'left',
+            opacity:0,
+            animation:'introScale 0.7s cubic-bezier(.22,1,.36,1) 2.2s forwards',
           }}/>
         </div>
-
-        {/* Tagline — word by word blur-in */}
-        <p className="mt-5 flex flex-wrap justify-center gap-x-[0.45em] gap-y-1 px-8 text-center font-display font-semibold uppercase text-white/70"
-          style={{fontSize:'clamp(0.58rem,1.2vw,0.75rem)',letterSpacing:'0.35em',maxWidth:'36ch'}}>
-          {WORDS.map((w,i)=>(
-            <span key={i} style={{
-              opacity:0,display:'inline-block',
-              animation:`introWord 0.5s cubic-bezier(.16,1,.3,1) ${3.4+i*0.09}s forwards`,
-            }}>{w}</span>
-          ))}
-        </p>
-
-        {/* Skip cue */}
-        <span className="mt-12 text-[8px] font-bold uppercase tracking-[0.4em] text-white/25"
-          style={{opacity:0,animation:'introWord 0.7s ease 2.0s forwards'}}>
-          tap or press any key to skip
-        </span>
       </div>
     </div>,
     document.body
@@ -682,7 +720,7 @@ export default function Landing(){
         .b-pulse{animation:bPulse 2.2s ease-out infinite}
         .b-scan{animation:bScanLine 10s linear infinite;animation-delay:-4s}
         .b-mask-x{-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%)}
-        [data-w]{display:inline-block;perspective:600px}
+        [data-w]{display:block;perspective:600px}
         @keyframes bShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
         @keyframes bPulseFlow{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}
         .b-pulse-flow{animation:bPulseFlow 3.5s cubic-bezier(.45,.05,.55,.95) infinite}
@@ -710,7 +748,7 @@ export default function Landing(){
       {/* ══════════════════════════════════════════
           HERO — WebGL background, massive type
       ══════════════════════════════════════════ */}
-      <section ref={heroRef} className="relative min-h-screen overflow-hidden" style={{backgroundColor:isDark?'#060302':'var(--bridge-canvas)'}}>
+      <section ref={heroRef} className="relative overflow-hidden" style={{backgroundColor:isDark?'#060302':'var(--bridge-canvas)'}}>
         {isDark&&<WebGLBg/>}
         {isDark&&<div aria-hidden className="b-scan pointer-events-none absolute inset-x-0 top-0 h-[2px] opacity-70"
           style={{background:'linear-gradient(90deg,transparent 0%,rgba(234,88,12,.6) 35%,rgba(251,191,36,.55) 50%,rgba(234,88,12,.6) 65%,transparent 100%)'}}/>}
@@ -734,24 +772,24 @@ export default function Landing(){
           </div>
         </div>
 
-        <div className="relative z-10 mx-auto max-w-7xl px-5 pt-16 pb-28 sm:px-8 lg:pt-24">
-          {/* Headline — full width grand entrance */}
+        <div className="relative z-10 mx-auto max-w-6xl px-5 pt-14 pb-20 sm:px-8 lg:pt-20">
+          {/* Headline — bold, statement-sized */}
           <div ref={headRef} style={{perspective:'1000px',overflow:'hidden'}}>
-            <h1 className={`font-display font-black leading-[0.84] tracking-[-0.038em] text-center ${isDark?'text-white/92':'text-[var(--bridge-text)]'}`}
-              style={{fontSize:'clamp(3.6rem,12vw,11.5rem)'}}>
-              <span data-w className="block">Your next</span>
-              <span data-w className={`block ${isDark?'shimmer-text':'text-gradient-bridge'}`}
-                style={isDark?{filter:'drop-shadow(0 0 100px rgba(234,88,12,.7))'}:{}}>
+            <h1 className={`font-display font-black leading-[0.9] tracking-[-0.035em] text-center ${isDark?'text-white/92':'text-[var(--bridge-text)]'}`}
+              style={{fontSize:'clamp(3rem,8vw,7.5rem)'}}>
+              <span data-w>Your next</span>
+              <span data-w className={isDark?'shimmer-text':'text-gradient-bridge'}
+                style={isDark?{filter:'drop-shadow(0 0 80px rgba(234,88,12,.6))'}:{}}>
                 career move
               </span>
-              <span data-w className="block">starts with</span>
-              <span data-w className={`block font-editorial italic ${isDark?'text-white/16':'text-[var(--bridge-text-faint)]'}`} style={{fontSize:'0.78em'}}>one conversation.</span>
+              <span data-w>starts with</span>
+              <span data-w className={`font-editorial italic ${isDark?'text-white/22':'text-[var(--bridge-text-faint)]'}`} style={{fontSize:'0.78em'}}>one conversation.</span>
             </h1>
           </div>
 
           {/* Description + CTAs — centered below headline */}
-          <div className={`mt-12 flex flex-col items-center text-center transition-all duration-1000 delay-500 ${ready?'opacity-100 translate-y-0':'opacity-0 translate-y-6'}`}>
-            <p className="max-w-2xl text-[1.1rem] leading-relaxed text-[var(--bridge-text-muted)]">
+          <div className={`mt-10 flex flex-col items-center text-center transition-all duration-1000 delay-500 ${ready?'opacity-100 translate-y-0':'opacity-0 translate-y-6'}`}>
+            <p className="max-w-xl text-[1.05rem] leading-relaxed text-[var(--bridge-text-muted)]">
               Real mentors. Real sessions. Real outcomes. Skip the cold messages — book a 1-on-1 with someone who's already walked your path.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
