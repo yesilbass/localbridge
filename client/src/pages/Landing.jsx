@@ -754,11 +754,11 @@ export default function Landing(){
         {/* Animated mesh gradient background */}
         <div aria-hidden className="absolute inset-0 overflow-hidden">
           {/* Base warm gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-100 via-amber-50 to-orange-50"/>
+          <div className={`absolute inset-0 ${isDark?'bg-gradient-to-br from-[#0c0906] via-[#111009] to-[#070604]':'bg-gradient-to-br from-stone-50 via-orange-50/60 to-amber-50/40'}`}/>
           
           {/* Static gradient orbs - performance optimized */}
-          <div className="absolute top-[10%] left-[10%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-orange-400/20 to-amber-300/15 blur-[60px] opacity-60"/>
-          <div className="absolute top-[30%] right-[5%] w-[300px] h-[300px] rounded-full bg-gradient-to-br from-amber-400/15 to-orange-300/10 blur-[50px] opacity-50"/>
+          <div className={`absolute top-[10%] left-[10%] w-[400px] h-[400px] rounded-full blur-[60px] opacity-60 ${isDark?'bg-gradient-to-br from-orange-500/12 to-amber-500/8':'bg-gradient-to-br from-orange-400/20 to-amber-300/15'}`}/>
+          <div className={`absolute top-[30%] right-[5%] w-[300px] h-[300px] rounded-full blur-[50px] opacity-50 ${isDark?'bg-gradient-to-br from-amber-500/10 to-orange-500/6':'bg-gradient-to-br from-amber-400/15 to-orange-300/10'}`}/>
           
           {/* Subtle noise texture */}
           <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage:`url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`}}/>        </div>
@@ -780,10 +780,10 @@ export default function Landing(){
           </div>
         </div>
 
-        <div className="relative z-10 mx-auto flex max-w-6xl flex-1 flex-col justify-start px-5 pt-2 pb-8 sm:px-8 lg:pb-12">
+        <div className="relative z-10 mx-auto flex max-w-6xl flex-1 flex-col justify-start px-5 pt-8 pb-8 sm:px-8 lg:pb-12">
           {/* Headline — bold, statement-sized */}
           <div ref={headRef} style={{perspective:'1000px',overflow:'hidden'}}>
-            <h1 className={`font-display font-black leading-[0.92] tracking-[-0.03em] text-center ${isDark?'text-white/92':'text-[var(--bridge-text)]'}`}
+            <h1 className={`font-display font-black leading-[0.92] tracking-[-0.03em] text-center ${isDark?'text-white/75':'text-[var(--bridge-text)]'}`}
               style={{fontSize:'clamp(3rem, min(8vw, 8rem), 8rem)'}}>
               <span data-w>Your next</span>
               <span data-w className={isDark?'shimmer-text':'text-gradient-bridge'}

@@ -50,7 +50,7 @@ function TabBar({ tabs, activeTab, setActiveTab }) {
           className="pointer-events-none absolute bottom-0 h-[2px] rounded-full bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 shadow-[0_0_18px_rgba(234,88,12,0.7)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{ left: pill.left, width: pill.width }} />
 
-        {tabs.map((tab, idx) => {
+        {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = activeTab === tab.id;
           return (
@@ -58,7 +58,6 @@ function TabBar({ tabs, activeTab, setActiveTab }) {
               ref={el => { tabRefs.current[tab.id] = el; }}
               onClick={() => setActiveTab(tab.id)}
               aria-current={active ? 'page' : undefined}
-              title={`Press ${idx + 1} to switch`}
               data-cursor="hover"
               className={`relative z-10 flex shrink-0 items-center gap-2 px-4 py-3.5 text-[13px] font-bold whitespace-nowrap transition-colors duration-200 sm:px-5 ${
                 active
@@ -76,11 +75,6 @@ function TabBar({ tabs, activeTab, setActiveTab }) {
                   {tab.count}
                 </span>
               )}
-              <kbd aria-hidden className={`hidden h-4 min-w-[16px] items-center justify-center rounded border px-1 font-mono text-[9px] font-bold transition-colors lg:inline-flex ${
-                active
-                  ? 'border-orange-500/40 bg-orange-500/10 text-orange-500 dark:text-orange-300'
-                  : 'border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/60 text-[var(--bridge-text-faint)]'
-              }`}>{idx + 1}</kbd>
             </button>
           );
         })}

@@ -255,7 +255,7 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
 
           <Magnetic strength={0.16} className="mt-6 block">
             <button type="button" onClick={handleBookClick} disabled={!canBook} data-cursor={canBook ? 'Book' : undefined}
-              className={`btn-sheen relative w-full rounded-2xl py-3.5 text-sm font-black tracking-wide transition-all duration-300 ${canBook ? `bg-gradient-to-r from-amber-400 to-orange-400 text-stone-900 shadow-[0_12px_32px_-6px_rgba(234,88,12,0.55)] ring-1 ring-white/30 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-6px_rgba(234,88,12,0.75)] ${focusRing}` : 'cursor-not-allowed bg-white/10 text-stone-500'}`}>
+              className={`btn-sheen relative w-full rounded-2xl px-6 py-4 text-sm font-black tracking-wide transition-all duration-300 ${canBook ? `bg-gradient-to-r from-amber-400 to-orange-400 text-stone-900 shadow-[0_12px_32px_-6px_rgba(234,88,12,0.55)] ring-1 ring-white/30 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-6px_rgba(234,88,12,0.75)] ${focusRing}` : 'cursor-not-allowed bg-white/10 text-stone-500'}`}>
               {canBook ? (mentor.session_rate ? 'Continue to payment →' : 'Book session →') : 'Pick a date & time'}
             </button>
           </Magnetic>
