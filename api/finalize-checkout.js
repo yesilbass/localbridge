@@ -98,6 +98,12 @@ export default async function handler(req, res) {
           .maybeSingle();
         sync = error ? { synced: false, error: error.message } : { synced: true };
         if (!error && inserted?.id) bridgeSessionId = inserted.id;
+        console.log('[finalize-checkout] mentor_booking result:', {
+          error: error?.message ?? null,
+          insertedId: inserted?.id ?? null,
+          bridgeSessionId,
+          supabasePresent: !!getSupabaseAdmin(),
+        });
       }
 
       if (sync.synced) {
