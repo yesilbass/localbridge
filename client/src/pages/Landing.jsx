@@ -228,13 +228,13 @@ function IntroLoader(){
         @keyframes introOrbDrift{0%{transform:translate(-50%,-50%) translate(0,0) rotate(0deg);}25%{transform:translate(-50%,-50%) translate(4vmin,-3vmin) rotate(90deg);}50%{transform:translate(-50%,-50%) translate(-2vmin,2vmin) rotate(180deg);}75%{transform:translate(-50%,-50%) translate(3vmin,-1vmin) rotate(270deg);}100%{transform:translate(-50%,-50%) translate(0,0) rotate(360deg);}}
         @keyframes introHeroIn{0%{opacity:0;transform:scale(0.1) rotateX(90deg) rotateY(45deg) rotateZ(-30deg) translateZ(-200px);filter:blur(40px);}40%{opacity:1;transform:scale(1.2) rotateX(-10deg) rotateY(-15deg) rotateZ(10deg) translateZ(50px);filter:blur(0);}60%{transform:scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) translateZ(0px);}100%{opacity:1;transform:scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) translateZ(0px);filter:blur(0);}}
         @keyframes introHeroMorph{0%{opacity:1;transform:scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg);filter:blur(0);}30%{opacity:1;transform:scale(1.8) rotateX(20deg) rotateY(-20deg) rotateZ(10deg);filter:blur(2px);}60%{opacity:0.8;transform:scale(2.5) rotateX(45deg) rotateY(-45deg) rotateZ(30deg);filter:blur(8px);}100%{opacity:0;transform:scale(4) rotateX(90deg) rotateY(-90deg) rotateZ(60deg);filter:blur(24px);}}
-        @keyframes introLetter3D{0%{opacity:0;transform:translate3d(var(--sx),var(--sy),-800px) rotateX(var(--rx)) rotateY(var(--ry)) rotateZ(var(--rz)) scale(0.05);filter:blur(30px);}25%{opacity:1;filter:blur(0);}40%{transform:translate3d(calc(var(--sx)*0.4),calc(var(--sy)*0.4),0px) rotateX(calc(var(--rx)*0.3)) rotateY(calc(var(--ry)*0.3)) rotateZ(calc(var(--rz)*0.3)) scale(1.15);}55%{transform:translate3d(calc(var(--sx)*0.15),calc(var(--sy)*0.15),0px) rotateX(calc(var(--rx)*0.08)) rotateY(calc(var(--ry)*0.08)) rotateZ(calc(var(--rz)*0.08)) scale(1.02);}70%{transform:translate3d(calc(var(--sx)*0.05),calc(var(--sy)*0.05),0px) rotateX(calc(var(--rx)*0.02)) rotateY(calc(var(--ry)*0.02)) rotateZ(calc(var(--rz)*0.02)) scale(1);}100%{opacity:1;transform:translate3d(0,0,0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);filter:blur(0);}}
+        @keyframes introLetter3D{0%{opacity:0;transform:translate3d(var(--sx),var(--sy),-1600px) rotateX(var(--rx)) rotateY(var(--ry)) rotateZ(var(--rz)) scale(0.04);filter:blur(50px) brightness(10);}10%{opacity:1;filter:blur(18px) brightness(5);}20%{filter:blur(2px) brightness(2);}40%{transform:translate3d(calc(var(--sx)*-0.13),calc(var(--sy)*-0.10),0px) rotateX(calc(var(--rx)*0.09)) rotateY(calc(var(--ry)*0.09)) rotateZ(calc(var(--rz)*0.06)) scale(1.24);filter:blur(0) brightness(1.8);}55%{transform:translate3d(calc(var(--sx)*0.04),calc(var(--sy)*0.03),0px) rotateX(calc(var(--rx)*-0.02)) rotateY(calc(var(--ry)*-0.02)) rotateZ(0deg) scale(0.94);filter:brightness(1.05);}68%{transform:translate3d(0,0,0) rotateX(0) rotateY(0) rotateZ(0) scale(1.06);}80%{transform:translate3d(0,0,0) rotateX(0) rotateY(0) rotateZ(0) scale(0.98);}91%{transform:translate3d(0,0,0) rotateX(0) rotateY(0) rotateZ(0) scale(1.01);}100%{opacity:1;transform:translate3d(0,0,0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);filter:blur(0) brightness(1);}}
         @keyframes introParticle{0%{opacity:0;transform:translate(-50%,-50%) rotate(0deg) scale(0);}20%{opacity:1;transform:translate(calc(var(--px)),calc(var(--py))) rotate(180deg) scale(1);}50%{opacity:0.8;transform:translate(calc(var(--px)*1.5),calc(var(--py)*1.5)) rotate(360deg) scale(0.8);}100%{opacity:0;transform:translate(calc(var(--px)*2.5),calc(var(--py)*2.5)) rotate(720deg) scale(0);}}
         @keyframes introShockwave{0%{opacity:0;transform:scale(0.1) rotate(0deg);border-width:8px;}20%{opacity:1;transform:scale(0.5) rotate(45deg);border-width:4px;}100%{opacity:0;transform:scale(3) rotate(180deg);border-width:0px;}}
         @keyframes introFlash{0%,100%{opacity:0;}10%{opacity:0.5;}30%{opacity:0.2;}50%{opacity:0;}}
         @keyframes introScale{0%{opacity:0;transform:scaleX(0) rotateY(90deg);}100%{opacity:1;transform:scaleX(1) rotateY(0deg);}}
         @keyframes introTaglineIn{0%{opacity:0;transform:scale(0.9) translateY(30px) rotateX(-20deg);filter:blur(8px);}50%{opacity:1;filter:blur(0);}70%{transform:scale(1.02) translateY(-5px) rotateX(5deg);}100%{opacity:1;transform:scale(1) translateY(0) rotateX(0deg);filter:blur(0);}}
-        @keyframes introGlitch{0%,100%{transform:translate(0);}20%{transform:translate(-2px,2px);}40%{transform:translate(2px,-2px);}60%{transform:translate(-1px,-1px);}80%{transform:translate(1px,1px);}}
+        @keyframes introGlitch{0%{filter:drop-shadow(-5px 0 0 rgba(255,40,40,.9)) drop-shadow(5px 0 0 rgba(0,220,255,.9)) drop-shadow(0 0 50px rgba(251,191,36,.7));}20%{filter:drop-shadow(-3px 0 0 rgba(255,40,40,.6)) drop-shadow(3px 0 0 rgba(0,220,255,.6)) drop-shadow(0 0 80px rgba(234,88,12,1));}45%{filter:drop-shadow(0 0 60px rgba(251,191,36,1)) drop-shadow(0 0 120px rgba(234,88,12,.7)) drop-shadow(0 3px 0 rgba(255,255,255,.3));}75%{filter:drop-shadow(0 0 35px rgba(251,146,60,.7)) drop-shadow(0 0 70px rgba(234,88,12,.4));}100%{filter:drop-shadow(0 0 20px rgba(234,88,12,.5)) drop-shadow(0 2px 0 rgba(255,255,255,.15));}}
         @keyframes introChromatic{0%,100%{filter:drop-shadow(0 0 0 transparent);}25%{filter:drop-shadow(-2px 0 0 rgba(255,0,0,0.5)) drop-shadow(2px 0 0 rgba(0,255,255,0.5));}50%{filter:drop-shadow(0 0 0 transparent);}75%{filter:drop-shadow(-1px 0 0 rgba(255,0,0,0.3)) drop-shadow(1px 0 0 rgba(0,255,255,0.3));}}
         @media (prefers-reduced-motion: reduce){*{animation-duration:0.01ms!important;animation-iteration-count:1!important;}}
       `}</style>
@@ -335,25 +335,28 @@ function IntroLoader(){
               willChange:'transform,opacity,filter',
             }}>B</span>
 
-          {/* BRIDGE letters with 3D explosion */}
+          {/* BRIDGE letters with 3D explosion — each letter unique vector */}
           <div className="absolute font-display font-black leading-none flex items-baseline"
-            style={{fontSize:'clamp(2.6rem,7vw,5.6rem)',perspective:'1200px'}}>
+            style={{fontSize:'clamp(3rem,7.5vw,6.2rem)',perspective:'1400px',perspectiveOrigin:'50% 50%'}}>
             {BRIDGE.map((ch,i)=>{
-              const offset=i-2.5;
-              const sx=`${offset*140}px`;
-              const sy=`${Math.abs(offset)*70}px`;
-              const rx=`${offset*30}deg`;
-              const ry=`${offset*-35}deg`;
-              const rz=`${offset*20}deg`;
+              // Unique 3D origin per letter — no symmetric formula
+              const VECS=[
+                {sx:'-400px',sy:'-260px',rx:'300deg', ry:'-180deg',rz:'150deg'},  // B
+                {sx:'360px', sy:'-180px',rx:'-270deg',ry:'360deg', rz:'-90deg'},  // R
+                {sx:'-60px', sy:'340px', rx:'450deg', ry:'-90deg', rz:'200deg'},  // I
+                {sx:'300px', sy:'220px', rx:'-360deg',ry:'-240deg',rz:'80deg'},   // D
+                {sx:'-420px',sy:'120px', rx:'180deg', ry:'300deg', rz:'-240deg'}, // G
+                {sx:'280px', sy:'-300px',rx:'-420deg',ry:'-120deg',rz:'280deg'},  // E
+              ];
+              const v=VECS[i];
               return(
                 <span key={i} style={{
                   background:CHROME,
                   WebkitBackgroundClip:'text',backgroundClip:'text',color:'transparent',
-                  filter:`drop-shadow(0 0 ${25+(i===0?15:0)}px rgba(234,88,12,.6)) drop-shadow(0 2px 0 rgba(255,255,255,.15))`,
                   display:'inline-block',
                   opacity:0,
-                  '--sx':sx,'--sy':sy,'--rx':rx,'--ry':ry,'--rz':rz,
-                  animation:`introLetter3D 1s cubic-bezier(.22,1,.36,1) ${1.5+STAGGER[i]}s forwards, introGlitch 0.4s ease ${1.8+STAGGER[i]}s forwards`,
+                  '--sx':v.sx,'--sy':v.sy,'--rx':v.rx,'--ry':v.ry,'--rz':v.rz,
+                  animation:`introLetter3D 1.1s cubic-bezier(.22,1,.36,1) ${1.5+STAGGER[i]}s forwards, introGlitch 0.6s ease ${1.8+STAGGER[i]}s forwards`,
                   willChange:'transform,opacity,filter',
                 }}>{ch}</span>
               );
@@ -444,7 +447,7 @@ function BrandStrip(){
       <div className="overflow-hidden b-mask-x">
         <div className="b-ticker flex w-max gap-12 pr-12 items-center">
           {[...BRANDS,...BRANDS].map((b,i)=>(
-            <span key={i} className="font-display text-2xl font-black uppercase tracking-tight text-[var(--bridge-text-muted)]/55 hover:text-[var(--bridge-text-secondary)] transition-colors whitespace-nowrap">{b}</span>
+            <span key={i} className="font-display text-2xl font-black uppercase tracking-tight text-[var(--bridge-text-muted)] hover:text-orange-400 transition-colors whitespace-nowrap">{b}</span>
           ))}
         </div>
       </div>
@@ -781,9 +784,9 @@ export default function Landing(){
       {/* ══════════════════════════════════════════
           BRAND TRUST STRIP — above hero
       ══════════════════════════════════════════ */}
-      <section className="relative border-b border-[var(--bridge-border)] bg-gradient-to-b from-[var(--bridge-canvas)] to-orange-50/30 py-4">
+      <section className="relative border-b border-[var(--bridge-border)] bg-[var(--bridge-canvas)] py-4">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <p className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.32em] text-[var(--bridge-text-faint)]">
+          <p className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.32em] text-[var(--bridge-text-muted)]">
             Mentors from the world's best companies
           </p>
           <BrandStrip/>
