@@ -9,7 +9,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import {
-  StatCard, EmptyState, SessionCard, SectionHeading,
+  StatCard, EmptyState, SessionCard, SectionHeading, canJoinSession,
 } from './dashboardShared';
 import { formatSessionDate, getAvatarColor, getInitials } from './dashboardUtils';
 import { LiveCountdown, AddToCalendarButton, UrgencyBadge, useSessionTrends } from './dashboardLive.jsx';
@@ -20,6 +20,8 @@ import IntakeSummaryModal from './IntakeSummaryModal';
 import CalendarConnectButton from '../../components/CalendarConnectButton';
 import { useState, useEffect } from 'react';
 import SessionCalendar from './SessionCalendar';
+import CancellationModal from '../../components/CancellationModal';
+import { getMyCancellationRequests } from '../../api/cancellations';
 
 export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, user }) {
   const navigate = useNavigate();
@@ -29,6 +31,8 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, 
   const [calendarBanner, setCalendarBanner] = useState(null);
   const [intakeOpen, setIntakeOpen] = useState(false);
   const [intakeData, setIntakeData] = useState({ summary: '', menteeName: '' });
+  const [cancellationModal, setCancellationModal] = useState(null);
+  const [cancellationBanners, setCancellationBanners] = useState([]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -40,6 +44,22 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, 
       return () => clearTimeout(t);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const SEEN_KEY = `bridge_cancel_seen_mentor_${user.id}`;
+    const seenIds = JSON.parse(localStorage.getItem(SEEN_KEY) || '[]');
+    getMyCancellationRequests().then(({ data }) => {
+      if (!data) return;
+      const unseen = data.filter(r =>
+        ['approved', 'denied'].includes(r.status) && !seenIds.includes(r.id)
+      );
+      if (unseen.length) {
+        setCancellationBanners(unseen);
+        localStorage.setItem(SEEN_KEY, JSON.stringify([...seenIds, ...unseen.map(r => r.id)]));
+      }
+    });
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const {
     sessions, mentorProfileId, calendarConnected, refetch, actionLoading,
@@ -67,9 +87,36 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, 
         onSaved={() => refetch?.()}
       />
 
+      {cancellationModal && (
+        <CancellationModal
+          session={cancellationModal.session}
+          isMentor
+          onClose={() => setCancellationModal(null)}
+          onSuccess={() => { setCancellationModal(null); refetch?.(); }}
+        />
+      )}
+
       {/* ── Overview tab ─────────────────────────────────────────────── */}
       {activeTab === 'overview' && (
         <div className="space-y-8 pb-12">
+
+          {/* Cancellation outcome banners */}
+          {cancellationBanners.map(r => (
+            <div key={r.id} className={`flex items-start gap-3 rounded-2xl px-5 py-4 text-sm ring-1 ${
+              r.status === 'approved'
+                ? 'bg-emerald-500/8 text-emerald-700 ring-emerald-500/20 dark:text-emerald-300'
+                : 'bg-red-500/8 text-red-600 ring-red-500/20 dark:text-red-400'
+            }`}>
+              <span className="mt-0.5 text-base shrink-0">{r.status === 'approved' ? '✓' : '⚠'}</span>
+              <div className="min-w-0">
+                {r.status === 'approved'
+                  ? <p className="font-semibold">Your cancellation request was approved. The session has been cancelled.</p>
+                  : <p className="font-semibold">Your cancellation request was denied.{r.reviewer_note ? ` Reason: ${r.reviewer_note}` : ' Please contact your mentee to reschedule.'}</p>}
+              </div>
+              <button type="button" onClick={() => setCancellationBanners(b => b.filter(x => x.id !== r.id))}
+                className="ml-auto shrink-0 opacity-60 hover:opacity-100"><X className="h-4 w-4" /></button>
+            </div>
+          ))}
 
           {/* Calendar banners */}
           {calendarBanner === 'connected' && (
@@ -255,6 +302,7 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, 
           handleStatusUpdate={handleStatusUpdate}
           actionLoading={actionLoading}
           onViewIntake={(s, text) => { setIntakeData({ summary: text, menteeName: s.mentee_name ?? 'Mentee' }); setIntakeOpen(true); }}
+          onCancel={(session) => setCancellationModal({ session })}
         />
       )}
 
@@ -365,6 +413,7 @@ function MentorNextSessionHero({ session, heroHint, setHeroHint, handleStatusUpd
   const isPending  = session.status === 'pending';
   const isAccepted = session.status === 'accepted';
   const mentee = session.mentee_name ?? 'Your mentee';
+  const canJoin = canJoinSession(session.scheduled_date);
 
   return (
     <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-stone-950 via-stone-900 to-orange-950 p-7 text-white shadow-[0_24px_60px_-16px_rgba(234,88,12,0.35)] sm:p-8">
@@ -423,16 +472,22 @@ function MentorNextSessionHero({ session, heroHint, setHeroHint, handleStatusUpd
             </>
           ) : (
             <>
-              <Magnetic strength={0.18}>
-                <button type="button" data-cursor="Join"
-                  onClick={() => {
-                    if (session.video_room_url) { setHeroHint(null); navigate(`/session/${session.id}/video`); }
-                    else setHeroHint('Video link is still preparing — try again in a few seconds.');
-                  }}
-                  className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-black text-stone-900 shadow-[0_8px_24px_-6px_rgba(255,255,255,0.5)] transition hover:bg-orange-50 hover:shadow-[0_12px_32px_-8px_rgba(255,255,255,0.65)]">
+              {canJoin ? (
+                <Magnetic strength={0.18}>
+                  <button type="button" data-cursor="Join"
+                    onClick={() => {
+                      if (session.video_room_url) { setHeroHint(null); navigate(`/session/${session.id}/video`); }
+                      else setHeroHint('Video link is still preparing — try again in a few seconds.');
+                    }}
+                    className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-black text-stone-900 shadow-[0_8px_24px_-6px_rgba(255,255,255,0.5)] transition hover:bg-orange-50 hover:shadow-[0_12px_32px_-8px_rgba(255,255,255,0.65)]">
+                    <Video className="h-4 w-4" />Join Meeting
+                  </button>
+                </Magnetic>
+              ) : (
+                <div className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-6 py-3 text-sm font-black text-white/40 ring-1 ring-white/10 cursor-not-allowed" title="Available 3 hours before the session">
                   <Video className="h-4 w-4" />Join Meeting
-                </button>
-              </Magnetic>
+                </div>
+              )}
               <Magnetic strength={0.14}>
                 <button type="button" onClick={() => setActiveTab('connections')} data-cursor="Mentees"
                   className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-6 py-3 text-sm font-bold text-white ring-1 ring-white/15 backdrop-blur-sm transition hover:bg-white/20">
@@ -534,7 +589,7 @@ function ActivityFeed({ history, role, total, showAll, onToggle }) {
 }
 
 // ─── MentorSessionsTab ────────────────────────────────────────────────────────
-function MentorSessionsTab({ sessions, upcomingSessions, historySessions, searchQuery, setSearchQuery, handleStatusUpdate, actionLoading, onViewIntake }) {
+function MentorSessionsTab({ sessions, upcomingSessions, historySessions, searchQuery, setSearchQuery, handleStatusUpdate, actionLoading, onViewIntake, onCancel }) {
   const match = (s) =>
     s.mentee_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.session_type?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -558,6 +613,7 @@ function MentorSessionsTab({ sessions, upcomingSessions, historySessions, search
         actionLoading={actionLoading}
         isMentor
         onViewIntake={onViewIntake}
+        onCancel={onCancel}
       />
 
       <section>
@@ -567,6 +623,7 @@ function MentorSessionsTab({ sessions, upcomingSessions, historySessions, search
             <SessionCard key={s.id} session={s} isMentor
               onAccept={(id) => handleStatusUpdate(id, 'accepted')}
               onDecline={(id) => handleStatusUpdate(id, 'declined')}
+              onCancel={onCancel}
               actionLoading={actionLoading}
               intakeSummary={s.intake_summary}
               onViewIntake={(_, text) => onViewIntake(s, text)}

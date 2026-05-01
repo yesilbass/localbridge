@@ -667,6 +667,11 @@ export default function VideoCall() {
           if (!cancelled) setAccessError('This session has not been confirmed yet.');
           return;
         }
+        const scheduledMs = new Date(data.scheduled_date).getTime();
+        if (Date.now() < scheduledMs - 3 * 60 * 60 * 1000) {
+          if (!cancelled) setAccessError('The video room opens 3 hours before the session starts.');
+          return;
+        }
         if (!cancelled) setSession(data);
       } catch (err) {
         if (!cancelled) setAccessError(err.message ?? 'Could not load session.');
@@ -1179,7 +1184,6 @@ export default function VideoCall() {
       supabase.removeChannel(channel.current);
       channel.current = null;
     }
-    try { await updateSessionStatus(session.id, 'completed'); } catch { /* non-fatal */ }
     setCallStatus('ended');
   }, [session]);
 
@@ -1265,7 +1269,11 @@ export default function VideoCall() {
         <MentorMenteeReviewModal
           session={session}
           menteeId={session?.mentee_id}
-          onDone={() => { setShowMenteeReview(false); navigate('/dashboard'); }}
+          onDone={async () => {
+            try { await updateSessionStatus(session.id, 'completed'); } catch { /* non-fatal */ }
+            setShowMenteeReview(false);
+            navigate('/dashboard');
+          }}
         />
       )}
 

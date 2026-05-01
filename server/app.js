@@ -15,6 +15,7 @@ import stripeRoutes from './routes/stripe.js';
 import calendarRoutes from './routes/calendar.js';
 import googleAuthRoutes from './routes/googleAuth.js';
 import devRoutes from './routes/dev.js';
+import cancellationsRoute from './routes/cancellations.js';
 import { getSupabaseAdmin } from './lib/supabaseAdmin.js';
 import createSubscriptionCheckout from '../api/create-subscription-checkout.js';
 import createBookingCheckout from '../api/create-booking-checkout.js';
@@ -67,6 +68,9 @@ app.use('/api/stripe', stripeRoutes);
 
 // Developer portal API
 app.use('/api/dev', devRoutes);
+
+// Cancellation requests
+app.use('/api/cancellations', cancellationsRoute);
 
 // User names — mentor dashboard uses this to get mentee names (admin client bypasses RLS)
 app.post('/api/user-names', async (req, res) => {

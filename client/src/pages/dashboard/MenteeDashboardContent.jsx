@@ -9,7 +9,7 @@ import {
   Video, X,
 } from 'lucide-react';
 import {
-  StatCard, EmptyState, SessionCard, MentorCard, SectionHeading,
+  StatCard, EmptyState, SessionCard, MentorCard, SectionHeading, canJoinSession,
 } from './dashboardShared';
 import { formatSessionDate, getAvatarColor, getInitials } from './dashboardUtils';
 import { LiveCountdown, AddToCalendarButton, useSessionTrends, getRelativeSession } from './dashboardLive.jsx';
@@ -18,7 +18,9 @@ import DashboardSettingsPanel from './DashboardSettingsPanel';
 import { useState, useEffect, useCallback } from 'react';
 import SessionCalendar from './SessionCalendar';
 import ReviewModal from '../../components/ReviewModal';
+import CancellationModal from '../../components/CancellationModal';
 import { getMyReviewedSessionIds } from '../../api/reviews';
+import { getMyCancellationRequests, getFreePlanGrant } from '../../api/cancellations';
 
 function isWithinReviewWindow(session) {
   if (session.status !== 'completed') return false;
@@ -31,10 +33,36 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
   const [heroHint, setHeroHint] = useState(null);
   const [reviewModal, setReviewModal] = useState(initialReviewSession ? { ...initialReviewSession } : null);
   const [reviewedSessionIds, setReviewedSessionIds] = useState(new Set());
+  const [cancellationModal, setCancellationModal] = useState(null);
+  const [cancellationBanners, setCancellationBanners] = useState([]);
+  const [freePlanGrant, setFreePlanGrant] = useState(null);
 
   useEffect(() => {
     getMyReviewedSessionIds().then(({ data }) => { if (data) setReviewedSessionIds(data); });
   }, []);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const SEEN_KEY = `bridge_cancel_seen_${user.id}`;
+    const seenIds = JSON.parse(localStorage.getItem(SEEN_KEY) || '[]');
+
+    getMyCancellationRequests().then(({ data }) => {
+      if (!data) return;
+      const unseen = data.filter(r =>
+        ['approved', 'denied'].includes(r.status) && !seenIds.includes(r.id)
+      );
+      if (unseen.length) {
+        setCancellationBanners(unseen);
+        localStorage.setItem(SEEN_KEY, JSON.stringify([...seenIds, ...unseen.map(r => r.id)]));
+      }
+    });
+
+    getFreePlanGrant(user.id).then(grant => {
+      if (grant?.active && grant.expires_at && new Date(grant.expires_at) > new Date()) {
+        setFreePlanGrant(grant);
+      }
+    });
+  }, [user?.id]);
 
   useEffect(() => {
     if (initialReviewSession) window.history.replaceState({}, '');
@@ -57,7 +85,7 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
   const {
     sessions, mentorMap, actionLoading, searchQuery, setSearchQuery,
     showAllHistory, setShowAllHistory, upcomingSessions, nextSession,
-    historySessions, visibleHistory, uniqueMentors, handleStatusUpdate,
+    historySessions, visibleHistory, uniqueMentors, handleStatusUpdate, refetch,
   } = dash;
 
   // 30-day trend deltas (pure derivation — no API).
@@ -70,6 +98,14 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
 
   return (
     <>
+      {cancellationModal && (
+        <CancellationModal
+          session={cancellationModal.session}
+          isMentor={false}
+          onClose={() => setCancellationModal(null)}
+          onSuccess={() => { setCancellationModal(null); refetch?.(); }}
+        />
+      )}
       {reviewModal && (
         <ReviewModal
           sessionId={reviewModal.sessionId}
@@ -84,6 +120,37 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
       {/* ── Overview tab ─────────────────────────────────────────────── */}
       {activeTab === 'overview' && (
         <div className="space-y-8 pb-12">
+
+          {/* Cancellation outcome banners */}
+          {cancellationBanners.map(r => (
+            <div key={r.id} className={`flex items-start gap-3 rounded-2xl px-5 py-4 text-sm ring-1 ${
+              r.status === 'approved'
+                ? 'bg-emerald-500/8 text-emerald-700 ring-emerald-500/20 dark:text-emerald-300'
+                : 'bg-red-500/8 text-red-600 ring-red-500/20 dark:text-red-400'
+            }`}>
+              <span className="mt-0.5 text-base shrink-0">{r.status === 'approved' ? '✓' : '⚠'}</span>
+              <div className="min-w-0">
+                {r.status === 'approved'
+                  ? <p className="font-semibold">Your cancellation request was approved. The session has been cancelled.</p>
+                  : <p className="font-semibold">Your cancellation request was denied.{r.reviewer_note ? ` Reason: ${r.reviewer_note}` : ' Please reach out to your mentor to reschedule.'}</p>}
+              </div>
+              <button type="button" onClick={() => setCancellationBanners(b => b.filter(x => x.id !== r.id))}
+                className="ml-auto shrink-0 opacity-60 hover:opacity-100"><X className="h-4 w-4" /></button>
+            </div>
+          ))}
+
+          {/* Free Pro plan banner */}
+          {freePlanGrant && (
+            <div className="flex items-start gap-3 rounded-2xl bg-violet-500/8 px-5 py-4 text-sm text-violet-700 ring-1 ring-violet-500/20 dark:text-violet-300">
+              <span className="mt-0.5 text-base shrink-0">🎁</span>
+              <div className="min-w-0">
+                <p className="font-bold">You have a complimentary Pro plan!</p>
+                <p className="mt-0.5 text-xs opacity-80">Your mentor cancelled a session, so we've given you 2 weeks of Pro free. Expires {new Date(freePlanGrant.expires_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.</p>
+              </div>
+              <button type="button" onClick={() => setFreePlanGrant(null)}
+                className="ml-auto shrink-0 opacity-60 hover:opacity-100"><X className="h-4 w-4" /></button>
+            </div>
+          )}
 
           {/* Stats grid — kinetic counters + 30d trend deltas */}
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
@@ -185,7 +252,7 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
                   <SessionCard
                     key={s.id} session={s} isMentor={false}
                     mentorProfile={mentorMap[s.mentor_id]}
-                    onCancel={(id) => handleStatusUpdate(id, 'cancelled')}
+                    onCancel={(session) => setCancellationModal({ session })}
                     actionLoading={actionLoading}
                   />
                 ))}
@@ -253,6 +320,7 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
           actionLoading={actionLoading}
           reviewedSessionIds={reviewedSessionIds}
           onReview={(s) => openReviewForSession(s, mentorMap)}
+          onCancel={(session) => setCancellationModal({ session })}
         />
       )}
 
@@ -281,6 +349,7 @@ function NextSessionHero({ session, mentorProfile, heroHint, setHeroHint, onJoin
   const [date, time] = (formatSessionDate(session.scheduled_date) || ' · ').split(' · ');
   const isPending  = session.status === 'pending';
   const isAccepted = session.status === 'accepted';
+  const canJoin = canJoinSession(session.scheduled_date);
 
   return (
     <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-stone-950 via-stone-900 to-orange-950 p-7 text-white shadow-[0_24px_60px_-16px_rgba(234,88,12,0.35)] sm:p-8">
@@ -354,13 +423,20 @@ function NextSessionHero({ session, mentorProfile, heroHint, setHeroHint, onJoin
         {/* Actions — magnetic */}
         <div className="mt-6 flex flex-wrap gap-3">
           {isAccepted && (
-            <Magnetic strength={0.18}>
-              <button type="button" onClick={onJoin} data-cursor="Join"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-black text-stone-900 shadow-[0_8px_24px_-6px_rgba(255,255,255,0.5)] transition hover:bg-orange-50 hover:shadow-[0_12px_32px_-8px_rgba(255,255,255,0.65)]">
+            canJoin ? (
+              <Magnetic strength={0.18}>
+                <button type="button" onClick={onJoin} data-cursor="Join"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-black text-stone-900 shadow-[0_8px_24px_-6px_rgba(255,255,255,0.5)] transition hover:bg-orange-50 hover:shadow-[0_12px_32px_-8px_rgba(255,255,255,0.65)]">
+                  <Video className="h-4 w-4" />
+                  Join Meeting
+                </button>
+              </Magnetic>
+            ) : (
+              <div className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-6 py-3 text-sm font-black text-white/40 ring-1 ring-white/10 cursor-not-allowed" title="Available 3 hours before the session">
                 <Video className="h-4 w-4" />
                 Join Meeting
-              </button>
-            </Magnetic>
+              </div>
+            )
           )}
           <Magnetic strength={0.14}>
             <Link to={`/mentors/${session.mentor_id}`} data-cursor="Profile"
@@ -463,7 +539,7 @@ function ActivityFeed({ history, role, total, showAll, onToggle }) {
 // ─── MenteeSessionsTab ────────────────────────────────────────────────────────
 function MenteeSessionsTab({
   sessions, upcomingSessions, historySessions, mentorMap, searchQuery, setSearchQuery,
-  handleStatusUpdate, actionLoading, onReview, reviewedSessionIds = new Set(),
+  handleStatusUpdate, actionLoading, onReview, reviewedSessionIds = new Set(), onCancel,
 }) {
   const match = (s) =>
     s.mentor_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -491,6 +567,7 @@ function MenteeSessionsTab({
         mentorMap={mentorMap}
         onReview={onReview}
         reviewedSessionIds={reviewedSessionIds}
+        onCancel={onCancel}
       />
 
       <section>
@@ -499,7 +576,7 @@ function MenteeSessionsTab({
           {upcomingSessions.filter(match).map((s) => (
             <SessionCard key={s.id} session={s} isMentor={false}
               mentorProfile={mentorMap[s.mentor_id]}
-              onCancel={(id) => handleStatusUpdate(id, 'cancelled')}
+              onCancel={onCancel}
               actionLoading={actionLoading}
             />
           ))}

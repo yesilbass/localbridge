@@ -11,6 +11,11 @@ import {
 import { focusRing } from '../../ui';
 import { SESSION_TYPE_MAP, getAvatarColor, getInitials, formatSessionDate } from './dashboardUtils';
 
+export function canJoinSession(scheduledDate) {
+  if (!scheduledDate) return false;
+  return Date.now() >= new Date(scheduledDate).getTime() - 3 * 60 * 60 * 1000;
+}
+
 // Session type → left accent bar gradient
 const TYPE_BAR = {
   career_advice:  'from-amber-400 to-orange-500',
@@ -202,9 +207,10 @@ export function SessionCard({
   const isPast = session.scheduled_date && new Date(session.scheduled_date) < now;
   const canAct = !isPast && !['completed', 'declined', 'cancelled'].includes(session.status);
 
-  const showMentorActions = canAct && isMentor && session.status === 'pending' && (onAccept || onDecline);
-  const showCancelButton  = canAct && !isMentor && ['pending', 'accepted'].includes(session.status) && onCancel;
-  const showJoinCall      = session.status === 'accepted' && !isPast && session.video_room_url;
+  const showMentorActions      = canAct && isMentor && session.status === 'pending' && (onAccept || onDecline);
+  const showMentorCancelButton = canAct && isMentor && ['pending', 'accepted'].includes(session.status) && onCancel;
+  const showCancelButton       = canAct && !isMentor && ['pending', 'accepted'].includes(session.status) && onCancel;
+  const showJoinCall           = session.status === 'accepted' && !isPast && session.video_room_url;
 
   const [dateLabel, timeLabel] = (formatSessionDate(session.scheduled_date) || ' · ').split(' · ');
 
@@ -279,10 +285,16 @@ export function SessionCard({
               <Video className="h-3.5 w-3.5" />Join Call
             </button>
           )}
-          {showCancelButton && (
-            <button type="button" onClick={() => onCancel(session.id)} disabled={actionLoading === session.id}
+          {showMentorCancelButton && (
+            <button type="button" onClick={() => onCancel(session)} disabled={actionLoading === session.id}
               className="inline-flex items-center rounded-xl border border-[var(--bridge-border)] px-4 py-2 text-xs font-bold text-[var(--bridge-text-secondary)] transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-500/10 dark:hover:text-red-300">
-              {actionLoading === session.id ? 'Cancelling…' : 'Cancel'}
+              Cancel
+            </button>
+          )}
+          {showCancelButton && (
+            <button type="button" onClick={() => onCancel(session)} disabled={actionLoading === session.id}
+              className="inline-flex items-center rounded-xl border border-[var(--bridge-border)] px-4 py-2 text-xs font-bold text-[var(--bridge-text-secondary)] transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-500/10 dark:hover:text-red-300">
+              Cancel
             </button>
           )}
           {!showMentorActions && !showCancelButton && !showJoinCall && !isMentor && !(session.status === 'completed' && (onReview || reviewed)) && (
