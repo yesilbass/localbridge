@@ -239,7 +239,6 @@ export default function Mentors() {
 
   return (
     <main className="relative isolate min-h-screen overflow-x-hidden">
-      <CustomCursor />
 
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10"
         style={{ background: 'radial-gradient(ellipse 70% 40% at 50% -10%, var(--bridge-aurora-1), transparent 60%)' }} />

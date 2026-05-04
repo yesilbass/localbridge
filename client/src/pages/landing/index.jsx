@@ -55,7 +55,6 @@ export default function Landing() {
     <div className="relative overflow-x-hidden">
       <style>{LANDING_CSS}</style>
 
-      <CustomCursor />
       <IntroLoader />
       <ScrollProgressBar />
       <FloatingDock />

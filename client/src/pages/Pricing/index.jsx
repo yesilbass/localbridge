@@ -148,7 +148,6 @@ export default function Pricing() {
 
   return (
     <>
-      <CustomCursor />
       <main
         data-route-atmo="pricing"
         className="relative isolate min-h-screen overflow-x-hidden"

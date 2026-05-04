@@ -144,7 +144,6 @@ export default function Dashboard() {
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] selection:bg-orange-200/50 selection:text-stone-900 dark:selection:bg-orange-900/50">
-      <CustomCursor />
       <AuroraBg />
 
       {/* Ambient base layer for color cohesion */}
