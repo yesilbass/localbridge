@@ -4,26 +4,27 @@ import StatCell from './StatCell';
 
 export default function StatsBentoSection() {
   return (
-    <section className="relative overflow-hidden py-28 bg-gradient-to-b from-[var(--bridge-canvas)] via-orange-50/10 to-[var(--bridge-canvas)]">
-      <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
+    <section className="relative overflow-hidden bg-gradient-to-b from-[var(--bridge-canvas)] via-orange-50/10 to-[var(--bridge-canvas)] py-20 sm:py-24 lg:py-32">
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-orange-500/5 to-transparent" />
+      <div className="relative z-10 mx-auto max-w-bridge px-4 sm:px-6 lg:px-8">
         <RevealOnScroll>
-          <div className="mb-12 flex flex-col items-start gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-10 flex flex-col items-start gap-4 sm:mb-14 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.32em] text-[var(--bridge-accent)]">By the numbers</p>
-              <h2 className="mt-2 font-display text-2xl font-black tracking-tight text-[var(--bridge-text)] sm:text-3xl md:text-4xl lg:text-5xl">
+              <h2 className="mt-3 max-w-3xl font-display text-3xl font-black leading-[1.02] tracking-[-0.035em] text-[var(--bridge-text)] sm:text-4xl lg:text-6xl">
                 A platform people <span className="text-gradient-bridge">actually use</span>
               </h2>
             </div>
-            <p className="max-w-xs text-[12px] leading-relaxed text-[var(--bridge-text-muted)]">
+            <p className="max-w-sm text-sm leading-7 text-[var(--bridge-text-muted)]">
               No vanity metrics. Just signal: people show up, book again, and recommend.
             </p>
           </div>
         </RevealOnScroll>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:auto-rows-[176px]">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:auto-rows-[190px] lg:grid-cols-4">
           {/* Featured mentor network cell — spans 2 rows */}
           <RevealOnScroll delay={0} className="col-span-2 lg:row-span-2">
-            <TiltCard n={4} className="group relative h-full overflow-hidden rounded-3xl border border-orange-500/22 bg-[var(--bridge-surface)] p-7 sm:p-9 shadow-bridge-glow">
+            <TiltCard n={4} className="group relative h-full overflow-hidden rounded-[2rem] border border-orange-500/22 bg-[var(--bridge-surface)] p-7 shadow-bridge-glow sm:p-9">
               <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse 60% 80% at 100% 100%,rgba(234,88,12,.08),transparent 70%)' }} />
               <div className="relative flex h-full flex-col justify-between gap-6">
                 <div className="flex items-center gap-2">
@@ -51,7 +52,7 @@ export default function StatsBentoSection() {
           </RevealOnScroll>
 
           <RevealOnScroll delay={120}>
-            <TiltCard n={3} className="relative h-full overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-orange-500/30 hover:shadow-bridge-glow">
+            <TiltCard n={3} className="relative h-full overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card transition-all hover:-translate-y-1 hover:border-orange-500/30 hover:shadow-bridge-glow">
               <div className="relative flex h-full flex-col justify-between">
                 <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[var(--bridge-text-muted)]">Total bookings</p>
                 <StatCell target={4800} suffix="+" label="Sessions booked" accent="from-orange-500 to-amber-400" />
@@ -60,7 +61,7 @@ export default function StatsBentoSection() {
           </RevealOnScroll>
 
           <RevealOnScroll delay={200}>
-            <TiltCard n={3} className="relative h-full overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-orange-500/30 hover:shadow-bridge-glow">
+            <TiltCard n={3} className="relative h-full overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card transition-all hover:-translate-y-1 hover:border-orange-500/30 hover:shadow-bridge-glow">
               <div className="relative flex h-full flex-col justify-between">
                 <div className="flex items-center gap-1">
                   {[0, 1, 2, 3, 4].map(i => (
@@ -75,7 +76,7 @@ export default function StatsBentoSection() {
           </RevealOnScroll>
 
           <RevealOnScroll delay={280}>
-            <TiltCard n={3} className="relative h-full overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-orange-500/30 hover:shadow-bridge-glow">
+            <TiltCard n={3} className="relative h-full overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card transition-all hover:-translate-y-1 hover:border-orange-500/30 hover:shadow-bridge-glow">
               <div className="relative flex h-full flex-col justify-between">
                 <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[var(--bridge-text-muted)]">Recommend</p>
                 <StatCell target={97} suffix="%" label="Would recommend" accent="from-orange-500 to-amber-400" />
@@ -84,7 +85,7 @@ export default function StatsBentoSection() {
           </RevealOnScroll>
 
           <RevealOnScroll delay={360}>
-            <TiltCard n={3} className="relative h-full overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-orange-500/30 hover:shadow-bridge-glow">
+            <TiltCard n={3} className="relative h-full overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card transition-all hover:-translate-y-1 hover:border-orange-500/30 hover:shadow-bridge-glow">
               <div className="relative flex h-full flex-col justify-between">
                 <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[var(--bridge-text-muted)]">Response time</p>
                 <StatCell target={11} suffix=" min" label="Avg time to first reply" accent="from-orange-500 to-amber-400" />
@@ -95,7 +96,7 @@ export default function StatsBentoSection() {
 
         {/* Footer stats strip */}
         <RevealOnScroll delay={420}>
-          <div className="mt-4 grid grid-cols-2 gap-3 rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-5 sm:grid-cols-4 sm:gap-6 sm:px-8">
+          <div className="mt-4 grid grid-cols-2 gap-4 rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/92 px-5 py-5 shadow-bridge-card backdrop-blur-xl sm:grid-cols-4 sm:gap-6 sm:px-8">
             {[
               { k: '$2.1M+', v: 'in offer increases unlocked' },
               { k: '47', v: 'industries covered' },

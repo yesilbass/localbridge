@@ -246,38 +246,49 @@ export default function Mentors() {
 
       {/* Hero header */}
       {!aiMode && (
-        <section className="relative overflow-hidden border-b border-[var(--bridge-border)] bg-[var(--bridge-canvas)] pb-5 pt-8">
-          <div aria-hidden className="pointer-events-none absolute -left-24 -top-12 h-64 w-64 rounded-full opacity-40 blur-3xl"
-            style={{ background: 'radial-gradient(circle, rgba(234,88,12,0.22) 0%, transparent 70%)' }} />
-          <div aria-hidden className="pointer-events-none absolute right-0 top-0 h-56 w-56 rounded-full opacity-30 blur-3xl"
-            style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%)' }} />
+        <section className="bridge-hero-strip relative overflow-hidden pb-8 pt-8 sm:pb-10 sm:pt-12">
+          <div aria-hidden className="bridge-ambient-orb absolute -left-28 -top-24 h-80 w-80 opacity-80" />
+          <div aria-hidden className="pointer-events-none absolute right-[-8rem] top-[-8rem] h-96 w-96 rounded-full opacity-40 blur-3xl"
+            style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.20) 0%, transparent 70%)' }} />
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-orange-400/45 to-transparent" />
 
           <div className="relative mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end">
               <div>
-                <div className="mb-2.5 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3 py-1 shadow-sm">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/82 px-3.5 py-1.5 shadow-bridge-tile backdrop-blur-xl">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse-soft" />
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--bridge-text-muted)]">
                     {totalCount > 0 ? `${totalCount} mentors available` : 'Browse mentors'}
                   </span>
                 </div>
-                <h1 className="font-display text-3xl font-black tracking-tight text-[var(--bridge-text)] sm:text-4xl">
-                  Find your <span className="text-gradient-bridge">mentor</span>
+                <h1 className="max-w-4xl font-display text-4xl font-black tracking-[-0.045em] text-[var(--bridge-text)] sm:text-5xl lg:text-6xl">
+                  Find the mentor who changes your <span className="text-gradient-bridge">next move</span>.
                 </h1>
-                <p className="mt-2 max-w-md text-[14px] leading-relaxed text-[var(--bridge-text-muted)]">
-                  Connect with professionals who've been where you want to go. Real advice, real experience.
+                <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--bridge-text-muted)] sm:text-lg">
+                  Browse vetted operators, founders, executives, and specialists. Compare fit, expertise, availability, and session style before you book.
                 </p>
-                <button type="button" onClick={() => setShowTiersModal(true)}
-                  className={`mt-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 text-[12px] font-semibold text-[var(--bridge-text-secondary)] shadow-sm transition hover:border-orange-400/50 hover:bg-orange-500/6 hover:text-orange-600 dark:hover:border-orange-400/40 dark:hover:text-orange-300 ${focusRing}`}>
-                  <svg className="h-3.5 w-3.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" /></svg>
-                  See Mentor Tiers
-                </button>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <button type="button" onClick={() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                    className={`inline-flex items-center justify-center rounded-full bg-[var(--bridge-text)] px-5 py-3 text-sm font-bold text-[var(--bridge-canvas)] shadow-bridge-accent transition hover:-translate-y-0.5 hover:brightness-110 ${focusRing}`}>
+                    Explore mentors
+                  </button>
+                  <button type="button" onClick={() => setShowTiersModal(true)}
+                    className={`inline-flex items-center justify-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/82 px-4 py-3 text-sm font-semibold text-[var(--bridge-text-secondary)] shadow-bridge-tile backdrop-blur-xl transition hover:border-orange-400/50 hover:bg-orange-500/8 hover:text-orange-600 dark:hover:border-orange-400/40 dark:hover:text-orange-300 ${focusRing}`}>
+                    <svg className="h-4 w-4 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" /></svg>
+                    Compare tiers
+                  </button>
+                </div>
               </div>
 
               {!asMentor && (
-                <div className="flex flex-col items-start gap-2 sm:items-end">
+                <div className="relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/76 p-5 shadow-bridge-float backdrop-blur-xl">
+                  <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-violet-500/12 blur-3xl" />
+                  <div className="relative">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">Personalized search</p>
+                    <h2 className="mt-2 font-display text-xl font-black tracking-tight text-[var(--bridge-text)]">Let AI shortlist your best-fit mentors</h2>
+                    <p className="mt-2 text-[13px] leading-6 text-[var(--bridge-text-muted)]">Answer a few questions and Bridge will rank mentors against your goals, role, industry, and timeline.</p>
                   {remainingUses !== null && remainingUses > 0 && (
-                    <div className="flex items-center gap-1.5">
+                    <div className="mt-4 flex items-center gap-1.5">
                       {Array.from({ length: LIMITS.mentor_match }).map((_, i) => (
                         <span key={i} className={`h-1.5 w-1.5 rounded-full transition-all ${i < LIMITS.mentor_match - remainingUses ? 'bg-[var(--bridge-border-strong)]' : 'bg-violet-500 shadow-[0_0_4px_rgba(139,92,246,0.5)]'}`} />
                       ))}
@@ -285,14 +296,15 @@ export default function Mentors() {
                     </div>
                   )}
                   {remainingUses === 0 ? (
-                    <span className="rounded-full border border-[var(--bridge-border)] px-4 py-2 text-[12px] font-medium text-[var(--bridge-text-faint)]">AI matching used up</span>
+                    <span className="mt-4 inline-flex rounded-full border border-[var(--bridge-border)] px-4 py-2 text-[12px] font-medium text-[var(--bridge-text-faint)]">AI matching used up</span>
                   ) : (
                     <button type="button" onClick={handleAiMatchClick}
-                      className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-purple-500 px-5 py-2.5 text-[13px] font-semibold text-white shadow-[0_4px_16px_-4px_rgba(139,92,246,0.55)] transition hover:brightness-110 hover:shadow-[0_8px_24px_-4px_rgba(139,92,246,0.7)] ${focusRing}`}>
+                      className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-purple-500 px-5 py-3 text-[13px] font-bold text-white shadow-[0_4px_16px_-4px_rgba(139,92,246,0.55)] transition hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_8px_24px_-4px_rgba(139,92,246,0.7)] ${focusRing}`}>
                       <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
-                      AI Match
+                      Start AI match
                     </button>
                   )}
+                  </div>
                 </div>
               )}
             </div>
@@ -301,7 +313,7 @@ export default function Mentors() {
       )}
 
       {/* Sticky control bar */}
-      <div className={`sticky top-[3.75rem] z-30 border-b border-[var(--bridge-border)] bg-[var(--bridge-canvas)]/95 backdrop-blur-xl sm:top-16 ${aiMode ? 'opacity-60 pointer-events-none' : ''}`}>
+      <div className={`sticky top-[3.75rem] z-30 border-b border-[var(--bridge-border)] bg-[var(--bridge-canvas)]/92 shadow-[0_10px_30px_-28px_rgba(120,45,8,0.6)] backdrop-blur-xl sm:top-16 ${aiMode ? 'opacity-60 pointer-events-none' : ''}`}>
         <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 dark:opacity-100"
           style={{ background: 'linear-gradient(90deg, transparent, rgba(251,146,60,0.12) 40%, rgba(251,146,60,0.12) 60%, transparent)' }} />
 
@@ -314,7 +326,7 @@ export default function Mentors() {
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" strokeLinecap="round" />
               </svg>
               <input type="text" placeholder="Search by name, role, company…" value={search} onChange={e => setSearch(e.target.value)}
-                className="h-9 w-full rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-0 pl-9 pr-8 text-[13px] text-[var(--bridge-text)] placeholder:text-[var(--bridge-text-faint)] transition focus:border-orange-400/60 focus:outline-none focus:shadow-[0_0_0_3px_rgba(251,146,60,0.12)]" />
+                className="h-10 w-full rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/88 py-0 pl-9 pr-8 text-[13px] font-medium text-[var(--bridge-text)] shadow-bridge-tile placeholder:text-[var(--bridge-text-faint)] transition focus:border-orange-400/60 focus:outline-none focus:shadow-[0_0_0_3px_rgba(251,146,60,0.12)]" />
               {search && (
                 <button type="button" onClick={() => setSearch('')} aria-label="Clear"
                   className="absolute right-2 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded text-[var(--bridge-text-faint)] transition hover:text-[var(--bridge-text)]">
@@ -326,7 +338,7 @@ export default function Mentors() {
             {/* Sort */}
             <div ref={sortRef} className="relative hidden sm:block">
               <button type="button" onClick={() => setSortOpen(o => !o)} aria-haspopup="listbox" aria-expanded={sortOpen}
-                className={`inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3 text-[12px] font-medium text-[var(--bridge-text-secondary)] transition hover:border-[var(--bridge-border-strong)] hover:text-[var(--bridge-text)] ${focusRing}`}>
+                className={`inline-flex h-10 items-center gap-1.5 rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/88 px-3 text-[12px] font-semibold text-[var(--bridge-text-secondary)] shadow-bridge-tile transition hover:-translate-y-px hover:border-[var(--bridge-border-strong)] hover:text-[var(--bridge-text)] ${focusRing}`}>
                 <svg className="h-3.5 w-3.5 shrink-0 text-[var(--bridge-text-faint)]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5h18M6 12h12M10 16.5h4" /></svg>
                 <span className="hidden lg:inline">{SORT_OPTIONS.find(o => o.value === sortBy)?.label}</span>
                 <span className="lg:hidden">Sort</span>
@@ -353,7 +365,7 @@ export default function Mentors() {
 
             {/* Filter toggle */}
             <button type="button" onClick={() => setFilterOpen(o => !o)} aria-expanded={filterOpen}
-              className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-[12px] font-medium transition ${filterOpen || activeFilterCount > 0 ? 'border-orange-400/50 bg-orange-500/8 text-orange-600 dark:text-orange-300' : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)] hover:border-[var(--bridge-border-strong)] hover:text-[var(--bridge-text)]'} ${focusRing}`}>
+              className={`inline-flex h-10 items-center gap-1.5 rounded-xl border px-3 text-[12px] font-semibold shadow-bridge-tile transition hover:-translate-y-px ${filterOpen || activeFilterCount > 0 ? 'border-orange-400/50 bg-orange-500/8 text-orange-600 dark:text-orange-300' : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)]/88 text-[var(--bridge-text-secondary)] hover:border-[var(--bridge-border-strong)] hover:text-[var(--bridge-text)]'} ${focusRing}`}>
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" /></svg>
               Filters
               {activeFilterCount > 0 && (
@@ -373,13 +385,13 @@ export default function Mentors() {
           </div>
 
           {/* Industry chips */}
-          <div className="flex gap-1 overflow-x-auto pb-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-1.5 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {INDUSTRIES.map(({ label, value }) => (
               <button key={value || 'all'} type="button" onClick={() => setActiveIndustry(value)}
-                className={`inline-flex shrink-0 items-center rounded-md px-2.5 py-1 text-[12px] font-medium transition ${
+                className={`inline-flex shrink-0 items-center rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${
                   activeIndustry === value
-                    ? 'bg-[var(--bridge-text)] text-[var(--bridge-canvas)]'
-                    : 'text-[var(--bridge-text-muted)] hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)]'
+                    ? 'bg-[var(--bridge-text)] text-[var(--bridge-canvas)] shadow-bridge-tile'
+                    : 'border border-transparent text-[var(--bridge-text-muted)] hover:border-[var(--bridge-border)] hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)]'
                 } ${focusRing}`}>
                 {label}
               </button>
@@ -389,15 +401,15 @@ export default function Mentors() {
 
         {/* Advanced filters panel */}
         {filterOpen && (
-          <div className="border-t border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/40">
+          <div className="border-t border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/48">
             <div className="mx-auto max-w-[90rem] px-4 py-4 sm:px-6 lg:px-8">
-              <div className="flex flex-wrap items-start gap-6">
+              <div className="flex flex-wrap items-start gap-6 rounded-[1.25rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/72 p-4 shadow-bridge-tile backdrop-blur-xl">
                 <div>
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-faint)]">Tier</p>
                   <div className="flex flex-wrap gap-1.5">
                     {TIERS.map(({ label, value }) => (
                       <button key={value || 'all-t'} type="button" onClick={() => setActiveTier(value)}
-                        className={`rounded-md px-2.5 py-1 text-[12px] font-medium transition ${activeTier === value ? 'bg-[var(--bridge-text)] text-[var(--bridge-canvas)]' : 'border border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)]'} ${focusRing}`}>
+                        className={`rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${activeTier === value ? 'bg-[var(--bridge-text)] text-[var(--bridge-canvas)] shadow-bridge-tile' : 'border border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)]'} ${focusRing}`}>
                         {label}
                       </button>
                     ))}
@@ -411,7 +423,7 @@ export default function Mentors() {
                       <div key={key} className="relative">
                         <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[12px] text-[var(--bridge-text-faint)]">$</span>
                         <input type="number" min="0" placeholder={ph} value={val} onChange={e => set(e.target.value)} aria-label={`${ph} rate`}
-                          className="w-20 rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-1.5 pl-5 pr-2.5 text-[13px] text-[var(--bridge-text)] placeholder:text-[var(--bridge-text-faint)] focus:border-orange-400/60 focus:outline-none" />
+                          className="w-24 rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-2 pl-5 pr-2.5 text-[13px] font-medium text-[var(--bridge-text)] placeholder:text-[var(--bridge-text-faint)] focus:border-orange-400/60 focus:outline-none" />
                       </div>
                     ))}
                   </div>
@@ -420,7 +432,7 @@ export default function Mentors() {
                 <div>
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-faint)]">Status</p>
                   <button type="button" role="switch" aria-checked={availableOnly} onClick={() => setAvailableOnly(v => !v)}
-                    className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-[12px] font-medium transition ${availableOnly ? 'bg-emerald-500/12 text-emerald-600 ring-1 ring-emerald-400/30 dark:text-emerald-300' : 'border border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)]'} ${focusRing}`}>
+                    className={`flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] font-semibold transition ${availableOnly ? 'bg-emerald-500/12 text-emerald-600 ring-1 ring-emerald-400/30 dark:text-emerald-300' : 'border border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)]'} ${focusRing}`}>
                     <span className={`flex h-3 w-5 rounded-full transition-colors ${availableOnly ? 'bg-emerald-500' : 'bg-[var(--bridge-border-strong)]'}`}>
                       <span className={`m-0.5 h-2 w-2 rounded-full bg-white shadow transition-transform ${availableOnly ? 'translate-x-2' : ''}`} />
                     </span>
@@ -512,7 +524,7 @@ export default function Mentors() {
       )}
 
       {/* Mentor grid */}
-      <div ref={gridRef} className={`mx-auto max-w-[90rem] scroll-mt-28 px-4 py-6 sm:px-6 lg:px-8 ${aiMode ? 'hidden' : ''}`}>
+      <div ref={gridRef} className={`mx-auto max-w-[90rem] scroll-mt-28 px-4 py-8 sm:px-6 sm:py-10 lg:px-8 ${aiMode ? 'hidden' : ''}`}>
 
         {asMentor && (
           <div className="mb-5 flex items-start gap-3 rounded-xl border border-amber-400/25 bg-amber-500/6 px-4 py-3">
@@ -531,7 +543,7 @@ export default function Mentors() {
         {error && <FetchErrorBanner message={error} onRetry={loadMentors} />}
 
         {!loading && !error && totalCount > 0 && (
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[1.25rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/62 px-4 py-3 shadow-bridge-tile backdrop-blur-xl">
             <p className="text-[13px] text-[var(--bridge-text-muted)]">
               Showing <span className="font-semibold text-[var(--bridge-text)]">{startIdx}–{endIdx}</span> of <span className="font-semibold text-[var(--bridge-text)]">{totalCount}</span> mentors
               {activeFilterCount > 0 && <span className="ml-2 text-[11px] text-[var(--bridge-text-faint)]">· filtered</span>}
@@ -539,10 +551,10 @@ export default function Mentors() {
             {(canPrev || canNext) && (
               <div className="flex items-center gap-2">
                 <button type="button" disabled={!canPrev} onClick={() => changePage(Math.max(0, page - 1))}
-                  className={`rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 text-[12px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>← Prev</button>
-                <span className="rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-3 py-1.5 text-[12px] font-semibold text-[var(--bridge-text-faint)]">{page + 1}</span>
+                  className={`rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 text-[12px] font-semibold text-[var(--bridge-text-secondary)] transition hover:-translate-y-px hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>← Prev</button>
+                <span className="rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-3 py-1.5 text-[12px] font-bold text-[var(--bridge-text-faint)]">{page + 1}</span>
                 <button type="button" disabled={!canNext} onClick={() => changePage(page + 1)}
-                  className={`rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 text-[12px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>Next →</button>
+                  className={`rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 text-[12px] font-semibold text-[var(--bridge-text-secondary)] transition hover:-translate-y-px hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>Next →</button>
               </div>
             )}
           </div>
@@ -552,7 +564,7 @@ export default function Mentors() {
           <MentorGridSkeleton />
         ) : visibleMentors.length > 0 ? (
           <div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {visibleMentors.map((mentor, i) => (
                 <Reveal key={mentor.id} delay={Math.min(i * 25, 120)} className="h-full">
                   <MentorCard
@@ -569,24 +581,25 @@ export default function Mentors() {
             </div>
 
             {(canPrev || canNext) && (
-              <div className="mt-10 flex items-center justify-center gap-2">
+              <div className="mt-12 flex items-center justify-center gap-2">
                 <button type="button" disabled={!canPrev} onClick={() => changePage(Math.max(0, page - 1))}
-                  className={`rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-2.5 text-[13px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>← Previous</button>
-                <span className="rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-2 text-[12px] font-bold text-[var(--bridge-text-faint)]">Page {page + 1}</span>
+                  className={`rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-2.5 text-[13px] font-semibold text-[var(--bridge-text-secondary)] shadow-bridge-tile transition hover:-translate-y-px hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>← Previous</button>
+                <span className="rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-2 text-[12px] font-bold text-[var(--bridge-text-faint)] shadow-bridge-tile">Page {page + 1}</span>
                 <button type="button" disabled={!canNext} onClick={() => changePage(page + 1)}
-                  className={`rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-2.5 text-[13px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>Next →</button>
+                  className={`rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-2.5 text-[13px] font-semibold text-[var(--bridge-text-secondary)] shadow-bridge-tile transition hover:-translate-y-px hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}>Next →</button>
               </div>
             )}
           </div>
         ) : !error ? (
-          <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-2xl border border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface)]/60 px-6 py-24 text-center">
-            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]">
-              <svg className="h-6 w-6 text-[var(--bridge-text-faint)]" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.35-4.35" strokeLinecap="round" /></svg>
+          <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-[1.75rem] border border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface)]/66 px-6 py-24 text-center shadow-bridge-card backdrop-blur-xl">
+            <div aria-hidden className="pointer-events-none absolute -top-20 h-48 w-48 rounded-full bg-orange-400/10 blur-3xl" />
+            <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-tile">
+              <svg className="h-6 w-6 text-orange-500/80" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.35-4.35" strokeLinecap="round" /></svg>
             </div>
             <p className="relative mt-4 font-display text-xl font-bold text-[var(--bridge-text)]">Nobody fits that combo</p>
             <p className="relative mt-2 max-w-sm text-[13px] leading-relaxed text-[var(--bridge-text-muted)]">Try loosening a filter or using a different keyword.</p>
             <button type="button" onClick={resetFilters}
-              className={`relative mt-5 rounded-lg border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-2 text-[13px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] ${focusRing}`}>
+              className={`relative mt-5 rounded-xl bg-[var(--bridge-text)] px-5 py-2.5 text-[13px] font-bold text-[var(--bridge-canvas)] shadow-bridge-accent transition hover:-translate-y-px hover:brightness-110 ${focusRing}`}>
               Reset filters
             </button>
           </div>

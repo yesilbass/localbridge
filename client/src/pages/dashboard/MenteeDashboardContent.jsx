@@ -301,7 +301,7 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
               </div>
 
               {/* Activity feed */}
-              <ActivityFeed history={visibleHistory} role="mentee" total={historySessions.length} showAll={showAllHistory} onToggle={() => setShowAllHistory(v => !v)} />
+              <ActivityFeed history={visibleHistory} role="mentee" total={historySessions.length} showAll={showAllHistory} onToggle={() => setShowAllHistory(v => !v)} mentorMap={mentorMap} />
             </div>
           </div>
         </div>

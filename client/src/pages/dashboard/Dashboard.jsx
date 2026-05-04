@@ -7,8 +7,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarDays, Users, Settings,
-  Plus, X, AlertCircle, LogOut, Sparkles, TrendingUp,
-  Clock, Star, ChevronRight,
+  Plus, X, AlertCircle, TrendingUp,
+  Clock,
 } from 'lucide-react';
 import { useAuth } from '../../context/useAuth.js';
 import { isMentorAccount } from '../../utils/accountRole.js';
@@ -36,10 +36,11 @@ function TabBar({ tabs, activeTab, setActiveTab }) {
     const el = tabRefs.current[activeTab];
     if (!el) return;
     setPill({ left: el.offsetLeft, width: el.offsetWidth });
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }, [activeTab, tabs]);
 
   return (
-    <div className="border-b border-[var(--bridge-border)] bg-[var(--bridge-canvas)]/80 backdrop-blur-2xl">
+    <div className="border-b border-[var(--bridge-border)] bg-[var(--bridge-canvas)]/82 shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] backdrop-blur-2xl">
       <div className="relative mx-auto flex max-w-[90rem] overflow-x-auto px-4 sm:px-6 lg:px-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {/* Active background pill — floats behind active tab */}
         <div aria-hidden
@@ -59,7 +60,7 @@ function TabBar({ tabs, activeTab, setActiveTab }) {
               onClick={() => setActiveTab(tab.id)}
               aria-current={active ? 'page' : undefined}
               data-cursor="hover"
-              className={`relative z-10 flex shrink-0 items-center gap-2 px-4 py-3.5 text-[13px] font-bold whitespace-nowrap transition-colors duration-200 sm:px-5 ${
+              className={`group relative z-10 flex shrink-0 items-center gap-2 px-4 py-3.5 text-[13px] font-bold whitespace-nowrap transition-colors duration-200 sm:px-5 ${
                 active
                   ? 'text-orange-500 dark:text-orange-400'
                   : 'text-[var(--bridge-text-muted)] hover:text-[var(--bridge-text)]'
@@ -156,21 +157,21 @@ export default function Dashboard() {
       <div className="sticky top-[3.75rem] z-30 sm:top-16">
 
         {/* Greeting + actions band */}
-        <div className="relative border-b border-[var(--bridge-border)] bg-[var(--bridge-canvas)]/80 backdrop-blur-2xl">
+        <div className="relative border-b border-[var(--bridge-border)] bg-[var(--bridge-canvas)]/82 shadow-bridge-tile backdrop-blur-2xl">
           {/* Top accent */}
           <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px"
             style={{ background: 'linear-gradient(90deg, transparent, rgba(251,146,60,0.32) 35%, rgba(251,191,36,0.32) 65%, transparent)' }} />
           {/* Noise */}
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.018]" />
 
-          <div className="relative mx-auto flex max-w-[90rem] flex-wrap items-center justify-between gap-3 px-4 py-5 sm:px-6 lg:px-8">
+          <div className="relative mx-auto flex max-w-[90rem] flex-col items-stretch justify-between gap-4 px-4 py-4 sm:px-6 md:flex-row md:items-center lg:px-8">
 
             {/* Left: greeting + meta */}
-            <div className="flex items-center gap-4 min-w-0">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               {/* Avatar with glow ring */}
-              <div className="relative hidden shrink-0 sm:block">
+              <div className="relative shrink-0">
                 <span aria-hidden className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-br from-orange-500/40 via-amber-400/30 to-rose-400/25 opacity-70 blur-md" />
-                <div className={`relative flex h-12 w-12 items-center justify-center rounded-2xl text-sm font-black ring-2 ring-[var(--bridge-border-strong)] ${avatarColor}`}>
+                <div className={`relative flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-black ring-2 ring-[var(--bridge-border-strong)] sm:h-12 sm:w-12 ${avatarColor}`}>
                   {user.user_metadata?.avatar_url
                     ? <img src={user.user_metadata.avatar_url} alt="" className="h-full w-full rounded-2xl object-cover" />
                     : avatarInits}
@@ -179,7 +180,7 @@ export default function Dashboard() {
 
               <div className="min-w-0">
                 {/* Editorial greeting */}
-                <h1 className="truncate font-display text-2xl font-black tracking-[-0.025em] text-[var(--bridge-text)] sm:text-[1.85rem]" style={{ lineHeight: '1.05' }}>
+                <h1 className="truncate font-display text-[1.45rem] font-black tracking-[-0.03em] text-[var(--bridge-text)] sm:text-[1.85rem]" style={{ lineHeight: '1.05' }}>
                   Good {greeting},{' '}
                   <span className="text-gradient-bridge italic">{firstName}</span>
                   <span aria-hidden className="ml-2 inline-block align-baseline">
@@ -207,9 +208,9 @@ export default function Dashboard() {
             </div>
 
             {/* Right: stat chips + CTA */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 md:justify-end">
               {/* Mini stat chips */}
-              <div className="hidden items-center gap-1.5 sm:flex">
+              <div className="flex items-center gap-1.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] max-sm:w-full [&::-webkit-scrollbar]:hidden">
                 <StatChip icon={CalendarDays} value={totalSessions}  label="total sessions" />
                 <StatChip icon={Clock}        value={upcomingCount}  label="upcoming"       accent={upcomingCount > 0} />
                 {isMentor && pendingCount > 0 && (
@@ -244,7 +245,7 @@ export default function Dashboard() {
       {/* ═══════════════════════════════════════════════════════
           CONTENT
       ═══════════════════════════════════════════════════════ */}
-      <main className="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <main className="mx-auto w-full max-w-[90rem] px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
         {/* Today / live banner — only renders when an accepted session is within 6h */}
         {dash.nextSession && (
           <div className="mb-6">

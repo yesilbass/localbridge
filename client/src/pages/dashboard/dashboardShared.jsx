@@ -84,17 +84,17 @@ export function SectionHeading({ id, children, count, action, kicker }) {
 export function StatCard({ label, value, icon: Icon, gradient = 'from-orange-500 to-amber-500', hint, trend, subValue, kinetic = true }) {
   const numeric = typeof value === 'number';
   return (
-    <div className="bd-card-edge group relative overflow-hidden rounded-2xl bg-[var(--bridge-surface)] p-5 shadow-sm ring-1 ring-[var(--bridge-border)] transition-all duration-500 hover:-translate-y-1 hover:shadow-xl hover:ring-[var(--bridge-border-strong)]">
-      <div aria-hidden className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br opacity-15 blur-2xl transition-opacity duration-500 group-hover:opacity-40 ${gradient}`} />
+    <div className="bd-card-edge group relative overflow-hidden rounded-[1.35rem] bg-[var(--bridge-surface)] p-4 shadow-bridge-tile ring-1 ring-[var(--bridge-border)] transition-all duration-500 hover:-translate-y-1 hover:shadow-bridge-float hover:ring-[var(--bridge-border-strong)] sm:p-5">
+      <div aria-hidden className={`pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gradient-to-br opacity-[0.18] blur-2xl transition-opacity duration-500 group-hover:opacity-[0.45] ${gradient}`} />
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.025]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '14px 14px', color: 'currentColor' }} />
       <div className="relative flex items-start justify-between">
-        <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-[0_8px_22px_-6px_rgba(234,88,12,0.55)] ring-1 ring-white/15 transition-transform duration-500 group-hover:scale-105 group-hover:rotate-[-3deg] ${gradient}`}>
-          <Icon className="h-5 w-5" />
+        <div className={`inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-[0_8px_22px_-6px_rgba(234,88,12,0.55)] ring-1 ring-white/15 transition-transform duration-500 group-hover:scale-105 group-hover:rotate-[-3deg] sm:h-10 sm:w-10 ${gradient}`}>
+          <Icon className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
         </div>
         {trend && <StatTrendInline {...trend} />}
       </div>
-      <div className="relative mt-4 flex items-baseline gap-1.5">
-        <p className="font-display text-[2.35rem] font-black tabular-nums leading-none tracking-[-0.02em] text-[var(--bridge-text)]">
+      <div className="relative mt-4 flex items-baseline gap-1.5 sm:mt-5">
+        <p className="font-display text-[2rem] font-black tabular-nums leading-none tracking-[-0.03em] text-[var(--bridge-text)] sm:text-[2.45rem]">
           {kinetic && numeric ? <KineticInline to={value} /> : value}
         </p>
         {subValue != null && (
@@ -354,10 +354,10 @@ export function MentorCard({ mentor }) {
 // ─── SearchBar ─────────────────────────────────────────────────────────────────
 export function SearchBar({ value, onChange, placeholder }) {
   return (
-    <div className="relative max-w-xs flex-1 sm:min-w-[16rem]">
+    <div className="relative w-full flex-1 sm:max-w-xs sm:min-w-[16rem]">
       <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--bridge-text-muted)] transition-colors peer-focus:text-orange-500" />
       <input type="text" placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)}
-        className="peer w-full rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-3 pl-11 pr-4 text-sm font-semibold text-[var(--bridge-text)] shadow-sm transition focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25"
+        className="peer w-full rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-3 pl-11 pr-10 text-sm font-semibold text-[var(--bridge-text)] shadow-bridge-tile transition focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25"
       />
       {value && (
         <button type="button" onClick={() => onChange('')} aria-label="Clear"
@@ -380,11 +380,11 @@ export function NoMatch() {
 }
 
 // ─── ActivityFeed ──────────────────────────────────────────────────────────────
-export function ActivityFeed({ history, role, total, showAll, onToggle }) {
+export function ActivityFeed({ history, role, total, showAll, onToggle, mentorMap = {} }) {
   return (
-    <div className="bd-card-edge relative overflow-hidden rounded-3xl bg-[var(--bridge-surface)] p-5 shadow-sm ring-1 ring-[var(--bridge-border)]">
+    <div className="bd-card-edge relative overflow-hidden rounded-3xl bg-[var(--bridge-surface)] p-5 shadow-bridge-tile ring-1 ring-[var(--bridge-border)]">
       <div aria-hidden className="pointer-events-none absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-amber-400/12 blur-3xl" />
-      <div className="relative mb-4 flex items-center justify-between">
+      <div className="relative mb-5 flex items-center justify-between">
         <p className="text-[10px] font-black uppercase tracking-[0.22em] text-orange-500">Recent activity</p>
         <span className="text-[9px] font-bold text-[var(--bridge-text-faint)]">{total} total</span>
       </div>
@@ -393,9 +393,9 @@ export function ActivityFeed({ history, role, total, showAll, onToggle }) {
           <div aria-hidden className="absolute left-[0.6rem] top-2 bottom-2 w-px bg-gradient-to-b from-orange-400/40 via-[var(--bridge-border)] to-transparent" />
           {history.map((s) => {
             const done = s.status === 'completed';
-            const name = role === 'mentor' ? s.mentee_name : s.mentor_name;
+            const name = role === 'mentor' ? s.mentee_name : (mentorMap[s.mentor_id]?.name ?? s.mentor_name);
             return (
-              <div key={s.id} className="group relative flex items-start gap-3.5 pl-1">
+              <div key={s.id} className="group relative flex items-start gap-3.5 rounded-2xl py-1 pl-1 transition hover:bg-[var(--bridge-surface-muted)]/45">
                 <div className={`relative z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 ring-[var(--bridge-canvas)] transition-all duration-300 group-hover:scale-110 ${done ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-[0_0_14px_rgba(16,185,129,0.5)]' : 'bg-stone-300 dark:bg-stone-600'}`}>
                   {done ? <CheckCircle2 className="h-3 w-3 text-white" /> : <Clock className="h-3 w-3 text-white" />}
                 </div>
@@ -403,7 +403,7 @@ export function ActivityFeed({ history, role, total, showAll, onToggle }) {
                   <p className="text-xs font-bold text-[var(--bridge-text)]">
                     {done ? 'Session completed' : `Session ${s.status}`}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-[var(--bridge-text-muted)]">with {name}</p>
+                  <p className="mt-0.5 truncate text-[11px] text-[var(--bridge-text-muted)]">with {name ?? (role === 'mentor' ? 'Mentee' : 'Mentor')}</p>
                 </div>
               </div>
             );

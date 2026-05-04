@@ -61,9 +61,10 @@ export default function Landing() {
       <FloatingDock />
 
       {/* Brand trust strip */}
-      <section className="relative border-b border-[var(--bridge-border)] bg-[var(--bridge-canvas)] py-4">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <p className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.32em] text-[var(--bridge-text-muted)]">
+      <section className="relative border-y border-[var(--bridge-border)] bg-[var(--bridge-canvas)]/92 py-5 backdrop-blur-xl">
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_80%_at_50%_-20%,rgba(234,88,12,.08),transparent_62%)]" />
+        <div className="relative mx-auto max-w-bridge px-4 sm:px-6 lg:px-8">
+          <p className="mb-4 text-center text-[10px] font-black uppercase tracking-[0.34em] text-[var(--bridge-text-muted)]">
             Mentors from the world's best companies
           </p>
           <BrandStrip />
