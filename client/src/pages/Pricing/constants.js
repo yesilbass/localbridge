@@ -101,11 +101,11 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'Is there a free trial for paid plans?',
-    a: 'The Free tier already covers real usage. If we add trials later we'll say so clearly.',
+    a: "The Free tier already covers real usage. If we add trials later we'll say so clearly.",
   },
   {
     q: 'What about refunds?',
-    a: 'Cancel anytime and you won't be billed again. For mid-cycle refunds, contact support — we handle these case by case.',
+    a: "Cancel anytime and you won't be billed again. For mid-cycle refunds, contact support — we handle these case by case.",
   },
 ];
 
