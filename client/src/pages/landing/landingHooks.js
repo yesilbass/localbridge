@@ -34,6 +34,39 @@ export function useCountUp(target, duration = 1200) {
   return [ref, val];
 }
 
+// Detects low-power devices so we can skip GPU-heavy effects (blurs, shimmers, big SVG, infinite anims).
+// Tier: 'low' | 'mid' | 'high'.
+export function usePerfTier() {
+  const [tier, setTier] = useState(() => {
+    if (typeof window === 'undefined') return 'high';
+    return computeTier();
+  });
+  useEffect(() => {
+    setTier(computeTier());
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onChange = () => setTier(computeTier());
+    mq.addEventListener?.('change', onChange);
+    return () => mq.removeEventListener?.('change', onChange);
+  }, []);
+  return tier;
+}
+
+function computeTier() {
+  if (typeof window === 'undefined') return 'high';
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) return 'low';
+  const conn = navigator.connection || navigator.webkitConnection;
+  if (conn?.saveData) return 'low';
+  if (conn?.effectiveType && /^(slow-2g|2g|3g)$/.test(conn.effectiveType)) return 'low';
+  const cores = navigator.hardwareConcurrency || 8;
+  const mem = navigator.deviceMemory || 8;
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  const narrow = window.innerWidth < 640;
+  if (mem <= 2 || cores <= 2) return 'low';
+  if (mem <= 4 || cores <= 4 || (isMobile && narrow)) return 'mid';
+  return 'high';
+}
+
 export function useScrollProgress() {
   const [p, setP] = useState(0);
   useEffect(() => {

@@ -5,6 +5,7 @@ import { useAuth } from '../../context/useAuth';
 import CustomCursor from '../../components/CustomCursor.jsx';
 
 import { LANDING_CSS } from './landingStyles';
+import { usePerfTier } from './landingHooks';
 import IntroLoader from './IntroLoader';
 import ScrollProgressBar from './ScrollProgressBar';
 import FloatingDock from './FloatingDock';
@@ -22,6 +23,8 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function Landing() {
   const { user } = useAuth();
+  const tier = usePerfTier();
+  const isLow = tier === 'low';
   const [ready, setReady] = useState(false);
   const [isDark, setIsDark] = useState(
     () => typeof window !== 'undefined' && document.documentElement.classList.contains('theme-dark')
@@ -41,6 +44,14 @@ export default function Landing() {
   }, []);
 
   useEffect(() => {
+    if (isLow) {
+      // Lite: just snap them visible — no scroll-triggered animation overhead.
+      document.querySelectorAll('[data-gsap-fade]').forEach(el => {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+      });
+      return;
+    }
     const els = document.querySelectorAll('[data-gsap-fade]');
     els.forEach(el => {
       gsap.fromTo(el, { y: 40, opacity: 0 }, {
@@ -49,7 +60,7 @@ export default function Landing() {
       });
     });
     return () => ScrollTrigger.getAll().forEach(t => t.kill());
-  }, []);
+  }, [isLow]);
 
   return (
     <div className="relative overflow-x-hidden">
