@@ -14,10 +14,9 @@ const VECTORS = [
   { lx:  '240px', ly: '-190px', rx: '-95deg', ry:  '-55deg'},
 ];
 
-// Warm-gold gradient used on the wordmark — hardcoded so it works even before
-// LANDING_PALETTE_CSS vars are resolved.
-const MOLTEN =
-  'linear-gradient(90deg,#F97316 0%,#FB923C 20%,#FBBF24 40%,#FFF7ED 55%,#FBBF24 70%,#FB923C 85%,#F97316 100%)';
+// Refined indigo wordmark gradient — investor-grade, modern
+const BRAND_GRADIENT =
+  'linear-gradient(90deg,#4F46E5 0%,#7C7CFF 22%,#A5B4FC 45%,#FFFFFF 55%,#A5B4FC 70%,#7C7CFF 85%,#4F46E5 100%)';
 
 const CSS = `
   @keyframes brLetIn{
@@ -38,7 +37,7 @@ const CSS = `
     0%  { opacity:0; }
     100%{ opacity:1; }
   }
-  @keyframes brGold{
+  @keyframes brShimmer{
     0%,100%{ background-position:0% 50%; }
     50%    { background-position:100% 50%; }
   }
@@ -47,9 +46,7 @@ const CSS = `
   }
 `;
 
-// Durations per tier (ms)
 const TOTAL  = { high: 2000, mid: 1200, low: 550 };
-// When exit animation begins (ms before total ends)
 const EXIT_D = { high:  420, mid:  360, low: 280 };
 
 export default function IntroLoader() {
@@ -62,8 +59,6 @@ export default function IntroLoader() {
 
   const [done,    setDone]    = useState(false);
   const [exiting, setExiting] = useState(false);
-  // mounted is set synchronously via useLayoutEffect so the overlay renders
-  // on the very first paint — no flash of page content before the intro.
   const [mounted, setMounted] = useState(false);
 
   useLayoutEffect(() => {
@@ -71,7 +66,6 @@ export default function IntroLoader() {
     try {
       if (sessionStorage.getItem('bridge_intro_seen') === '1') setDone(true);
     } catch {
-      // Private browsing / storage blocked → skip intro
       setDone(true);
     }
   }, []);
@@ -83,7 +77,7 @@ export default function IntroLoader() {
     document.body.style.overflow = 'hidden';
 
     const finish = () => {
-      try { sessionStorage.setItem('bridge_intro_seen', '1'); } catch {}
+      try { sessionStorage.setItem('bridge_intro_seen', '1'); } catch { /* ignore */ }
       document.body.style.overflow = prevOverflow;
       setDone(true);
     };
@@ -115,13 +109,12 @@ export default function IntroLoader() {
     if (exiting) return;
     setExiting(true);
     setTimeout(() => {
-      try { sessionStorage.setItem('bridge_intro_seen', '1'); } catch {}
+      try { sessionStorage.setItem('bridge_intro_seen', '1'); } catch { /* ignore */ }
       document.body.style.overflow = '';
       setDone(true);
     }, exitMs);
   }
 
-  // Stagger delays for each letter entrance
   const letterDelay = (i) => (isLow ? 0 : isMid ? 0.06 : 0.08) * i + (isLow ? 0.05 : 0.12);
 
   return createPortal(
@@ -139,25 +132,25 @@ export default function IntroLoader() {
     >
       <style>{CSS}</style>
 
-      {/* Background */}
+      {/* Background — deep midnight navy */}
       <div
         aria-hidden
         className="absolute inset-0"
-        style={{ background: 'radial-gradient(ellipse 130% 100% at 50% 55%, #1a0c05 0%, #0a0402 50%, #000 100%)' }}
+        style={{ background: 'radial-gradient(ellipse 130% 100% at 50% 55%, #0A0F2C 0%, #050818 50%, #000 100%)' }}
       />
 
-      {/* Ambient glows — high tier only, skipped on low/mid for performance */}
+      {/* Ambient glows — high tier only */}
       {!isLow && !isMid && (
         <>
           <div aria-hidden className="absolute pointer-events-none rounded-full" style={{
             left: '22%', top: '28%', width: '52vmin', height: '52vmin',
-            background: 'radial-gradient(circle, rgba(249,115,22,0.28) 0%, transparent 65%)',
+            background: 'radial-gradient(circle, rgba(124,124,255,0.32) 0%, transparent 65%)',
             filter: 'blur(48px)',
             animation: 'brFadeIn 1s ease-out 0.1s both',
           }} />
           <div aria-hidden className="absolute pointer-events-none rounded-full" style={{
             left: '60%', top: '48%', width: '42vmin', height: '42vmin',
-            background: 'radial-gradient(circle, rgba(251,191,36,0.18) 0%, transparent 65%)',
+            background: 'radial-gradient(circle, rgba(165,180,252,0.20) 0%, transparent 65%)',
             filter: 'blur(48px)',
             animation: 'brFadeIn 1s ease-out 0.2s both',
           }} />
@@ -176,13 +169,12 @@ export default function IntroLoader() {
       >
         {/* Wordmark */}
         {isLow ? (
-          // Low-tier: single element, no 3D, simple fade
           <p
             className="font-display font-black"
             style={{
               fontSize: 'clamp(3rem, 8vw, 6rem)',
               letterSpacing: '-0.045em',
-              background: MOLTEN,
+              background: BRAND_GRADIENT,
               backgroundSize: '200% 100%',
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
@@ -193,24 +185,22 @@ export default function IntroLoader() {
             BRIDGE
           </p>
         ) : isMid ? (
-          // Mid-tier: single element with subtle gold shimmer
           <p
             className="font-display font-black"
             style={{
               fontSize: 'clamp(3rem, 8vw, 6rem)',
               letterSpacing: '-0.045em',
-              background: MOLTEN,
+              background: BRAND_GRADIENT,
               backgroundSize: '300% 100%',
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
               color: 'transparent',
-              animation: 'brFadeIn 0.45s cubic-bezier(0.22,1,0.36,1) 0.08s both, brGold 3s ease-in-out infinite',
+              animation: 'brFadeIn 0.45s cubic-bezier(0.22,1,0.36,1) 0.08s both, brShimmer 3s ease-in-out infinite',
             }}
           >
             BRIDGE
           </p>
         ) : (
-          // High-tier: individual 3D letter entrance
           <div
             className="flex items-baseline font-display font-black"
             style={{
@@ -225,7 +215,7 @@ export default function IntroLoader() {
                 key={i}
                 style={{
                   display: 'inline-block',
-                  background: MOLTEN,
+                  background: BRAND_GRADIENT,
                   backgroundSize: '300% 100%',
                   WebkitBackgroundClip: 'text',
                   backgroundClip: 'text',
@@ -234,8 +224,8 @@ export default function IntroLoader() {
                   '--lx': VECTORS[i].lx,
                   '--ly': VECTORS[i].ly,
                   '--rx': VECTORS[i].rx,
-                  filter: 'drop-shadow(0 0 14px rgba(249,115,22,0.40))',
-                  animation: `brLetIn 0.75s cubic-bezier(0.22,1,0.36,1) ${letterDelay(i)}s forwards, brGold 3.2s ease-in-out ${0.7}s infinite`,
+                  filter: 'drop-shadow(0 0 14px rgba(124,124,255,0.50))',
+                  animation: `brLetIn 0.75s cubic-bezier(0.22,1,0.36,1) ${letterDelay(i)}s forwards, brShimmer 3.2s ease-in-out 0.7s infinite`,
                   willChange: 'transform,opacity',
                 }}
               >
@@ -245,7 +235,7 @@ export default function IntroLoader() {
           </div>
         )}
 
-        {/* Underline accent — mid and high only */}
+        {/* Underline accent */}
         {!isLow && (
           <div
             aria-hidden
@@ -259,7 +249,7 @@ export default function IntroLoader() {
           >
             <div style={{
               height: '100%',
-              background: 'linear-gradient(90deg, transparent, rgba(249,115,22,0.9) 25%, rgba(255,247,237,0.95) 50%, rgba(251,191,36,0.85) 75%, transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(124,124,255,0.95) 25%, rgba(255,255,255,0.95) 50%, rgba(165,180,252,0.85) 75%, transparent)',
               transformOrigin: 'left',
               transform: 'scaleX(0)',
               opacity: 0,
@@ -268,7 +258,7 @@ export default function IntroLoader() {
           </div>
         )}
 
-        {/* Tagline — high tier only */}
+        {/* Tagline */}
         {!isLow && !isMid && (
           <div
             style={{
@@ -288,7 +278,7 @@ export default function IntroLoader() {
               style={{
                 fontSize: 'clamp(0.5rem, 0.85vw, 0.62rem)',
                 letterSpacing: '0.40em',
-                color: 'rgba(255,255,255,0.58)',
+                color: 'rgba(255,255,255,0.62)',
               }}
             >
               Mentorship · Networking · Outcomes
@@ -296,14 +286,13 @@ export default function IntroLoader() {
           </div>
         )}
 
-        {/* Skip hint */}
         <p
           aria-hidden
           style={{
             position: 'absolute',
             bottom: '2rem',
             opacity: 0,
-            color: 'rgba(255,255,255,0.25)',
+            color: 'rgba(255,255,255,0.28)',
             fontSize: '0.6rem',
             letterSpacing: '0.22em',
             textTransform: 'uppercase',

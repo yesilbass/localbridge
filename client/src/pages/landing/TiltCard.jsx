@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react';
 
-export default function TiltCard({ children, className = '', n = 8, onClick }) {
+export default function TiltCard({ children, className = '', n = 8, onClick, style }) {
   const r = useRef(null);
 
   const handleMouseMove = useCallback(e => {
@@ -26,7 +26,7 @@ export default function TiltCard({ children, className = '', n = 8, onClick }) {
     <div
       ref={r}
       className={`tilt-card cursor-glow ${className}`}
-      style={{ '--tilt-x': '0deg', '--tilt-y': '0deg' }}
+      style={{ '--tilt-x': '0deg', '--tilt-y': '0deg', ...style }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}

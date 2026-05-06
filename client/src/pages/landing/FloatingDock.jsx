@@ -4,10 +4,10 @@ import { useFooterOffset } from '../../utils/useFooterOffset';
 
 const NAV_ITEMS = [
   { label: 'Home', id: 'top' },
-  { label: 'How It Works', id: 'how' },
+  { label: 'How it works', id: 'how' },
   { label: 'Mentors', id: 'mentors' },
   { label: 'Outcomes', id: 'outcomes' },
-  { label: 'Get Started', id: 'start', primary: true },
+  { label: 'Get started', id: 'start', primary: true },
 ];
 
 export default function FloatingDock() {
@@ -37,17 +37,43 @@ export default function FloatingDock() {
         transition: 'transform 500ms cubic-bezier(0.16,1,0.3,1),opacity 380ms ease',
       }}
     >
-      <nav className="pointer-events-auto flex items-center gap-1 rounded-full border border-white/[0.07] bg-[#0c0906]/95 px-2 py-2 shadow-[0_24px_80px_rgba(0,0,0,0.85),0_0_100px_color-mix(in srgb, var(--color-primary) 12%, transparent)] backdrop-blur-2xl">
+      <nav
+        className="pointer-events-auto flex items-center gap-1 rounded-full px-2 py-2 backdrop-blur-2xl"
+        style={{
+          backgroundColor: 'rgba(7,7,15,0.94)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.5), 0 0 100px color-mix(in srgb, var(--color-primary) 14%, transparent)',
+        }}
+      >
         {NAV_ITEMS.map((item, i) => (
           <button
             key={i}
             onClick={() => scrollTo(item.id)}
             data-cursor="hover"
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-[11px] font-semibold transition-all duration-200 ${
+            className="whitespace-nowrap rounded-full px-4 py-2 text-[11.5px] font-semibold transition-all duration-200"
+            style={
               item.primary
-                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-[0_0_30px_color-mix(in srgb, var(--color-primary) 50%, transparent)]'
-                : 'text-white/38 hover:bg-white/[0.06] hover:text-white/80'
-            }`}
+                ? {
+                    backgroundImage: 'linear-gradient(135deg, var(--color-primary) 0%, var(--lp-grad-mid) 100%)',
+                    color: '#FFFFFF',
+                    boxShadow: '0 0 30px color-mix(in srgb, var(--color-primary) 50%, transparent)',
+                  }
+                : {
+                    color: 'rgba(255,255,255,0.45)',
+                  }
+            }
+            onMouseEnter={(e) => {
+              if (!item.primary) {
+                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)';
+                e.currentTarget.style.color = 'rgba(255,255,255,0.92)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!item.primary) {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'rgba(255,255,255,0.45)';
+              }
+            }}
           >
             {item.label}
           </button>

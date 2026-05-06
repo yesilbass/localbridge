@@ -1,44 +1,53 @@
+import { Zap, DollarSign, MessageSquare, Video, Target, Filter, ArrowRight } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
 import TiltCard from './TiltCard';
 
 const PROMISE_CARDS = [
   {
-    icon: '⚡',
+    Icon: Zap,
     title: 'One session at a time',
-    desc: 'No packages, no lock-ins. Pay for exactly what you need.',
+    desc: 'No packages, no lock-ins. Pay for exactly what you need — nothing more.',
     extra: (
-      <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-[var(--bridge-text-faint)]">
+      <div className="mt-3 flex items-center gap-2 text-[10.5px] font-bold" style={{ color: 'var(--bridge-text-faint)' }}>
         <span className="line-through opacity-50">3-month pkg</span>
-        <svg className="h-3 w-3 text-[var(--bridge-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-          <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <span className="text-[var(--bridge-accent)]">1 hour</span>
+        <ArrowRight className="h-3 w-3" style={{ color: 'var(--color-primary)' }} />
+        <span style={{ color: 'var(--color-primary)' }}>1 hour</span>
       </div>
     ),
   },
   {
-    icon: '💵',
+    Icon: DollarSign,
     title: 'Price on every profile',
-    desc: 'No "contact us for pricing" opacity. Rates are front and center.',
+    desc: 'No "contact us for pricing" opacity. Rates are front and center, always.',
   },
   {
-    icon: '💬',
+    Icon: MessageSquare,
     title: 'Unfiltered reviews',
-    desc: 'All reviews published — good and critical. No curation.',
+    desc: 'All reviews published — good and critical. No curation, no censoring.',
   },
   {
-    icon: '🎥',
+    Icon: Video,
     title: 'Built-in video, zero friction',
     desc: 'Custom room auto-generated per session. No Zoom links needed.',
   },
   {
-    icon: '🎯',
-    title: 'Sessions with a structure',
+    Icon: Target,
+    title: 'Sessions with structure',
     desc: "Four named formats so you walk in knowing what you'll walk out with.",
     extra: (
       <div className="mt-3 flex flex-wrap gap-1.5">
         {['Career Advice', 'Interview Prep', 'Resume Review', 'Networking'].map(t => (
-          <span key={t} className="rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-2.5 py-0.5 text-[10px] font-semibold text-[var(--bridge-text-muted)]">{t}</span>
+          <span
+            key={t}
+            className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
+            style={{
+              backgroundColor: 'var(--bridge-surface-muted)',
+              color: 'var(--bridge-text-muted)',
+              boxShadow: '0 0 0 1px var(--bridge-border) inset',
+            }}
+          >
+            {t}
+          </span>
         ))}
       </div>
     ),
@@ -48,42 +57,95 @@ const PROMISE_CARDS = [
 
 export default function ManifestoSection() {
   return (
-    <section className="relative overflow-hidden bg-[var(--bridge-canvas)] py-20 sm:py-24 lg:py-32">
-      <div className="relative z-10 mx-auto max-w-bridge px-4 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden py-24 sm:py-28 lg:py-32" style={{ backgroundColor: 'var(--bridge-canvas)' }}>
+      <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
           <div className="mb-12 grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">Why Bridge works</p>
-              <h2 className="mt-3 font-display font-black leading-[1.02] tracking-tight text-[var(--bridge-text)]"
-                style={{ fontSize: 'clamp(2rem, min(5vw, 4.2rem), 4.2rem)' }}>
-                Six promises.<br /><span className="text-gradient-bridge">Zero exceptions.</span>
+              <p className="text-[10px] font-black uppercase tracking-[0.32em]" style={{ color: 'var(--color-primary)' }}>
+                Why Bridge works
+              </p>
+              <h2
+                className="mt-3 font-display font-black leading-[0.98] tracking-tight"
+                style={{ fontSize: 'clamp(2rem, 4.8vw, 3.75rem)', color: 'var(--bridge-text)' }}
+              >
+                Six promises.<br />
+                <span
+                  className="bg-clip-text text-transparent"
+                  style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)' }}
+                >
+                  Zero exceptions.
+                </span>
               </h2>
             </div>
-            <p className="max-w-sm text-sm leading-7 text-[var(--bridge-text-muted)]">
+            <p
+              className="max-w-sm text-[14px] leading-7"
+              style={{ color: 'var(--bridge-text-muted)' }}
+            >
               Built around the things career platforms keep getting wrong — because we lived through them too.
             </p>
           </div>
         </RevealOnScroll>
 
-        {/* Featured promise */}
+        {/* Featured promise — "The filter" */}
         <RevealOnScroll delay={0} variant="flip">
-          <TiltCard n={3} className="group relative mb-4 overflow-hidden rounded-[2rem] border border-orange-500/22 bg-[var(--bridge-surface)] p-7 shadow-bridge-glow sm:p-9 b-glow-border b-flare">
-            <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse 50% 70% at 100% 0%,color-mix(in srgb, var(--color-primary) 8%, transparent),transparent 70%)' }} />
-            <div className="relative grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
+          <TiltCard
+            n={3}
+            className="group relative mb-4 overflow-hidden rounded-[1.75rem] p-7 sm:p-9"
+            style={{
+              backgroundColor: 'var(--bridge-surface)',
+              boxShadow: '0 30px 60px -30px color-mix(in srgb, var(--color-primary) 28%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-primary) 22%, transparent) inset',
+            }}
+          >
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background: 'radial-gradient(ellipse 50% 70% at 100% 0%, color-mix(in srgb, var(--color-primary) 9%, transparent), transparent 70%)',
+              }}
+            />
+            <div className="relative grid gap-7 sm:grid-cols-[1fr_auto] sm:items-center">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/22 bg-orange-500/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-[var(--bridge-accent)] mb-4">
-                  <span className="h-1.5 w-1.5 rounded-full bg-orange-400" /> The filter
+                <div
+                  className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] mb-4"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                    color: 'var(--color-primary)',
+                    boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-primary) 28%, transparent) inset',
+                  }}
+                >
+                  <Filter className="h-3 w-3" />
+                  The filter
                 </div>
-                <h3 className="font-display text-2xl font-black leading-tight tracking-[-0.025em] text-[var(--bridge-text)] sm:text-4xl">
-                  Only people who've <span className="text-gradient-bridge">done your job</span>.
+                <h3
+                  className="font-display text-[28px] font-black leading-[1.05] tracking-[-0.025em] sm:text-[40px]"
+                  style={{ color: 'var(--bridge-text)' }}
+                >
+                  Only people who&rsquo;ve <span
+                    className="bg-clip-text text-transparent"
+                    style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)' }}
+                  >done your job</span>.
                 </h3>
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--bridge-text-muted)]">
-                  Every mentor has lived the exact role you're targeting. We filter on outcome, not credentials. No generic coaches, no unverified bios.
+                <p
+                  className="mt-4 max-w-2xl text-[14.5px] leading-7"
+                  style={{ color: 'var(--bridge-text-muted)' }}
+                >
+                  Every mentor has lived the exact role you&rsquo;re targeting. We filter on outcome, not credentials. No generic coaches, no unverified bios, no bullshit.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-1.5 sm:max-w-[220px]">
+              <div className="flex flex-wrap gap-1.5 sm:max-w-[240px]">
                 {['PMs at Series B+', 'EMs at hyperscalers', 'RNs → UX', 'VPs of Sales', 'Founders post-YC', 'Top studios'].map(t => (
-                  <span key={t} className="rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-2.5 py-1 text-[10px] font-medium text-[var(--bridge-text-muted)]">{t}</span>
+                  <span
+                    key={t}
+                    className="rounded-full px-2.5 py-1 text-[10px] font-medium"
+                    style={{
+                      backgroundColor: 'var(--bridge-surface-muted)',
+                      color: 'var(--bridge-text-secondary)',
+                      boxShadow: '0 0 0 1px var(--bridge-border) inset',
+                    }}
+                  >
+                    {t}
+                  </span>
                 ))}
               </div>
             </div>
@@ -99,14 +161,38 @@ export default function ManifestoSection() {
               variant={i % 2 === 0 ? 'flip-right' : 'flip-left'}
               className={card.wide ? 'sm:col-span-1 lg:col-span-2' : ''}
             >
-              <TiltCard n={3} className="group relative h-full overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card transition-all hover:-translate-y-1 hover:border-orange-500/28 hover:shadow-bridge-glow b-flare">
+              <TiltCard
+                n={3}
+                className="group relative h-full overflow-hidden rounded-2xl p-6 transition-all hover:-translate-y-1"
+                style={{
+                  backgroundColor: 'var(--bridge-surface)',
+                  boxShadow: '0 14px 32px -22px rgba(79,70,229,0.16), 0 0 0 1px var(--bridge-border) inset',
+                }}
+              >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--bridge-surface-muted)] text-xl ring-1 ring-[var(--bridge-border)]">
-                    {card.icon}
+                  <div
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+                    style={{
+                      backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                      color: 'var(--color-primary)',
+                      boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-primary) 22%, transparent) inset',
+                    }}
+                  >
+                    <card.Icon className="h-5 w-5" strokeWidth={2.2} />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-[var(--bridge-text)]">{card.title}</h3>
-                    <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--bridge-text-muted)]">{card.desc}</p>
+                  <div className="min-w-0 flex-1">
+                    <h3
+                      className="text-[14.5px] font-bold tracking-tight"
+                      style={{ color: 'var(--bridge-text)' }}
+                    >
+                      {card.title}
+                    </h3>
+                    <p
+                      className="mt-1.5 text-[12.5px] leading-relaxed"
+                      style={{ color: 'var(--bridge-text-muted)' }}
+                    >
+                      {card.desc}
+                    </p>
                     {card.extra}
                   </div>
                 </div>

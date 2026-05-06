@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
-import { Sparkles, Send, ArrowRight, Star } from 'lucide-react';
+import { Sparkles, ArrowRight, Star, Calendar, ShieldCheck } from 'lucide-react';
 
 export default function HeroSection({ user, isDark, ready }) {
   const headRef = useRef(null);
@@ -11,77 +11,88 @@ export default function HeroSection({ user, isDark, ready }) {
     const lines = headRef.current.querySelectorAll('.hero-line');
     gsap.fromTo(
       lines,
-      { opacity: 0, y: 32, filter: 'blur(10px)' },
-      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.0, stagger: 0.08, ease: 'power3.out' },
+      { opacity: 0, y: 36, filter: 'blur(12px)' },
+      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.05, stagger: 0.09, ease: 'power3.out' },
     );
   }, [ready]);
 
   return (
-    <section className="relative flex min-h-[92vh] items-center overflow-hidden px-5 pt-28 pb-24 sm:px-8 lg:pt-32">
-      {/* Subtle weave overlay — sits on top of the page-level palette gradient. */}
+    <section className="relative flex min-h-[94vh] items-center overflow-hidden px-5 pt-28 pb-24 sm:px-8 lg:pt-36">
+      {/* Subtle precision grid overlay */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
-          className="absolute inset-0 opacity-[0.14]"
+          className="absolute inset-0 opacity-[0.10]"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 32V0H32' stroke='${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(67,56,202,0.10)'}' stroke-width='1'/%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='44' height='44' viewBox='0 0 44 44' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 44V0H44' stroke='${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(79,70,229,0.10)'}' stroke-width='1'/%3E%3C/svg%3E")`,
+          }}
+        />
+        {/* radial vignette to soften grid edges */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse 80% 60% at 50% 35%, transparent 0%, var(--bridge-canvas) 90%)',
           }}
         />
       </div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-14 lg:grid-cols-12 lg:gap-10">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-14 lg:grid-cols-12 lg:gap-12">
         {/* ── Left: copy ─────────────────────────────────────────────── */}
         <div className="lg:col-span-7">
-          {/* Live badge */}
+          {/* Eyebrow / status pill */}
           <div
-            className="mb-8 inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 text-xs font-semibold backdrop-blur-sm"
+            className="mb-7 inline-flex items-center gap-2.5 rounded-full px-3.5 py-1.5 text-[11px] font-semibold tracking-wide backdrop-blur-sm"
             style={{
-              backgroundColor: 'var(--bridge-surface)',
-              color: 'var(--bridge-text-muted)',
+              backgroundColor: 'color-mix(in srgb, var(--bridge-surface) 80%, transparent)',
+              color: 'var(--bridge-text-secondary)',
               boxShadow: '0 0 0 1px var(--bridge-border) inset, 0 4px 14px -8px color-mix(in srgb, var(--color-primary) 35%, transparent)',
             }}
           >
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
             </span>
-            2,400+ vetted mentors ready
+            <span style={{ color: 'var(--bridge-text-muted)' }}>2,400+ vetted mentors live now</span>
+            <span className="mx-0.5 h-3 w-px" style={{ backgroundColor: 'var(--bridge-border-strong)' }} />
+            <span className="font-bold" style={{ color: 'var(--color-primary)' }}>YC-backed</span>
           </div>
 
           {/* Headline */}
           <h1
             ref={headRef}
-            className="font-display font-black leading-[0.98] tracking-[-0.035em]"
-            style={{ fontSize: 'clamp(2.75rem, 7.4vw, 5.75rem)', color: 'var(--bridge-text)' }}
+            className="font-display font-black leading-[0.96] tracking-[-0.04em]"
+            style={{ fontSize: 'clamp(2.85rem, 7.6vw, 6rem)', color: 'var(--bridge-text)' }}
           >
-            <span className="hero-line block">Your next</span>
+            <span className="hero-line block">The fastest path</span>
             <span
               className="hero-line block bg-clip-text text-transparent"
-              style={{ backgroundImage: 'linear-gradient(90deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 50%, var(--lp-grad-to) 100%)' }}
+              style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)' }}
             >
-              career move
+              to your next role.
             </span>
-            <span className="hero-line block">starts with</span>
             <span
-              className="hero-line block font-editorial italic font-normal pt-2"
+              className="hero-line block font-editorial italic font-normal pt-3"
               style={{
-                fontSize: 'clamp(2.25rem, 6vw, 4.75rem)',
-                color: 'color-mix(in srgb, var(--bridge-text) 55%, transparent)',
+                fontSize: 'clamp(1.5rem, 3.4vw, 2.4rem)',
+                color: 'color-mix(in srgb, var(--bridge-text) 60%, transparent)',
+                letterSpacing: '-0.01em',
               }}
             >
-              one conversation.
+              One conversation. Real outcomes.
             </span>
           </h1>
 
           {/* Sub */}
           <p
-            className="mt-8 max-w-xl text-base leading-relaxed sm:text-lg animate-fade-in-up delay-300 opacity-0 fill-mode-forwards"
+            className="mt-7 max-w-xl text-base leading-relaxed sm:text-[17px] sm:leading-[1.65] animate-fade-in-up delay-300 opacity-0 fill-mode-forwards"
             style={{ color: 'var(--bridge-text-secondary)' }}
           >
-            Real mentors. Real sessions. Real outcomes. Skip the cold messages — book a 1-on-1 with someone who's already walked your path.
+            Bridge connects ambitious professionals with mentors who&rsquo;ve already done the job.
+            AI-matched in seconds. Booked in a click. No subscriptions, no packages — just one
+            session that moves your career forward.
           </p>
 
           {/* CTAs */}
-          <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center animate-fade-in-up delay-500 opacity-0 fill-mode-forwards">
+          <div className="mt-9 flex flex-col items-start gap-3.5 sm:flex-row sm:items-center animate-fade-in-up delay-500 opacity-0 fill-mode-forwards">
             <Link
               to={user ? '/mentors' : '/register'}
               className="lp-cta group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full px-7 py-3.5 text-[15px] font-bold transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)]"
@@ -93,18 +104,28 @@ export default function HeroSection({ user, isDark, ready }) {
             >
               <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
               <span className="relative z-10 flex items-center gap-2">
-                Find your mentor
+                Get started — free
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
               </span>
             </Link>
             <Link
               to="/mentors"
-              className="group inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[15px] font-semibold transition-colors"
-              style={{ color: 'var(--bridge-text-secondary)' }}
+              className="group inline-flex items-center gap-2 rounded-full px-4 py-3 text-[14px] font-semibold transition-colors"
+              style={{
+                color: 'var(--bridge-text-secondary)',
+                boxShadow: '0 0 0 1px var(--bridge-border) inset',
+              }}
             >
               Browse mentors
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </Link>
+          </div>
+
+          {/* Trust row */}
+          <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-3 animate-fade-in-up delay-700 opacity-0 fill-mode-forwards">
+            <Trust icon={<ShieldCheck className="h-3.5 w-3.5" />} text="No credit card" />
+            <Trust icon={<Calendar className="h-3.5 w-3.5" />} text="Book in 60 seconds" />
+            <Trust icon={<Star className="h-3.5 w-3.5" style={{ fill: 'currentColor' }} />} text={<><b style={{ color: 'var(--bridge-text)' }}>4.9</b>/5 across 4,800+ sessions</>} />
           </div>
         </div>
 
@@ -123,17 +144,31 @@ export default function HeroSection({ user, isDark, ready }) {
   );
 }
 
+function Trust({ icon, text }) {
+  return (
+    <span className="inline-flex items-center gap-2 text-[12.5px] font-medium" style={{ color: 'var(--bridge-text-muted)' }}>
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+              color: 'var(--color-primary)',
+            }}>
+        {icon}
+      </span>
+      {text}
+    </span>
+  );
+}
+
 /* ─────────────────────────────────────────────────────────────────────────
-   HeroPreviewCard — Maya Chen mentor preview with floating AI-match +
-   offer-accepted chips. Decorative; pulls no live data.
+   HeroPreviewCard — Mentor preview with floating AI-match + booked chips.
    ───────────────────────────────────────────────────────────────────────── */
 function HeroPreviewCard() {
   return (
     <div className="relative mx-auto w-full max-w-md">
-      {/* ambient glow behind card — inverted-tone glow per mode */}
+      {/* ambient glow behind card */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-6 rounded-[2.25rem] blur-3xl"
+        className="pointer-events-none absolute -inset-8 rounded-[2.25rem] blur-3xl"
         style={{
           background: 'radial-gradient(60% 60% at 50% 50%, color-mix(in srgb, var(--color-primary) 28%, transparent) 0%, transparent 70%)',
         }}
@@ -141,10 +176,10 @@ function HeroPreviewCard() {
 
       {/* AI Match floating chip — top-left */}
       <div
-        className="hero-float-a absolute -left-2 -top-6 z-20 inline-flex items-center gap-2.5 rounded-2xl px-3.5 py-2.5 backdrop-blur"
+        className="hero-float-a absolute -left-3 -top-7 z-20 inline-flex items-center gap-2.5 rounded-2xl px-3.5 py-2.5 backdrop-blur"
         style={{
           backgroundColor: 'var(--lp-chip-bg)',
-          boxShadow: '0 18px 36px -12px rgba(0,0,0,0.45)',
+          boxShadow: '0 18px 36px -12px rgba(0,0,0,0.5)',
           border: '1px solid var(--lp-chip-border)',
         }}
       >
@@ -152,46 +187,46 @@ function HeroPreviewCard() {
           className="flex h-7 w-7 items-center justify-center rounded-full"
           style={{
             backgroundImage: 'linear-gradient(135deg, var(--lp-grad-from) 0%, var(--lp-grad-to) 100%)',
-            color: 'var(--color-on-primary)',
+            color: '#FFFFFF',
           }}
         >
           <Sparkles className="h-3.5 w-3.5" />
         </span>
         <div className="leading-tight">
           <p className="text-[11px] font-bold text-white">98% AI Match</p>
-          <p className="text-[10px] text-white/60">Maya Chen · PM Strategy</p>
+          <p className="text-[10px] text-white/60">Maya · PM Strategy</p>
         </div>
       </div>
 
-      {/* Offer accepted floating chip — top-right (success stays green; universal signal) */}
+      {/* Session booked chip — top-right */}
       <div
-        className="hero-float-b absolute -right-2 top-2 z-20 inline-flex items-center gap-2.5 rounded-2xl px-3.5 py-2.5 backdrop-blur"
+        className="hero-float-b absolute -right-3 top-3 z-20 inline-flex items-center gap-2.5 rounded-2xl px-3.5 py-2.5 backdrop-blur"
         style={{
           backgroundColor: 'var(--lp-chip-bg)',
-          boxShadow: '0 18px 36px -12px rgba(0,0,0,0.45)',
+          boxShadow: '0 18px 36px -12px rgba(0,0,0,0.5)',
           border: '1px solid var(--lp-chip-border)',
         }}
       >
         <span
           className="flex h-7 w-7 items-center justify-center rounded-full text-white"
-          style={{ backgroundImage: 'linear-gradient(135deg, #10b981 0%, #14b8a6 100%)' }}
+          style={{ backgroundImage: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
         >
-          <Send className="h-3.5 w-3.5" />
+          <Calendar className="h-3.5 w-3.5" />
         </span>
         <div className="leading-tight">
-          <p className="text-[11px] font-bold text-white">Offer accepted</p>
-          <p className="text-[10px] text-white/60">+25% comp · Tier IV</p>
+          <p className="text-[11px] font-bold text-white">Session booked</p>
+          <p className="text-[10px] text-white/60">Tomorrow · 2:00 PM</p>
         </div>
       </div>
 
       {/* Mentor card */}
       <div
-        className="relative overflow-hidden rounded-3xl p-6"
+        className="relative overflow-hidden rounded-3xl p-7"
         style={{ backgroundColor: 'var(--lp-card-bg)', boxShadow: 'var(--lp-card-shadow)' }}
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full blur-2xl"
+          className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full blur-2xl"
           style={{ backgroundImage: 'var(--lp-card-glow)' }}
         />
 
@@ -201,8 +236,8 @@ function HeroPreviewCard() {
             className="flex h-14 w-14 items-center justify-center rounded-2xl text-base font-black"
             style={{
               backgroundImage: 'linear-gradient(135deg, var(--lp-grad-from) 0%, var(--lp-grad-to) 100%)',
-              color: 'var(--color-on-primary)',
-              boxShadow: '0 0 0 2px rgba(255,255,255,0.20) inset',
+              color: '#FFFFFF',
+              boxShadow: '0 0 0 2px rgba(255,255,255,0.20) inset, 0 8px 24px -8px color-mix(in srgb, var(--color-primary) 50%, transparent)',
             }}
           >
             MC
@@ -212,18 +247,19 @@ function HeroPreviewCard() {
               Maya Chen
             </p>
             <p className="truncate text-[12px]" style={{ color: 'var(--bridge-text-muted)' }}>
-              Director of Product
+              Director of Product · Linear
             </p>
           </div>
           <span
-            className="inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
+            className="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.10em]"
             style={{
-              backgroundColor: 'color-mix(in srgb, var(--color-primary) 15%, transparent)',
-              color: 'var(--color-primary)',
-              boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent) inset',
+              backgroundColor: 'color-mix(in srgb, #10b981 12%, transparent)',
+              color: '#059669',
+              boxShadow: '0 0 0 1px color-mix(in srgb, #10b981 30%, transparent) inset',
             }}
           >
-            Linear
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Online
           </span>
         </div>
 
@@ -232,7 +268,7 @@ function HeroPreviewCard() {
           {['PM Strategy', 'Frameworks', 'Roadmapping', 'OKRs'].map((t) => (
             <span
               key={t}
-              className="rounded-full px-2.5 py-1 text-[10px] font-semibold"
+              className="rounded-full px-2.5 py-1 text-[10.5px] font-semibold"
               style={{
                 backgroundColor: 'var(--bridge-surface-muted)',
                 color: 'var(--bridge-text-secondary)',
@@ -246,15 +282,36 @@ function HeroPreviewCard() {
 
         {/* Stats row */}
         <div
-          className="relative mt-6 grid grid-cols-3 rounded-2xl px-2 py-3"
+          className="relative mt-6 grid grid-cols-3 rounded-2xl px-2 py-3.5"
           style={{
             backgroundColor: 'var(--bridge-surface-muted)',
             boxShadow: '0 0 0 1px var(--bridge-border) inset',
           }}
         >
-          <Stat label="Rating" value={<span className="inline-flex items-center gap-1">4.9 <Star className="h-3 w-3" style={{ fill: '#f59e0b', color: '#f59e0b' }} /></span>} divider />
+          <Stat label="Rating" value={<span className="inline-flex items-center gap-1">4.9 <Star className="h-3 w-3" style={{ fill: '#F59E0B', color: '#F59E0B' }} /></span>} divider />
           <Stat label="Sessions" value="86" divider />
           <Stat label="Rate" value="$95/hr" />
+        </div>
+
+        {/* Mock CTA inside card */}
+        <div
+          className="relative mt-5 flex items-center justify-between rounded-xl px-3.5 py-2.5"
+          style={{
+            backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+            boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-primary) 24%, transparent) inset',
+          }}
+        >
+          <div>
+            <p className="text-[11px] font-bold" style={{ color: 'var(--bridge-text)' }}>Next available</p>
+            <p className="text-[10.5px]" style={{ color: 'var(--bridge-text-muted)' }}>Today 4:30 PM · 60 min</p>
+          </div>
+          <span
+            className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-bold"
+            style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)' }}
+          >
+            Book
+            <ArrowRight className="h-3 w-3" />
+          </span>
         </div>
       </div>
     </div>
@@ -267,7 +324,7 @@ function Stat({ label, value, divider }) {
       className="flex flex-col items-center justify-center px-2"
       style={divider ? { borderRight: '1px solid var(--bridge-border)' } : undefined}
     >
-      <p className="text-[13px] font-extrabold tabular-nums" style={{ color: 'var(--bridge-text)' }}>{value}</p>
+      <p className="text-[14px] font-extrabold tabular-nums" style={{ color: 'var(--bridge-text)' }}>{value}</p>
       <p className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--bridge-text-muted)' }}>{label}</p>
     </div>
   );

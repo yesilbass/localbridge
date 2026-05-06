@@ -1,116 +1,232 @@
+import { TrendingUp, Users, Star, MessageSquare, Clock, Globe } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
 import TiltCard from './TiltCard';
 import StatCell from './StatCell';
 
 export default function StatsBentoSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-[var(--bridge-canvas)] via-orange-50/10 to-[var(--bridge-canvas)] py-20 sm:py-24 lg:py-32">
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-orange-500/5 to-transparent" />
-      <div className="relative z-10 mx-auto max-w-bridge px-4 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden py-24 sm:py-28 lg:py-32" style={{ backgroundColor: 'var(--bridge-canvas)' }}>
+      {/* subtle top gradient flourish */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-40"
+        style={{
+          background: 'linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 4%, transparent) 0%, transparent 100%)',
+        }}
+      />
+      <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
-          <div className="mb-10 flex flex-col items-start gap-4 sm:mb-14 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-14 flex flex-col items-start gap-5 sm:mb-16 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.32em] text-[var(--bridge-accent)]">By the numbers</p>
-              <h2 className="mt-3 max-w-3xl font-display text-3xl font-black leading-[1.02] tracking-[-0.035em] text-[var(--bridge-text)] sm:text-4xl lg:text-6xl">
-                A platform people <span className="text-gradient-bridge">actually use</span>
+              <p
+                className="text-[10px] font-black uppercase tracking-[0.32em]"
+                style={{ color: 'var(--color-primary)' }}
+              >
+                By the numbers
+              </p>
+              <h2
+                className="mt-3 max-w-3xl font-display font-black leading-[0.98] tracking-[-0.035em]"
+                style={{ fontSize: 'clamp(2rem, 5vw, 4rem)', color: 'var(--bridge-text)' }}
+              >
+                Built once. Used <span style={{ color: 'var(--color-primary)' }}>relentlessly</span>.
               </h2>
             </div>
-            <p className="max-w-sm text-sm leading-7 text-[var(--bridge-text-muted)]">
-              No vanity metrics. Just signal: people show up, book again, and recommend.
+            <p className="max-w-sm text-[14px] leading-7" style={{ color: 'var(--bridge-text-muted)' }}>
+              No vanity metrics. Real signal: people show up, book again, and recommend.
             </p>
           </div>
         </RevealOnScroll>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:auto-rows-[190px] lg:grid-cols-4">
-          {/* Featured mentor network cell — spans 2 rows */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:auto-rows-[200px] lg:grid-cols-4">
+          {/* Featured: Mentor network — spans 2 cols × 2 rows */}
           <RevealOnScroll delay={0} variant="left" className="col-span-2 lg:row-span-2">
-            <TiltCard n={4} className="group relative h-full overflow-hidden rounded-[2rem] border border-orange-500/22 bg-[var(--bridge-surface)] p-7 shadow-bridge-glow sm:p-9 b-glow-border">
-              <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse 60% 80% at 100% 100%,color-mix(in srgb, var(--color-primary) 8%, transparent),transparent 70%)' }} />
-              <div className="relative flex h-full flex-col justify-between gap-6">
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-55" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-400" />
+            <TiltCard
+              n={4}
+              className="group relative h-full overflow-hidden rounded-[1.75rem] p-7 sm:p-9"
+              style={{
+                backgroundColor: 'var(--bridge-surface)',
+                boxShadow: '0 30px 60px -28px color-mix(in srgb, var(--color-primary) 28%, transparent), 0 0 0 1px var(--bridge-border) inset',
+              }}
+            >
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background: 'radial-gradient(ellipse 60% 70% at 100% 100%, color-mix(in srgb, var(--color-primary) 9%, transparent), transparent 70%)',
+                }}
+              />
+              <div className="relative flex h-full flex-col justify-between gap-7">
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className="flex h-8 w-8 items-center justify-center rounded-lg"
+                    style={{
+                      backgroundColor: 'color-mix(in srgb, var(--color-primary) 14%, transparent)',
+                      color: 'var(--color-primary)',
+                    }}
+                  >
+                    <Users className="h-4 w-4" />
                   </span>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--bridge-accent)]">Mentor network</p>
+                  <p
+                    className="text-[10px] font-black uppercase tracking-[0.28em]"
+                    style={{ color: 'var(--bridge-text-muted)' }}
+                  >
+                    Mentor network
+                  </p>
                 </div>
-                <StatCell target={2400} suffix="+" label="Vetted mentors across 60+ industries" accent="from-orange-500 to-amber-400" />
+
+                <div>
+                  <StatCell
+                    target={2400}
+                    suffix="+"
+                    label="Vetted mentors across 60+ industries"
+                  />
+                </div>
+
                 <div className="flex items-center gap-3">
                   <div className="flex -space-x-2">
-                    {[['MC', 'from-amber-400 to-orange-500'], ['JR', 'from-orange-400 to-rose-500'], ['EV', 'from-rose-400 to-pink-500'], ['MK', 'from-emerald-400 to-teal-500']].map(([initials, grad]) => (
-                      <div key={initials} className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-[var(--bridge-surface)] bg-gradient-to-br ${grad} text-[9px] font-bold text-white`}>
+                    {[
+                      ['MC', 'linear-gradient(135deg,#4F46E5,#818CF8)'],
+                      ['JR', 'linear-gradient(135deg,#7C7CFF,#4F46E5)'],
+                      ['EV', 'linear-gradient(135deg,#312E81,#818CF8)'],
+                      ['MK', 'linear-gradient(135deg,#10b981,#059669)'],
+                    ].map(([initials, grad]) => (
+                      <div
+                        key={initials}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                        style={{
+                          background: grad,
+                          border: '2px solid var(--bridge-surface)',
+                        }}
+                      >
                         {initials}
                       </div>
                     ))}
                   </div>
-                  <p className="text-[11px] text-[var(--bridge-text-muted)]">
-                    <span className="font-bold text-[var(--bridge-text)]">12 new</span> joined this week
+                  <p className="text-[12px]" style={{ color: 'var(--bridge-text-muted)' }}>
+                    <span className="font-bold" style={{ color: 'var(--bridge-text)' }}>12 new</span> mentors joined this week
                   </p>
                 </div>
               </div>
             </TiltCard>
           </RevealOnScroll>
 
-          <RevealOnScroll delay={80} variant="flip">
-            <TiltCard n={3} className="relative h-full overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card transition-all hover:-translate-y-1 hover:border-orange-500/30 hover:shadow-bridge-glow b-flare">
-              <div className="relative flex h-full flex-col justify-between">
-                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[var(--bridge-text-muted)]">Total bookings</p>
-                <StatCell target={4800} suffix="+" label="Sessions booked" accent="from-orange-500 to-amber-400" />
-              </div>
-            </TiltCard>
-          </RevealOnScroll>
+          <BentoCell
+            delay={80}
+            variant="flip"
+            icon={<TrendingUp className="h-4 w-4" />}
+            kicker="Total bookings"
+            target={4800}
+            suffix="+"
+            label="Sessions booked to date"
+          />
 
-          <RevealOnScroll delay={160} variant="right">
-            <TiltCard n={3} className="relative h-full overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card transition-all hover:-translate-y-1 hover:border-orange-500/30 hover:shadow-bridge-glow">
-              <div className="relative flex h-full flex-col justify-between">
-                <div className="flex items-center gap-1">
-                  {[0, 1, 2, 3, 4].map(i => (
-                    <svg key={i} className="h-3 w-3 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                    </svg>
-                  ))}
-                </div>
-                <StatCell target={4.9} suffix="/5" label="Average rating" accent="from-orange-500 to-amber-400" decimal />
-              </div>
-            </TiltCard>
-          </RevealOnScroll>
+          <BentoCell
+            delay={160}
+            variant="right"
+            icon={<Star className="h-4 w-4" style={{ fill: 'currentColor' }} />}
+            kicker="Average rating"
+            target={4.9}
+            suffix="/5"
+            label="From 1,200+ post-session reviews"
+            decimal
+          />
 
-          <RevealOnScroll delay={240} variant="flip">
-            <TiltCard n={3} className="relative h-full overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card transition-all hover:-translate-y-1 hover:border-orange-500/30 hover:shadow-bridge-glow b-flare">
-              <div className="relative flex h-full flex-col justify-between">
-                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[var(--bridge-text-muted)]">Recommend</p>
-                <StatCell target={97} suffix="%" label="Would recommend" accent="from-orange-500 to-amber-400" />
-              </div>
-            </TiltCard>
-          </RevealOnScroll>
+          <BentoCell
+            delay={240}
+            variant="flip"
+            icon={<MessageSquare className="h-4 w-4" />}
+            kicker="Recommend"
+            target={97}
+            suffix="%"
+            label="Would recommend to a friend"
+          />
 
-          <RevealOnScroll delay={320} variant="right">
-            <TiltCard n={3} className="relative h-full overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card transition-all hover:-translate-y-1 hover:border-orange-500/30 hover:shadow-bridge-glow">
-              <div className="relative flex h-full flex-col justify-between">
-                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[var(--bridge-text-muted)]">Response time</p>
-                <StatCell target={11} suffix=" min" label="Avg time to first reply" accent="from-orange-500 to-amber-400" />
-              </div>
-            </TiltCard>
-          </RevealOnScroll>
+          <BentoCell
+            delay={320}
+            variant="right"
+            icon={<Clock className="h-4 w-4" />}
+            kicker="Response time"
+            target={11}
+            suffix=" min"
+            label="Avg time to first reply"
+          />
         </div>
 
         {/* Footer stats strip */}
         <RevealOnScroll delay={420}>
-          <div className="mt-4 grid grid-cols-2 gap-4 rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/92 px-5 py-5 shadow-bridge-card backdrop-blur-xl sm:grid-cols-4 sm:gap-6 sm:px-8">
+          <div
+            className="mt-5 grid grid-cols-2 gap-4 rounded-[1.75rem] px-6 py-6 backdrop-blur-xl sm:grid-cols-4 sm:gap-7 sm:px-8"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--bridge-surface) 92%, transparent)',
+              boxShadow: '0 14px 30px -22px rgba(79,70,229,0.20), 0 0 0 1px var(--bridge-border) inset',
+            }}
+          >
             {[
               { k: '$2.1M+', v: 'in offer increases unlocked' },
               { k: '47', v: 'industries covered' },
               { k: '92%', v: 'rebook within 30 days' },
-              { k: '24/7', v: 'global mentor coverage' },
+              { k: <span className="inline-flex items-center gap-1.5">24/7 <Globe className="h-5 w-5" style={{ color: 'var(--color-primary)' }} /></span>, v: 'global mentor coverage' },
             ].map((s, i) => (
-              <div key={i} className="flex flex-col gap-1 border-b border-[var(--bridge-border)] pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3 last:border-0">
-                <p className="font-display text-2xl font-black tabular-nums text-[var(--bridge-text)] sm:text-3xl">{s.k}</p>
-                <p className="text-[11px] text-[var(--bridge-text-muted)] leading-tight">{s.v}</p>
+              <div
+                key={i}
+                className="flex flex-col gap-1.5 border-b pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3 last:border-0"
+                style={{ borderColor: 'var(--bridge-border)' }}
+              >
+                <p
+                  className="font-display text-[26px] font-black tabular-nums leading-tight sm:text-[32px]"
+                  style={{ color: 'var(--bridge-text)' }}
+                >
+                  {s.k}
+                </p>
+                <p className="text-[11.5px] leading-tight" style={{ color: 'var(--bridge-text-muted)' }}>
+                  {s.v}
+                </p>
               </div>
             ))}
           </div>
         </RevealOnScroll>
       </div>
     </section>
+  );
+}
+
+function BentoCell({ delay, variant, icon, kicker, target, suffix, label, decimal }) {
+  return (
+    <RevealOnScroll delay={delay} variant={variant}>
+      <TiltCard
+        n={3}
+        className="relative h-full overflow-hidden rounded-[1.5rem] p-6"
+        style={{
+          backgroundColor: 'var(--bridge-surface)',
+          boxShadow: '0 12px 28px -22px rgba(79,70,229,0.18), 0 0 0 1px var(--bridge-border) inset',
+        }}
+      >
+        <div className="relative flex h-full flex-col justify-between gap-5">
+          <div className="flex items-center gap-2.5">
+            <span
+              className="flex h-7 w-7 items-center justify-center rounded-md"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+                color: 'var(--color-primary)',
+              }}
+            >
+              {icon}
+            </span>
+            <p
+              className="text-[10px] font-black uppercase tracking-[0.22em]"
+              style={{ color: 'var(--bridge-text-muted)' }}
+            >
+              {kicker}
+            </p>
+          </div>
+          <StatCell
+            target={target}
+            suffix={suffix}
+            label={label}
+            decimal={decimal}
+          />
+        </div>
+      </TiltCard>
+    </RevealOnScroll>
   );
 }
