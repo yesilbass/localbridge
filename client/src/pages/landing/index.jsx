@@ -131,17 +131,18 @@ export default function Landing() {
       <ScrollProgressBar />
       <FloatingDock />
 
-      {/* Brand trust strip — transparent, floats over page atmosphere */}
-      <section className="relative py-6">
+      <HeroSection user={user} isDark={isDark} ready={ready} />
+
+      {/* Brand trust strip — below hero, acts as social proof after the hook */}
+      <section className="relative py-8 border-y border-[var(--bridge-border)]/40">
         <div className="relative mx-auto max-w-bridge px-4 sm:px-6 lg:px-8">
-          <p className="mb-4 text-center text-[10px] font-black uppercase tracking-[0.34em] text-[var(--bridge-text-muted)]">
-            Mentors from the world's best companies
+          <p className="mb-5 text-center text-[10px] font-black uppercase tracking-[0.34em] text-[var(--bridge-text-muted)]">
+            Mentors currently at
           </p>
           <BrandStrip />
         </div>
       </section>
 
-      <HeroSection user={user} isDark={isDark} ready={ready} />
       <StatsBentoSection />
       <MentorMarqueeSection />
       <HowItWorksSection />
