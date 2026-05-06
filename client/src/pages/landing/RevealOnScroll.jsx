@@ -1,15 +1,19 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const VARIANTS = {
-  up:    { h: 'translateY(44px)',                              v: 'translateY(0)' },
-  down:  { h: 'translateY(-44px)',                             v: 'translateY(0)' },
-  left:  { h: 'translateX(-72px)',                             v: 'translateX(0)' },
-  right: { h: 'translateX(72px)',                              v: 'translateX(0)' },
-  scale: { h: 'scale(0.86)',                                   v: 'scale(1)' },
-  flip:  { h: 'perspective(900px) rotateX(-30deg) scale(0.96)', v: 'perspective(900px) rotateX(0deg) scale(1)' },
-  'flip-right': { h: 'perspective(900px) rotateY(-24deg) translateX(-40px)', v: 'perspective(900px) rotateY(0deg) translateX(0)' },
-  'flip-left':  { h: 'perspective(900px) rotateY(24deg) translateX(40px)',   v: 'perspective(900px) rotateY(0deg) translateX(0)' },
-  zoom:  { h: 'scale(0.78) translateY(30px)',                  v: 'scale(1) translateY(0)' },
+  up:           { h: { y: 44 },                             v: { y: 0 } },
+  down:         { h: { y: -44 },                            v: { y: 0 } },
+  left:         { h: { x: -72 },                            v: { x: 0 } },
+  right:        { h: { x: 72 },                             v: { x: 0 } },
+  scale:        { h: { scale: 0.86 },                       v: { scale: 1 } },
+  flip:         { h: { rotationX: -30, scale: 0.96, transformPerspective: 900 }, v: { rotationX: 0, scale: 1, transformPerspective: 900 } },
+  'flip-right': { h: { rotationY: -24, x: -40, transformPerspective: 900 }, v: { rotationY: 0, x: 0, transformPerspective: 900 } },
+  'flip-left':  { h: { rotationY: 24, x: 40, transformPerspective: 900 },   v: { rotationY: 0, x: 0, transformPerspective: 900 } },
+  zoom:         { h: { scale: 0.78, y: 30 },                v: { scale: 1, y: 0 } },
 };
 
 export default function RevealOnScroll({
@@ -20,31 +24,40 @@ export default function RevealOnScroll({
   duration = 900,
 }) {
   const r = useRef(null);
-  const [vis, setVis] = useState(false);
-  const vt = VARIANTS[variant] || VARIANTS.up;
 
   useEffect(() => {
     const el = r.current;
     if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } },
-      { threshold: 0.06, rootMargin: '0px 0px -24px 0px' },
+    
+    const vt = VARIANTS[variant] || VARIANTS.up;
+
+    // Convert duration from ms to seconds
+    const durationSec = duration / 1000;
+    const delaySec = delay / 1000;
+
+    const anim = gsap.fromTo(el,
+      { ...vt.h, opacity: 0 },
+      {
+        ...vt.v,
+        opacity: 1,
+        duration: durationSec,
+        delay: delaySec,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%',
+          once: true
+        }
+      }
     );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
+
+    return () => {
+      anim.kill();
+    };
+  }, [variant, delay, duration]);
 
   return (
-    <div
-      ref={r}
-      className={className}
-      style={{
-        opacity:    vis ? 1 : 0,
-        transform:  vis ? vt.v : vt.h,
-        transition: `opacity ${duration}ms cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform ${Math.round(duration * 1.04)}ms cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
-        willChange: vis ? 'auto' : 'transform, opacity',
-      }}
-    >
+    <div ref={r} className={className} style={{ opacity: 0 }}>
       {children}
     </div>
   );

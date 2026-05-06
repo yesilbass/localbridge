@@ -2,260 +2,93 @@ import { useRef, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import MagneticWrapper from './MagneticWrapper';
-import { usePerfTier } from './landingHooks';
-import HeroCanvas from './HeroCanvas';
-
-const HERO_CSS = `
-  @keyframes heroZoom{0%{transform:scale(1.0) translate3d(0,0,0);}100%{transform:scale(1.12) translate3d(0,-1.5%,0);}}
-  @keyframes heroDrift{0%,100%{transform:scale(1.05) translate3d(0,0,0);}50%{transform:scale(1.08) translate3d(-1%,-1%,0);}}
-  @keyframes heroOrb1{0%,100%{transform:translate3d(0,0,0) scale(1);}50%{transform:translate3d(2%,-3%,0) scale(1.08);}}
-  @keyframes heroOrb2{0%,100%{transform:translate3d(0,0,0) scale(1);}50%{transform:translate3d(-2%,2%,0) scale(1.05);}}
-  @keyframes heroLetterIn{0%{opacity:0;transform:translate3d(0,80px,-220px) rotateX(-55deg) scale(0.78);filter:blur(18px);}55%{opacity:1;filter:blur(2px);}82%{transform:translate3d(0,-3px,0) rotateX(2deg) scale(1.015);filter:blur(0);}100%{opacity:1;transform:translate3d(0,0,0) rotateX(0deg) scale(1);filter:blur(0);}}
-  @keyframes heroCtaIn{0%{opacity:0;transform:translateY(28px) scale(0.92);filter:blur(10px);}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}}
-  @keyframes heroCtaPulse{0%,100%{box-shadow:0 0 0 0 transparent,0 18px 50px -10px color-mix(in srgb, var(--color-primary) 55%, transparent),0 0 60px color-mix(in srgb, var(--color-primary) 40%, transparent),0 0 100px color-mix(in srgb, var(--color-accent) 18%, transparent),inset 0 1px 0 rgba(255,255,255,0.32);}50%{box-shadow:0 0 0 6px transparent,0 22px 60px -8px color-mix(in srgb, var(--color-primary) 70%, transparent),0 0 90px color-mix(in srgb, var(--color-primary) 55%, transparent),0 0 140px color-mix(in srgb, var(--color-accent) 32%, transparent),inset 0 1px 0 rgba(255,255,255,0.4);}}
-  @keyframes heroNeonRotate{0%{--neon-angle:0deg;}100%{--neon-angle:360deg;}}
-  @keyframes heroSheen{0%{background-position:-200% 50%;}100%{background-position:200% 50%;}}
-  @keyframes heroFadeUp{0%{opacity:0;transform:translateY(24px);filter:blur(6px);}100%{opacity:1;transform:translateY(0);filter:blur(0);}}
-  @keyframes heroChipIn{0%{opacity:0;transform:translateY(-12px) scale(0.92);filter:blur(6px);}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}}
-  @keyframes heroGridDrift{0%{background-position:0 0;}100%{background-position:60px 60px;}}
-  @keyframes heroGlowSweep{0%{transform:translateX(-100%) skewX(-22deg);}100%{transform:translateX(220%) skewX(-22deg);}}
-  @keyframes heroSparkle{0%,100%{opacity:0;transform:scale(0.4);}50%{opacity:1;transform:scale(1);}}
-
-  @property --neon-angle{syntax:'<angle>';initial-value:0deg;inherits:false;}
-
-  .hero-letter{display:inline-block;opacity:0;transform-origin:50% 100%;will-change:transform,opacity,filter;}
-  .hero-bg-zoom{animation:heroZoom 28s cubic-bezier(0.45,0,0.55,1) forwards;will-change:transform;}
-  .hero-bg-drift{animation:heroDrift 18s ease-in-out infinite;will-change:transform;}
-  .hero-cta{position:relative;isolation:isolate;animation:heroCtaIn 1s cubic-bezier(0.22,1,0.36,1) 1.05s both, heroCtaPulse 2.6s ease-in-out 2.0s infinite;will-change:transform,box-shadow,filter,opacity;}
-  .hero-cta::before{content:"";position:absolute;inset:-2px;border-radius:9999px;padding:2px;background:conic-gradient(from var(--neon-angle,0deg),var(--color-accent),#ffffff,var(--color-primary),var(--color-primary-hover),var(--color-accent));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;animation:heroNeonRotate 3.5s linear infinite;z-index:-1;filter:drop-shadow(0 0 12px color-mix(in srgb, var(--color-primary) 85%, transparent)) drop-shadow(0 0 26px color-mix(in srgb, var(--color-accent) 55%, transparent));pointer-events:none;}
-  .hero-cta::after{content:"";position:absolute;inset:0;border-radius:9999px;background:linear-gradient(110deg,transparent 0%,transparent 38%,rgba(255,255,255,0.55) 50%,transparent 62%,transparent 100%);background-size:220% 100%;animation:heroSheen 4.5s ease-in-out 2.4s infinite;mix-blend-mode:overlay;pointer-events:none;}
-  .hero-cta-glow{position:absolute;inset:-12px;border-radius:9999px;background:radial-gradient(ellipse 80% 100% at 50% 50%,color-mix(in srgb, var(--color-primary) 45%, transparent) 0%,color-mix(in srgb, var(--color-accent) 18%, transparent) 35%,transparent 70%);filter:blur(18px);z-index:-2;pointer-events:none;animation:heroFadeUp 1.4s cubic-bezier(0.22,1,0.36,1) 1.4s both;}
-  .hero-cta-lite{position:relative;animation:heroCtaIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.6s both,heroCtaPulse 2.6s ease-in-out 1.4s infinite;will-change:transform,box-shadow,opacity;border:1px solid rgba(255,255,255,0.35);box-shadow:0 12px 32px -8px color-mix(in srgb, var(--color-primary) 55%, transparent),0 0 28px color-mix(in srgb, var(--color-primary) 35%, transparent);}
-  .hero-secondary{animation:heroCtaIn 1s cubic-bezier(0.22,1,0.36,1) 1.25s both;}
-  .hero-desc{animation:heroFadeUp 1.0s cubic-bezier(0.22,1,0.36,1) 0.85s both;}
-  .hero-trust{animation:heroFadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 1.5s both;}
-  .hero-status-chip{animation:heroChipIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.4s both;}
-  .hero-rating-chip{animation:heroChipIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.55s both;}
-  .hero-grid{background-image:linear-gradient(color-mix(in srgb, var(--color-primary) 5%, transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb, var(--color-primary) 5%, transparent) 1px,transparent 1px);background-size:60px 60px;animation:heroGridDrift 60s linear infinite;mask-image:radial-gradient(ellipse 70% 60% at 50% 40%,#000 0%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 40%,#000 0%,transparent 75%);}
-  .hero-orb-1{animation:heroOrb1 14s ease-in-out infinite;will-change:transform;}
-  .hero-orb-2{animation:heroOrb2 18s ease-in-out infinite;will-change:transform;}
-  .hero-arrow-glow{filter:drop-shadow(0 0 6px rgba(255,255,255,0.7));}
-
-  @media (prefers-reduced-motion:reduce){
-    .hero-bg-zoom,.hero-bg-drift,.hero-orb-1,.hero-orb-2,.hero-grid,.hero-cta,.hero-cta::before,.hero-cta::after{animation:none!important;}
-    .hero-letter{opacity:1!important;transform:none!important;filter:none!important;}
-  }
-`;
-
-function splitLine(text, baseDelay) {
-  return text.split('').map((ch, i) => ({
-    ch,
-    delay: baseDelay + i * 0.05,
-    isSpace: ch === ' ',
-  }));
-}
 
 export default function HeroSection({ user, isDark, ready }) {
   const headRef = useRef(null);
-  const tier = usePerfTier();
-  const isLow = tier === 'low';
-  const isMid = tier === 'mid';
-  const lite = isLow || isMid;
-
-  // Use a tighter stagger and shorter duration on lite tiers — same effect, cheaper.
-  const stagger = isLow ? 0.025 : isMid ? 0.035 : 0.05;
-  const lineGap = isLow ? 0.08 : isMid ? 0.12 : 0.18;
-
-  const lines = useMemo(() => {
-    const l1 = splitLine('Your next', 0.1);
-    const l1End = 0.1 + stagger * 9 + lineGap;
-    const l2 = splitLine('career move', l1End);
-    const l2End = l1End + stagger * 11 + lineGap;
-    const l3 = splitLine('starts with', l2End);
-    const l3End = l2End + stagger * 11 + lineGap;
-    const l4 = splitLine('one conversation.', l3End);
-    return { l1, l2, l3, l4 };
-  }, [stagger, lineGap]);
 
   useEffect(() => {
     if (!ready || !headRef.current) return;
     const letters = headRef.current.querySelectorAll('.hero-letter');
-    letters.forEach(el => {
-      const d = parseFloat(el.dataset.d || '0');
-      // Lite tiers skip the blur filter (GPU-heavy) and use a flatter transform.
-      const fromVars = isLow
-        ? { opacity: 0, y: 24, scale: 0.96 }
-        : isMid
-        ? { opacity: 0, y: 40, rotateX: -25, scale: 0.92 }
-        : { opacity: 0, y: 80, z: -220, rotateX: -55, scale: 0.78, filter: 'blur(18px)' };
-      const toVars = isLow
-        ? { opacity: 1, y: 0, scale: 1, duration: 0.55, delay: d, ease: 'power3.out' }
-        : isMid
-        ? { opacity: 1, y: 0, rotateX: 0, scale: 1, duration: 0.85, delay: d, ease: 'power4.out' }
-        : { opacity: 1, y: 0, z: 0, rotateX: 0, scale: 1, filter: 'blur(0px)', duration: 1.2, delay: d, ease: 'expo.out', transformOrigin: '50% 100%' };
-      gsap.fromTo(el, fromVars, toVars);
-    });
-  }, [ready, isLow, isMid]);
+    gsap.fromTo(letters, 
+      { opacity: 0, y: 30, filter: 'blur(8px)' },
+      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.0, stagger: 0.02, ease: 'power3.out' }
+    );
+  }, [ready]);
 
   return (
-    <section className="relative flex flex-col overflow-hidden min-h-[90vh]">
-      <style>{HERO_CSS}</style>
-
-      {/* CINEMATIC BACKGROUND — multi-layer atmospheric depth */}
-      <div aria-hidden className="absolute inset-0 overflow-hidden">
-        <div className={`${lite ? '' : 'hero-bg-zoom'} absolute inset-0`}>
-          {/* Rich layered gradient base */}
-          <div
-            className="absolute inset-0"
-            style={
-              isDark
-                ? { background: 'linear-gradient(145deg, color-mix(in srgb, var(--color-primary) 14%, var(--color-bg)) 0%, var(--color-bg) 30%, color-mix(in srgb, var(--color-secondary) 10%, var(--color-bg)) 60%, color-mix(in srgb, var(--color-primary) 7%, var(--color-bg)) 100%)' }
-                : { background: 'linear-gradient(145deg, color-mix(in srgb, var(--color-primary) 5%, var(--color-bg)) 0%, var(--color-bg) 38%, color-mix(in srgb, var(--color-accent) 4%, var(--color-bg)) 68%, var(--color-bg) 100%)' }
-            }
-          />
-
-          {/* Orb 1 — primary, top-left, bleeds offscreen for seamless blend with area above */}
-          <div className={`${lite ? '' : 'hero-orb-1'} absolute -top-[12%] -left-[6%] w-[700px] h-[700px] rounded-full ${lite ? 'blur-[60px]' : 'blur-[110px]'} ${isDark ? 'bg-gradient-to-br from-[var(--color-primary)]/30 to-[var(--color-accent)]/10 opacity-85' : 'bg-gradient-to-br from-[var(--color-primary)]/14 to-[var(--color-accent)]/6 opacity-75'}`} />
-
-          {/* Orb 2 — amber/warm, right edge */}
-          {!isLow && <div className={`${lite ? '' : 'hero-orb-2'} absolute top-[18%] -right-[8%] w-[580px] h-[580px] rounded-full ${lite ? 'blur-[50px]' : 'blur-[100px]'} ${isDark ? 'bg-gradient-to-br from-amber-500/24 to-[var(--color-primary)]/10 opacity-80' : 'bg-gradient-to-br from-amber-400/16 to-orange-300/8 opacity-65'}`} />}
-
-          {/* Orb 3 — warm bottom-center (high tier only) */}
-          {!lite && <div className="hero-orb-1 absolute bottom-[8%] left-[28%] w-[580px] h-[580px] rounded-full blur-[115px] bg-gradient-to-br from-orange-600/18 to-rose-500/8 opacity-70" />}
-
-          {/* Orb 4 — secondary/accent hue for depth (mid+ only) */}
-          {!isLow && <div className={`${lite ? '' : 'hero-orb-2'} absolute top-[48%] right-[18%] w-[400px] h-[400px] rounded-full ${lite ? 'blur-[40px]' : 'blur-[85px]'} ${isDark ? 'bg-gradient-to-br from-[var(--color-secondary)]/18 to-[var(--color-accent)]/6 opacity-55' : 'bg-gradient-to-br from-[var(--color-accent)]/10 to-transparent opacity-45'}`} />}
-
-          {/* Drifting grid — dark + high tier */}
-          {isDark && !lite && <div aria-hidden className="hero-grid absolute inset-0 opacity-40" />}
-
-          {/* Noise grain */}
-          {!lite && <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />}
-
-          {/* Radial vignette (dark mode) */}
-          {isDark && <div aria-hidden className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 95% 70% at 50% 35%,transparent 30%,rgba(0,0,0,0.45) 100%)' }} />}
-        </div>
+    <section className="relative flex flex-col items-center justify-center min-h-[95vh] overflow-hidden text-center px-5 pt-32 pb-24 sm:px-8">
+      {/* Dynamic ambient background */}
+      <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[1000px] rounded-full blur-[160px] opacity-30 animate-pulse ${isDark ? 'bg-gradient-to-b from-orange-500/20 to-amber-500/5' : 'bg-gradient-to-b from-orange-400/20 to-amber-300/5'}`} style={{ animationDuration: '8s' }} />
+        <div className={`absolute inset-0 b-grid-drift opacity-20 ${isDark ? 'bg-[url("data:image/svg+xml,%3Csvg width=\'32\' height=\'32\' viewBox=\'0 0 32 32\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 32V0H32\' stroke=\'rgba(255,255,255,0.08)\' stroke-width=\'1\'/%3E%3C/svg%3E")]' : 'bg-[url("data:image/svg+xml,%3Csvg width=\'32\' height=\'32\' viewBox=\'0 0 32 32\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 32V0H32\' stroke=\'rgba(0,0,0,0.03)\' stroke-width=\'1\'/%3E%3C/svg%3E")]'}`} />
       </div>
 
-      {/* Three.js interactive particle network — mid+ devices */}
-      {!isLow && <HeroCanvas isDark={isDark} isMid={isMid} />}
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--bridge-canvas)] to-transparent z-[1]" />
-
-      {/* Top utility bar */}
-      <div className="relative z-10 mx-auto max-w-7xl px-5 pt-4 sm:px-8">
-        <div className="flex items-center justify-between gap-4">
-          <div className={`hero-status-chip inline-flex items-center gap-2.5 rounded-full border px-4 py-1.5 backdrop-blur-xl ${isDark ? 'border-white/[0.08] bg-white/[0.03]' : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)]'}`}>
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-65" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,.9)]" />
-            </span>
-            <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-white/45' : 'text-[var(--bridge-text-muted)]'}`}>
-              Live · 2,400+ vetted
-            </span>
-          </div>
-          <div className="hero-rating-chip hidden md:flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              {[0, 1, 2, 3, 4].map(i => (
-                <svg key={i} className="h-3 w-3 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-              ))}
-            </div>
-            <span className={`text-[11px] font-semibold ${isDark ? 'text-white/55' : 'text-[var(--bridge-text-secondary)]'}`}>
-              <span className={`font-bold ${isDark ? 'text-white/85' : 'text-[var(--bridge-text)]'}`}>4.9</span> · 4,800+ sessions
-            </span>
-          </div>
+      <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center">
+        {/* Simple live badge */}
+        <div className={`mb-10 inline-flex items-center gap-2.5 rounded-full border px-4 py-1.5 text-xs font-semibold backdrop-blur-sm ${isDark ? 'border-white/10 bg-white/5 text-white/70' : 'border-gray-200 bg-white/50 text-gray-600'}`}>
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+          </span>
+          2,400+ vetted mentors ready
         </div>
-      </div>
 
-      <div className="relative z-10 mx-auto flex max-w-6xl flex-1 flex-col justify-start px-5 pt-8 pb-8 sm:px-8 lg:pb-12">
-        {/* HEADLINE — letter-by-letter kinetic 3D entrance at 0.05s intervals */}
-        <div ref={headRef} style={{ perspective: '1400px', perspectiveOrigin: '50% 60%' }}>
-          <h1
-            className={`font-display font-black leading-[0.92] tracking-[-0.03em] text-center ${isDark ? 'text-white/82' : 'text-[var(--bridge-text)]'}`}
-            style={{ fontSize: 'clamp(3rem, min(8vw, 8rem), 8rem)', transformStyle: 'preserve-3d' }}
-          >
-            <span className="block" style={{ overflow: 'visible' }}>
-              {lines.l1.map((t, i) => (
-                <span key={`l1-${i}`} className="hero-letter" data-d={t.delay} style={{ whiteSpace: 'pre' }}>{t.ch}</span>
-              ))}
-            </span>
-            <span
-              className="block"
-              style={isDark
-                ? { filter: lite
-                    ? 'drop-shadow(0 0 26px color-mix(in srgb, var(--color-primary) 45%, transparent))'
-                    : 'drop-shadow(0 0 80px color-mix(in srgb, var(--color-primary) 55%, transparent)) drop-shadow(0 0 30px color-mix(in srgb, var(--color-accent) 35%, transparent))',
-                    overflow: 'visible' }
-                : { overflow: 'visible' }}
-            >
-              {lines.l2.map((t, i) => (
-                <span
-                  key={`l2-${i}`}
-                  className={`hero-letter ${t.isSpace ? '' : (isDark ? (isLow ? 'text-amber-300' : 'shimmer-text') : 'text-gradient-bridge')}`}
-                  data-d={t.delay}
-                  style={{ whiteSpace: 'pre' }}
-                >{t.ch}</span>
-              ))}
-            </span>
-            <span className="block" style={{ overflow: 'visible' }}>
-              {lines.l3.map((t, i) => (
-                <span key={`l3-${i}`} className="hero-letter" data-d={t.delay} style={{ whiteSpace: 'pre' }}>{t.ch}</span>
-              ))}
-            </span>
-            <span
-              className={`block font-editorial italic ${isDark ? 'text-white/26' : 'text-[var(--bridge-text-faint)]'}`}
-              style={{ fontSize: '0.78em', overflow: 'visible' }}
-            >
-              {lines.l4.map((t, i) => (
-                <span key={`l4-${i}`} className="hero-letter" data-d={t.delay} style={{ whiteSpace: 'pre' }}>{t.ch}</span>
-              ))}
-            </span>
+        <div ref={headRef}>
+          <h1 className={`font-display font-black leading-[1.02] tracking-[-0.03em] ${isDark ? 'text-white' : 'text-gray-900'}`}
+              style={{ fontSize: 'clamp(3.5rem, min(9vw, 6.5rem), 6.5rem)' }}>
+            <span className="hero-letter block text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 pb-2">Get unstuck.</span>
+            <span className="hero-letter block">Talk to someone</span>
+            <span className="hero-letter block">who's been there.</span>
           </h1>
         </div>
 
-        {/* DESC + CTAs */}
-        <div className="mt-6 flex flex-col items-center text-center sm:mt-8 lg:mt-10">
-          <p className="hero-desc max-w-xl text-[0.95rem] leading-relaxed text-[var(--bridge-text-muted)] sm:text-[1.05rem]">
-            Real mentors. Real sessions. Real outcomes. Skip the cold messages — book a 1-on-1 with someone who's already walked your path.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3 sm:mt-8 sm:gap-4">
-            <MagneticWrapper>
-              <span className="relative inline-block">
-                {!isLow && <span aria-hidden className="hero-cta-glow" />}
-                <Link
-                  to={user ? '/mentors' : '/register'}
-                  data-cursor="Start"
-                  className={`${lite ? 'hero-cta-lite' : 'hero-cta'} inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 via-orange-500 to-amber-500 px-6 py-3 text-[0.9rem] font-bold text-white transition-transform duration-300 hover:scale-[1.06] active:scale-[0.97] sm:gap-3 sm:px-9 sm:py-4 sm:text-[0.95rem]`}
-                >
-                  <span className="relative z-[1]">Find your mentor</span>
-                  <svg className="hero-arrow-glow relative z-[1] h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </Link>
-              </span>
-            </MagneticWrapper>
-            <MagneticWrapper>
-              <Link
-                to="/mentors"
-                data-cursor="Browse"
-                className={`hero-secondary inline-flex items-center gap-2 rounded-full border px-6 py-3 text-[0.9rem] font-semibold transition-all sm:px-8 sm:py-4 sm:text-[0.95rem] ${isDark ? 'border-white/[0.10] bg-white/[0.04] hover:border-white/[0.22] hover:bg-white/[0.07]' : 'border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] hover:border-orange-500/40 hover:shadow-bridge-card'}`}
-                style={{ color: isDark ? 'rgba(255,255,255,.65)' : 'var(--bridge-text)' }}
-              >
-                Browse mentors →
-              </Link>
-            </MagneticWrapper>
-          </div>
-          <div className="hero-trust mt-5 flex flex-wrap justify-center gap-x-5 gap-y-1">
-            {['No credit card required', 'First session guaranteed', 'Cancel anytime'].map((t, i) => (
-              <span key={i} className="flex items-center gap-2 text-[10px] text-[var(--bridge-text-faint)]">
-                {i > 0 && <span className="h-1 w-1 rounded-full bg-[var(--bridge-border-strong)]" />}{t}
-              </span>
-            ))}
-          </div>
+        <p className={`mt-10 max-w-2xl text-lg sm:text-xl leading-relaxed animate-fade-in-up delay-300 opacity-0 fill-mode-forwards ${isDark ? 'text-white/60' : 'text-gray-500'}`}>
+          Book a 1-on-1 with a vetted professional who's already held the exact role you're targeting. No packages, no cold DMs — just the right advice from the right person.
+        </p>
+
+        <div className="mt-12 flex flex-col sm:flex-row items-center gap-5 animate-fade-in-up delay-500 opacity-0 fill-mode-forwards relative z-20">
+          <Link
+            to={user ? '/mentors' : '/register'}
+            className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-orange-500 px-8 py-4.5 text-[17px] font-bold text-white shadow-[0_0_40px_-10px_rgba(249,115,22,0.5)] transition-all duration-300 hover:bg-orange-600 hover:shadow-[0_0_60px_-15px_rgba(249,115,22,0.7)] hover:-translate-y-1 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-full" />
+            <span className="relative z-10 flex items-center gap-2">
+              Book your first session
+              <svg className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+            </span>
+          </Link>
+          <Link
+            to="/mentors"
+            className={`group inline-flex items-center justify-center gap-2 rounded-full border px-8 py-4.5 text-[17px] font-semibold transition-all duration-300 hover:-translate-y-1 ${isDark ? 'border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-white/20' : 'border-gray-200 bg-white text-gray-900 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm'}`}
+          >
+            Browse mentors
+          </Link>
+        </div>
+
+        <div className={`mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm font-medium animate-fade-in-up delay-700 opacity-0 fill-mode-forwards ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+          <span className="flex items-center gap-2">
+            <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            No packages · pay per session
+          </span>
+          <span className="flex items-center gap-2">
+            <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            First session guaranteed
+          </span>
+          <span className="flex items-center gap-2">
+            <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            Cancel anytime
+          </span>
         </div>
       </div>
+      
+      <style>{`
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-500 { animation-delay: 500ms; }
+        .delay-700 { animation-delay: 700ms; }
+        .fill-mode-forwards { animation-fill-mode: forwards; }
+      `}</style>
     </section>
   );
 }

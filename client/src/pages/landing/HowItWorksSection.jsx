@@ -1,5 +1,8 @@
-import RevealOnScroll from './RevealOnScroll';
-import TiltCard from './TiltCard';
+import { useRef, useEffect } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const STEPS = [
   {
@@ -14,8 +17,6 @@ const STEPS = [
     ),
     title: 'Tell us your goal',
     desc: 'Plain English. Our AI searches 2,400+ professionals and ranks the exact few most likely to move the needle.',
-    accent: 'from-orange-500 to-amber-400',
-    ring: 'ring-orange-500/22',
   },
   {
     num: '02',
@@ -28,8 +29,6 @@ const STEPS = [
     ),
     title: 'Pick your mentor',
     desc: 'Real bios, honest reviews, exact rates — all visible before you commit. No surprises.',
-    accent: 'from-amber-400 to-orange-400',
-    ring: 'ring-amber-500/22',
   },
   {
     num: '03',
@@ -43,65 +42,64 @@ const STEPS = [
     ),
     title: 'Book and get unstuck',
     desc: 'Real-time availability. Built-in video room. No Zoom links, no scheduling back-and-forth.',
-    accent: 'from-emerald-400 to-teal-500',
-    ring: 'ring-emerald-500/22',
   },
 ];
 
 export default function HowItWorksSection() {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    
+    const cards = containerRef.current.querySelectorAll('.hiw-card');
+    
+    gsap.fromTo(cards,
+      { y: 60, opacity: 0, scale: 0.95 },
+      {
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: 'back.out(1.2)',
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: 'top 75%',
+          once: true
+        }
+      }
+    );
+  }, []);
+
   return (
-    <section id="how" className="relative overflow-hidden py-28 bg-[var(--bridge-canvas)]">
-      <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
-        <RevealOnScroll>
-          <div className="mb-16 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">How it works</p>
-              <h2 className="mt-3 font-display font-black leading-[0.96] tracking-[-0.025em] text-[var(--bridge-text)]"
-                style={{ fontSize: 'clamp(2rem, min(5vw, 4.5rem), 4.5rem)' }}>
-                Three steps.<br /><span className="text-gradient-bridge">One hour.</span> Real momentum.
-              </h2>
-            </div>
-            <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-2 text-[11px] font-bold text-emerald-600 dark:text-emerald-300">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-65" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-              </span>
-              Avg. time-to-session: <span className="font-black">53 sec</span>
-            </div>
-          </div>
-        </RevealOnScroll>
+    <section ref={containerRef} className="relative py-24 sm:py-32 bg-[var(--bridge-canvas)]">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8">
+        <div className="mb-16 flex flex-col items-center text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-orange-500 mb-4">How it works</p>
+          <h2 className="font-display font-black leading-tight tracking-tight text-[var(--bridge-text)] text-4xl sm:text-5xl max-w-2xl">
+            Three steps.<br />One hour. Real momentum.
+          </h2>
+        </div>
 
-        <div className="relative grid gap-5 sm:grid-cols-3">
-          {/* Animated flow line connecting steps */}
-          <div aria-hidden className="pointer-events-none absolute top-[110px] left-[16%] right-[16%] hidden h-[2px] sm:block overflow-hidden rounded-full">
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg,transparent 0%,color-mix(in srgb, var(--color-primary) 18%, transparent) 18%,color-mix(in srgb, var(--color-primary) 18%, transparent) 82%,transparent 100%)' }} />
-            <div className="absolute inset-y-0 w-1/3 b-pulse-flow" style={{ background: 'linear-gradient(90deg,transparent 0%,color-mix(in srgb, var(--color-primary) 85%, transparent) 50%,transparent 100%)' }} />
-          </div>
-
+        <div className="grid gap-6 sm:grid-cols-3">
           {STEPS.map((step, i) => (
-            <RevealOnScroll key={i} delay={i * 140} variant={i === 0 ? 'flip-right' : i === 1 ? 'zoom' : 'flip-left'}>
-              <TiltCard n={5} className="group relative h-full overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-7 shadow-bridge-card hover:border-orange-500/30 hover:shadow-bridge-glow transition-all">
-                <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100"
-                  style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 0%,color-mix(in srgb, var(--color-primary) 6%, transparent),transparent 70%)' }} />
-                <div className={`pointer-events-none absolute -top-2 -right-2 font-display text-[8.5rem] font-black leading-none text-transparent bg-clip-text bg-gradient-to-br ${step.accent} opacity-[0.07] transition-all duration-700 group-hover:opacity-[0.18] group-hover:scale-110`}>
-                  {step.num}
-                </div>
-                <div className="relative">
-                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${step.accent} text-white shadow-[0_8px_28px_color-mix(in srgb, var(--color-primary) 32%, transparent)] ring-2 ${step.ring}`}>
-                    {step.icon}
-                  </div>
-                  <div className="mt-5 flex items-baseline gap-2">
-                    <span className={`font-display text-xs font-black text-transparent bg-clip-text bg-gradient-to-r ${step.accent}`}>{step.num}</span>
-                    <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-faint)]">• {step.time}</span>
-                  </div>
-                  <h3 className="mt-2 text-lg font-bold tracking-tight text-[var(--bridge-text)]">{step.title}</h3>
-                  <p className="mt-2 text-[13px] text-[var(--bridge-text-muted)] leading-relaxed">{step.desc}</p>
-                  <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/60 px-3 py-1.5 text-[10px] font-bold text-[var(--bridge-text-secondary)]">
-                    <span className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${step.accent}`} />{step.chip}
-                  </div>
-                </div>
-              </TiltCard>
-            </RevealOnScroll>
+            <div key={i} className="hiw-card group relative rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-8 transition-all hover:border-orange-500/30 hover:shadow-lg hover:-translate-y-1">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-lg shadow-orange-500/20">
+                {step.icon}
+              </div>
+              
+              <div className="mb-2 flex items-baseline gap-2">
+                <span className="font-display text-xs font-black text-orange-500">{step.num}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--bridge-text-faint)]">• {step.time}</span>
+              </div>
+              
+              <h3 className="mb-3 text-xl font-bold text-[var(--bridge-text)]">{step.title}</h3>
+              <p className="text-sm text-[var(--bridge-text-muted)] leading-relaxed">{step.desc}</p>
+              
+              <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--bridge-text-secondary)]">
+                {step.chip}
+              </div>
+            </div>
           ))}
         </div>
       </div>
