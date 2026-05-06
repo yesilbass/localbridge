@@ -15,7 +15,6 @@ export default function HeroSection({ user, ready }) {
     rotateX: 0,
     rotateY: 0,
     scale: 1,
-    filter: 'blur(0px)',
   };
 
   const flyTransition = {
@@ -32,27 +31,27 @@ export default function HeroSection({ user, ready }) {
   });
 
   const eyebrowFly = flyIn(
-    { opacity: 0, x: -150, y: -18, rotate: -4, scale: 0.92, filter: 'blur(14px)' },
+    { opacity: 0, x: -150, y: -18, rotate: -4, scale: 0.92 },
     0.04,
   );
   const taglineFly = flyIn(
-    { opacity: 0, x: -86, y: 38, rotate: -3, scale: 0.96, filter: 'blur(12px)' },
+    { opacity: 0, x: -86, y: 38, rotate: -3, scale: 0.96 },
     0.08,
   );
   const copyFly = flyIn(
-    { opacity: 0, x: -180, y: 34, rotate: -2, scale: 0.96, filter: 'blur(16px)' },
+    { opacity: 0, x: -180, y: 34, rotate: -2, scale: 0.96 },
     0.2,
   );
   const ctaFly = flyIn(
-    { opacity: 0, x: -42, y: 128, rotate: 3, scale: 0.9, filter: 'blur(16px)' },
+    { opacity: 0, x: -42, y: 128, rotate: 3, scale: 0.9 },
     0.32,
   );
   const trustFly = flyIn(
-    { opacity: 0, x: 44, y: 118, rotate: 2.5, scale: 0.92, filter: 'blur(14px)' },
+    { opacity: 0, x: 44, y: 118, rotate: 2.5, scale: 0.92 },
     0.44,
   );
   const cardFly = flyIn(
-    { opacity: 0, x: 260, y: 54, rotate: 7, rotateY: -16, scale: 0.86, filter: 'blur(18px)' },
+    { opacity: 0, x: 260, y: 54, rotate: 7, rotateY: -16, scale: 0.86 },
     0.16,
   );
 
