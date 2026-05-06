@@ -72,7 +72,7 @@ export default function HowItWorksSection() {
   }, []);
 
   return (
-    <section ref={containerRef} className="relative py-24 sm:py-32 bg-[var(--bridge-canvas)]">
+    <section id="how" ref={containerRef} className="relative py-24 sm:py-32 bg-[var(--bridge-canvas)]">
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="mb-16 flex flex-col items-center text-center">
           <p className="text-[10px] font-black uppercase tracking-widest text-orange-500 mb-4">How it works</p>
