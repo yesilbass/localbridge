@@ -8,8 +8,8 @@ export default function MentorCard({ m }) {
     const el = r.current;
     if (!el) return;
     const b = el.getBoundingClientRect();
-    el.style.setProperty('--tx', `${((e.clientY - b.top) / b.height - 0.5) * -6}deg`);
-    el.style.setProperty('--ty', `${((e.clientX - b.left) / b.width - 0.5) * 6}deg`);
+    el.style.setProperty('--tilt-x', `${((e.clientY - b.top) / b.height - 0.5) * -6}deg`);
+    el.style.setProperty('--tilt-y', `${((e.clientX - b.left) / b.width - 0.5) * 6}deg`);
     el.style.setProperty('--mx', `${((e.clientX - b.left) / b.width) * 100}%`);
     el.style.setProperty('--my', `${((e.clientY - b.top) / b.height) * 100}%`);
   };
@@ -17,8 +17,8 @@ export default function MentorCard({ m }) {
   const handleMouseLeave = () => {
     const el = r.current;
     if (!el) return;
-    el.style.setProperty('--tx', '0deg');
-    el.style.setProperty('--ty', '0deg');
+    el.style.setProperty('--tilt-x', '0deg');
+    el.style.setProperty('--tilt-y', '0deg');
   };
 
   return (

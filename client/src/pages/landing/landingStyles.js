@@ -1,4 +1,16 @@
 export const LANDING_CSS = `
+  /* ── Hero fade-up animation (used in HeroSection) ────────── */
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .animate-fade-in-up{animation:fadeInUp 0.8s ease-out forwards}
+  .delay-300{animation-delay:300ms}
+  .delay-500{animation-delay:500ms}
+  .delay-700{animation-delay:700ms}
+  .fill-mode-forwards{animation-fill-mode:forwards}
+
+  /* ── Primary CTA button (landing-specific) ───────────────── */
+  .lp-cta:hover{background-color:var(--color-primary-hover)!important;box-shadow:0 22px 50px -12px color-mix(in srgb, var(--color-primary) 75%, transparent)!important}
+  .lp-cta:active{transform:translateY(0)!important;box-shadow:0 10px 28px -12px color-mix(in srgb, var(--color-primary) 55%, transparent)!important}
+
   /* ── Glow border breathe ──────────────────────────────────── */
   @keyframes bGlowBorder{0%,100%{box-shadow:0 0 0 1px color-mix(in srgb,var(--color-primary) 22%,transparent),0 0 18px color-mix(in srgb,var(--color-primary) 14%,transparent)}50%{box-shadow:0 0 0 1px color-mix(in srgb,var(--color-primary) 55%,transparent),0 0 44px color-mix(in srgb,var(--color-primary) 28%,transparent),0 0 80px color-mix(in srgb,var(--color-accent) 16%,transparent)}}
   .b-glow-border{animation:bGlowBorder 3.5s ease-in-out infinite}

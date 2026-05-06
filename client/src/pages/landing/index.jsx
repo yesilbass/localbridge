@@ -435,9 +435,6 @@ export default function Landing() {
 
       <OutcomesSection />
 
-      {/* Minimal spacing before CTA */}
-      <div className="h-16 w-full" />
-
       <FinalCtaSection user={user} />
     </div>
   );

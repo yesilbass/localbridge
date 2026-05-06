@@ -62,7 +62,7 @@ export default function HeroSection({ user, isDark, ready }) {
             </span>
             <span className="hero-line block">starts with</span>
             <span
-              className="hero-line block font-serif italic font-normal pt-2"
+              className="hero-line block font-editorial italic font-normal pt-2"
               style={{
                 fontSize: 'clamp(2.25rem, 6vw, 4.75rem)',
                 color: 'color-mix(in srgb, var(--bridge-text) 55%, transparent)',
@@ -84,7 +84,7 @@ export default function HeroSection({ user, isDark, ready }) {
           <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center animate-fade-in-up delay-500 opacity-0 fill-mode-forwards">
             <Link
               to={user ? '/mentors' : '/register'}
-              className="lp-cta group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full px-7 py-3.5 text-[15px] font-bold transition-all duration-300 hover:-translate-y-0.5"
+              className="lp-cta group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full px-7 py-3.5 text-[15px] font-bold transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)]"
               style={{
                 backgroundColor: 'var(--color-primary)',
                 color: 'var(--color-on-primary)',
@@ -115,18 +115,9 @@ export default function HeroSection({ user, isDark, ready }) {
       </div>
 
       <style>{`
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
-        .delay-300 { animation-delay: 300ms; }
-        .delay-500 { animation-delay: 500ms; }
-        .delay-700 { animation-delay: 700ms; }
-        .fill-mode-forwards { animation-fill-mode: forwards; }
-
         @keyframes heroFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
         .hero-float-a { animation: heroFloat 6.5s ease-in-out infinite; }
         .hero-float-b { animation: heroFloat 7.5s ease-in-out -2s infinite; }
-
-        .lp-cta:hover { background-color: var(--color-primary-hover) !important; box-shadow: 0 22px 50px -12px color-mix(in srgb, var(--color-primary) 75%, transparent) !important; }
       `}</style>
     </section>
   );

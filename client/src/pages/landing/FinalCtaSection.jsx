@@ -11,6 +11,7 @@ const GUARANTEES = [
 export default function FinalCtaSection({ user }) {
   return (
     <section
+      id="start"
       className="relative overflow-hidden py-24 sm:py-32"
       style={{
         background:
@@ -73,7 +74,7 @@ export default function FinalCtaSection({ user }) {
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               to={user ? '/mentors' : '/register'}
-              className="lp-cta group relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full px-8 py-4 text-[15px] font-bold transition-all duration-300 hover:-translate-y-0.5 sm:w-auto"
+              className="lp-cta group relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full px-8 py-4 text-[15px] font-bold transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)] sm:w-auto"
               style={{
                 backgroundColor: 'var(--color-primary)',
                 color: 'var(--color-on-primary)',
