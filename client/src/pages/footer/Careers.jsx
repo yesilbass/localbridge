@@ -33,7 +33,7 @@ export default function Careers() {
                 className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[45vmax] w-[80vmax] -translate-x-1/2 opacity-55 dark:opacity-80"
                 style={{
                     background:
-                        'conic-gradient(from 220deg at 50% 50%, rgba(251,146,60,0.14), rgba(253,230,138,0.1), rgba(234,88,12,0.18), rgba(251,146,60,0.14))',
+                        'conic-gradient(from 220deg at 50% 50%, color-mix(in srgb, var(--color-primary) 14%, transparent), color-mix(in srgb, var(--color-accent) 10%, transparent), color-mix(in srgb, var(--color-primary) 18%, transparent), color-mix(in srgb, var(--color-primary) 14%, transparent))',
                     filter: 'blur(100px)',
                 }}
             />
@@ -60,7 +60,7 @@ export default function Careers() {
                                 onClick={() => setFilter(t)}
                                 className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
                                     filter === t
-                                        ? 'border-transparent bg-gradient-to-r from-stone-900 to-stone-800 text-amber-50 shadow-[0_6px_20px_-6px_rgba(28,25,23,0.45)] dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 dark:shadow-[0_8px_22px_-6px_rgba(234,88,12,0.5)]'
+                                        ? 'border-transparent bg-gradient-to-r from-stone-900 to-stone-800 text-amber-50 shadow-[0_6px_20px_-6px_color-mix(in srgb, var(--color-secondary) 45%, transparent)] dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 dark:shadow-[0_8px_22px_-6px_color-mix(in srgb, var(--color-primary) 50%, transparent)]'
                                         : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)] hover:-translate-y-0.5 hover:border-orange-300/70 hover:shadow-md'
                                 } ${focusRing}`}
                             >
@@ -94,7 +94,7 @@ export default function Careers() {
                                         </div>
                                     </div>
                                     <button
-                                        className={`btn-sheen group/btn shrink-0 inline-flex items-center gap-1.5 rounded-full bg-stone-900 px-6 py-2.5 text-sm font-semibold text-amber-50 shadow-[0_8px_22px_-6px_rgba(28,25,23,0.4)] transition hover:-translate-y-0.5 hover:bg-stone-800 hover:shadow-[0_12px_28px_-8px_rgba(28,25,23,0.5)] dark:bg-gradient-to-r dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 ${focusRing}`}
+                                        className={`btn-sheen group/btn shrink-0 inline-flex items-center gap-1.5 rounded-full bg-stone-900 px-6 py-2.5 text-sm font-semibold text-amber-50 shadow-[0_8px_22px_-6px_color-mix(in srgb, var(--color-secondary) 40%, transparent)] transition hover:-translate-y-0.5 hover:bg-stone-800 hover:shadow-[0_12px_28px_-8px_color-mix(in srgb, var(--color-secondary) 50%, transparent)] dark:bg-gradient-to-r dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 ${focusRing}`}
                                     >
                                         Apply
                                         <ArrowRight className="h-4 w-4 transition group-hover/btn:translate-x-0.5" />
@@ -126,7 +126,7 @@ export default function Careers() {
                                         key={p.title}
                                         className="group flex items-start gap-3 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-300/60 hover:shadow-bridge-tile"
                                     >
-                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_6px_18px_-4px_rgba(234,88,12,0.4)] transition group-hover:scale-[1.06]">
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_6px_18px_-4px_color-mix(in srgb, var(--color-primary) 40%, transparent)] transition group-hover:scale-[1.06]">
                                             <Icon className="h-4 w-4" />
                                         </div>
                                         <div className="min-w-0">

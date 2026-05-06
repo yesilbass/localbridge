@@ -42,7 +42,7 @@ export default function FAQ() {
                 className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[45vmax] w-[80vmax] -translate-x-1/2 opacity-60 dark:opacity-80"
                 style={{
                     background:
-                        'conic-gradient(from 190deg at 50% 50%, rgba(251,146,60,0.14), rgba(253,230,138,0.1), rgba(234,88,12,0.18), rgba(251,146,60,0.14))',
+                        'conic-gradient(from 190deg at 50% 50%, color-mix(in srgb, var(--color-primary) 14%, transparent), color-mix(in srgb, var(--color-accent) 10%, transparent), color-mix(in srgb, var(--color-primary) 18%, transparent), color-mix(in srgb, var(--color-primary) 14%, transparent))',
                     filter: 'blur(100px)',
                 }}
             />
@@ -73,7 +73,7 @@ export default function FAQ() {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search questions…"
-                            className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] py-4 pl-12 pr-12 text-base text-[var(--bridge-text)] shadow-bridge-tile placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:shadow-[0_0_0_4px_rgba(251,146,60,0.2)]"
+                            className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] py-4 pl-12 pr-12 text-base text-[var(--bridge-text)] shadow-bridge-tile placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 20%, transparent)]"
                         />
                         {search ? (
                             <button
@@ -95,7 +95,7 @@ export default function FAQ() {
                             onClick={() => setCat(c)}
                             className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
                                 cat === c
-                                    ? 'border-transparent bg-gradient-to-r from-stone-900 to-stone-800 text-amber-50 shadow-[0_6px_20px_-6px_rgba(28,25,23,0.45)] dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 dark:shadow-[0_8px_22px_-6px_rgba(234,88,12,0.5)]'
+                                    ? 'border-transparent bg-gradient-to-r from-stone-900 to-stone-800 text-amber-50 shadow-[0_6px_20px_-6px_color-mix(in srgb, var(--color-secondary) 45%, transparent)] dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 dark:shadow-[0_8px_22px_-6px_color-mix(in srgb, var(--color-primary) 50%, transparent)]'
                                     : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)] hover:-translate-y-0.5 hover:border-orange-300/70 hover:shadow-md'
                             } ${focusRing}`}
                         >
@@ -130,7 +130,7 @@ export default function FAQ() {
                                         <span
                                             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
                                                 isOpen
-                                                    ? 'rotate-45 border-orange-300/70 bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_4px_14px_-2px_rgba(234,88,12,0.55)]'
+                                                    ? 'rotate-45 border-orange-300/70 bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_4px_14px_-2px_color-mix(in srgb, var(--color-primary) 55%, transparent)]'
                                                     : 'border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] text-[var(--bridge-text-muted)]'
                                             }`}
                                         >
@@ -149,7 +149,7 @@ export default function FAQ() {
                     {filtered.length === 0 ? (
                         <div className="relative overflow-hidden rounded-2xl border border-dashed border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)]/60 px-8 py-14 text-center">
                             <div aria-hidden className="pointer-events-none absolute -top-16 left-1/2 h-32 w-64 -translate-x-1/2 rounded-full bg-gradient-to-b from-orange-300/25 to-transparent blur-3xl" />
-                            <div className="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_10px_30px_-6px_rgba(234,88,12,0.5)]">
+                            <div className="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_10px_30px_-6px_color-mix(in srgb, var(--color-primary) 50%, transparent)]">
                                 <HelpCircle className="h-6 w-6" />
                             </div>
                             <p className="relative font-display text-lg font-semibold text-[var(--bridge-text)]">No matches.</p>

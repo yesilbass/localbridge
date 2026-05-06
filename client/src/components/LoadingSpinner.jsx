@@ -35,29 +35,29 @@ export default function LoadingSpinner({
         className="relative grid place-items-center"
         style={{ width: outerBox, height: outerBox }}
       >
-        {/* Soft glow halo */}
+        {/* Soft glow halo — palette-tinted */}
         <span
           aria-hidden
           className="absolute inset-0 rounded-full blur-xl opacity-60 dark:opacity-80"
           style={{
             background:
-              'radial-gradient(closest-side, rgba(251,146,60,0.45), rgba(234,88,12,0.15) 60%, transparent 80%)',
+              'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 45%, transparent), color-mix(in srgb, var(--color-primary-hover) 15%, transparent) 60%, transparent 80%)',
           }}
         />
-        {/* Outer arc */}
+        {/* Outer arc — palette primary */}
         <span
           aria-hidden
           className="absolute inset-0 rounded-full animate-spin"
           style={{
             borderWidth: dims.stroke,
             borderStyle: 'solid',
-            borderColor: 'rgba(251,146,60,0.15)',
-            borderTopColor: 'rgb(234 88 12)',
-            borderRightColor: 'rgb(251 146 60)',
+            borderColor: 'color-mix(in srgb, var(--color-primary) 15%, transparent)',
+            borderTopColor: 'var(--color-primary)',
+            borderRightColor: 'var(--color-primary-hover)',
             animationDuration: '1.1s',
           }}
         />
-        {/* Inner counter arc */}
+        {/* Inner counter arc — palette accent */}
         <span
           aria-hidden
           className="absolute rounded-full"
@@ -65,16 +65,23 @@ export default function LoadingSpinner({
             inset: dims.gap + dims.stroke,
             borderWidth: Math.max(1, dims.stroke - 1),
             borderStyle: 'solid',
-            borderColor: 'rgba(253,230,138,0.2)',
-            borderBottomColor: 'rgb(253 230 138)',
-            borderLeftColor: 'rgba(251,191,36,0.85)',
+            borderColor: 'color-mix(in srgb, var(--color-accent) 20%, transparent)',
+            borderBottomColor: 'var(--color-accent)',
+            borderLeftColor: 'color-mix(in srgb, var(--color-accent) 85%, transparent)',
             animation: 'spin 1.6s linear infinite reverse',
           }}
         />
-        {/* Bridge "B" mark */}
+        {/* Bridge "B" mark — palette gradient */}
         <span
-          className="relative flex items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-500 to-amber-500 text-white shadow-[0_4px_16px_-4px_rgba(234,88,12,0.65)]"
-          style={{ width: innerBox, height: innerBox }}
+          className="relative flex items-center justify-center rounded-full text-[var(--color-on-primary)]"
+          style={{
+            width: innerBox,
+            height: innerBox,
+            backgroundImage:
+              'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 60%, var(--color-accent) 100%)',
+            boxShadow:
+              '0 4px 16px -4px color-mix(in srgb, var(--color-primary) 65%, transparent)',
+          }}
         >
           <span
             className="font-display font-bold leading-none tracking-tight"
@@ -85,7 +92,7 @@ export default function LoadingSpinner({
         </span>
       </div>
       {showText ? (
-        <p className="text-sm font-medium text-stone-500 dark:text-stone-400">
+        <p className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>
           {text}
         </p>
       ) : null}

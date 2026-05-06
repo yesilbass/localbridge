@@ -34,7 +34,7 @@ export default function Community() {
                 className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[45vmax] w-[80vmax] -translate-x-1/2 opacity-55 dark:opacity-80"
                 style={{
                     background:
-                        'conic-gradient(from 180deg at 50% 50%, rgba(251,146,60,0.14), rgba(253,230,138,0.1), rgba(234,88,12,0.18), rgba(251,146,60,0.14))',
+                        'conic-gradient(from 180deg at 50% 50%, color-mix(in srgb, var(--color-primary) 14%, transparent), color-mix(in srgb, var(--color-accent) 10%, transparent), color-mix(in srgb, var(--color-primary) 18%, transparent), color-mix(in srgb, var(--color-primary) 14%, transparent))',
                     filter: 'blur(100px)',
                 }}
             />
@@ -107,7 +107,7 @@ export default function Community() {
                                                 className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${
                                                     rsvpd
                                                         ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-[0_8px_22px_-4px_rgba(16,185,129,0.5)]'
-                                                        : 'btn-sheen bg-stone-900 text-amber-50 shadow-[0_8px_22px_-4px_rgba(28,25,23,0.4)] hover:-translate-y-0.5 hover:bg-stone-800 hover:shadow-[0_12px_28px_-6px_rgba(28,25,23,0.5)] dark:bg-gradient-to-r dark:from-orange-500 dark:to-amber-500 dark:text-stone-950'
+                                                        : 'btn-sheen bg-stone-900 text-amber-50 shadow-[0_8px_22px_-4px_color-mix(in srgb, var(--color-secondary) 40%, transparent)] hover:-translate-y-0.5 hover:bg-stone-800 hover:shadow-[0_12px_28px_-6px_color-mix(in srgb, var(--color-secondary) 50%, transparent)] dark:bg-gradient-to-r dark:from-orange-500 dark:to-amber-500 dark:text-stone-950'
                                                 } ${focusRing}`}
                                             >
                                                 {rsvpd ? (
@@ -156,7 +156,7 @@ export default function Community() {
                     <Reveal delay={100}>
                         <div className="relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-8 shadow-bridge-card">
                             <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-gradient-to-br from-orange-400/25 to-amber-300/10 blur-3xl" />
-                            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_10px_28px_-4px_rgba(234,88,12,0.5)]">
+                            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_10px_28px_-4px_color-mix(in srgb, var(--color-primary) 50%, transparent)]">
                                 <Mail className="h-5 w-5" />
                             </div>
                             <p className="relative mt-6 text-xs font-bold uppercase tracking-[0.2em] text-orange-700 dark:text-orange-300">Newsletter</p>
@@ -179,11 +179,11 @@ export default function Community() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="you@example.com"
-                                        className="flex-1 rounded-full border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-5 py-3 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                                        className="flex-1 rounded-full border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-5 py-3 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 18%, transparent)]"
                                     />
                                     <button
                                         type="submit"
-                                        className={`btn-sheen shrink-0 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_26px_-4px_rgba(234,88,12,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_32px_-6px_rgba(234,88,12,0.7)] ${focusRing}`}
+                                        className={`btn-sheen shrink-0 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_26px_-4px_color-mix(in srgb, var(--color-primary) 55%, transparent)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_32px_-6px_color-mix(in srgb, var(--color-primary) 70%, transparent)] ${focusRing}`}
                                     >
                                         <Sparkles className="h-4 w-4" />
                                         Subscribe

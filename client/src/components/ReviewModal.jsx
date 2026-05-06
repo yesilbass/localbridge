@@ -35,7 +35,7 @@ function StarButton({ index, filled, hovered, onHover, onClick }) {
       <svg
         viewBox="0 0 24 24"
         className={`h-9 w-9 transition-colors duration-100 ${
-          active ? 'text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.55)]' : 'text-stone-200'
+          active ? 'text-amber-400 drop-shadow-[0_0_6px_color-mix(in srgb, var(--color-accent) 55%, transparent)]' : 'text-stone-200'
         }`}
         fill={active ? 'currentColor' : 'none'}
         stroke="currentColor"
@@ -141,7 +141,7 @@ export default function ReviewModal({
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-md overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-[0_32px_80px_-12px_rgba(28,25,23,0.35)]">
+      <div className="relative w-full max-w-md overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-[0_32px_80px_-12px_color-mix(in srgb, var(--color-secondary) 35%, transparent)]">
         {/* Orange accent bar */}
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500" />
 
@@ -234,7 +234,7 @@ export default function ReviewModal({
               <button
                 type="submit"
                 disabled={submitting || rating < 1}
-                className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-sm font-bold text-white shadow-[0_6px_18px_-4px_rgba(234,88,12,0.45)] transition hover:from-amber-400 hover:to-orange-400 hover:shadow-[0_8px_24px_-6px_rgba(234,88,12,0.6)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-sm font-bold text-white shadow-[0_6px_18px_-4px_color-mix(in srgb, var(--color-primary) 45%, transparent)] transition hover:from-amber-400 hover:to-orange-400 hover:shadow-[0_8px_24px_-6px_color-mix(in srgb, var(--color-primary) 60%, transparent)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting ? 'Submitting…' : 'Submit Review'}
               </button>

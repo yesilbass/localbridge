@@ -425,7 +425,7 @@ export default function Settings() {
                       onClick={() => setActiveSection(section.id)}
                       className={`relative flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition-all ${
                           active
-                              ? 'bg-gradient-to-r from-stone-900 to-stone-800 text-amber-50 shadow-[0_6px_18px_-4px_rgba(28,25,23,0.45)] dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 dark:shadow-[0_8px_20px_-4px_rgba(234,88,12,0.5)]'
+                              ? 'bg-gradient-to-r from-stone-900 to-stone-800 text-amber-50 shadow-[0_6px_18px_-4px_color-mix(in srgb, var(--color-secondary) 45%, transparent)] dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 dark:shadow-[0_8px_20px_-4px_color-mix(in srgb, var(--color-primary) 50%, transparent)]'
                               : 'text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)]'
                       }`}
                   >
@@ -911,7 +911,7 @@ export default function Settings() {
             <button
                 onClick={saveSettings}
                 disabled={saving}
-                className={`btn-sheen group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_36px_-8px_rgba(234,88,12,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_rgba(234,88,12,0.7)] disabled:pointer-events-none disabled:opacity-55 ${focusRing}`}
+                className={`btn-sheen group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_36px_-8px_color-mix(in srgb, var(--color-primary) 55%, transparent)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_color-mix(in srgb, var(--color-primary) 70%, transparent)] disabled:pointer-events-none disabled:opacity-55 ${focusRing}`}
             >
               {saving ? (
                 <>

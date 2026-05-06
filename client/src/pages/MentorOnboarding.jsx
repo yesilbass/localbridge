@@ -61,7 +61,7 @@ async function readFileAsText(file) {
 
 function Card({ children, footer }) {
   return (
-    <div className="overflow-hidden rounded-[2rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-[0_24px_60px_-12px_rgba(28,25,23,0.10)]">
+    <div className="overflow-hidden rounded-[2rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-[0_24px_60px_-12px_color-mix(in srgb, var(--color-secondary) 10%, transparent)]">
       <div className="space-y-5 p-8">{children}</div>
       {footer && <div className="border-t border-[var(--bridge-border)] px-8 py-5">{footer}</div>}
     </div>

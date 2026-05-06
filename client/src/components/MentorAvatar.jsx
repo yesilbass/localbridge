@@ -1,16 +1,22 @@
-const PALETTE = [
-  'bg-violet-600',
-  'bg-emerald-600',
-  'bg-sky-700',
-  'bg-rose-600',
-  'bg-indigo-700',
-  'bg-teal-600',
-  'bg-orange-600',
-  'bg-pink-600',
-  'bg-amber-700',
-  'bg-cyan-700',
-  'bg-green-700',
-  'bg-purple-600',
+/**
+ * 12 deterministic palette-aware backgrounds. Each entry is a CSS color string
+ * referencing the active palette's --color-* tokens, so avatars coordinate with
+ * the route's active palette instead of fighting it. Order is stable so a given
+ * mentor name always hashes to the same slot.
+ */
+const TOKEN_PALETTE = [
+  'var(--color-primary)',
+  'var(--color-primary-hover)',
+  'var(--color-secondary)',
+  'var(--color-accent)',
+  'var(--color-info)',
+  'var(--color-success)',
+  'color-mix(in srgb, var(--color-primary) 70%, var(--color-secondary))',
+  'color-mix(in srgb, var(--color-accent) 70%, var(--color-secondary))',
+  'color-mix(in srgb, var(--color-primary) 55%, var(--color-info))',
+  'color-mix(in srgb, var(--color-accent) 55%, var(--color-success))',
+  'color-mix(in srgb, var(--color-secondary) 60%, var(--color-primary))',
+  'color-mix(in srgb, var(--color-info) 55%, var(--color-accent))',
 ];
 
 const SIZES = {
@@ -26,7 +32,7 @@ function nameToColor(name) {
   let hash = 0;
   const s = name || '';
   for (let i = 0; i < s.length; i++) hash = s.charCodeAt(i) + ((hash << 5) - hash);
-  return PALETTE[Math.abs(hash) % PALETTE.length];
+  return TOKEN_PALETTE[Math.abs(hash) % TOKEN_PALETTE.length];
 }
 
 function getInitials(name) {
@@ -43,7 +49,8 @@ export default function MentorAvatar({ name = '', size = 'md', className = '' })
   const sizeClasses = SIZES[size] ?? SIZES.md;
   return (
     <div
-      className={`flex shrink-0 items-center justify-center rounded-full font-bold text-white ${bg} ${sizeClasses}${className ? ` ${className}` : ''}`}
+      className={`flex shrink-0 items-center justify-center rounded-full font-bold text-[var(--color-on-primary)] ${sizeClasses}${className ? ` ${className}` : ''}`}
+      style={{ backgroundColor: bg }}
       aria-hidden
     >
       {getInitials(name)}

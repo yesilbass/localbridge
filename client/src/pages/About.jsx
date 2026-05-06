@@ -59,7 +59,7 @@ export default function About() {
           className="pointer-events-none absolute left-1/2 top-[-20%] -z-10 h-[70vmax] w-[70vmax] -translate-x-1/2 opacity-60 dark:opacity-80"
           style={{
             background:
-              'conic-gradient(from 200deg at 50% 50%, rgba(251,146,60,0.16), rgba(253,230,138,0.12), rgba(234,88,12,0.2), rgba(251,146,60,0.16))',
+              'conic-gradient(from 200deg at 50% 50%, color-mix(in srgb, var(--color-primary) 16%, transparent), color-mix(in srgb, var(--color-accent) 12%, transparent), color-mix(in srgb, var(--color-primary) 20%, transparent), color-mix(in srgb, var(--color-primary) 16%, transparent))',
             filter: 'blur(90px)',
           }}
         />
@@ -158,7 +158,7 @@ export default function About() {
             {VALUES.map((v, i) => (
               <Reveal key={v.title} delay={i * 80}>
                 <article className="group relative h-full overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-tile transition duration-500 hover:-translate-y-1 hover:shadow-bridge-card cursor-glow">
-                  <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${v.accent} text-white shadow-[0_8px_22px_-6px_rgba(234,88,12,0.45)] transition-transform group-hover:scale-105`}>
+                  <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${v.accent} text-white shadow-[0_8px_22px_-6px_color-mix(in srgb, var(--color-primary) 45%, transparent)] transition-transform group-hover:scale-105`}>
                     <v.icon className="h-5 w-5" aria-hidden />
                   </div>
                   <p className={`mt-5 text-[11px] font-bold uppercase tracking-[0.2em] ${v.text}`}>Principle 0{i + 1}</p>
@@ -249,7 +249,7 @@ export default function About() {
             <div className="relative mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 to="/mentors"
-                className={`btn-sheen inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-orange-700 shadow-[0_12px_36px_-8px_rgba(28,25,23,0.25)] transition hover:-translate-y-0.5 hover:bg-orange-50 hover:shadow-[0_18px_44px_-10px_rgba(28,25,23,0.35)] ${focusRing}`}
+                className={`btn-sheen inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-orange-700 shadow-[0_12px_36px_-8px_color-mix(in srgb, var(--color-secondary) 25%, transparent)] transition hover:-translate-y-0.5 hover:bg-orange-50 hover:shadow-[0_18px_44px_-10px_color-mix(in srgb, var(--color-secondary) 35%, transparent)] ${focusRing}`}
               >
                 Browse mentors <span aria-hidden>→</span>
               </Link>

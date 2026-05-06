@@ -75,6 +75,7 @@ Mentorship platform connecting job seekers with established professionals. React
 | comment | text | |
 | created_at | timestamptz | |
 **RLS**: SELECT public, INSERT authenticated, DELETE own.
+**Required trigger** (TODO — set up in Supabase): an `AFTER INSERT OR UPDATE OR DELETE ON reviews` trigger must recalculate `mentor_profiles.rating` (and ideally `total_sessions`) using AVG over all reviews for that `mentor_id`. The client must NOT recalculate this — `mentor_profiles` UPDATE is RLS-restricted to the row's own user, so a mentee write would silently fail, and concurrent inserts race. Until this trigger is in place, displayed mentor ratings will not reflect new reviews.
 
 ### `favorites`
 | Column | Type | Notes |

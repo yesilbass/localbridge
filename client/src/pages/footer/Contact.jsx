@@ -65,7 +65,7 @@ export default function Contact() {
                 className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[50vmax] w-[80vmax] -translate-x-1/2 opacity-55 dark:opacity-80"
                 style={{
                     background:
-                        'conic-gradient(from 160deg at 50% 50%, rgba(251,146,60,0.15), rgba(253,230,138,0.1), rgba(234,88,12,0.18), rgba(251,146,60,0.15))',
+                        'conic-gradient(from 160deg at 50% 50%, color-mix(in srgb, var(--color-primary) 15%, transparent), color-mix(in srgb, var(--color-accent) 10%, transparent), color-mix(in srgb, var(--color-primary) 18%, transparent), color-mix(in srgb, var(--color-primary) 15%, transparent))',
                     filter: 'blur(100px)',
                 }}
             />
@@ -94,7 +94,7 @@ export default function Contact() {
                                     className="group relative flex items-start gap-4 overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-5 shadow-bridge-tile backdrop-blur-sm transition-all duration-500 hover:-translate-y-0.5 hover:shadow-bridge-card cursor-glow"
                                 >
                                     <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br from-orange-400/15 to-transparent opacity-0 blur-2xl transition group-hover:opacity-100" />
-                                    <div className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${hue} text-white shadow-[0_8px_22px_-6px_rgba(234,88,12,0.4)] transition-transform duration-500 group-hover:scale-[1.04]`}>
+                                    <div className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${hue} text-white shadow-[0_8px_22px_-6px_color-mix(in srgb, var(--color-primary) 40%, transparent)] transition-transform duration-500 group-hover:scale-[1.04]`}>
                                         <Icon className="h-5 w-5" />
                                     </div>
                                     <div className="relative min-w-0">
@@ -169,7 +169,7 @@ export default function Contact() {
                                                     required
                                                     value={form.name}
                                                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                                    className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                                                    className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 18%, transparent)]"
                                                 />
                                             </div>
                                             <div>
@@ -179,7 +179,7 @@ export default function Contact() {
                                                     required
                                                     value={form.email}
                                                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                                                    className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                                                    className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 18%, transparent)]"
                                                 />
                                             </div>
                                         </div>
@@ -188,7 +188,7 @@ export default function Contact() {
                                             <select
                                                 value={form.topic}
                                                 onChange={(e) => setForm({ ...form, topic: e.target.value })}
-                                                className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                                                className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 18%, transparent)]"
                                             >
                                                 <option>General question</option>
                                                 <option>Billing issue</option>
@@ -206,7 +206,7 @@ export default function Contact() {
                                                 value={form.message}
                                                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                                                 placeholder="Tell us what's up — the more specific, the better."
-                                                className="w-full resize-none rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                                                className="w-full resize-none rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 18%, transparent)]"
                                             />
                                             <p className="mt-1.5 text-right text-[10px] font-medium text-[var(--bridge-text-faint)]">
                                                 {form.message.length} characters
@@ -220,7 +220,7 @@ export default function Contact() {
                                         <button
                                             type="submit"
                                             disabled={submitting}
-                                            className={`btn-sheen group relative inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 py-4 text-sm font-semibold text-white shadow-[0_14px_36px_-8px_rgba(234,88,12,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_rgba(234,88,12,0.7)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 ${focusRing}`}
+                                            className={`btn-sheen group relative inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 py-4 text-sm font-semibold text-white shadow-[0_14px_36px_-8px_color-mix(in srgb, var(--color-primary) 55%, transparent)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_color-mix(in srgb, var(--color-primary) 70%, transparent)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 ${focusRing}`}
                                         >
                                             {submitting ? (
                                                 <>

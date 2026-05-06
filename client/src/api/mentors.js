@@ -26,7 +26,10 @@ export async function getAllMentors({ search = '', industry = '', sortBy = 'rati
 
   let query = supabase
     .from("mentor_profiles")
-    .select("*", { count: "exact" });
+    .select("*", { count: "exact" })
+    // Seeded/demo mentors have onboarding_complete = NULL — keep them visible.
+    // Hide only mentors who started real onboarding but didn't finish (false).
+    .or('onboarding_complete.is.null,onboarding_complete.eq.true');
 
   if (search) {
     query = query.or(`name.ilike.%${search}%,title.ilike.%${search}%,company.ilike.%${search}%`);

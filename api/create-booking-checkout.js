@@ -1,5 +1,7 @@
 import { getStripe } from './_lib/stripeClient.js';
 import { getPublicOrigin } from './_lib/publicOrigin.js';
+import supabase from './_lib/supabase.js';
+import { verifyAuthUser } from './_lib/auth.js';
 
 const SESSION_TYPE_MAP = {
   career_advice: 'Career Advice',
@@ -19,21 +21,40 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'Stripe is not configured on the server.' });
   }
 
-  const {
-    userId, userEmail, menteeName, mentorId, mentorName,
-    sessionType, sessionTypeKey, scheduledDate,
-    sessionPrice, message,
-  } = req.body;
+  const { user, error: authError } = await verifyAuthUser(req);
+  if (!user) return res.status(401).json({ error: authError || 'Unauthorized' });
 
-  const safePrice = Number(sessionPrice);
-  if (!safePrice || safePrice <= 0) {
-    return res.status(400).json({ error: 'Invalid mentor session price.' });
-  }
+  const {
+    userEmail, menteeName, mentorId, mentorName,
+    sessionType, sessionTypeKey, scheduledDate,
+    message,
+  } = req.body;
 
   const typeKey = sessionTypeKey || SESSION_TYPE_KEY_FROM_NAME[sessionType];
   if (!typeKey || !SESSION_TYPE_MAP[typeKey]) {
     return res.status(400).json({ error: 'Invalid session type.' });
   }
+
+  if (!mentorId) {
+    return res.status(400).json({ error: 'mentorId is required.' });
+  }
+
+  // Price comes from the mentor profile, not the client. Trusting the client
+  // would let a caller set sessionPrice to $0.01 and pay almost nothing.
+  const { data: mentorProfile, error: mentorError } = await supabase
+    .from('mentor_profiles')
+    .select('session_rate, name')
+    .eq('id', mentorId)
+    .maybeSingle();
+
+  if (mentorError || !mentorProfile) {
+    return res.status(404).json({ error: 'Mentor not found.' });
+  }
+  const safePrice = Number(mentorProfile.session_rate);
+  if (!safePrice || safePrice <= 0) {
+    return res.status(400).json({ error: 'This mentor has not set a session rate yet.' });
+  }
+  const safeMentorName = mentorProfile.name || mentorName || 'mentor';
 
   const origin = getPublicOrigin();
 
@@ -41,13 +62,13 @@ export default async function handler(req, res) {
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded_page',
       mode: 'payment',
-      customer_email: userEmail || undefined,
+      customer_email: userEmail || user.email || undefined,
       line_items: [
         {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: `Session with ${mentorName}`,
+              name: `Session with ${safeMentorName}`,
               description: `${sessionType} mentor booking`,
             },
             unit_amount: Math.round(safePrice * 100),
@@ -57,10 +78,10 @@ export default async function handler(req, res) {
       ],
       metadata: {
         type: 'mentor_booking',
-        userId: String(userId ?? ''),
+        userId: String(user.id),
         menteeName: String(menteeName ?? '').slice(0, 500),
         mentorId: String(mentorId ?? ''),
-        mentorName: String(mentorName ?? '').slice(0, 500),
+        mentorName: String(safeMentorName ?? '').slice(0, 500),
         sessionTypeKey: String(typeKey ?? ''),
         sessionTypeName: String(sessionType ?? ''),
         scheduledDate: String(scheduledDate ?? ''),
@@ -73,6 +94,6 @@ export default async function handler(req, res) {
     res.json({ clientSecret: session.client_secret });
   } catch (error) {
     console.error('Booking checkout error:', error);
-    res.status(500).json({ error: error?.message || 'Could not create booking checkout.' });
+    res.status(500).json({ error: 'Could not create booking checkout.' });
   }
 }

@@ -14,12 +14,12 @@ export default function BridgeGlobalAtmosphere() {
       aria-hidden
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
     >
-      {/* Aurora — slowly breathing warm halos */}
+      {/* Aurora — slowly breathing palette-tinted halos (palette-aware via tokens) */}
       <div
         className="absolute left-[-20%] top-[-30%] h-[60vmax] w-[60vmax] rounded-full opacity-70 animate-bridge-aurora dark:opacity-90"
         style={{
           background:
-            'radial-gradient(closest-side, rgba(251,146,60,0.22), rgba(234,88,12,0.08) 50%, transparent 72%)',
+            'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 22%, transparent), color-mix(in srgb, var(--color-primary-hover) 8%, transparent) 50%, transparent 72%)',
           filter: 'blur(70px)',
           willChange: 'transform',
         }}
@@ -28,7 +28,7 @@ export default function BridgeGlobalAtmosphere() {
         className="absolute right-[-25%] top-[8%] h-[55vmax] w-[55vmax] rounded-full opacity-60 dark:opacity-80"
         style={{
           background:
-            'radial-gradient(closest-side, rgba(253,230,138,0.2), rgba(251,191,36,0.08) 50%, transparent 72%)',
+            'radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 20%, transparent), color-mix(in srgb, var(--color-accent) 8%, transparent) 50%, transparent 72%)',
           filter: 'blur(90px)',
           animation: 'bridge-aurora 28s ease-in-out infinite reverse',
         }}
@@ -37,7 +37,7 @@ export default function BridgeGlobalAtmosphere() {
         className="absolute bottom-[-20%] left-[30%] h-[50vmax] w-[50vmax] rounded-full opacity-45 dark:opacity-70"
         style={{
           background:
-            'radial-gradient(closest-side, rgba(236,72,153,0.12), rgba(251,146,60,0.06) 50%, transparent 70%)',
+            'radial-gradient(closest-side, color-mix(in srgb, var(--color-secondary) 12%, transparent), color-mix(in srgb, var(--color-primary) 6%, transparent) 50%, transparent 70%)',
           filter: 'blur(80px)',
           animation: 'bridge-aurora 34s ease-in-out infinite',
         }}

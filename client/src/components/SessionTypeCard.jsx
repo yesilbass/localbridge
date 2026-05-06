@@ -1,14 +1,38 @@
 import { Check, Clock } from 'lucide-react';
 
 /**
- * @param {{ type: object, selected?: boolean, onClick?: () => void, variant?: 'marketing' | 'picker' }} props
+ * SessionTypeCard
+ *
+ * Renders one of the four session types (Career Advice, Interview Prep,
+ * Resume Review, Networking). Per the brand brief, the four types are
+ * differentiated by *tint, border accent, and icon color* — all derived from a
+ * single `type.hueVar` palette token (defined in `constants/sessionTypes.js`).
+ *
+ * That keeps the four cards coordinated within whichever palette is active
+ * (Modern Signal / Grounded Guidance / Quiet Authority) instead of fighting it
+ * with four loud baked-in hues.
+ *
+ * @param {{
+ *   type: { hueVar: string, icon: string, name: string, description?: string,
+ *           tagline?: string, duration: string, popular?: boolean },
+ *   selected?: boolean,
+ *   onClick?: () => void,
+ *   variant?: 'marketing' | 'picker'
+ * }} props
  */
 export default function SessionTypeCard({ type, selected = false, onClick, variant = 'marketing' }) {
-  const { icon, name, description, tagline, duration, popular, accent } = type;
+  const { hueVar = 'var(--color-primary)', icon, name, description, tagline, duration, popular } = type;
   const bodyText = variant === 'picker' ? tagline ?? description : description;
 
   const isInteractive = typeof onClick === 'function';
   const isPicker = variant === 'picker';
+
+  // All chrome (left border, icon bg, tag, selected ring/glow) is derived from
+  // the single hue. Soft/strong variants keep the contrast hierarchy.
+  const tintSoft   = `color-mix(in srgb, ${hueVar} 12%, transparent)`;
+  const tintMed    = `color-mix(in srgb, ${hueVar} 22%, transparent)`;
+  const tintStrong = `color-mix(in srgb, ${hueVar} 45%, transparent)`;
+  const ringColor  = `color-mix(in srgb, ${hueVar} 90%, transparent)`;
 
   return (
     <div
@@ -26,39 +50,47 @@ export default function SessionTypeCard({ type, selected = false, onClick, varia
             }
           : undefined
       }
+      style={{
+        borderLeftColor: hueVar,
+      }}
       className={[
         'group relative flex flex-col overflow-hidden rounded-[1.25rem] border outline-none transition-all duration-500',
         'border-l-[3px]',
-        accent.border,
         isPicker
           ? 'gap-3 border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] p-4 text-left sm:gap-3 sm:p-5'
           : 'gap-4 border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-tile backdrop-blur-sm',
-        !selected && 'hover:-translate-y-1 hover:shadow-bridge-card hover:border-orange-300/70 dark:hover:border-orange-400/40',
-        selected
-          ? `z-[1] ${isPicker ? `bg-gradient-to-br ${accent.selectedBg}` : ''} shadow-[0_20px_48px_-14px_rgba(234,88,12,0.35)] ring-2 ring-offset-2 ring-offset-[var(--bridge-surface)] ${accent.selectedRing}`
-          : '',
+        !selected && 'hover:-translate-y-1 hover:shadow-bridge-card',
         isInteractive ? 'cursor-pointer' : '',
-        isInteractive && 'focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)]',
+        isInteractive && 'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)]',
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      {/* Selected glow underlay */}
+      {/* Selected glow underlay — palette-tinted */}
       {selected ? (
         <span
           aria-hidden
-          className="pointer-events-none absolute -inset-px rounded-[1.25rem] bg-gradient-to-br from-orange-500/10 via-transparent to-amber-400/5 opacity-80"
+          className="pointer-events-none absolute -inset-px rounded-[1.25rem] opacity-80"
+          style={{
+            background: `linear-gradient(135deg, ${tintSoft}, transparent 60%, color-mix(in srgb, ${hueVar} 6%, transparent))`,
+            boxShadow: `0 0 0 2px ${ringColor}, 0 20px 48px -14px ${tintStrong}`,
+          }}
         />
       ) : null}
       {/* Hover sheen */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-orange-400/18 to-transparent opacity-0 blur-2xl transition group-hover:opacity-100"
+        className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-0 blur-2xl transition group-hover:opacity-100"
+        style={{ background: `linear-gradient(135deg, ${tintMed}, transparent)` }}
       />
 
       {popular && (
         <span
-          className={`absolute ${isPicker ? 'top-3 right-3' : 'top-4 right-4'} inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_6px_14px_-4px_rgba(16,185,129,0.55)] sm:text-[11px]`}
+          className={`absolute ${isPicker ? 'top-3 right-3' : 'top-4 right-4'} inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--color-on-primary)] sm:text-[11px]`}
+          style={{
+            background: `linear-gradient(90deg, var(--color-success), color-mix(in srgb, var(--color-success) 70%, var(--color-accent)))`,
+            boxShadow: `0 6px 14px -4px color-mix(in srgb, var(--color-success) 55%, transparent)`,
+          }}
         >
           <span className="h-1.5 w-1.5 rounded-full bg-white/85 animate-pulse-soft" />
           Popular
@@ -67,9 +99,15 @@ export default function SessionTypeCard({ type, selected = false, onClick, varia
 
       <div className={`relative flex ${isPicker ? 'flex-row items-start gap-4' : 'flex-col gap-5'}`}>
         <div
-          className={`flex shrink-0 items-center justify-center rounded-2xl ring-1 ring-[var(--bridge-border)] transition-transform duration-500 group-hover:scale-[1.04] ${accent.iconBg} ${
+          className={`flex shrink-0 items-center justify-center rounded-2xl ring-1 transition-transform duration-500 group-hover:scale-[1.04] ${
             isPicker ? 'h-12 w-12 text-2xl' : 'h-14 w-14 text-2xl shadow-inner'
           }`}
+          style={{
+            backgroundColor: tintSoft,
+            color: hueVar,
+            // ring color
+            boxShadow: `inset 0 0 0 1px ${tintMed}`,
+          }}
         >
           {icon}
         </div>
@@ -81,7 +119,11 @@ export default function SessionTypeCard({ type, selected = false, onClick, varia
             </h3>
             {selected && isInteractive && isPicker && (
               <span
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-600 to-amber-500 text-white shadow-[0_4px_12px_-2px_rgba(234,88,12,0.55)]"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[var(--color-on-primary)]"
+                style={{
+                  background: `linear-gradient(135deg, ${hueVar}, color-mix(in srgb, ${hueVar} 70%, var(--color-secondary)))`,
+                  boxShadow: `0 4px 12px -2px ${tintStrong}`,
+                }}
                 aria-hidden="true"
               >
                 <Check className="h-3.5 w-3.5" strokeWidth={3} />
@@ -103,12 +145,22 @@ export default function SessionTypeCard({ type, selected = false, onClick, varia
           isPicker ? 'pt-1' : 'pt-4 border-t border-[var(--bridge-border)]'
         }`}
       >
-        <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${accent.tag}`}>
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold"
+          style={{
+            color: hueVar,
+            backgroundColor: tintSoft,
+            borderColor: tintMed,
+          }}
+        >
           <Clock className="h-3 w-3 opacity-70" />
           {duration}
         </span>
         {isPicker && selected && (
-          <span className="ml-auto text-xs font-bold uppercase tracking-wide text-orange-700 dark:text-orange-300">
+          <span
+            className="ml-auto text-xs font-bold uppercase tracking-wide"
+            style={{ color: hueVar }}
+          >
             Selected
           </span>
         )}

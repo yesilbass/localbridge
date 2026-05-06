@@ -4,23 +4,22 @@
 
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
-  Calendar, Clock, CalendarDays, CheckCircle2, ArrowUpRight,
+  Calendar, Clock, ArrowUpRight,
   Users, Video, Check, X, Plus, Zap,
   TrendingUp,
 } from 'lucide-react';
 import {
-  StatCard, EmptyState, SessionCard, SectionHeading, canJoinSession,
+  EmptyState, SessionCard, SectionHeading, canJoinSession,
   SearchBar, NoMatch, ActivityFeed,
 } from './dashboardShared';
 import { formatSessionDate, getAvatarColor, getInitials } from './dashboardUtils';
-import { LiveCountdown, AddToCalendarButton, UrgencyBadge, useSessionTrends } from './dashboardLive.jsx';
-import { GoalRing, Sparkline, Tilt3D, Magnetic, useDailyActivity, useGoalProgress, KineticNumber } from './dashboardCinematic.jsx';
+import { LiveCountdown, AddToCalendarButton, UrgencyBadge } from './dashboardLive.jsx';
+import { Tilt3D, Magnetic, KineticNumber } from './dashboardCinematic.jsx';
 import DashboardSettingsPanel from './DashboardSettingsPanel';
 import MentorAvailabilityModal from './MentorAvailabilityModal';
 import IntakeSummaryModal from './IntakeSummaryModal';
 import CalendarConnectButton from '../../components/CalendarConnectButton';
 import { useState, useEffect } from 'react';
-import SessionCalendar from './SessionCalendar';
 import CancellationModal from '../../components/CancellationModal';
 import { getMyCancellationRequests } from '../../api/cancellations';
 
@@ -70,13 +69,6 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, 
   } = dash;
 
   const pendingSessions = upcomingSessions.filter(s => s.status === 'pending');
-
-  // 30-day session trends — pure derivation.
-  const trends = useSessionTrends(sessions);
-  const completedTotal = sessions.filter(s => s.status === 'completed').length;
-  const daily = useDailyActivity(sessions, 14);
-  const dailyTotal = daily.reduce((a, b) => a + b, 0);
-  const goal = useGoalProgress(sessions, 10);
 
   return (
     <>
@@ -130,61 +122,6 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, 
             </div>
           )}
 
-          {/* Stats — kinetic counters + 30d trend deltas */}
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-            <StatCard label="Total Sessions" value={sessions.length}
-              icon={CalendarDays} gradient="from-orange-500 to-amber-500"
-              trend={{ current: trends.bookedLast30, previous: trends.bookedPrior30, label: '30d' }} />
-            <StatCard label="Upcoming" value={upcomingSessions.length}
-              icon={Clock} gradient="from-sky-500 to-blue-500" />
-            <StatCard label="Completed" value={completedTotal}
-              icon={CheckCircle2} gradient="from-emerald-500 to-teal-500"
-              trend={{ current: trends.completedLast30, previous: trends.completedPrior30, label: '30d' }} />
-            <StatCard label="Active Mentees" value={menteeCards.length}
-              icon={Users} gradient="from-violet-500 to-purple-500" />
-          </div>
-
-          {/* Pulse — monthly goal ring + 14-day demand sparkline */}
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-            <Tilt3D max={4} className="rounded-3xl">
-              <div className="bd-card-edge relative flex h-full items-center gap-5 overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--bridge-surface)] via-[var(--bridge-surface)] to-orange-500/[0.04] p-6 ring-1 ring-[var(--bridge-border)] shadow-sm">
-                <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-500/15 blur-3xl" />
-                <GoalRing value={goal.completed} max={goal.target} label="Monthly" sub={`${goal.completed} / ${goal.target}`} />
-                <div className="relative">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-500">Monthly target</p>
-                  <h3 className="mt-1 font-display text-lg font-black tracking-tight text-[var(--bridge-text)]">
-                    {goal.completed >= goal.target ? 'Target hit. Lift it next month.' : `${goal.target - goal.completed} more to reach target.`}
-                  </h3>
-                  <p className="mt-1 text-[12px] text-[var(--bridge-text-muted)]">Each completed session strengthens your acceptance signal.</p>
-                </div>
-              </div>
-            </Tilt3D>
-            <Tilt3D max={4} className="rounded-3xl lg:col-span-2">
-              <div className="bd-card-edge relative flex h-full flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--bridge-surface)] to-[var(--bridge-surface-muted)]/40 p-6 ring-1 ring-[var(--bridge-border)] shadow-sm">
-                <div aria-hidden className="pointer-events-none absolute -bottom-12 -left-8 h-44 w-44 rounded-full bg-amber-400/12 blur-3xl" />
-                <div className="relative flex flex-wrap items-baseline justify-between gap-2">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-500">Demand · last 14 days</p>
-                    <h3 className="mt-1 flex items-baseline gap-2 font-display text-2xl font-black tracking-tight text-[var(--bridge-text)]">
-                      <KineticNumber to={dailyTotal} ms={900} />
-                      <span className="text-sm font-bold text-[var(--bridge-text-muted)]">incoming</span>
-                    </h3>
-                  </div>
-                  <span className="rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-2.5 py-1 text-[10px] font-bold text-[var(--bridge-text-secondary)]">
-                    {dailyTotal === 0 ? 'Quiet stretch' : 'On the move'}
-                  </span>
-                </div>
-                <div className="relative mt-5 flex-1">
-                  <Sparkline data={daily} height={84} />
-                  <div className="mt-2 flex justify-between text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--bridge-text-faint)]">
-                    <span>14d ago</span>
-                    <span>Today</span>
-                  </div>
-                </div>
-              </div>
-            </Tilt3D>
-          </div>
-
           {/* Pending requests — highest priority for mentors */}
           {pendingSessions.length > 0 && (
             <PendingRequestsSection
@@ -205,6 +142,7 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, 
                 actionLoading={actionLoading}
                 setActiveTab={setActiveTab}
                 navigate={navigate}
+                onCancel={() => setCancellationModal({ session: nextSession })}
               />
             </Tilt3D>
           ) : (
@@ -235,6 +173,7 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, 
                     key={s.id} session={s} isMentor
                     onAccept={(id) => handleStatusUpdate(id, 'accepted')}
                     onDecline={(id) => handleStatusUpdate(id, 'declined')}
+                    onCancel={(session) => setCancellationModal({ session })}
                     actionLoading={actionLoading}
                     intakeSummary={s.intake_summary}
                     onViewIntake={(_, text) => { setIntakeData({ summary: text, menteeName: s.mentee_name ?? 'Mentee' }); setIntakeOpen(true); }}
@@ -265,7 +204,7 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, 
                     return (
                       <button key={i} type="button" onClick={q.onClick} data-cursor={q.cursor}
                         className={`group flex w-full items-center gap-3 rounded-2xl p-3 transition-all duration-300 ${q.hover}`}>
-                        <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${q.g} text-white shadow-[0_8px_22px_-6px_rgba(234,88,12,0.45)] ring-1 ring-white/15 transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-4deg]`}>
+                        <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${q.g} text-white shadow-[0_8px_22px_-6px_color-mix(in srgb, var(--color-primary) 45%, transparent)] ring-1 ring-white/15 transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-4deg]`}>
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1 text-left">
@@ -408,7 +347,7 @@ function PendingRequestCard({ session, onAccept, onDecline, actionLoading }) {
 }
 
 // ─── MentorNextSessionHero ────────────────────────────────────────────────────
-function MentorNextSessionHero({ session, heroHint, setHeroHint, handleStatusUpdate, actionLoading, setActiveTab, navigate }) {
+function MentorNextSessionHero({ session, heroHint, setHeroHint, handleStatusUpdate, actionLoading, setActiveTab, navigate, onCancel }) {
   const [date, time] = (formatSessionDate(session.scheduled_date) || ' · ').split(' · ');
   const isPending  = session.status === 'pending';
   const isAccepted = session.status === 'accepted';
@@ -416,7 +355,7 @@ function MentorNextSessionHero({ session, heroHint, setHeroHint, handleStatusUpd
   const canJoin = canJoinSession(session.scheduled_date);
 
   return (
-    <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-stone-950 via-stone-900 to-orange-950 p-7 text-white shadow-[0_24px_60px_-16px_rgba(234,88,12,0.35)] sm:p-8">
+    <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-stone-950 via-stone-900 to-orange-950 p-7 text-white shadow-[0_24px_60px_-16px_color-mix(in srgb, var(--color-primary) 35%, transparent)] sm:p-8">
       <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-orange-500/20 blur-3xl" />
       <div aria-hidden className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-amber-500/15 blur-3xl" />
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.04]"
@@ -484,7 +423,7 @@ function MentorNextSessionHero({ session, heroHint, setHeroHint, handleStatusUpd
                   </button>
                 </Magnetic>
               ) : (
-                <div className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-6 py-3 text-sm font-black text-white/40 ring-1 ring-white/10 cursor-not-allowed" title="Available 3 hours before the session">
+                <div className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-6 py-3 text-sm font-black text-white/40 ring-1 ring-white/10 cursor-not-allowed">
                   <Video className="h-4 w-4" />Join Meeting
                 </div>
               )}
@@ -495,6 +434,12 @@ function MentorNextSessionHero({ session, heroHint, setHeroHint, handleStatusUpd
                 </button>
               </Magnetic>
               {isAccepted && <AddToCalendarButton session={session} label="Add to calendar" />}
+              {isAccepted && onCancel && (
+                <button type="button" onClick={onCancel}
+                  className="inline-flex items-center gap-2 rounded-xl bg-white/8 px-6 py-3 text-sm font-bold text-white/70 ring-1 ring-white/10 transition hover:bg-red-500/25 hover:text-white hover:ring-red-400/30">
+                  Cancel Session
+                </button>
+              )}
             </>
           )}
         </div>
@@ -518,7 +463,7 @@ function NoSessionCTA({ onSettings }) {
   return (
     <Tilt3D max={4} className="rounded-[2rem]">
       <div className="relative overflow-hidden rounded-[2rem] p-7 sm:p-9"
-        style={{ background: 'linear-gradient(135deg, #f97316 0%, #f59e0b 45%, #ea580c 100%)' }}>
+        style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 45%, var(--color-primary-hover) 100%)' }}>
         <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08]"
           style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40' fill='%23000' fill-opacity='1'/%3E%3C/svg%3E\")" }}
         />
@@ -552,26 +497,11 @@ function MentorSessionsTab({ sessions, upcomingSessions, historySessions, search
     s.session_type?.toLowerCase().includes(searchQuery.toLowerCase());
 
   return (
-    <div className="space-y-8 pb-12">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-orange-500">Your inbox</p>
-          <h2 className="mt-2 font-display font-black tracking-[-0.025em] text-[var(--bridge-text)]" style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: '1.02' }}>
-            Sessions <span className="text-gradient-bridge italic">incoming</span>
-          </h2>
-          <p className="mt-1.5 text-sm text-[var(--bridge-text-secondary)]">Manage incoming requests and view session history.</p>
-        </div>
+    <div className="space-y-6 pb-12">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="font-display text-2xl font-black tracking-tight text-[var(--bridge-text)]">Sessions</h2>
         <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search by mentee or type…" />
       </div>
-
-      <SessionCalendar
-        sessions={sessions}
-        handleStatusUpdate={handleStatusUpdate}
-        actionLoading={actionLoading}
-        isMentor
-        onViewIntake={onViewIntake}
-        onCancel={onCancel}
-      />
 
       <section>
         <SectionHeading kicker="Coming up" count={upcomingSessions.filter(match).length}>Upcoming</SectionHeading>

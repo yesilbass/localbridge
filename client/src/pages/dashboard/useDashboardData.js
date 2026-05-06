@@ -43,6 +43,15 @@ import { isMentorAccount } from '../../utils/accountRole';
 import { getMySession, updateSessionStatus, acceptSession } from '../../api/sessions';
 import supabase from '../../api/supabase';
 
+const ACTIVE_SESSION_STATUSES = new Set(['pending', 'accepted']);
+const HISTORY_SESSION_STATUSES = new Set(['completed', 'declined', 'cancelled']);
+
+function getSessionTime(session) {
+  const source = session.scheduled_date ?? session.created_at;
+  if (!source) return null;
+  const time = new Date(source).getTime();
+  return Number.isFinite(time) ? time : null;
+}
 
 export function useDashboardData(user, authLoading) {
   const isMentor = user ? isMentorAccount(user) : false;
@@ -155,17 +164,21 @@ export function useDashboardData(user, authLoading) {
 
   /** Pending or accepted, and still in the future (or missing date treated as upcoming). */
   const upcomingSessions = useMemo(() => {
-    const now = new Date();
+    const now = Date.now();
     return sessions
         .filter(
-            (s) =>
-                (s.status === 'pending' || s.status === 'accepted') &&
-                (!s.scheduled_date || new Date(s.scheduled_date) > now),
+            (s) => {
+              const status = String(s.status ?? '').toLowerCase();
+              if (!ACTIVE_SESSION_STATUSES.has(status)) return false;
+              if (!s.scheduled_date) return true;
+              const scheduled = getSessionTime(s);
+              return scheduled == null || scheduled > now;
+            },
         )
         .sort((a, b) => {
           if (!a.scheduled_date) return 1;
           if (!b.scheduled_date) return -1;
-          return new Date(a.scheduled_date) - new Date(b.scheduled_date);
+          return getSessionTime(a) - getSessionTime(b);
         });
   }, [sessions]);
 
@@ -173,19 +186,19 @@ export function useDashboardData(user, authLoading) {
 
   /** Terminal statuses, or any session whose scheduled time has passed. */
   const historySessions = useMemo(() => {
-    const now = new Date();
+    const now = Date.now();
     return sessions
         .filter(
-            (s) =>
-                s.status === 'completed' ||
-                s.status === 'declined' ||
-                s.status === 'cancelled' ||
-                (s.scheduled_date && new Date(s.scheduled_date) <= now),
+            (s) => {
+              const status = String(s.status ?? '').toLowerCase();
+              if (HISTORY_SESSION_STATUSES.has(status)) return true;
+              const scheduled = s.scheduled_date ? getSessionTime(s) : null;
+              return scheduled != null && scheduled <= now;
+            },
         )
         .sort(
             (a, b) =>
-                new Date(b.scheduled_date ?? b.created_at) -
-                new Date(a.scheduled_date ?? a.created_at),
+                (getSessionTime(b) ?? 0) - (getSessionTime(a) ?? 0),
         );
   }, [sessions]);
 

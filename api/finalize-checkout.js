@@ -1,13 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import supabase from './_lib/supabase.js';
 import { getStripe } from './_lib/stripeClient.js';
-import { getPublicOrigin } from './_lib/publicOrigin.js';
-
-function getSupabaseAdmin() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key);
-}
+import { bookCalendarEventForMentor } from './_lib/calendarBook.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -33,7 +26,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Payment is not marked as paid yet.' });
     }
 
-    const supabase = getSupabaseAdmin();
     const meta = checkoutSession.metadata ?? {};
     let sync = { synced: false, error: 'Unknown type' };
     let bridgeSessionId = null;
@@ -99,28 +91,22 @@ export default async function handler(req, res) {
           .maybeSingle();
         sync = error ? { synced: false, error: error.message } : { synced: true };
         if (!error && inserted?.id) bridgeSessionId = inserted.id;
-        console.log('[finalize-checkout] mentor_booking result:', {
-          error: error?.message ?? null,
-          insertedId: inserted?.id ?? null,
-          bridgeSessionId,
-          supabasePresent: !!getSupabaseAdmin(),
-        });
       }
 
       if (sync.synced) {
-        const baseUrl = getPublicOrigin();
-        fetch(`${baseUrl}/api/calendar-book`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            mentor_profile_id: meta.mentorId,
-            mentee_email: checkoutSession.customer_email || undefined,
-            session_type: meta.sessionTypeKey,
-            scheduled_date: meta.scheduledDate,
-            duration_minutes: 60,
-            bridge_session_id: bridgeSessionId,
-          }),
-        }).catch((err) => console.error('calendar-book fire-and-forget failed:', err));
+        // Direct in-process call — avoids unreliable serverless-to-serverless HTTP.
+        // Calendar booking is best-effort; failures are logged but do not fail finalize.
+        const calRes = await bookCalendarEventForMentor({
+          mentor_profile_id: meta.mentorId,
+          mentee_email: checkoutSession.customer_email || undefined,
+          mentee_name: meta.menteeName || undefined,
+          session_type: meta.sessionTypeKey,
+          scheduled_date: meta.scheduledDate,
+          duration_minutes: 60,
+        });
+        if (!calRes.ok) {
+          console.error('[finalize-checkout] calendar booking skipped:', calRes.error);
+        }
       }
     }
 

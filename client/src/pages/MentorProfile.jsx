@@ -113,7 +113,7 @@ function ProfileSkeleton() {
           </div>
           <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
             <div className="relative">
-              <div aria-hidden className="absolute inset-0 -m-3 rounded-3xl opacity-50 blur-xl bd-aurora" style={{ background: 'radial-gradient(circle, rgba(251,146,60,0.45) 0%, transparent 70%)' }} />
+              <div aria-hidden className="absolute inset-0 -m-3 rounded-3xl opacity-50 blur-xl bd-aurora" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 45%, transparent) 0%, transparent 70%)' }} />
               <div className="relative h-28 w-28 animate-pulse rounded-[1.25rem] bg-gradient-to-br from-[var(--bridge-surface-muted)] to-[var(--bridge-surface)] ring-2 ring-orange-400/20 shadow-bridge-card" />
             </div>
             <div className="flex-1 space-y-3">
@@ -147,6 +147,21 @@ function ProfileSkeleton() {
 
 // ─── Booking flow ──────────────────────────────────────────────────────────────
 
+/** Converts a YYYY-MM-DD date + HH:mm time (in America/New_York) to a UTC ISO string. */
+function toNewYorkUtcIso(dateStr, timeStr) {
+  const [yr, mo, dy] = dateStr.split('-').map(Number);
+  const [hr, mn] = timeStr.split(':').map(Number);
+  const utcGuess = new Date(Date.UTC(yr, mo - 1, dy, hr, mn, 0));
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    hour: 'numeric', minute: 'numeric', hour12: false,
+  }).formatToParts(utcGuess);
+  const nyH = parseInt(parts.find((p) => p.type === 'hour').value) % 24;
+  const nyM = parseInt(parts.find((p) => p.type === 'minute').value);
+  const diffMs = ((hr * 60 + mn) - (nyH * 60 + nyM)) * 60_000;
+  return new Date(utcGuess.getTime() + diffMs).toISOString();
+}
+
 function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, navigate, mentorId }) {
   const [pickedDate, setPickedDate] = useState(null);
   const [pickedTime, setPickedTime] = useState(null);
@@ -158,17 +173,28 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
   const baseSlots      = useMemo(() => getSlotsForDate(scheduleNorm, pickedDate, acceptingBookings), [scheduleNorm, pickedDate, acceptingBookings]);
 
   const slots = useMemo(() => {
-    if (!calBusy || calBusy.length === 0 || !pickedDate) return baseSlots;
+    const now = new Date();
     return baseSlots.map(({ time, available }) => {
       if (!available) return { time, available: false };
-      const [h, m] = time.split(':').map(Number);
-      const slotStart = new Date(pickedDate); slotStart.setHours(h, m, 0, 0);
-      const slotEnd   = new Date(pickedDate); slotEnd.setHours(h + 1, m, 0, 0);
-      const blocked = calBusy.some(({ start, end }) => {
-        const bs = new Date(start); const be = new Date(end);
-        return slotStart < be && slotEnd > bs;
-      });
-      return { time, available: !blocked, calendarBusy: blocked };
+      // Block slots that are already in the past
+      if (pickedDate) {
+        const [h, m] = time.split(':').map(Number);
+        const slotDate = new Date(pickedDate);
+        slotDate.setHours(h, m, 0, 0);
+        if (slotDate <= now) return { time, available: false };
+      }
+      // Block slots that conflict with the mentor's Google Calendar
+      if (calBusy && calBusy.length > 0 && pickedDate) {
+        const [h, m] = time.split(':').map(Number);
+        const slotStart = new Date(pickedDate); slotStart.setHours(h, m, 0, 0);
+        const slotEnd   = new Date(pickedDate); slotEnd.setHours(h + 1, m, 0, 0);
+        const blocked = calBusy.some(({ start, end }) => {
+          const bs = new Date(start); const be = new Date(end);
+          return slotStart < be && slotEnd > bs;
+        });
+        if (blocked) return { time, available: false, calendarBusy: true };
+      }
+      return { time, available: true };
     });
   }, [baseSlots, calBusy, pickedDate]);
 
@@ -200,7 +226,7 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
   function handleBookClick() {
     if (!canBook) return;
     if (!user) { navigate('/login', { state: { from: `/mentors/${mentorId}` } }); return; }
-    const iso = `${localDateStr(pickedDate)}T${pickedTime}`;
+    const iso = toNewYorkUtcIso(localDateStr(pickedDate), pickedTime);
     onRequestConfirm({ sessionType, isoDate: iso, prettyDate: pickedDate, prettyTime: pickedTime });
   }
 
@@ -217,7 +243,7 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
 
           <p className="relative text-[10px] font-black uppercase tracking-[0.28em] text-orange-300">Your session</p>
           <div className="relative mt-4 flex items-start gap-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-stone-900 shadow-[0_8px_24px_-6px_rgba(234,88,12,0.55)] ring-1 ring-white/20">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-stone-900 shadow-[0_8px_24px_-6px_color-mix(in srgb, var(--color-primary) 55%, transparent)] ring-1 ring-white/20">
               <SessionTypeIcon typeKey={sessionType.key} />
             </span>
             <div className="min-w-0">
@@ -252,7 +278,7 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
 
           <Magnetic strength={0.16} className="mt-6 block">
             <button type="button" onClick={handleBookClick} disabled={!canBook} data-cursor={canBook ? 'Book' : undefined}
-              className={`btn-sheen relative w-full rounded-2xl px-6 py-4 text-sm font-black tracking-wide transition-all duration-300 ${canBook ? `bg-gradient-to-r from-amber-400 to-orange-400 text-stone-900 shadow-[0_12px_32px_-6px_rgba(234,88,12,0.55)] ring-1 ring-white/30 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-6px_rgba(234,88,12,0.75)] ${focusRing}` : 'cursor-not-allowed bg-white/10 text-stone-500'}`}>
+              className={`btn-sheen relative w-full rounded-2xl px-6 py-4 text-sm font-black tracking-wide transition-all duration-300 ${canBook ? `bg-gradient-to-r from-amber-400 to-orange-400 text-stone-900 shadow-[0_12px_32px_-6px_color-mix(in srgb, var(--color-primary) 55%, transparent)] ring-1 ring-white/30 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-6px_color-mix(in srgb, var(--color-primary) 75%, transparent)] ${focusRing}` : 'cursor-not-allowed bg-white/10 text-stone-500'}`}>
               {canBook ? (mentor.session_rate ? 'Continue to payment →' : 'Book session →') : 'Pick a date & time'}
             </button>
           </Magnetic>
@@ -428,7 +454,7 @@ function ConfirmModal({ mentor, user, confirmation, onClose }) {
             </h2>
             <p className="relative mx-auto mt-3 max-w-sm leading-relaxed text-[var(--bridge-text-secondary)]">{mentorFirst} will confirm or suggest another time. We'll email you as soon as they do.</p>
             <Magnetic strength={0.18}>
-              <button type="button" onClick={handleClose} data-cursor="Done" className={`btn-sheen relative mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-10 py-3 text-sm font-black text-white shadow-[0_8px_28px_-6px_rgba(234,88,12,0.65)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 ${focusRing}`}>Done</button>
+              <button type="button" onClick={handleClose} data-cursor="Done" className={`btn-sheen relative mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-10 py-3 text-sm font-black text-white shadow-[0_8px_28px_-6px_color-mix(in srgb, var(--color-primary) 65%, transparent)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 ${focusRing}`}>Done</button>
             </Magnetic>
           </div>
         ) : (
@@ -483,7 +509,7 @@ function ConfirmModal({ mentor, user, confirmation, onClose }) {
                 </button>
                 <Magnetic strength={0.16}>
                   <button type="button" onClick={handleConfirm} disabled={submitting} data-cursor="Pay"
-                    className={`btn-sheen inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-2.5 text-sm font-black text-white shadow-[0_8px_24px_-6px_rgba(234,88,12,0.65)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_32px_-6px_rgba(234,88,12,0.85)] disabled:opacity-60 ${focusRing}`}>
+                    className={`btn-sheen inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-2.5 text-sm font-black text-white shadow-[0_8px_24px_-6px_color-mix(in srgb, var(--color-primary) 65%, transparent)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_32px_-6px_color-mix(in srgb, var(--color-primary) 85%, transparent)] disabled:opacity-60 ${focusRing}`}>
                     {submitting ? 'Opening checkout…' : `Pay $${mentor.session_price ?? 25} & request`}
                   </button>
                 </Magnetic>
@@ -620,7 +646,6 @@ export default function MentorProfile() {
   if (loadError) {
     return (
       <main className="relative min-h-screen overflow-x-hidden px-4 py-16 sm:px-6">
-        <CustomCursor />
         <AuroraBg />
         <Tilt3D max={3} className="mx-auto max-w-lg">
           <div className="bd-card-edge relative mx-auto max-w-lg overflow-hidden rounded-[2rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-8 py-14 text-center shadow-bridge-card">
@@ -633,7 +658,7 @@ export default function MentorProfile() {
             <div className="relative mt-7">
               <Magnetic strength={0.18}>
                 <Link to="/mentors" data-cursor="Mentors"
-                  className={`btn-sheen inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-7 py-3 text-sm font-black text-white shadow-[0_8px_28px_-6px_rgba(234,88,12,0.65)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 ${focusRing}`}>
+                  className={`btn-sheen inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-7 py-3 text-sm font-black text-white shadow-[0_8px_28px_-6px_color-mix(in srgb, var(--color-primary) 65%, transparent)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 ${focusRing}`}>
                   Back to mentors
                 </Link>
               </Magnetic>
@@ -647,7 +672,6 @@ export default function MentorProfile() {
   if (!profile?.mentor) {
     return (
       <main className="relative min-h-screen overflow-x-hidden px-4 py-16 sm:px-6">
-        <CustomCursor />
         <AuroraBg />
         <Tilt3D max={3} className="mx-auto max-w-lg">
           <div className="bd-card-edge relative mx-auto max-w-lg overflow-hidden rounded-[2rem] border border-dashed border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-8 py-14 text-center">
@@ -679,7 +703,6 @@ export default function MentorProfile() {
 
   return (
     <>
-      <CustomCursor />
       <ScrollProgressBar />
       <main id="mentor-profile" className="relative isolate min-h-screen overflow-x-hidden" aria-labelledby="profile-heading">
         <AuroraBg />
@@ -691,9 +714,9 @@ export default function MentorProfile() {
 
           {/* Ambient orbs */}
           <div aria-hidden className="pointer-events-none absolute -left-24 -top-8 h-80 w-80 rounded-full opacity-40 blur-3xl"
-            style={{ background: 'radial-gradient(circle, rgba(234,88,12,0.18) 0%, transparent 70%)' }} />
+            style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, transparent 70%)' }} />
           <div aria-hidden className="pointer-events-none absolute -right-16 top-0 h-64 w-64 rounded-full opacity-30 blur-3xl"
-            style={{ background: 'radial-gradient(circle, rgba(251,146,60,0.15) 0%, transparent 70%)' }} />
+            style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 15%, transparent) 0%, transparent 70%)' }} />
 
           {/* Checkout notices */}
           {(checkoutError || checkoutNotice) && (
@@ -726,7 +749,7 @@ export default function MentorProfile() {
               {/* Avatar — cinematic 3D tilt + animated halo */}
               <Tilt3D max={10} className="relative shrink-0">
                 <div aria-hidden className="absolute inset-0 -m-3 rounded-3xl opacity-50 blur-xl bd-aurora"
-                  style={{ background: 'radial-gradient(circle, rgba(251,146,60,0.55) 0%, transparent 70%)' }} />
+                  style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 55%, transparent) 0%, transparent 70%)' }} />
                 <div aria-hidden className="absolute -inset-1.5 rounded-[1.4rem] border-gradient-bridge animate-border-bridge opacity-60" />
                 <div className="relative rounded-[1.25rem] ring-2 ring-orange-400/22" data-cursor="hover">
                   <MentorAvatar name={mentor.name} size="xl"
@@ -845,7 +868,7 @@ export default function MentorProfile() {
                     <Magnetic strength={0.22}>
                       <button type="button" data-cursor="Book"
                         onClick={() => bookingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                        className={`btn-sheen relative inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 pl-5 pr-6 py-3 text-sm font-black text-white shadow-[0_8px_28px_-6px_rgba(234,88,12,0.65)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-6px_rgba(234,88,12,0.85)] ${focusRing}`}>
+                        className={`btn-sheen relative inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 pl-5 pr-6 py-3 text-sm font-black text-white shadow-[0_8px_28px_-6px_color-mix(in srgb, var(--color-primary) 65%, transparent)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-6px_color-mix(in srgb, var(--color-primary) 85%, transparent)] ${focusRing}`}>
                         <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>
                         Book a Session
                       </button>
@@ -871,7 +894,7 @@ export default function MentorProfile() {
                 </div>
               </div>
               <div className="relative flex items-center gap-3 px-5 py-4 ring-1 ring-inset ring-[var(--bridge-border)]/40">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/12 shadow-[0_0_18px_rgba(234,88,12,0.18)]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/12 shadow-[0_0_18px_color-mix(in srgb, var(--color-primary) 18%, transparent)]">
                   <svg className="h-4 w-4 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>
                 </div>
                 <div>
@@ -935,7 +958,7 @@ export default function MentorProfile() {
                   </p>
                   <div className="relative mt-6 flex flex-wrap gap-3">
                     <Magnetic strength={0.18}>
-                      <Link to="/dashboard" data-cursor="Dashboard" className={`btn-sheen inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-3 text-sm font-black text-white shadow-[0_8px_28px_-6px_rgba(234,88,12,0.65)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 ${focusRing}`}>
+                      <Link to="/dashboard" data-cursor="Dashboard" className={`btn-sheen inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-3 text-sm font-black text-white shadow-[0_8px_28px_-6px_color-mix(in srgb, var(--color-primary) 65%, transparent)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 ${focusRing}`}>
                         Open mentor dashboard
                       </Link>
                     </Magnetic>
@@ -962,7 +985,7 @@ export default function MentorProfile() {
                   </p>
                   <div className="relative mt-6">
                     <Magnetic strength={0.18}>
-                      <Link to="/dashboard" data-cursor="Dashboard" className={`btn-sheen inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-3 text-sm font-black text-white shadow-[0_8px_28px_-6px_rgba(234,88,12,0.65)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 ${focusRing}`}>
+                      <Link to="/dashboard" data-cursor="Dashboard" className={`btn-sheen inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-3 text-sm font-black text-white shadow-[0_8px_28px_-6px_color-mix(in srgb, var(--color-primary) 65%, transparent)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 ${focusRing}`}>
                         Back to your dashboard
                       </Link>
                     </Magnetic>
@@ -977,12 +1000,12 @@ export default function MentorProfile() {
 
                 {/* Grid overlay */}
                 <div aria-hidden className="pointer-events-none absolute inset-0 opacity-50"
-                  style={{ backgroundImage: 'linear-gradient(rgba(234,88,12,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(234,88,12,0.06) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+                  style={{ backgroundImage: 'linear-gradient(color-mix(in srgb, var(--color-primary) 6%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 6%, transparent) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
                 {/* Top glow line */}
                 <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
                 {/* Orb */}
                 <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-52 w-52 rounded-full opacity-25 blur-3xl"
-                  style={{ background: 'radial-gradient(circle, rgba(251,146,60,0.7) 0%, transparent 70%)' }} />
+                  style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 70%, transparent) 0%, transparent 70%)' }} />
 
                 <div className="relative p-7 sm:p-10">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
@@ -1000,9 +1023,9 @@ export default function MentorProfile() {
                     {SESSION_TYPES.map((type) => (
                       <Tilt3D key={type.key} max={5} className="rounded-2xl">
                         <button type="button" onClick={() => setSelectedType(type)} data-cursor={type.name}
-                          className={`bd-card-edge group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4 text-left transition duration-300 hover:border-orange-400/55 hover:bg-white/[0.08] hover:shadow-[0_8px_32px_-6px_rgba(234,88,12,0.4)] ${focusRingWhite}`}>
+                          className={`bd-card-edge group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4 text-left transition duration-300 hover:border-orange-400/55 hover:bg-white/[0.08] hover:shadow-[0_8px_32px_-6px_color-mix(in srgb, var(--color-primary) 40%, transparent)] ${focusRingWhite}`}>
                           <div aria-hidden className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                            style={{ background: 'linear-gradient(135deg, rgba(234,88,12,0.10) 0%, transparent 60%)' }} />
+                            style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 10%, transparent) 0%, transparent 60%)' }} />
                           <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/8 text-amber-200 transition duration-300 group-hover:scale-105 group-hover:border-orange-400/55 group-hover:bg-gradient-to-br group-hover:from-orange-500 group-hover:to-amber-400 group-hover:text-stone-900">
                             <SessionTypeIcon typeKey={type.key} className="h-6 w-6" />
                           </span>
@@ -1067,7 +1090,7 @@ export default function MentorProfile() {
                         {mentor.expertise.map((tag) => (
                           <Magnetic key={tag} strength={0.1}>
                             <span data-cursor="hover"
-                              className="inline-flex cursor-default items-center rounded-full border border-orange-300/55 bg-gradient-to-br from-orange-50 to-amber-50/60 px-3.5 py-1.5 text-sm font-bold text-orange-900 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_18px_-4px_rgba(234,88,12,0.45)] dark:border-orange-400/30 dark:from-orange-500/12 dark:to-amber-500/8 dark:text-orange-300">
+                              className="inline-flex cursor-default items-center rounded-full border border-orange-300/55 bg-gradient-to-br from-orange-50 to-amber-50/60 px-3.5 py-1.5 text-sm font-bold text-orange-900 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_18px_-4px_color-mix(in srgb, var(--color-primary) 45%, transparent)] dark:border-orange-400/30 dark:from-orange-500/12 dark:to-amber-500/8 dark:text-orange-300">
                               {tag}
                             </span>
                           </Magnetic>
@@ -1098,7 +1121,7 @@ export default function MentorProfile() {
                         <div key={i} className="group/job relative pl-7 transition-transform duration-300 hover:translate-x-1">
                           <span aria-hidden className="absolute left-0 top-1.5 flex h-3 w-3 items-center justify-center">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-50 group-hover/job:opacity-80" />
-                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-br from-orange-400 to-amber-400 ring-2 ring-[var(--bridge-surface)] shadow-[0_0_10px_rgba(234,88,12,0.5)]" />
+                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-br from-orange-400 to-amber-400 ring-2 ring-[var(--bridge-surface)] shadow-[0_0_10px_color-mix(in srgb, var(--color-primary) 50%, transparent)]" />
                           </span>
                           <p className="font-display text-base font-black tracking-tight text-[var(--bridge-text)] sm:text-lg">{job.title}</p>
                           <p className="mt-0.5 inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 px-2.5 py-0.5 text-xs font-bold text-orange-600 ring-1 ring-orange-500/20 dark:text-orange-300">{job.company}</p>
@@ -1245,7 +1268,7 @@ export default function MentorProfile() {
                               return (
                                 <span key={i} className={`relative flex h-8 w-8 items-center justify-center rounded-xl text-[10px] font-black transition-all duration-300 ${
                                   active
-                                    ? 'bg-gradient-to-br from-orange-500/20 to-amber-500/12 text-orange-600 ring-1 ring-orange-400/35 shadow-[0_0_12px_rgba(234,88,12,0.28)] dark:text-orange-300'
+                                    ? 'bg-gradient-to-br from-orange-500/20 to-amber-500/12 text-orange-600 ring-1 ring-orange-400/35 shadow-[0_0_12px_color-mix(in srgb, var(--color-primary) 28%, transparent)] dark:text-orange-300'
                                     : 'bg-[var(--bridge-surface-muted)] text-[var(--bridge-text-faint)]'
                                 }`}>{day}</span>
                               );
@@ -1327,7 +1350,7 @@ function ScrollProgressBar() {
   return createPortal(
     <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-[70] h-[2px]">
       <div
-        className="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 shadow-[0_0_12px_rgba(234,88,12,0.65)] transition-[width] duration-150 ease-out"
+        className="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 shadow-[0_0_12px_color-mix(in srgb, var(--color-primary) 65%, transparent)] transition-[width] duration-150 ease-out"
         style={{ width: `${pct}%` }}
       />
     </div>,
@@ -1347,10 +1370,10 @@ function StickyBookBar({ mentor, bookingRef }) {
   if (typeof document === 'undefined') return null;
   return createPortal(
     <div className={`pointer-events-none fixed inset-x-0 bottom-4 z-[60] flex justify-center px-4 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${show ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-      <div className="pointer-events-auto bd-card-edge relative flex w-full max-w-md items-center gap-3 overflow-hidden rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/90 px-3 py-2 shadow-[0_18px_44px_-12px_rgba(234,88,12,0.45)] backdrop-blur-xl">
+      <div className="pointer-events-auto bd-card-edge relative flex w-full max-w-md items-center gap-3 overflow-hidden rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/90 px-3 py-2 shadow-[0_18px_44px_-12px_color-mix(in srgb, var(--color-primary) 45%, transparent)] backdrop-blur-xl">
         <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-orange-400/30 bd-pulse-ring" />
         <div aria-hidden className="pointer-events-none absolute -left-12 top-1/2 h-32 w-32 -translate-y-1/2 rounded-full bg-orange-400/25 blur-3xl bd-aurora" />
-        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_0_18px_rgba(234,88,12,0.55)]">
+        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_0_18px_color-mix(in srgb, var(--color-primary) 55%, transparent)]">
           <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75" /></svg>
         </div>
         <div className="relative min-w-0 flex-1">
@@ -1360,7 +1383,7 @@ function StickyBookBar({ mentor, bookingRef }) {
         <Magnetic strength={0.18}>
           <button type="button" data-cursor="Book"
             onClick={() => bookingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-            className="btn-sheen relative inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-4 py-2 text-[12px] font-black text-white shadow-[0_8px_20px_-6px_rgba(234,88,12,0.7)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5">
+            className="btn-sheen relative inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-4 py-2 text-[12px] font-black text-white shadow-[0_8px_20px_-6px_color-mix(in srgb, var(--color-primary) 70%, transparent)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5">
             Book
             <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
           </button>

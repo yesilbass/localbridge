@@ -46,7 +46,7 @@ export default function EmbeddedCheckoutPanel({ clientSecret, onClose }) {
           className="pointer-events-none absolute left-1/2 top-1/2 h-[80vmax] w-[80vmax] -translate-x-1/2 -translate-y-1/2 opacity-45 dark:opacity-65"
           style={{
             background:
-              'conic-gradient(from 200deg at 50% 50%, rgba(251,146,60,0.22), rgba(234,88,12,0.12), rgba(253,230,138,0.14), rgba(251,146,60,0.22))',
+              'conic-gradient(from 200deg at 50% 50%, color-mix(in srgb, var(--color-primary) 22%, transparent), color-mix(in srgb, var(--color-primary) 12%, transparent), color-mix(in srgb, var(--color-accent) 14%, transparent), color-mix(in srgb, var(--color-primary) 22%, transparent))',
             filter: 'blur(110px)',
           }}
         />

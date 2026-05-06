@@ -16,7 +16,7 @@ export default function FeedbackFAB() {
         <button
           type="button"
           onClick={() => setFeedbackOpen(true)}
-          className={`group pointer-events-auto btn-sheen relative inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 pl-4 pr-5 py-3 text-sm font-semibold text-white shadow-[0_12px_36px_-8px_rgba(234,88,12,0.5)] ring-1 ring-white/25 transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_48px_-10px_rgba(234,88,12,0.7)] hover:brightness-105 active:translate-y-0 dark:shadow-[0_18px_44px_-8px_rgba(251,146,60,0.55)] ${fabFocus}`}
+          className={`group pointer-events-auto btn-sheen relative inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 pl-4 pr-5 py-3 text-sm font-semibold text-white shadow-[0_12px_36px_-8px_color-mix(in srgb, var(--color-primary) 50%, transparent)] ring-1 ring-white/25 transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_48px_-10px_color-mix(in srgb, var(--color-primary) 70%, transparent)] hover:brightness-105 active:translate-y-0 dark:shadow-[0_18px_44px_-8px_color-mix(in srgb, var(--color-primary) 55%, transparent)] ${fabFocus}`}
           aria-label="Give feedback"
         >
           <span

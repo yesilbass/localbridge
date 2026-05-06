@@ -649,7 +649,7 @@ export default function Profile() {
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bridge-surface-raised)]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-orange-500 via-amber-400 to-rose-500 shadow-[0_0_12px_-2px_rgba(251,146,60,0.7)] transition-all duration-700"
+                  className="h-full rounded-full bg-gradient-to-r from-orange-500 via-amber-400 to-rose-500 shadow-[0_0_12px_-2px_color-mix(in srgb, var(--color-primary) 70%, transparent)] transition-all duration-700"
                   style={{ width: `${completionPct}%` }}
                 />
               </div>

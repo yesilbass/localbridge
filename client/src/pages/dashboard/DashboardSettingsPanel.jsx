@@ -243,7 +243,7 @@ export default function DashboardSettingsPanel({ user, logout, isMentor, mentorP
                     data-cursor={label}
                     className={`group/theme relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border p-4 text-sm font-bold transition-all duration-300 ${
                       active
-                        ? 'border-orange-500 bg-gradient-to-br from-orange-500/15 to-amber-500/8 text-orange-700 shadow-[0_8px_24px_-6px_rgba(234,88,12,0.4)] ring-1 ring-orange-400/40 dark:text-orange-100'
+                        ? 'border-orange-500 bg-gradient-to-br from-orange-500/15 to-amber-500/8 text-orange-700 shadow-[0_8px_24px_-6px_color-mix(in srgb, var(--color-primary) 40%, transparent)] ring-1 ring-orange-400/40 dark:text-orange-100'
                         : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)] hover:-translate-y-0.5 hover:border-[var(--bridge-border-strong)] hover:shadow-md'
                     }`}
                   >
@@ -318,7 +318,7 @@ export default function DashboardSettingsPanel({ user, logout, isMentor, mentorP
                     data-cursor={l}
                     className={`group/vis flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold transition-all duration-300 ${
                       active
-                        ? 'border-orange-500 bg-gradient-to-br from-orange-500/12 to-amber-500/6 text-orange-700 shadow-[0_4px_18px_-4px_rgba(234,88,12,0.35)] ring-1 ring-orange-400/35 dark:text-orange-100'
+                        ? 'border-orange-500 bg-gradient-to-br from-orange-500/12 to-amber-500/6 text-orange-700 shadow-[0_4px_18px_-4px_color-mix(in srgb, var(--color-primary) 35%, transparent)] ring-1 ring-orange-400/35 dark:text-orange-100'
                         : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)] hover:-translate-y-0.5 hover:border-[var(--bridge-border-strong)]'
                     }`}
                   >
@@ -425,7 +425,7 @@ export default function DashboardSettingsPanel({ user, logout, isMentor, mentorP
               onClick={save}
               disabled={saving}
               data-cursor="Save"
-              className="btn-sheen inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-2.5 text-sm font-black text-white shadow-[0_8px_24px_-6px_rgba(234,88,12,0.65)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_32px_-6px_rgba(234,88,12,0.85)] disabled:opacity-50"
+              className="btn-sheen inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-2.5 text-sm font-black text-white shadow-[0_8px_24px_-6px_color-mix(in srgb, var(--color-primary) 65%, transparent)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_32px_-6px_color-mix(in srgb, var(--color-primary) 85%, transparent)] disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
               {saving ? 'Saving…' : 'Save changes'}
@@ -451,7 +451,7 @@ function ToggleRow({ label, help, checked, onChange }) {
         onClick={() => onChange(!checked)}
         data-cursor="hover"
         className={`relative h-6 w-11 shrink-0 rounded-full transition-all duration-300 ${
-          checked ? 'bg-gradient-to-r from-orange-500 to-amber-500 shadow-[0_0_14px_rgba(234,88,12,0.45)]' : 'bg-stone-300 dark:bg-stone-600'
+          checked ? 'bg-gradient-to-r from-orange-500 to-amber-500 shadow-[0_0_14px_color-mix(in srgb, var(--color-primary) 45%, transparent)]' : 'bg-stone-300 dark:bg-stone-600'
         }`}
       >
         <span

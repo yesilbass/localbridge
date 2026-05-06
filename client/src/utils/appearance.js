@@ -7,6 +7,24 @@ const FONT_SIZE_MAP = {
 
 export const APPEARANCE_STORAGE_KEY = 'bridge-appearance';
 
+/**
+ * Allowed palette identifiers. Kept in sync with appearance.css
+ * `[data-palette="..."]` blocks. Modern Signal is the default.
+ */
+export const PALETTE_NAMES = ['modern-signal', 'grounded-guidance', 'quiet-authority'];
+export const DEFAULT_PALETTE = 'modern-signal';
+
+/**
+ * Set the active design palette on <html>. Modals/portals read it via the
+ * cascade since they typically render at document.body.
+ * @param {'modern-signal'|'grounded-guidance'|'quiet-authority'} palette
+ */
+export function applyPalette(palette) {
+  if (typeof document === 'undefined') return;
+  const safe = PALETTE_NAMES.includes(palette) ? palette : DEFAULT_PALETTE;
+  document.documentElement.setAttribute('data-palette', safe);
+}
+
 /** Keys we re-apply from localStorage on top of server settings so theme survives DB lag / stale rows. */
 const LOCAL_OVERRIDE_KEYS = ['theme', 'font_size', 'high_contrast'];
 

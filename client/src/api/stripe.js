@@ -1,5 +1,12 @@
+import supabase from './supabase';
+
+async function getAuthHeaders() {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function createBookingCheckout({
-  userId,
   userEmail,
   menteeName,
   mentorId,
@@ -9,14 +16,13 @@ export async function createBookingCheckout({
   /** `sessions.session_type` check constraint value, e.g. `career_advice` */
   sessionTypeKey,
   scheduledDate,
-  sessionPrice,
   message,
 }) {
+  const auth = await getAuthHeaders();
   const res = await fetch('/api/create-booking-checkout', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...auth },
     body: JSON.stringify({
-      userId,
       userEmail,
       menteeName,
       mentorId,
@@ -24,7 +30,6 @@ export async function createBookingCheckout({
       sessionType: sessionTypeName,
       sessionTypeKey,
       scheduledDate,
-      sessionPrice,
       message,
     }),
   });
@@ -34,11 +39,12 @@ export async function createBookingCheckout({
   return { ok: true, clientSecret: data.clientSecret };
 }
 
-export async function createSubscriptionCheckout({ planName, userId, userEmail }) {
+export async function createSubscriptionCheckout({ planName, userEmail }) {
+  const auth = await getAuthHeaders();
   const res = await fetch('/api/create-subscription-checkout', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ planName, userId, userEmail }),
+    headers: { 'Content-Type': 'application/json', ...auth },
+    body: JSON.stringify({ planName, userEmail }),
   });
 
   const data = await res.json().catch(() => ({}));

@@ -61,7 +61,7 @@ export default function Help() {
                     <div className="relative mt-12 overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-gradient-to-br from-[var(--bridge-surface)] via-[var(--bridge-surface)] to-orange-50/30 p-7 shadow-bridge-card dark:to-orange-500/[0.05]">
                         <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gradient-to-br from-orange-400/20 to-transparent blur-3xl" />
                         <div className="relative flex items-start gap-4">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_8px_22px_-4px_rgba(234,88,12,0.45)]">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_8px_22px_-4px_color-mix(in srgb, var(--color-primary) 45%, transparent)]">
                                 <LifeBuoy className="h-5 w-5" />
                             </div>
                             <div className="min-w-0 flex-1">
@@ -88,7 +88,7 @@ export default function Help() {
                 className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[45vmax] w-[80vmax] -translate-x-1/2 opacity-55 dark:opacity-80"
                 style={{
                     background:
-                        'conic-gradient(from 200deg at 50% 50%, rgba(251,146,60,0.14), rgba(253,230,138,0.1), rgba(234,88,12,0.18), rgba(251,146,60,0.14))',
+                        'conic-gradient(from 200deg at 50% 50%, color-mix(in srgb, var(--color-primary) 14%, transparent), color-mix(in srgb, var(--color-accent) 10%, transparent), color-mix(in srgb, var(--color-primary) 18%, transparent), color-mix(in srgb, var(--color-primary) 14%, transparent))',
                     filter: 'blur(100px)',
                 }}
             />
@@ -110,7 +110,7 @@ export default function Help() {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search help articles…"
-                            className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] py-4 pl-12 pr-4 text-base text-[var(--bridge-text)] shadow-bridge-tile placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:shadow-[0_0_0_4px_rgba(251,146,60,0.2)]"
+                            className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] py-4 pl-12 pr-4 text-base text-[var(--bridge-text)] shadow-bridge-tile placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 20%, transparent)]"
                         />
                     </div>
                 </Reveal>
@@ -143,7 +143,7 @@ export default function Help() {
                                     <div className="group relative overflow-hidden rounded-[1.75rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-tile transition-all duration-500 hover:-translate-y-1 hover:shadow-bridge-card cursor-glow">
                                         <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-gradient-to-br from-orange-400/15 to-transparent opacity-0 blur-3xl transition group-hover:opacity-100" />
                                         <div className="relative flex items-center gap-3">
-                                            <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.hue} text-white shadow-[0_8px_22px_-4px_rgba(234,88,12,0.4)] transition group-hover:scale-[1.04]`}>
+                                            <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.hue} text-white shadow-[0_8px_22px_-4px_color-mix(in srgb, var(--color-primary) 40%, transparent)] transition group-hover:scale-[1.04]`}>
                                                 <meta.Icon className="h-5 w-5" />
                                             </div>
                                             <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)]">{cat.name}</h2>
@@ -181,7 +181,7 @@ export default function Help() {
                         </div>
                         <a
                             href="/contact"
-                            className={`btn-sheen inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-6px_rgba(234,88,12,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_38px_-8px_rgba(234,88,12,0.7)] ${focusRing}`}
+                            className={`btn-sheen inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-6px_color-mix(in srgb, var(--color-primary) 55%, transparent)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_38px_-8px_color-mix(in srgb, var(--color-primary) 70%, transparent)] ${focusRing}`}
                         >
                             Contact support <ChevronRight className="h-4 w-4" />
                         </a>

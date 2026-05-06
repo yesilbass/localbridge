@@ -1,653 +1,588 @@
-/* Bridge appearance: light / dark / high-contrast
-   Preference is stored in localStorage; `system` follows prefers-color-scheme via JS. */
+/* ═══════════════════════════════════════════════════════════════════════════
+   Bridge appearance system — 3-palette comparison build
+   ═══════════════════════════════════════════════════════════════════════════
+   Layered architecture:
 
-/* ── Design tokens ─────────────────────────────────────────── */
-html {
-  color-scheme: light;
-  /* Light: amber ember — rich warm canvas, floating card surfaces, strong orange presence */
-  --bridge-canvas: #f9eedb;
-  --bridge-surface: #fef8ee;
-  --bridge-surface-raised: #ffffff;
-  --bridge-surface-muted: #f2e2c4;
-  --bridge-border: rgb(140 55 8 / 0.16);
-  --bridge-border-strong: rgb(140 55 8 / 0.30);
-  --bridge-text: #1a1209;
-  --bridge-text-secondary: #3d2c18;
-  --bridge-text-muted: #6b5438;
-  --bridge-text-faint: #9e7f5e;
-  --bridge-accent: #ea580c;
-  --bridge-accent-muted: #c2410c;
-  --bridge-accent-soft: #fb923c;
-  --bridge-accent-glow: 0 0 32px rgba(234, 88, 12, 0.28);
-  --bridge-mesh-1: rgb(253 186 116 / 0.88);
-  --bridge-mesh-2: rgb(254 215 170 / 0.82);
-  --bridge-mesh-3: rgb(251 146 60 / 0.65);
-  --bridge-aurora-1: rgb(253 186 116 / 0.92);
-  --bridge-aurora-2: rgb(251 146 60 / 0.78);
-  --bridge-aurora-3: rgb(234 88 12 / 0.55);
-  --bridge-shadow-ring: rgb(255 255 255 / 0.9);
-  --bridge-shadow-soft: rgb(100 45 8 / 0.13);
-  --bridge-scrollbar: #d4b896;
-  --bridge-scrollbar-hover: #c4a07a;
-  --bridge-text-glow: rgba(234, 88, 12, 0.18);
-  /* Landing hero dot grid */
-  --landing-hero-dot: rgba(68, 40, 10, 0.14);
-  --landing-hero-highlight: rgb(251 146 60 / 0.48);
-  /* Always-dark hero/CTA background */
-  --bridge-hero-bg: #150803;
-  /* Fixed side fades */
-  --bridge-gutter-l: linear-gradient(to right, rgb(234 88 12 / 0.14), rgb(253 186 116 / 0.07), transparent 72%);
-  --bridge-gutter-r: linear-gradient(to left, rgb(234 88 12 / 0.12), rgb(253 186 116 / 0.06), transparent 72%);
-  --bridge-gutter-vline: linear-gradient(to bottom, transparent, rgb(234 88 12 / 0.28), transparent);
-}
+   Layer A — Semantic palette tokens (`--color-*`).
+     Defined per-palette × per-theme via `html[data-palette="…"]` selectors.
+     Three palettes: modern-signal (indigo, default), grounded-guidance (teal),
+     quiet-authority (blue). Each gets a full light + dark variant.
 
-html.theme-dark {
-  color-scheme: dark;
-  /* Dark: obsidian ember — deep warm charcoal with layered elevation. Not gray, not flat. */
-  --bridge-canvas: #0a0806;
-  --bridge-surface: #15110e;
-  --bridge-surface-raised: #1c1714;
-  --bridge-surface-muted: #100d0b;
-  --bridge-border: rgb(251 146 60 / 0.12);
-  --bridge-border-strong: rgb(251 146 60 / 0.22);
-  --bridge-text: #fbf7ed;
-  --bridge-text-secondary: #ebe3d3;
-  --bridge-text-muted: #b5ada2;
-  --bridge-text-faint: #7a726a;
-  --bridge-accent: #fb923c;
-  --bridge-accent-muted: #fdba74;
-  --bridge-accent-soft: #fed7aa;
-  --bridge-accent-glow: 0 0 40px rgba(251, 146, 60, 0.32);
-  --bridge-mesh-1: rgb(234 88 12 / 0.14);
-  --bridge-mesh-2: rgb(251 146 60 / 0.1);
-  --bridge-mesh-3: rgb(253 186 116 / 0.08);
-  --bridge-aurora-1: rgb(234 88 12 / 0.22);
-  --bridge-aurora-2: rgb(251 146 60 / 0.16);
-  --bridge-aurora-3: rgb(253 186 116 / 0.1);
-  --bridge-shadow-ring: rgb(255 255 255 / 0.045);
-  --bridge-shadow-soft: rgb(0 0 0 / 0.5);
-  --bridge-scrollbar: #3f3b38;
-  --bridge-scrollbar-hover: #57534e;
-  --bridge-text-glow: rgba(251, 146, 60, 0.18);
-  --landing-hero-dot: rgba(255, 255, 255, 0.085);
-  --landing-hero-highlight: rgb(251 146 60 / 0.32);
-  --bridge-hero-bg: #060403;
-  --bridge-gutter-l: linear-gradient(to right, rgb(234 88 12 / 0.08), transparent 55%);
-  --bridge-gutter-r: linear-gradient(to left, rgb(234 88 12 / 0.07), transparent 55%);
-  --bridge-gutter-vline: linear-gradient(to bottom, transparent, rgb(251 146 60 / 0.18), transparent);
-}
+   Layer B — Bridge token rebinding (`--bridge-*`).
+     Existing `--bridge-canvas`, `--bridge-surface`, `--bridge-text`, etc. are
+     re-derived from `--color-*` so every existing consumer (atmosphere,
+     gutters, glass surfaces, shadows, gradients) auto-switches per route
+     without touching JSX.
 
+   Layer C — Tailwind orange-N / amber-N re-skin.
+     Overrides `bg-orange-*`, `text-orange-*`, `border-orange-*`, gradient
+     stops, ring/divide/from/to/via for orange + amber utilities, scoped to
+     each `[data-palette]`. Lets the codebase's existing orange-led classes
+     pick up whichever palette is active above them.
+
+   Per-route palette is set on `<html data-palette="…">` from App.jsx so
+   modals, portals, and the navbar/footer chrome all inherit consistently.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── Default tokens (Modern Signal — light) ───────────────────────────────── */
 html,
-html body {
-  transition: background-color 260ms ease, color 260ms ease;
+html[data-palette="modern-signal"] {
+  /* Layer A — semantic */
+  --color-primary:        #4338CA;
+  --color-primary-hover:  #3730A3;
+  --color-on-primary:     #FFFFFF;
+  --color-secondary:      #0F172A;
+  --color-accent:         #06B6D4;
+
+  --color-bg:             #F8F8FF;
+  --color-surface:        #FFFFFF;
+  --color-surface-raised: #FFFFFF;
+  --color-surface-muted:  #EEF0FB;
+
+  --color-border:         #E0E7FF;
+  --color-border-strong:  #C7D2FE;
+
+  --color-text:           #151521;
+  --color-text-secondary: #374151;
+  --color-text-muted:     #6B7280;
+
+  --color-success:        #059669;
+  --color-warning:        #B45309;
+  --color-error:          #DC2626;
+  --color-info:           #2563EB;
+
+  /* Layer B — bridge tokens (rebound) */
+  --bridge-canvas:        var(--color-bg);
+  --bridge-surface:       var(--color-surface);
+  --bridge-surface-raised:var(--color-surface-raised);
+  --bridge-surface-muted: var(--color-surface-muted);
+  --bridge-border:        var(--color-border);
+  --bridge-border-strong: var(--color-border-strong);
+  --bridge-text:          var(--color-text);
+  --bridge-text-secondary:var(--color-text-secondary);
+  --bridge-text-muted:    var(--color-text-muted);
+  --bridge-accent:        var(--color-primary);
+  --bridge-accent-strong: var(--color-primary-hover);
+
+  --bridge-shadow-soft:   color-mix(in srgb, var(--color-secondary) 7%, transparent);
+  --bridge-shadow-ring:   color-mix(in srgb, var(--color-secondary) 7%, transparent);
+  --bridge-text-glow:     color-mix(in srgb, var(--color-primary) 0%, transparent);
+
+  --bridge-aurora-1:      color-mix(in srgb, var(--color-primary) 22%, transparent);
+  --bridge-aurora-2:      color-mix(in srgb, var(--color-accent)  16%, transparent);
+  --bridge-aurora-3:      color-mix(in srgb, var(--color-primary) 14%, transparent);
+
+  --bridge-mesh-1:        color-mix(in srgb, var(--color-primary) 18%, transparent);
+  --bridge-mesh-2:        color-mix(in srgb, var(--color-accent)  14%, transparent);
+  --bridge-mesh-3:        color-mix(in srgb, var(--color-primary) 10%, transparent);
+
+  --bridge-gutter-l: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-primary) 6%, transparent),
+    transparent
+  );
+  --bridge-gutter-r: linear-gradient(
+    to left,
+    color-mix(in srgb, var(--color-primary) 6%, transparent),
+    transparent
+  );
+
+  --bridge-scrollbar:       color-mix(in srgb, var(--color-text) 20%, transparent);
+  --bridge-scrollbar-hover: color-mix(in srgb, var(--color-text) 32%, transparent);
 }
 
-html.theme-light body,
-html:not(.theme-dark) body {
-  background-color: var(--bridge-canvas);
-  color: var(--bridge-text);
-  /* Saturated warm amber radials — give depth comparable to dark mode's glows */
-  background-image:
-    radial-gradient(ellipse 90% 60% at -8% -8%, rgba(234, 88, 12, 0.22), transparent 52%),
-    radial-gradient(ellipse 80% 55% at 112% 10%, rgba(253, 186, 116, 0.45), transparent 52%),
-    radial-gradient(ellipse 65% 50% at 50% 118%, rgba(251, 146, 60, 0.18), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 80% 55%, rgba(254, 215, 170, 0.3), transparent 50%);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+/* Modern Signal — dark */
+html.theme-dark,
+html[data-palette="modern-signal"].theme-dark {
+  --color-primary:        #A5B4FC;
+  --color-primary-hover:  #C7D2FE;
+  --color-on-primary:     #111827;
+  --color-secondary:      #7DD3FC;
+  --color-accent:         #22D3EE;
+
+  --color-bg:             #0B1020;
+  --color-surface:        #12172A;
+  --color-surface-raised: #1A2040;
+  --color-surface-muted:  #0F1428;
+
+  --color-border:         #29314F;
+  --color-border-strong:  #3B4470;
+
+  --color-text:           #F8FAFC;
+  --color-text-secondary: #D8DDEF;
+  --color-text-muted:     #A8AEC4;
+
+  --color-success:        #34D399;
+  --color-warning:        #FBBF24;
+  --color-error:          #F87171;
+  --color-info:           #93C5FD;
+
+  --bridge-shadow-soft:   color-mix(in srgb, var(--color-primary) 18%, transparent);
+  --bridge-shadow-ring:   color-mix(in srgb, var(--color-primary) 22%, transparent);
+  --bridge-text-glow:     color-mix(in srgb, var(--color-primary) 25%, transparent);
+
+  --bridge-aurora-1:      color-mix(in srgb, var(--color-primary) 28%, transparent);
+  --bridge-aurora-2:      color-mix(in srgb, var(--color-accent)  20%, transparent);
+  --bridge-aurora-3:      color-mix(in srgb, var(--color-primary) 18%, transparent);
+
+  --bridge-mesh-1:        color-mix(in srgb, var(--color-primary) 22%, transparent);
+  --bridge-mesh-2:        color-mix(in srgb, var(--color-accent)  18%, transparent);
+  --bridge-mesh-3:        color-mix(in srgb, var(--color-primary) 14%, transparent);
 }
 
-/* Light mode grain — subtle texture adds tactile depth, avoids flat "paper" look */
-html.theme-light body::before,
-html:not(.theme-dark) body::before {
-  content: "";
+/* ── Grounded Guidance — light ───────────────────────────────────────────── */
+html[data-palette="grounded-guidance"] {
+  --color-primary:        #0B5F56;
+  --color-primary-hover:  #084C45;
+  --color-on-primary:     #FFFFFF;
+  --color-secondary:      #1F3A5F;
+  --color-accent:         #A16207;
+
+  --color-bg:             #F8F7F2;
+  --color-surface:        #FFFFFF;
+  --color-surface-raised: #FFFFFF;
+  --color-surface-muted:  #EFEBDF;
+
+  --color-border:         #E5E1D8;
+  --color-border-strong:  #CFC8B8;
+
+  --color-text:           #1C1917;
+  --color-text-secondary: #44403C;
+  --color-text-muted:     #6B625A;
+
+  --color-success:        #047857;
+  --color-warning:        #A16207;
+  --color-error:          #B42318;
+  --color-info:           #0E7490;
+}
+
+/* Grounded Guidance — dark */
+html[data-palette="grounded-guidance"].theme-dark {
+  --color-primary:        #2DD4BF;
+  --color-primary-hover:  #5EEAD4;
+  --color-on-primary:     #052E2B;
+  --color-secondary:      #93C5FD;
+  --color-accent:         #F6C453;
+
+  --color-bg:             #0A1412;
+  --color-surface:        #10201D;
+  --color-surface-raised: #173129;
+  --color-surface-muted:  #0D1A17;
+
+  --color-border:         #25413A;
+  --color-border-strong:  #335951;
+
+  --color-text:           #F8FAF7;
+  --color-text-secondary: #DDE7E2;
+  --color-text-muted:     #A7B7B2;
+
+  --color-success:        #34D399;
+  --color-warning:        #F6C453;
+  --color-error:          #F97066;
+  --color-info:           #67E8F9;
+}
+
+/* ── Quiet Authority — light ─────────────────────────────────────────────── */
+html[data-palette="quiet-authority"] {
+  --color-primary:        #175CD3;
+  --color-primary-hover:  #1249A8;
+  --color-on-primary:     #FFFFFF;
+  --color-secondary:      #0F766E;
+  --color-accent:         #14B8A6;
+
+  --color-bg:             #F7FAFC;
+  --color-surface:        #FFFFFF;
+  --color-surface-raised: #FFFFFF;
+  --color-surface-muted:  #EAF1F8;
+
+  --color-border:         #DDE7F0;
+  --color-border-strong:  #C0D0E2;
+
+  --color-text:           #111827;
+  --color-text-secondary: #334155;
+  --color-text-muted:     #64748B;
+
+  --color-success:        #15803D;
+  --color-warning:        #B45309;
+  --color-error:          #B91C1C;
+  --color-info:           #0369A1;
+}
+
+/* Quiet Authority — dark */
+html[data-palette="quiet-authority"].theme-dark {
+  --color-primary:        #60A5FA;
+  --color-primary-hover:  #93C5FD;
+  --color-on-primary:     #031525;
+  --color-secondary:      #2DD4BF;
+  --color-accent:         #38BDF8;
+
+  --color-bg:             #08111F;
+  --color-surface:        #0F1B2D;
+  --color-surface-raised: #15243C;
+  --color-surface-muted:  #0B1525;
+
+  --color-border:         #22314A;
+  --color-border-strong:  #324568;
+
+  --color-text:           #F8FAFC;
+  --color-text-secondary: #D5DEE9;
+  --color-text-muted:     #A8B3C7;
+
+  --color-success:        #4ADE80;
+  --color-warning:        #FBBF24;
+  --color-error:          #F87171;
+  --color-info:           #7DD3FC;
+}
+
+/* Light/dark surface adjustments shared across palettes (uses tokens) */
+html.theme-dark {
+  /* Slightly different scrollbar tuning in dark mode */
+  --bridge-scrollbar:       color-mix(in srgb, var(--color-primary) 22%, transparent);
+  --bridge-scrollbar-hover: color-mix(in srgb, var(--color-primary) 38%, transparent);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Body canvas — paints the active palette's background.
+   ═══════════════════════════════════════════════════════════════════════════ */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  position: relative;
+}
+
+body::before {
+  content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: 0.10;
-  mix-blend-mode: multiply;
-}
-
-html.theme-dark body {
-  background-color: var(--bridge-canvas);
-  color: var(--bridge-text);
-  /* Ambient: two low-opacity warm glows + very subtle grain fixed to the viewport.
-     The grain prevents banding on OLED-ish dark panels and adds tactile depth. */
+  z-index: -1;
   background-image:
-    radial-gradient(ellipse 80% 40% at 15% 0%, rgba(234, 88, 12, 0.08), transparent 62%),
-    radial-gradient(ellipse 60% 40% at 100% 35%, rgba(251, 146, 60, 0.06), transparent 60%),
-    radial-gradient(ellipse 75% 45% at 60% 110%, rgba(253, 186, 116, 0.05), transparent 62%);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+    radial-gradient(ellipse 80% 60% at 50% -10%, var(--bridge-mesh-1), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 100% 30%, var(--bridge-mesh-2), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 0% 100%, var(--bridge-mesh-3), transparent 60%);
+  opacity: 0.85;
+  transition: opacity 400ms ease;
 }
 
 html.theme-dark body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: 0.16;
-  mix-blend-mode: overlay;
-}
-
-/* ── Tailwind bridge utilities (match index.css @utility names) ─ */
-html .bg-bridge-page {
-  background-color: var(--bridge-canvas) !important;
-  background-image:
-    radial-gradient(ellipse 100% 80% at 0% -20%, var(--bridge-mesh-1), transparent 50%),
-    radial-gradient(ellipse 80% 60% at 100% 0%, var(--bridge-mesh-2), transparent 45%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, var(--bridge-mesh-3), transparent 40%) !important;
-  color: var(--bridge-text);
-}
-
-html .bg-bridge-hero-mesh {
-  background-image:
-    radial-gradient(ellipse 120% 100% at 50% -30%, var(--bridge-mesh-2), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 100% 20%, var(--bridge-mesh-3), transparent 50%),
-    radial-gradient(ellipse 45% 35% at 0% 80%, var(--bridge-mesh-1), transparent 45%) !important;
-}
-
-html .text-gradient-bridge {
-  background-image: linear-gradient(
-    135deg,
-    #b83a07 0%,
-    #ea580c 40%,
-    #d97706 100%
-  ) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  color: transparent !important;
-  filter: drop-shadow(0 0 20px rgba(234, 88, 12, 0.28));
-}
-
-html.theme-dark .text-gradient-bridge {
-  background-image: linear-gradient(
-    135deg,
-    #fed7aa 0%,
-    #fb923c 42%,
-    #fdba74 100%
-  ) !important;
-  filter: drop-shadow(0 0 22px rgba(251, 146, 60, 0.22));
-}
-
-html .shadow-bridge-glow {
-  box-shadow:
-    0 0 0 1px var(--bridge-shadow-ring) inset,
-    0 1px 3px rgb(100 45 8 / 0.12),
-    0 8px 24px -6px rgb(180 80 10 / 0.28),
-    0 26px 60px -18px rgb(180 80 10 / 0.22) !important;
-}
-
-html.theme-dark .shadow-bridge-glow {
-  box-shadow:
-    0 0 0 1px var(--bridge-shadow-ring) inset,
-    0 1px 2px rgb(0 0 0 / 0.45),
-    0 6px 18px -8px rgb(0 0 0 / 0.6),
-    0 30px 60px -18px rgb(234 88 12 / 0.32) !important;
-}
-
-html .shadow-bridge-card {
-  box-shadow:
-    0 0 0 1px rgb(140 55 8 / 0.12),
-    0 1px 3px rgb(100 45 8 / 0.1),
-    0 6px 18px -6px rgb(100 45 8 / 0.18),
-    0 28px 56px -24px rgb(100 45 8 / 0.14) !important;
-}
-
-html.theme-dark .shadow-bridge-card {
-  box-shadow:
-    0 0 0 1px var(--bridge-border),
-    0 1px 2px rgb(0 0 0 / 0.4),
-    0 8px 18px -8px rgb(0 0 0 / 0.55),
-    0 32px 60px -24px rgb(0 0 0 / 0.55) !important;
-}
-
-html .shadow-bridge-float {
-  box-shadow:
-    0 0 0 1px rgb(140 55 8 / 0.14) inset,
-    0 2px 6px rgb(100 45 8 / 0.14),
-    0 12px 32px -10px rgb(100 45 8 / 0.22),
-    0 40px 80px -20px rgb(180 80 10 / 0.28) !important;
-}
-
-html.theme-dark .shadow-bridge-float {
-  box-shadow:
-    0 0 0 1px var(--bridge-border-strong) inset,
-    0 2px 6px rgb(0 0 0 / 0.45),
-    0 16px 36px -14px rgb(0 0 0 / 0.6),
-    0 48px 90px -24px rgb(234 88 12 / 0.35) !important;
-}
-
-html .shadow-bridge-tile {
-  box-shadow:
-    0 0 0 1px var(--bridge-border),
-    0 1px 2px var(--bridge-shadow-soft),
-    0 10px 24px -12px var(--bridge-shadow-soft) !important;
-}
-
-html.theme-dark .shadow-bridge-tile {
-  box-shadow:
-    0 0 0 1px var(--bridge-border),
-    0 1px 2px rgb(0 0 0 / 0.45),
-    0 14px 26px -14px rgb(0 0 0 / 0.5) !important;
-}
-
-html .shadow-bridge-accent {
-  box-shadow:
-    0 1px 2px rgb(234 88 12 / 0.25),
-    0 6px 18px -4px rgb(234 88 12 / 0.3),
-    0 16px 44px -16px rgb(234 88 12 / 0.35) !important;
-}
-
-html.theme-dark .shadow-bridge-accent {
-  box-shadow:
-    0 1px 2px rgb(251 146 60 / 0.25),
-    0 6px 22px -4px rgb(251 146 60 / 0.4),
-    0 20px 50px -16px rgb(251 146 60 / 0.45) !important;
-}
-
-/* Top-of-page strip (mentors, mentor profile, etc.) */
-.bridge-hero-strip {
-  border-bottom: 1px solid var(--bridge-border);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--bridge-surface) 94%, transparent) 0%,
-    color-mix(in srgb, var(--bridge-surface-muted) 70%, transparent) 44%,
-    var(--bridge-canvas) 100%
-  );
-}
-
-.bridge-ambient-orb {
-  pointer-events: none;
-  border-radius: 9999px;
-  filter: blur(64px);
-  background: radial-gradient(circle at 35% 35%, rgb(253 186 116 / 0.55), rgb(234 88 12 / 0.2) 48%, transparent 72%);
-}
-
-html.theme-dark .bridge-ambient-orb {
-  background: radial-gradient(circle at 35% 35%, rgb(251 146 60 / 0.18), rgb(234 88 12 / 0.08) 52%, transparent 72%);
-  opacity: 0.95;
-}
-
-/* ── Light mode surface warmth — orange-tinted borders on stone classes ─── */
-html:not(.theme-dark) .border-stone-100,
-html:not(.theme-dark) .border-stone-100\/90,
-html:not(.theme-dark) .border-stone-200,
-html:not(.theme-dark) .border-stone-200\/60,
-html:not(.theme-dark) .border-stone-200\/70,
-html:not(.theme-dark) .border-stone-200\/80,
-html:not(.theme-dark) .border-stone-200\/90,
-html:not(.theme-dark) .border-stone-300,
-html:not(.theme-dark) .border-stone-300\/40,
-html:not(.theme-dark) .border-stone-300\/50 {
-  border-color: var(--bridge-border) !important;
-}
-
-html:not(.theme-dark) .bg-stone-50,
-html:not(.theme-dark) .bg-stone-50\/40,
-html:not(.theme-dark) .bg-stone-50\/50,
-html:not(.theme-dark) .bg-stone-50\/60,
-html:not(.theme-dark) .bg-stone-50\/80,
-html:not(.theme-dark) .bg-stone-50\/90 {
-  background-color: var(--bridge-surface-muted) !important;
-}
-
-/* Light mode: make bg-white and surface-raised elements visually pop above canvas */
-html:not(.theme-dark) .bg-white,
-html:not(.theme-dark) .bg-white\/80,
-html:not(.theme-dark) .bg-white\/85,
-html:not(.theme-dark) .bg-white\/90,
-html:not(.theme-dark) .bg-white\/95 {
-  background-color: var(--bridge-surface-raised) !important;
-}
-
-/* Light mode text: map stone to warm brown tones for better light-mode feel */
-html:not(.theme-dark) .text-stone-900 { color: var(--bridge-text) !important; }
-html:not(.theme-dark) .text-stone-800,
-html:not(.theme-dark) .text-stone-700 { color: var(--bridge-text-secondary) !important; }
-html:not(.theme-dark) .text-stone-600,
-html:not(.theme-dark) .text-stone-500 { color: var(--bridge-text-muted) !important; }
-html:not(.theme-dark) .text-stone-400 { color: var(--bridge-text-faint) !important; }
-
-/* Input focus ring in light mode — warm amber glow */
-html:not(.theme-dark) input:focus-visible,
-html:not(.theme-dark) select:focus-visible,
-html:not(.theme-dark) textarea:focus-visible {
-  box-shadow: 0 0 0 3px rgb(234 88 12 / 0.2), 0 0 16px rgb(234 88 12 / 0.12) !important;
-  border-color: rgb(234 88 12 / 0.5) !important;
-}
-
-/* ── Surfaces & text (broad Tailwind stone/white overrides) ─── */
-html.theme-dark .bg-white\/80 {
-  background-color: rgb(26 22 20 / 0.85) !important;
-  color: inherit;
-}
-
-html.theme-dark .bg-white\/85 {
-  background-color: rgb(26 22 20 / 0.9) !important;
-  color: inherit;
-}
-
-html.theme-dark .bg-white,
-html.theme-dark .bg-white\/90,
-html.theme-dark .bg-white\/95,
-html.theme-dark .bg-white\/\[0\.04\],
-html.theme-dark .bg-white\/\[0\.08\],
-html.theme-dark .bg-white\/10,
-html.theme-dark .bg-white\/20 {
-  background-color: var(--bridge-surface) !important;
-  color: inherit;
-}
-
-html.theme-dark .bg-stone-50,
-html.theme-dark .bg-stone-50\/40,
-html.theme-dark .bg-stone-50\/50,
-html.theme-dark .bg-stone-50\/60,
-html.theme-dark .bg-stone-50\/80,
-html.theme-dark .bg-stone-50\/90 {
-  background-color: var(--bridge-surface-muted) !important;
-}
-
-html.theme-dark .bg-stone-100,
-html.theme-dark .bg-stone-100\/60,
-html.theme-dark .bg-stone-100\/70,
-html.theme-dark .bg-stone-100\/80,
-html.theme-dark .bg-stone-100\/90 {
-  background-color: var(--bridge-surface-raised) !important;
-}
-
-html.theme-dark .bg-\[\#fffaf3\],
-html.theme-dark .bg-\[\#fffbf5\],
-html.theme-dark .bg-\[\#fdf7ef\],
-html.theme-dark .bg-\[\#fdf8f2\],
-html.theme-dark .bg-\[\#fffaf3\]\/90 {
-  background-color: var(--bridge-canvas) !important;
-}
-
-html.theme-dark .text-stone-900 {
-  color: var(--bridge-text) !important;
-}
-
-html.theme-dark .text-stone-800,
-html.theme-dark .text-stone-700 {
-  color: var(--bridge-text-secondary) !important;
-}
-
-html.theme-dark .text-stone-600,
-html.theme-dark .text-stone-500 {
-  color: var(--bridge-text-muted) !important;
-}
-
-html.theme-dark .text-stone-400,
-html.theme-dark .text-stone-300 {
-  color: var(--bridge-text-faint) !important;
-}
-
-html.theme-dark .border-stone-100,
-html.theme-dark .border-stone-100\/90,
-html.theme-dark .border-stone-200,
-html.theme-dark .border-stone-200\/60,
-html.theme-dark .border-stone-200\/70,
-html.theme-dark .border-stone-200\/80,
-html.theme-dark .border-stone-200\/90,
-html.theme-dark .border-stone-300,
-html.theme-dark .border-stone-300\/40,
-html.theme-dark .border-stone-300\/50 {
-  border-color: var(--bridge-border) !important;
-}
-
-html.theme-dark .border-stone-900\/10,
-html.theme-dark .border-stone-900\/90 {
-  border-color: var(--bridge-border-strong) !important;
-}
-
-html.theme-dark .ring-stone-200,
-html.theme-dark .ring-white {
-  --tw-ring-color: var(--bridge-border-strong) !important;
-}
-
-html.theme-dark .divide-stone-200\/60 > :not([hidden]) ~ :not([hidden]) {
-  border-color: var(--bridge-border) !important;
-}
-
-/* Gradient stops that stay "paper white" in light mode but read as surfaces in dark */
-html.theme-dark .from-white\/60,
-html.theme-dark .from-white\/70,
-html.theme-dark .from-white\/75 {
-  --tw-gradient-from: color-mix(in srgb, var(--bridge-surface) 90%, transparent) !important;
-}
-
-html.theme-dark .via-orange-50\/25,
-html.theme-dark .via-orange-50\/30 {
-  --tw-gradient-via: color-mix(in srgb, var(--bridge-accent) 12%, var(--bridge-canvas)) !important;
-}
-
-html.theme-dark .to-white {
-  --tw-gradient-to: var(--bridge-canvas) !important;
-}
-
-/* Pricing / mentor tier pastels */
-html.theme-dark .bg-orange-100 {
-  background-color: rgb(234 88 12 / 0.22) !important;
-}
-
-html.theme-dark .bg-sky-100 {
-  background-color: rgb(14 165 233 / 0.22) !important;
-}
-
-html.theme-dark .bg-emerald-100 {
-  background-color: rgb(16 185 129 / 0.22) !important;
-}
-
-html.theme-dark .bg-emerald-50\/40 {
-  background-color: rgb(6 78 59 / 0.4) !important;
-}
-
-html.theme-dark .bg-sky-50\/40 {
-  background-color: rgb(12 74 110 / 0.4) !important;
-}
-
-html.theme-dark .bg-violet-50\/40 {
-  background-color: rgb(76 29 149 / 0.38) !important;
-}
-
-html.theme-dark .border-emerald-200\/60 {
-  border-color: rgb(52 211 153 / 0.4) !important;
-}
-
-html.theme-dark .border-sky-200\/60 {
-  border-color: rgb(56 189 248 / 0.4) !important;
-}
-
-html.theme-dark .border-violet-200\/60 {
-  border-color: rgb(167 139 250 / 0.4) !important;
-}
-
-html.theme-dark .text-emerald-800 {
-  color: rgb(167 243 208) !important;
-}
-
-html.theme-dark .text-sky-800 {
-  color: rgb(186 230 253) !important;
-}
-
-html.theme-dark .text-violet-800 {
-  color: rgb(221 214 254) !important;
-}
-
-html.theme-dark .bg-violet-100 {
-  background-color: rgb(139 92 246 / 0.24) !important;
-}
-
-html.theme-dark .bg-amber-50 {
-  background-color: rgb(234 88 12 / 0.18) !important;
-}
-
-html.theme-dark .text-amber-800 {
-  color: rgb(253 230 138) !important;
-}
-
-html.theme-dark .bg-stone-200\/70 {
-  background-color: var(--bridge-surface-raised) !important;
-}
-
-/* Backdrop / glass nav — dual-layer: deep warm tint + inner highlight */
-html.theme-dark .bg-white\/60,
-html.theme-dark .bg-white\/70,
-html.theme-dark .bg-white\/75,
-html.theme-dark .supports-\[backdrop-filter\]\:bg-white\/60 {
-  background-color: rgb(26 22 20 / 0.86) !important;
-}
-
-html.theme-dark .backdrop-blur-xl,
-html.theme-dark .backdrop-blur-md {
-  --tw-backdrop-blur: blur(16px);
-}
-
-/* Inputs & placeholders — warmer surface + focus ring matches accent glow */
-html.theme-dark input,
-html.theme-dark select,
-html.theme-dark textarea {
-  color: var(--bridge-text) !important;
-}
-
-html.theme-dark input::placeholder,
-html.theme-dark textarea::placeholder {
-  color: var(--bridge-text-faint) !important;
-}
-
-html.theme-dark .placeholder\:text-stone-400::placeholder {
-  color: var(--bridge-text-faint) !important;
-}
-
-html.theme-dark input:focus-visible,
-html.theme-dark select:focus-visible,
-html.theme-dark textarea:focus-visible {
-  box-shadow: 0 0 0 3px rgb(251 146 60 / 0.28), 0 0 20px rgb(251 146 60 / 0.18) !important;
-  border-color: rgb(251 146 60 / 0.6) !important;
-}
-
-/* Orange UI accents stay legible on warm dark surfaces */
-html.theme-dark .bg-orange-50,
-html.theme-dark .bg-orange-50\/20,
-html.theme-dark .bg-orange-50\/25,
-html.theme-dark .bg-orange-50\/30,
-html.theme-dark .bg-orange-50\/40,
-html.theme-dark .bg-orange-50\/80,
-html.theme-dark .bg-orange-50\/90,
-html.theme-dark .from-orange-50\/40 {
-  background-color: rgb(234 88 12 / 0.16) !important;
-}
-
-html.theme-dark .border-orange-200,
-html.theme-dark .border-orange-200\/55,
-html.theme-dark .border-orange-200\/60,
-html.theme-dark .border-orange-200\/70,
-html.theme-dark .border-orange-200\/80,
-html.theme-dark .border-orange-300\/60,
-html.theme-dark .border-orange-300\/70,
-html.theme-dark .hover\:border-orange-200\/80:hover {
-  border-color: rgb(251 146 60 / 0.4) !important;
-}
-
-html.theme-dark .text-orange-700,
-html.theme-dark .text-orange-800,
-html.theme-dark .text-orange-900 {
-  color: #fed7aa !important;
-}
-
-html.theme-dark .ring-orange-500\/15,
-html.theme-dark .ring-orange-400\/30 {
-  --tw-ring-color: rgb(251 146 60 / 0.3) !important;
-}
-
-/* Gradient-stroke borders on primary cards get a luminous edge in dark mode. */
-html.theme-dark .border-gradient-bridge::before {
-  background: conic-gradient(
-    from var(--bridge-angle, 90deg),
-    rgba(251, 146, 60, 0.95),
-    rgba(234, 88, 12, 0.45),
-    rgba(253, 230, 138, 0.95),
-    rgba(251, 146, 60, 0.95)
-  );
   opacity: 1;
 }
 
-/* Sheen overlay needs a warmer gradient on dark buttons. */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Stone-* utility re-skin → bridge text/border tokens (auto-palette-aware
+   since --bridge-* derive from --color-*).
+   Kept identical to the prior mapping so we don't break visual hierarchy.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.text-stone-900, .text-stone-800 { color: var(--color-text) !important; }
+.text-stone-700                 { color: var(--color-text-secondary) !important; }
+.text-stone-600, .text-stone-500 { color: var(--color-text-muted) !important; }
+.text-stone-400                 { color: color-mix(in srgb, var(--color-text-muted) 70%, transparent) !important; }
+
+.bg-stone-50                    { background-color: var(--color-surface-muted) !important; }
+.bg-stone-100                   { background-color: var(--color-surface-muted) !important; }
+.bg-stone-200                   { background-color: var(--color-border) !important; }
+
+.border-stone-100,
+.border-stone-200,
+.border-stone-300 { border-color: var(--color-border) !important; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Layer C — Tailwind orange-N / amber-N re-skin.
+   These rules let existing `bg-orange-500`, `text-orange-700`, gradient stops,
+   ring colors, etc. take on whichever palette is active. We define a 50…900
+   ramp per palette and use it as overrides.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─ Modern Signal ramp (default + scoped) ─ */
+html, html[data-palette="modern-signal"] {
+  --p-50:  #EEF0FB;
+  --p-100: #DDE2F8;
+  --p-200: #C7D2FE;
+  --p-300: #A5B4FC;
+  --p-400: #818CF8;
+  --p-500: #6366F1;
+  --p-600: #4F46E5;
+  --p-700: #4338CA;
+  --p-800: #3730A3;
+  --p-900: #312E81;
+  --p-on:  #FFFFFF;
+
+  --a-50:  #ECFEFF;
+  --a-100: #CFFAFE;
+  --a-200: #A5F3FC;
+  --a-300: #67E8F9;
+  --a-400: #22D3EE;
+  --a-500: #06B6D4;
+  --a-600: #0891B2;
+  --a-700: #0E7490;
+  --a-800: #155E75;
+  --a-900: #164E63;
+}
+
+/* ─ Grounded Guidance ramp ─ */
+html[data-palette="grounded-guidance"] {
+  --p-50:  #ECFDF5;
+  --p-100: #D1FAE5;
+  --p-200: #99F6E4;
+  --p-300: #5EEAD4;
+  --p-400: #2DD4BF;
+  --p-500: #14B8A6;
+  --p-600: #0D9488;
+  --p-700: #0B5F56;
+  --p-800: #084C45;
+  --p-900: #064E3B;
+  --p-on:  #FFFFFF;
+
+  --a-50:  #FEFCE8;
+  --a-100: #FEF9C3;
+  --a-200: #FDE68A;
+  --a-300: #FCD34D;
+  --a-400: #FBBF24;
+  --a-500: #F59E0B;
+  --a-600: #D97706;
+  --a-700: #A16207;
+  --a-800: #854D0E;
+  --a-900: #713F12;
+}
+
+/* ─ Quiet Authority ramp ─ */
+html[data-palette="quiet-authority"] {
+  --p-50:  #EFF6FF;
+  --p-100: #DBEAFE;
+  --p-200: #BFDBFE;
+  --p-300: #93C5FD;
+  --p-400: #60A5FA;
+  --p-500: #3B82F6;
+  --p-600: #2563EB;
+  --p-700: #175CD3;
+  --p-800: #1249A8;
+  --p-900: #1E3A8A;
+  --p-on:  #FFFFFF;
+
+  --a-50:  #F0FDFA;
+  --a-100: #CCFBF1;
+  --a-200: #99F6E4;
+  --a-300: #5EEAD4;
+  --a-400: #2DD4BF;
+  --a-500: #14B8A6;
+  --a-600: #0D9488;
+  --a-700: #0F766E;
+  --a-800: #115E59;
+  --a-900: #134E4A;
+}
+
+/* ── orange-* utility overrides (apply per palette ramp) ───────────────── */
+.text-orange-50  { color: var(--p-50)  !important; }
+.text-orange-100 { color: var(--p-100) !important; }
+.text-orange-200 { color: var(--p-200) !important; }
+.text-orange-300 { color: var(--p-300) !important; }
+.text-orange-400 { color: var(--p-400) !important; }
+.text-orange-500 { color: var(--p-500) !important; }
+.text-orange-600 { color: var(--p-600) !important; }
+.text-orange-700 { color: var(--p-700) !important; }
+.text-orange-800 { color: var(--p-800) !important; }
+.text-orange-900 { color: var(--p-900) !important; }
+
+.bg-orange-50  { background-color: var(--p-50)  !important; }
+.bg-orange-100 { background-color: var(--p-100) !important; }
+.bg-orange-200 { background-color: var(--p-200) !important; }
+.bg-orange-300 { background-color: var(--p-300) !important; }
+.bg-orange-400 { background-color: var(--p-400) !important; }
+.bg-orange-500 { background-color: var(--p-500) !important; }
+.bg-orange-600 { background-color: var(--p-600) !important; }
+.bg-orange-700 { background-color: var(--p-700) !important; }
+.bg-orange-800 { background-color: var(--p-800) !important; }
+.bg-orange-900 { background-color: var(--p-900) !important; }
+
+.border-orange-100 { border-color: var(--p-100) !important; }
+.border-orange-200 { border-color: var(--p-200) !important; }
+.border-orange-300 { border-color: var(--p-300) !important; }
+.border-orange-400 { border-color: var(--p-400) !important; }
+.border-orange-500 { border-color: var(--p-500) !important; }
+.border-orange-600 { border-color: var(--p-600) !important; }
+.border-orange-700 { border-color: var(--p-700) !important; }
+
+.ring-orange-300 { --tw-ring-color: var(--p-300) !important; }
+.ring-orange-400 { --tw-ring-color: var(--p-400) !important; }
+.ring-orange-500 { --tw-ring-color: var(--p-500) !important; }
+.ring-orange-600 { --tw-ring-color: var(--p-600) !important; }
+
+.divide-orange-100 > :not([hidden]) ~ :not([hidden]) { border-color: var(--p-100) !important; }
+.divide-orange-200 > :not([hidden]) ~ :not([hidden]) { border-color: var(--p-200) !important; }
+
+.from-orange-300 { --tw-gradient-from: var(--p-300) var(--tw-gradient-from-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent) !important; }
+.from-orange-400 { --tw-gradient-from: var(--p-400) var(--tw-gradient-from-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent) !important; }
+.from-orange-500 { --tw-gradient-from: var(--p-500) var(--tw-gradient-from-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent) !important; }
+.from-orange-600 { --tw-gradient-from: var(--p-600) var(--tw-gradient-from-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent) !important; }
+
+.via-orange-300 { --tw-gradient-via: var(--p-300) !important; }
+.via-orange-400 { --tw-gradient-via: var(--p-400) !important; }
+.via-orange-500 { --tw-gradient-via: var(--p-500) !important; }
+
+.to-orange-300 { --tw-gradient-to: var(--p-300) var(--tw-gradient-to-position) !important; }
+.to-orange-400 { --tw-gradient-to: var(--p-400) var(--tw-gradient-to-position) !important; }
+.to-orange-500 { --tw-gradient-to: var(--p-500) var(--tw-gradient-to-position) !important; }
+.to-orange-600 { --tw-gradient-to: var(--p-600) var(--tw-gradient-to-position) !important; }
+
+.fill-orange-500   { fill: var(--p-500) !important; }
+.stroke-orange-500 { stroke: var(--p-500) !important; }
+.outline-orange-500 { outline-color: var(--p-500) !important; }
+.decoration-orange-500 { text-decoration-color: var(--p-500) !important; }
+.placeholder-orange-500::placeholder { color: var(--p-500) !important; }
+.caret-orange-500  { caret-color: var(--p-500) !important; }
+.accent-orange-500 { accent-color: var(--p-500) !important; }
+
+/* ── amber-* utility overrides ──────────────────────────────────────────── */
+.text-amber-50  { color: var(--a-50)  !important; }
+.text-amber-100 { color: var(--a-100) !important; }
+.text-amber-200 { color: var(--a-200) !important; }
+.text-amber-300 { color: var(--a-300) !important; }
+.text-amber-400 { color: var(--a-400) !important; }
+.text-amber-500 { color: var(--a-500) !important; }
+.text-amber-600 { color: var(--a-600) !important; }
+.text-amber-700 { color: var(--a-700) !important; }
+.text-amber-800 { color: var(--a-800) !important; }
+.text-amber-900 { color: var(--a-900) !important; }
+
+.bg-amber-50  { background-color: var(--a-50)  !important; }
+.bg-amber-100 { background-color: var(--a-100) !important; }
+.bg-amber-200 { background-color: var(--a-200) !important; }
+.bg-amber-300 { background-color: var(--a-300) !important; }
+.bg-amber-400 { background-color: var(--a-400) !important; }
+.bg-amber-500 { background-color: var(--a-500) !important; }
+.bg-amber-600 { background-color: var(--a-600) !important; }
+.bg-amber-700 { background-color: var(--a-700) !important; }
+.bg-amber-800 { background-color: var(--a-800) !important; }
+
+.border-amber-100 { border-color: var(--a-100) !important; }
+.border-amber-200 { border-color: var(--a-200) !important; }
+.border-amber-300 { border-color: var(--a-300) !important; }
+.border-amber-400 { border-color: var(--a-400) !important; }
+.border-amber-500 { border-color: var(--a-500) !important; }
+
+.ring-amber-300 { --tw-ring-color: var(--a-300) !important; }
+.ring-amber-400 { --tw-ring-color: var(--a-400) !important; }
+.ring-amber-500 { --tw-ring-color: var(--a-500) !important; }
+
+.from-amber-300 { --tw-gradient-from: var(--a-300) var(--tw-gradient-from-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent) !important; }
+.from-amber-400 { --tw-gradient-from: var(--a-400) var(--tw-gradient-from-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent) !important; }
+.from-amber-500 { --tw-gradient-from: var(--a-500) var(--tw-gradient-from-position) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent) !important; }
+
+.via-amber-300 { --tw-gradient-via: var(--a-300) !important; }
+.via-amber-400 { --tw-gradient-via: var(--a-400) !important; }
+.via-amber-500 { --tw-gradient-via: var(--a-500) !important; }
+
+.to-amber-300 { --tw-gradient-to: var(--a-300) var(--tw-gradient-to-position) !important; }
+.to-amber-400 { --tw-gradient-to: var(--a-400) var(--tw-gradient-to-position) !important; }
+.to-amber-500 { --tw-gradient-to: var(--a-500) var(--tw-gradient-to-position) !important; }
+
+.fill-amber-400   { fill: var(--a-400) !important; }
+.stroke-amber-400 { stroke: var(--a-400) !important; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Component-level adjustments — replace baked orange shadows + selection
+   with palette-aware tints.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Premium text selection — palette-tinted */
+::selection {
+  background: color-mix(in srgb, var(--color-primary) 25%, transparent);
+  color: inherit;
+}
+html.theme-dark ::selection {
+  background: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  color: var(--color-text);
+}
+
+/* Sheen overlay tinting on dark buttons */
 html.theme-dark .btn-sheen::after {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 237, 213, 0.22) 50%,
+    color-mix(in srgb, var(--color-on-primary, #ffffff) 22%, transparent) 50%,
     transparent 100%
   );
 }
 
-/* ── Light mode component depth helpers ──────────────────────── */
-
-/* Navbar in light mode: warm tinted glass */
-html:not(.theme-dark) nav,
-html:not(.theme-dark) [class*="bg-[var(--bridge-canvas)]/95"] {
-  box-shadow: 0 1px 0 rgb(140 55 8 / 0.12), 0 4px 16px -4px rgb(100 45 8 / 0.12);
+/* Light-mode navbar elevation — palette-tinted */
+html:not(.theme-dark) nav {
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-primary) 12%, transparent),
+    0 4px 16px -4px color-mix(in srgb, var(--color-secondary) 12%, transparent);
 }
 
-/* Input fields in light mode: white on the warm canvas = clear elevation */
+/* Input fields in light mode */
 html:not(.theme-dark) input[type="text"],
 html:not(.theme-dark) input[type="email"],
 html:not(.theme-dark) input[type="number"],
 html:not(.theme-dark) input[type="password"],
 html:not(.theme-dark) select,
 html:not(.theme-dark) textarea {
-  background-color: #ffffff !important;
-  border-color: rgb(140 55 8 / 0.18) !important;
-  box-shadow: 0 1px 3px rgb(100 45 8 / 0.08) inset !important;
+  background-color: var(--color-surface) !important;
+  border-color: color-mix(in srgb, var(--color-primary) 18%, transparent) !important;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--color-secondary) 8%, transparent) inset !important;
 }
 
-/* Orange tag/expertise chips in light mode — more visible */
-html:not(.theme-dark) .bg-orange-50\/80,
-html:not(.theme-dark) .bg-orange-50\/60 {
-  background-color: rgb(254 215 170 / 0.6) !important;
+/* Dark-mode atmospheric backgrounds for orange-tinted micro-surfaces.
+   Many JSX files use `bg-orange-50/60` etc.; let those auto-tint per palette. */
+html.theme-dark .bg-orange-50,
+html:not(.theme-dark) .bg-orange-50\/60,
+html:not(.theme-dark) .bg-orange-50\/80 {
+  background-color: color-mix(in srgb, var(--color-primary) 14%, transparent) !important;
 }
 
-/* Border color on orange-tinted elements — richer in light mode */
-html:not(.theme-dark) .border-orange-100,
+html.theme-dark .border-orange-100,
+html.theme-dark .border-orange-200\/60,
 html:not(.theme-dark) .border-orange-200\/60 {
-  border-color: rgb(180 80 10 / 0.22) !important;
+  border-color: color-mix(in srgb, var(--color-primary) 22%, transparent) !important;
 }
 
-/* ── High contrast ───────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Dashboard helpers — palette-aware "danger hover" utility used by Decline /
+   Cancel buttons. Replaces the previous hard-coded red-50 / red-300 / red-600
+   hover states so they track --color-error per active palette.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.bd-danger-hover:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-error) 45%, transparent) !important;
+  background-color: color-mix(in srgb, var(--color-error) 10%, transparent) !important;
+  color: var(--color-error) !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   High contrast mode — preserved from prior implementation, still palette-
+   independent. Uses palette warning hue for outline.
+   ═══════════════════════════════════════════════════════════════════════════ */
 html.high-contrast {
-    --hc-bg: #ffffff;
-    --hc-fg: #000000;
-    --hc-border: #000000;
+  --hc-bg: #ffffff;
+  --hc-fg: #000000;
+  --hc-border: #000000;
 }
 
 html.high-contrast.theme-dark {
-    --hc-bg: #000000;
-    --hc-fg: #ffffff;
-    --hc-border: #ffffff;
+  --hc-bg: #000000;
+  --hc-fg: #ffffff;
+  --hc-border: #ffffff;
 }
 
 html.high-contrast body {
-    background-color: var(--hc-bg) !important;
-    color: var(--hc-fg) !important;
+  background-color: var(--hc-bg) !important;
+  color: var(--hc-fg) !important;
 }
 
-html.high-contrast body::before {
-  display: none !important;
-}
-
-html.high-contrast * {
-    border-color: var(--hc-border) !important;
-}
+html.high-contrast body::before { display: none !important; }
+html.high-contrast * { border-color: var(--hc-border) !important; }
 
 html.high-contrast a,
 html.high-contrast button {
-    text-decoration: underline;
-    outline: 2px solid transparent;
+  text-decoration: underline;
+  outline: 2px solid transparent;
 }
 
 html.high-contrast a:focus,
@@ -655,17 +590,20 @@ html.high-contrast button:focus,
 html.high-contrast input:focus,
 html.high-contrast select:focus,
 html.high-contrast textarea:focus {
-  outline: 3px solid #f59e0b !important;
-    outline-offset: 2px;
+  outline: 3px solid var(--color-warning) !important;
+  outline-offset: 2px;
 }
 
 html.high-contrast .text-stone-400,
 html.high-contrast .text-stone-500,
 html.high-contrast .text-stone-600 {
-    color: var(--hc-fg) !important;
+  color: var(--hc-fg) !important;
 }
 
-/* Scrollbar (custom-scrollbar utility lives in index.css) */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Custom scrollbar (utility .custom-scrollbar lives in index.css)
+   ═══════════════════════════════════════════════════════════════════════════ */
 html.theme-dark .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--bridge-scrollbar) !important;
 }

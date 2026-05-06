@@ -1,14 +1,15 @@
-import { google } from 'googleapis';
-import supabase from './_lib/supabase.js';
-import { buildAuthedClient } from './_lib/oauth.js';
+import { applyCors } from './_lib/allowedOrigins.js';
+import { verifyAuthUser } from './_lib/auth.js';
+import { bookCalendarEventForMentor } from './_lib/calendarBook.js';
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  applyCors(req, res, 'POST, OPTIONS');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { user, error: authError } = await verifyAuthUser(req);
+  if (!user) return res.status(401).json({ error: authError || 'Unauthorized' });
 
   const {
     mentor_profile_id,
@@ -16,52 +17,20 @@ export default async function handler(req, res) {
     mentee_name,
     session_type,
     scheduled_date,
-    duration_minutes = 60,
-    bridge_session_id,
-  } = req.body;
+    duration_minutes,
+  } = req.body ?? {};
 
-  if (!mentor_profile_id || !session_type || !scheduled_date) {
-    return res.status(400).json({ error: 'mentor_profile_id, session_type, and scheduled_date are required' });
+  const result = await bookCalendarEventForMentor({
+    mentor_profile_id,
+    mentee_email,
+    mentee_name,
+    session_type,
+    scheduled_date,
+    duration_minutes,
+  });
+
+  if (!result.ok) {
+    return res.status(result.status || 500).json({ error: result.error });
   }
-
-  const { data: profile, error } = await supabase
-    .from('mentor_profiles')
-    .select('google_refresh_token')
-    .eq('id', mentor_profile_id)
-    .maybeSingle();
-
-  if (error || !profile) {
-    return res.status(404).json({ error: 'Mentor profile not found' });
-  }
-
-  if (!profile.google_refresh_token) {
-    return res.status(400).json({ error: 'Calendar not connected for this mentor' });
-  }
-
-  try {
-    const oauth2Client = buildAuthedClient(profile.google_refresh_token, mentor_profile_id);
-
-    const start = new Date(scheduled_date);
-    const end = new Date(start.getTime() + duration_minutes * 60 * 1000);
-
-    const attendees = [];
-    if (mentee_email) attendees.push({ email: mentee_email, displayName: mentee_name });
-
-    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-    const { data: event } = await calendar.events.insert({
-      calendarId: 'primary',
-      requestBody: {
-        summary: `Bridge Mentorship: ${session_type.replace(/_/g, ' ')}`,
-        description: `Bridge mentorship session — ${session_type}. Join on Bridge.`,
-        start: { dateTime: start.toISOString() },
-        end: { dateTime: end.toISOString() },
-        attendees,
-      },
-    });
-
-    return res.json({ google_event_id: event.id });
-  } catch (err) {
-    console.error('Book error:', err);
-    return res.status(500).json({ error: err.message });
-  }
+  return res.json({ google_event_id: result.google_event_id });
 }
