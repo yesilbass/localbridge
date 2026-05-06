@@ -8,11 +8,32 @@ import {
   WEEKDAY_LABELS,
 } from '../../utils/mentorAvailability';
 
+const TIMEZONE_OPTIONS = [
+  ['America/New_York', 'Eastern Time'],
+  ['America/Chicago', 'Central Time'],
+  ['America/Denver', 'Mountain Time'],
+  ['America/Los_Angeles', 'Pacific Time'],
+  ['America/Toronto', 'Toronto'],
+  ['Europe/London', 'London'],
+  ['Europe/Paris', 'Paris'],
+  ['Asia/Dubai', 'Dubai'],
+  ['Asia/Karachi', 'Karachi'],
+  ['Asia/Kolkata', 'India'],
+  ['Asia/Singapore', 'Singapore'],
+  ['Asia/Tokyo', 'Tokyo'],
+  ['Australia/Sydney', 'Sydney'],
+];
+
+function getBrowserTimezone() {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+}
+
 export default function MentorAvailabilityModal({ open, onClose, mentorProfileId, userId, onSaved }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [accepting, setAccepting] = useState(true);
   const [schedule, setSchedule] = useState(() => normalizeAvailabilitySchedule(null));
+  const [timezone, setTimezone] = useState(() => getBrowserTimezone());
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -32,7 +53,9 @@ export default function MentorAvailabilityModal({ open, onClose, mentorProfileId
         setLoading(false);
         return;
       }
-      setSchedule(normalizeAvailabilitySchedule(data?.availability_schedule));
+      const normalized = normalizeAvailabilitySchedule(data?.availability_schedule);
+      setSchedule(normalized);
+      setTimezone(data?.availability_schedule?.timezone || getBrowserTimezone());
       setAccepting(data?.available !== false);
       setLoading(false);
     })();
@@ -68,7 +91,7 @@ export default function MentorAvailabilityModal({ open, onClose, mentorProfileId
     setError(null);
     try {
       const payload = {
-        availability_schedule: { weekly: schedule.weekly, timezone: schedule.timezone },
+        availability_schedule: { weekly: schedule.weekly, timezone },
         available: accepting,
       };
       const { data, error: uErr } = await supabase
@@ -162,7 +185,7 @@ export default function MentorAvailabilityModal({ open, onClose, mentorProfileId
               </label>
 
               <p className="mb-3 text-xs text-[var(--bridge-text-muted)]">
-                Tap times for each day (timezone: <span className="font-medium text-[var(--bridge-text-secondary)]">{schedule.timezone}</span>). Same grid appears on your public profile.
+                Tap times for each day (timezone: <span className="font-medium text-[var(--bridge-text-secondary)]">{timezone}</span>). Same grid appears on your public profile.
               </p>
 
               <div className="grid gap-3 pb-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-1">
@@ -220,23 +243,45 @@ export default function MentorAvailabilityModal({ open, onClose, mentorProfileId
           )}
         </div>
 
-        <div className="flex shrink-0 gap-2 border-t border-[var(--bridge-border)] bg-[color-mix(in_srgb,var(--bridge-surface)_92%,var(--bridge-canvas)_8%)] px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:gap-3 sm:px-5 sm:py-4 sm:pb-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-xl border border-[var(--bridge-border)] py-2.5 text-sm font-semibold text-[var(--bridge-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--bridge-surface-muted)_70%,transparent)] sm:py-3"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            disabled={saving || loading || !mentorProfileId}
-            onClick={handleSave}
-            className="flex flex-[1.15] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 py-2.5 text-sm font-bold text-white shadow-md disabled:opacity-50 sm:py-3"
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save
-          </button>
+        <div className="flex shrink-0 flex-col gap-3 border-t border-[var(--bridge-border)] bg-[color-mix(in_srgb,var(--bridge-surface)_92%,var(--bridge-canvas)_8%)] px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-5 sm:py-4 sm:pb-4">
+          <label className="block">
+            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--bridge-text-muted)]">
+              Timezone
+            </span>
+            <select
+              value={timezone}
+              onChange={(e) => setTimezone(e.target.value)}
+              disabled={saving || loading}
+              className="w-full rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3 py-2.5 text-sm font-semibold text-[var(--bridge-text)] outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/20 disabled:opacity-50"
+            >
+              {!TIMEZONE_OPTIONS.some(([value]) => value === timezone) && (
+                <option value={timezone}>{timezone}</option>
+              )}
+              {TIMEZONE_OPTIONS.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="flex gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-xl border border-[var(--bridge-border)] py-2.5 text-sm font-semibold text-[var(--bridge-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--bridge-surface-muted)_70%,transparent)] sm:py-3"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={saving || loading || !mentorProfileId}
+              onClick={handleSave}
+              className="flex flex-[1.15] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 py-2.5 text-sm font-bold text-white shadow-md disabled:opacity-50 sm:py-3"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Save
+            </button>
+          </div>
         </div>
       </div>
     </div>,

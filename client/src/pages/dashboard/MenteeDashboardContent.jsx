@@ -20,7 +20,7 @@ import { useState, useEffect, useCallback } from 'react';
 import ReviewModal from '../../components/ReviewModal';
 import CancellationModal from '../../components/CancellationModal';
 import { getMyReviewedSessionIds } from '../../api/reviews';
-import { getMyCancellationRequests, getFreePlanGrant } from '../../api/cancellations';
+import { getMyCancellationRequests } from '../../api/cancellations';
 
 function isWithinReviewWindow(session) {
   if (session.status !== 'completed') return false;
@@ -35,7 +35,6 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
   const [reviewedSessionIds, setReviewedSessionIds] = useState(new Set());
   const [cancellationModal, setCancellationModal] = useState(null);
   const [cancellationBanners, setCancellationBanners] = useState([]);
-  const [freePlanGrant, setFreePlanGrant] = useState(null);
 
   useEffect(() => {
     getMyReviewedSessionIds().then(({ data }) => { if (data) setReviewedSessionIds(data); });
@@ -57,11 +56,6 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
       }
     });
 
-    getFreePlanGrant(user.id).then(grant => {
-      if (grant?.active && grant.expires_at && new Date(grant.expires_at) > new Date()) {
-        setFreePlanGrant(grant);
-      }
-    });
   }, [user?.id]);
 
   useEffect(() => {
@@ -130,19 +124,6 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
                 className="ml-auto shrink-0 opacity-60 hover:opacity-100"><X className="h-4 w-4" /></button>
             </div>
           ))}
-
-          {/* Free Pro plan banner */}
-          {freePlanGrant && (
-            <div className="flex items-start gap-3 rounded-2xl bg-violet-500/8 px-5 py-4 text-sm text-violet-700 ring-1 ring-violet-500/20 dark:text-violet-300">
-              <span className="mt-0.5 text-base shrink-0">🎁</span>
-              <div className="min-w-0">
-                <p className="font-bold">You have a complimentary Pro plan!</p>
-                <p className="mt-0.5 text-xs opacity-80">Your mentor cancelled a session, so we've given you 2 weeks of Pro free. Expires {new Date(freePlanGrant.expires_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.</p>
-              </div>
-              <button type="button" onClick={() => setFreePlanGrant(null)}
-                className="ml-auto shrink-0 opacity-60 hover:opacity-100"><X className="h-4 w-4" /></button>
-            </div>
-          )}
 
           {/* Hero: next session */}
           {nextSession ? (
@@ -542,4 +523,3 @@ function MenteeConnectionsTab({ uniqueMentors, searchQuery, setSearchQuery }) {
     </div>
   );
 }
-
