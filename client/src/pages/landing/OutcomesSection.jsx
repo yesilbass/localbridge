@@ -1,59 +1,145 @@
-import { OUTCOMES, AVATAR_GRAD } from './landingData';
+import { Star, Quote } from 'lucide-react';
+import { OUTCOMES } from './landingData';
 import RevealOnScroll from './RevealOnScroll';
+
+const TONE_GRADIENTS = {
+  amber:   'linear-gradient(135deg, #4F46E5, #818CF8)',
+  emerald: 'linear-gradient(135deg, #059669, #10b981)',
+  sky:     'linear-gradient(135deg, #0EA5E9, #38BDF8)',
+  rose:    'linear-gradient(135deg, #4F46E5, #A78BFA)',
+  violet:  'linear-gradient(135deg, #6D28D9, #A78BFA)',
+  teal:    'linear-gradient(135deg, #0D9488, #14B8A6)',
+  orange:  'linear-gradient(135deg, #4F46E5, #6366F1)',
+  pink:    'linear-gradient(135deg, #312E81, #818CF8)',
+};
 
 export default function OutcomesSection() {
   return (
-    <section id="outcomes" className="relative overflow-hidden py-24 bg-gradient-to-b from-[var(--bridge-canvas)] to-[var(--bridge-canvas)]">
+    <section
+      id="outcomes"
+      className="relative overflow-hidden py-24 sm:py-28"
+      style={{ backgroundColor: 'var(--bridge-canvas)' }}
+    >
       <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8">
         <RevealOnScroll>
-          <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div className="mb-12 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.32em] text-[var(--bridge-accent)]">Real outcomes</p>
-              <h2 className="mt-2 font-display font-black tracking-[-0.02em] text-[var(--bridge-text)]"
-                style={{ fontSize: 'clamp(1.8rem,4vw,3rem)' }}>
-                People who got <span className="text-gradient-bridge">unstuck</span>.
+              <p
+                className="text-[10px] font-black uppercase tracking-[0.32em]"
+                style={{ color: 'var(--color-primary)' }}
+              >
+                Real outcomes
+              </p>
+              <h2
+                className="mt-3 font-display font-black tracking-[-0.025em]"
+                style={{ fontSize: 'clamp(2rem, 4.6vw, 3.5rem)', color: 'var(--bridge-text)' }}
+              >
+                People who got{' '}
+                <span
+                  className="bg-clip-text text-transparent"
+                  style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)' }}
+                >
+                  unstuck
+                </span>.
               </h2>
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-4 py-2 text-[11px] font-bold text-[var(--bridge-text-muted)]">
+            <div
+              className="flex items-center gap-2.5 rounded-full px-4 py-2 text-[11.5px] font-bold"
+              style={{
+                backgroundColor: 'var(--bridge-surface)',
+                color: 'var(--bridge-text-muted)',
+                boxShadow: '0 0 0 1px var(--bridge-border) inset',
+              }}
+            >
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-65" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              <span>97% would recommend</span>
+              <span>97% would recommend Bridge</span>
             </div>
           </div>
         </RevealOnScroll>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {OUTCOMES.map((o, i) => (
             <RevealOnScroll
               key={i}
               delay={i * 90}
               variant={i % 3 === 0 ? 'left' : i % 3 === 1 ? 'zoom' : 'right'}
             >
-              <div className="group relative flex flex-col h-full overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card hover:border-orange-500/28 hover:shadow-bridge-glow transition-all b-flare">
-                <div className="flex items-center justify-between mb-4">
+              <div
+                className="group relative flex h-full flex-col overflow-hidden rounded-2xl p-7 transition-all hover:-translate-y-1"
+                style={{
+                  backgroundColor: 'var(--bridge-surface)',
+                  boxShadow: '0 14px 32px -22px rgba(79,70,229,0.18), 0 0 0 1px var(--bridge-border) inset',
+                }}
+              >
+                {/* Quote mark accent */}
+                <Quote
+                  aria-hidden
+                  className="absolute right-5 top-5 h-8 w-8 opacity-[0.08]"
+                  style={{ color: 'var(--color-primary)' }}
+                />
+
+                {/* Top row: stars + result chip */}
+                <div className="mb-4 flex items-center justify-between">
                   <div className="flex gap-0.5">
                     {[0, 1, 2, 3, 4].map(k => (
-                      <svg key={k} className="h-3 w-3 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
+                      <Star
+                        key={k}
+                        className="h-3 w-3"
+                        style={{ fill: '#F59E0B', color: '#F59E0B' }}
+                      />
                     ))}
                   </div>
-                  <span className="rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-2.5 py-1 text-[9px] font-bold text-[var(--bridge-text-muted)] whitespace-nowrap">
+                  <span
+                    className="rounded-full px-2.5 py-1 text-[9.5px] font-bold whitespace-nowrap uppercase tracking-wider"
+                    style={{
+                      backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                      color: 'var(--color-primary)',
+                      boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-primary) 22%, transparent) inset',
+                    }}
+                  >
                     {o.result}
                   </span>
                 </div>
-                <p className="flex-1 text-[13px] text-[var(--bridge-text-muted)] leading-relaxed">&ldquo;{o.quote}&rdquo;</p>
-                <div className="mt-5 flex items-center gap-3 pt-4 border-t border-[var(--bridge-border)]">
-                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${AVATAR_GRAD[o.tone]} text-[10px] font-bold text-white`}>
+
+                {/* Quote */}
+                <p
+                  className="relative flex-1 text-[14px] leading-relaxed"
+                  style={{ color: 'var(--bridge-text-secondary)' }}
+                >
+                  &ldquo;{o.quote}&rdquo;
+                </p>
+
+                {/* Footer: avatar + name + metric */}
+                <div
+                  className="mt-6 flex items-center gap-3 pt-5"
+                  style={{ borderTop: '1px solid var(--bridge-border)' }}
+                >
+                  <div
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[10.5px] font-bold text-white"
+                    style={{ background: TONE_GRADIENTS[o.tone] || TONE_GRADIENTS.amber }}
+                  >
                     {o.name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[12px] font-bold text-[var(--bridge-text)]">{o.name}</p>
-                    <p className="truncate text-[10px] text-[var(--bridge-text-faint)]">{o.role}</p>
+                    <p
+                      className="truncate text-[12.5px] font-bold"
+                      style={{ color: 'var(--bridge-text)' }}
+                    >
+                      {o.name}
+                    </p>
+                    <p className="truncate text-[10.5px]" style={{ color: 'var(--bridge-text-faint)' }}>
+                      {o.role}
+                    </p>
                   </div>
-                  <span className="text-[10px] font-semibold text-[var(--bridge-accent)] whitespace-nowrap">{o.metric}</span>
+                  <span
+                    className="text-[10.5px] font-bold whitespace-nowrap"
+                    style={{ color: 'var(--color-primary)' }}
+                  >
+                    {o.metric}
+                  </span>
                 </div>
               </div>
             </RevealOnScroll>
