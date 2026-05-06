@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 /**
  * BridgeGlobalAtmosphere — a fixed, full-viewport ambient layer that sits
  * behind every route. Provides:
@@ -7,8 +9,21 @@
  *
  * Zero layout impact (fixed, pointer-events-none, z-0). All tokens pulled from
  * `appearance.css` so switching theme re-paints automatically.
+ *
+ * Aurora keyframes are paused when the tab is hidden so the GPU isn't
+ * compositing 70-90px blurred radial gradients for nobody.
  */
 export default function BridgeGlobalAtmosphere() {
+  const [paused, setPaused] = useState(typeof document !== 'undefined' ? document.hidden : false);
+
+  useEffect(() => {
+    const onVis = () => setPaused(document.hidden);
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, []);
+
+  const playState = paused ? 'paused' : 'running';
+
   return (
     <div
       aria-hidden
@@ -20,8 +35,9 @@ export default function BridgeGlobalAtmosphere() {
         style={{
           background:
             'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 22%, transparent), color-mix(in srgb, var(--color-primary-hover) 8%, transparent) 50%, transparent 72%)',
-          filter: 'blur(70px)',
+          filter: 'blur(35px)',
           willChange: 'transform',
+          animationPlayState: playState,
         }}
       />
       <div
@@ -29,8 +45,9 @@ export default function BridgeGlobalAtmosphere() {
         style={{
           background:
             'radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 20%, transparent), color-mix(in srgb, var(--color-accent) 8%, transparent) 50%, transparent 72%)',
-          filter: 'blur(90px)',
+          filter: 'blur(40px)',
           animation: 'bridge-aurora 28s ease-in-out infinite reverse',
+          animationPlayState: playState,
         }}
       />
       <div
@@ -38,14 +55,15 @@ export default function BridgeGlobalAtmosphere() {
         style={{
           background:
             'radial-gradient(closest-side, color-mix(in srgb, var(--color-secondary) 12%, transparent), color-mix(in srgb, var(--color-primary) 6%, transparent) 50%, transparent 70%)',
-          filter: 'blur(80px)',
+          filter: 'blur(35px)',
           animation: 'bridge-aurora 34s ease-in-out infinite',
+          animationPlayState: playState,
         }}
       />
 
       {/* Noise — breaks up blur banding, adds premium texture */}
       <div
-        className="absolute inset-0 bg-bridge-noise opacity-[0.05] mix-blend-overlay dark:opacity-[0.1]"
+        className="absolute inset-0 bg-bridge-noise opacity-[0.05] dark:opacity-[0.1]"
       />
 
       {/* Subtle top/bottom vignette */}
