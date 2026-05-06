@@ -16,15 +16,48 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [headerHidden, setHeaderHidden] = useState(false);
   const asMentor = user ? isMentorAccount(user) : false;
 
-  useEffect(() => { setMobileOpen(false); setMenuOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setMobileOpen(false);
+      setMenuOpen(false);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [location.pathname]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    let lastY = window.scrollY;
+    let frame = 0;
+
+    const update = () => {
+      const currentY = Math.max(window.scrollY, 0);
+
+      setScrolled(currentY > 12);
+
+      if (currentY < lastY - 4 || currentY <= 24) {
+        setHeaderHidden(false);
+      } else if (currentY > 72 && currentY > lastY + 4) {
+        setHeaderHidden(true);
+      }
+
+      lastY = currentY;
+      frame = 0;
+    };
+
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+
+    update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [location.pathname]);
 
   useEffect(() => {
     if (mobileOpen) {
@@ -62,77 +95,64 @@ export default function Navbar() {
       {/* ═══════════════════════════════════════════════════
           MAIN HEADER
       ═══════════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-50 isolate">
+      <header
+        className={`fixed inset-x-0 top-0 z-50 isolate transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          headerHidden && !mobileOpen ? 'pointer-events-none opacity-0' : 'opacity-100'
+        }`}
+        style={{
+          background: 'transparent',
+          border: 0,
+          boxShadow: 'none',
+          outline: 0,
+          transform: headerHidden && !mobileOpen ? 'translateY(-1.5rem)' : 'translateY(0)',
+        }}
+      >
 
         {/* Background layer */}
         <div
-          className={`relative transition-[background-color,backdrop-filter] duration-500 ${
-            scrolled
-              ? 'bg-[color-mix(in_srgb,var(--bridge-canvas)_78%,transparent)] backdrop-blur-2xl'
-              : 'bg-transparent'
-          }`}
+          className="relative bg-transparent"
+          style={{ border: 0, boxShadow: 'none', outline: 0 }}
         >
-          {/* Bottom dissolve */}
-          <div aria-hidden
-            className={`pointer-events-none absolute inset-x-0 -bottom-8 h-8 transition-opacity duration-500 ${scrolled ? 'opacity-100' : 'opacity-0'}`}
-            style={{ background: 'linear-gradient(180deg, color-mix(in srgb, var(--bridge-canvas) 65%, transparent) 0%, transparent 100%)' }} />
+          <nav
+            className="relative mx-auto flex h-[5.25rem] max-w-[112rem] items-center justify-between gap-5 px-5 sm:px-8 lg:px-12"
+            style={{ border: 0, boxShadow: 'none', outline: 0 }}
+          >
 
-          <nav className="relative mx-auto flex h-[4rem] max-w-bridge items-center justify-between gap-3 px-4 sm:h-[4.25rem] sm:px-6 lg:px-8">
+            <div className="flex min-w-0 items-center gap-8">
+              {/* ── Wordmark ── */}
+              <Link to="/"
+                className="group relative flex shrink-0 items-center rounded-full outline-none transition-opacity duration-200 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)]">
+                <span className="font-display text-[1.22rem] font-black leading-none tracking-[-0.035em] text-[var(--bridge-text)] sm:text-[1.32rem]">
+                  Bridge
+                </span>
+                <span className="ml-1.5 font-display text-[1.22rem] font-medium leading-none tracking-[-0.04em] text-[var(--bridge-text)] sm:text-[1.32rem]">
+                  Mentorship
+                </span>
+              </Link>
 
-            {/* ── Wordmark ── */}
-            <Link to="/"
-              className="group relative flex shrink-0 flex-col justify-center rounded-2xl outline-none transition-transform duration-300 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)]">
-              <span className="font-display text-[1.3rem] font-black leading-none tracking-[-0.04em] text-[var(--bridge-text)] sm:text-[1.45rem]">
-                Bridge
-              </span>
-              <span
-                className="mt-[3px] text-[9px] font-semibold uppercase leading-none tracking-[0.26em]"
-                style={{ color: 'var(--color-primary)' }}
-              >
-                Mentorship
-              </span>
-            </Link>
-
-            {/* ── Center pill nav ── */}
-            <div className="hidden flex-1 items-center justify-center md:flex">
-              <div
-                className="relative flex items-center gap-1 rounded-full p-1.5"
-                style={{
-                  backgroundColor: 'color-mix(in srgb, var(--bridge-surface) 65%, transparent)',
-                  boxShadow: '0 0 0 1px var(--bridge-border) inset, 0 14px 34px -24px color-mix(in srgb, var(--color-secondary) 60%, transparent)',
-                  backdropFilter: 'blur(20px) saturate(140%)',
-                }}
-              >
+              {/* ── Inline nav ── */}
+              <div className="hidden items-center gap-7 md:flex">
                 {navItems.map(item => {
                   const active = isActive(item.path);
                   return (
                     <Link key={item.path} to={item.path}
                       aria-current={active ? 'page' : undefined}
-                      className={`relative flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-bold tracking-[-0.01em] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)] ${
+                      className={`group relative inline-flex items-center gap-1.5 rounded-full py-2 text-[15px] font-medium tracking-[-0.015em] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-3 before:inset-y-1 before:scale-75 before:rounded-full before:bg-[var(--bridge-text)] before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:before:scale-100 hover:before:opacity-[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)] ${
                         active
-                          ? 'text-[var(--color-on-primary)]'
-                          : 'text-[var(--bridge-text-muted)] hover:-translate-y-px hover:bg-[var(--bridge-surface)]/80 hover:text-[var(--bridge-text)]'
+                          ? 'text-[var(--bridge-text)]'
+                          : 'text-[var(--bridge-text-secondary)] hover:text-[var(--bridge-text)]'
                       }`}
-                      style={
-                        active
-                          ? {
-                              backgroundColor: 'var(--color-primary)',
-                              boxShadow: '0 8px 24px -10px color-mix(in srgb, var(--color-primary) 70%, transparent), 0 0 0 1px rgba(255,255,255,0.2) inset',
-                            }
-                          : undefined
-                      }
                     >
-                      {active && (
-                        <span aria-hidden className="absolute left-2 top-1/2 h-1 w-1 -translate-y-1/2 rounded-full bg-white/60" />
-                      )}
-                      <span className="relative z-10">{item.label}</span>
+                      <span
+                        aria-hidden
+                        className={`absolute -bottom-0.5 left-1/2 h-px w-full -translate-x-1/2 rounded-full bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent transition-all duration-300 ease-out ${
+                          active ? 'scale-x-100 opacity-80' : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-70'
+                        }`}
+                      />
+                      <span className="relative z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-px">{item.label}</span>
                       {item.ai && (
                         <span
-                          className={`relative inline-flex items-center rounded-full px-1.5 py-px text-[8px] font-black uppercase tracking-[0.12em] ${
-                            active
-                              ? 'bg-white/25 text-[var(--color-on-primary)]'
-                              : 'bg-[var(--bridge-surface-muted)] text-[var(--color-primary)]'
-                          }`}
+                          className="relative z-10 inline-flex items-center rounded-full bg-[var(--bridge-surface-muted)] px-1.5 py-px text-[8px] font-black uppercase tracking-[0.12em] text-[var(--color-primary)] transition-transform duration-300 group-hover:scale-105"
                         >
                           <Zap className="mr-0.5 h-2 w-2" />AI
                         </span>
@@ -253,13 +273,25 @@ export default function Navbar() {
                         {/* Menu items */}
                         <div className="py-1.5">
                           {[
-                            { to: '/profile',  icon: User,     label: 'My Profile'    },
-                            { to: '/settings', icon: Settings, label: 'Settings'      },
-                            ...(!asMentor ? [{ to: '/mentors', icon: Sparkles, label: 'Find a Mentor' }] : []),
-                          ].map(({ to, icon: Icon, label }) => (
+                            {
+                              to: '/profile',
+                              icon: <User className="h-4 w-4 shrink-0 text-[var(--bridge-text-faint)] transition-colors group-hover:text-[var(--color-primary)]" />,
+                              label: 'My Profile',
+                            },
+                            {
+                              to: '/settings',
+                              icon: <Settings className="h-4 w-4 shrink-0 text-[var(--bridge-text-faint)] transition-colors group-hover:text-[var(--color-primary)]" />,
+                              label: 'Settings',
+                            },
+                            ...(!asMentor ? [{
+                              to: '/mentors',
+                              icon: <Sparkles className="h-4 w-4 shrink-0 text-[var(--bridge-text-faint)] transition-colors group-hover:text-[var(--color-primary)]" />,
+                              label: 'Find a Mentor',
+                            }] : []),
+                          ].map(({ to, icon, label }) => (
                             <Link key={to} to={to} onClick={() => setMenuOpen(false)}
                               className="group mx-2 flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-bold text-[var(--bridge-text-secondary)] transition-all hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]">
-                              <Icon className="h-4 w-4 shrink-0 text-[var(--bridge-text-faint)] transition-colors group-hover:text-[var(--color-primary)]" />
+                              {icon}
                               {label}
                             </Link>
                           ))}
@@ -280,14 +312,14 @@ export default function Navbar() {
               ) : (
                 <div className="hidden items-center gap-2 sm:flex">
                   <Link to="/login"
-                    className="rounded-full px-4 py-2 text-[13px] font-bold text-[var(--bridge-text-muted)] transition hover:bg-[var(--bridge-surface)] hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)]">
-                    Log in
+                    className="group relative rounded-full px-4 py-2 text-[14px] font-medium text-[var(--bridge-text-secondary)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-1 before:inset-y-1 before:scale-75 before:rounded-full before:bg-[var(--bridge-text)] before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:text-[var(--bridge-text)] hover:before:scale-100 hover:before:opacity-[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)]">
+                    <span className="relative z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-px">Log in</span>
+                    <span aria-hidden className="absolute -bottom-0.5 left-1/2 h-px w-[calc(100%-2rem)] -translate-x-1/2 scale-x-0 rounded-full bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent opacity-0 transition-all duration-300 ease-out group-hover:scale-x-100 group-hover:opacity-70" />
                   </Link>
                   <Link to="/register" data-magnet="6"
-                    className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 text-[13px] font-black text-white transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+                    className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full bg-[var(--bridge-text)] px-5 py-2.5 text-[14px] font-medium text-[var(--bridge-canvas)] transition hover:-translate-y-0.5 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4"
                     style={{
-                      background: 'linear-gradient(90deg, var(--color-primary), var(--color-accent))',
-                      boxShadow: '0 10px 28px -10px color-mix(in srgb, var(--color-primary) 70%, transparent), 0 0 0 1px rgba(255,255,255,0.2) inset',
+                      boxShadow: '0 16px 34px -22px color-mix(in srgb, var(--bridge-text) 80%, transparent)',
                     }}
                   >
                     Get started
@@ -300,10 +332,10 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(v => !v)}
                 aria-expanded={mobileOpen}
                 aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-                className="relative flex h-9 w-9 items-center justify-center rounded-xl border text-[var(--bridge-text-muted)] transition hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] md:hidden"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full text-[var(--bridge-text)] transition hover:bg-[var(--bridge-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] md:hidden"
                 style={{
-                  borderColor: 'var(--bridge-border)',
-                  backgroundColor: 'color-mix(in srgb, var(--bridge-surface) 75%, transparent)',
+                  backgroundColor: mobileOpen || scrolled ? 'color-mix(in srgb, var(--bridge-surface) 76%, transparent)' : 'transparent',
+                  backdropFilter: mobileOpen || scrolled ? 'blur(16px)' : 'none',
                 }}
               >
                 <span className={`absolute transition-all duration-200 ${mobileOpen ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}>
@@ -343,10 +375,9 @@ export default function Navbar() {
 
             {/* Header */}
             <div className="relative flex shrink-0 items-center justify-between border-b border-[var(--bridge-border)]/80 px-5 py-4">
-              <Link to="/" onClick={() => setMobileOpen(false)} className="group flex flex-col justify-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]">
-                <span className="font-display text-xl font-black leading-none tracking-[-0.04em] text-[var(--bridge-text)]">Bridge</span>
-                <span className="mt-[3px] text-[9px] font-semibold uppercase leading-none tracking-[0.26em]"
-                  style={{ color: 'var(--color-primary)' }}>Mentorship</span>
+              <Link to="/" onClick={() => setMobileOpen(false)} className="group flex items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]">
+                <span className="font-display text-xl font-black leading-none tracking-[-0.035em] text-[var(--bridge-text)]">Bridge</span>
+                <span className="ml-1.5 font-display text-xl font-medium leading-none tracking-[-0.04em] text-[var(--bridge-text)]">Mentorship</span>
               </Link>
               <button type="button" onClick={() => setMobileOpen(false)}
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--bridge-border)]/80 text-[var(--bridge-text-muted)] transition hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
@@ -438,12 +469,20 @@ export default function Navbar() {
                     </div>
                   </div>
                   {[
-                    { to: '/profile',  icon: User,     label: 'Profile'   },
-                    { to: '/settings', icon: Settings, label: 'Settings'  },
-                  ].map(({ to, icon: Icon, label }) => (
+                    {
+                      to: '/profile',
+                      icon: <User className="h-4 w-4 text-[var(--bridge-text-faint)]" />,
+                      label: 'Profile',
+                    },
+                    {
+                      to: '/settings',
+                      icon: <Settings className="h-4 w-4 text-[var(--bridge-text-faint)]" />,
+                      label: 'Settings',
+                    },
+                  ].map(({ to, icon, label }) => (
                     <Link key={to} to={to} onClick={() => setMobileOpen(false)}
                       className="flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-[13px] font-bold text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]">
-                      <Icon className="h-4 w-4 text-[var(--bridge-text-faint)]" />
+                      {icon}
                       {label}
                     </Link>
                   ))}

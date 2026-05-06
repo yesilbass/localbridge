@@ -319,21 +319,10 @@ html.is-landing-route ::selection {
 export default function Landing() {
   const { user } = useAuth();
   const [ready, setReady] = useState(false);
-  const [isDark, setIsDark] = useState(
-    () => typeof window !== 'undefined' && document.documentElement.classList.contains('theme-dark')
-  );
 
   useLayoutEffect(() => {
     document.documentElement.classList.add('is-landing-route');
     return () => document.documentElement.classList.remove('is-landing-route');
-  }, []);
-
-  useEffect(() => {
-    const check = () => setIsDark(document.documentElement.classList.contains('theme-dark'));
-    check();
-    const mo = new MutationObserver(check);
-    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => mo.disconnect();
   }, []);
 
   useEffect(() => {
@@ -359,7 +348,7 @@ export default function Landing() {
              style={{ background: 'radial-gradient(closest-side, color-mix(in srgb, var(--lp-counter) 55%, transparent) 0%, transparent 70%)', opacity: 'var(--lp-glow-opacity-soft)' }} />
       </div>
 
-      <HeroSection user={user} isDark={isDark} ready={ready} />
+      <HeroSection user={user} ready={ready} />
 
       <BrandStrip />
 
