@@ -51,8 +51,8 @@ export const LANDING_CSS = `
   @keyframes bPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--color-primary) 65%, transparent)}70%{box-shadow:0 0 0 16px transparent}100%{box-shadow:0 0 0 0 transparent}}
   @keyframes bScanLine{0%{transform:translateY(-100%);opacity:0}10%{opacity:1}90%{opacity:.8}100%{transform:translateY(110vh);opacity:0}}
   @keyframes bPortal{from{transform:rotateX(72deg) rotate(0)}to{transform:rotateX(72deg) rotate(360deg)}}
-  .b-ticker{animation:bTicker 44s linear infinite}
-  .b-ticker-r{animation:bTickerRev 50s linear infinite}
+  .b-ticker{animation:bTicker 44s linear infinite;will-change:transform}
+  .b-ticker-r{animation:bTickerRev 50s linear infinite;will-change:transform}
   .b-marq:hover .b-ticker,.b-marq:hover .b-ticker-r{animation-play-state:paused}
   .b-float{animation:bFloat 8s ease-in-out infinite}
   .b-float-b{animation:bFloatB 10.5s ease-in-out infinite}

@@ -1,8 +1,10 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useLayoutEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+
+const revealed = new WeakSet();
 
 const STEPS = [
   {
@@ -48,27 +50,41 @@ const STEPS = [
 export default function HowItWorksSection() {
   const containerRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!containerRef.current) return;
-    
-    const cards = containerRef.current.querySelectorAll('.hiw-card');
-    
-    gsap.fromTo(cards,
-      { y: 60, opacity: 0, scale: 0.95 },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.8,
-        stagger: 0.2,
-        ease: 'back.out(1.2)',
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top 75%',
-          once: true
-        }
-      }
-    );
+
+    const cards = Array.from(containerRef.current.querySelectorAll('.hiw-card'));
+    if (!cards.length) return;
+
+    gsap.set(cards, { y: 60, opacity: 0, scale: 0.95 });
+
+    const anim = gsap.to(cards, {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      duration: 0.8,
+      stagger: 0.2,
+      ease: 'back.out(1.2)',
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: 'top 75%',
+        once: true,
+        onEnter: () => cards.forEach(c => revealed.add(c)),
+      },
+      onComplete: () => cards.forEach(c => revealed.add(c)),
+    });
+
+    const safety = setTimeout(() => {
+      cards.forEach(c => {
+        if (!revealed.has(c)) { gsap.set(c, { clearProps: 'all' }); revealed.add(c); }
+      });
+    }, 4800);
+
+    return () => {
+      clearTimeout(safety);
+      anim.scrollTrigger?.kill();
+      anim.kill();
+    };
   }, []);
 
   return (
