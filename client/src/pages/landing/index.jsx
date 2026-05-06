@@ -1,10 +1,7 @@
-import { useState, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { useAuth } from '../../context/useAuth';
 
 import { LANDING_CSS } from './landingStyles';
-import { usePerfTier } from './landingHooks';
 import HeroSection from './HeroSection';
 import HowItWorksSection from './HowItWorksSection';
 import FinalCtaSection from './FinalCtaSection';
@@ -16,8 +13,6 @@ import MentorMarqueeSection from './MentorMarqueeSection';
 import ManifestoSection from './ManifestoSection';
 import ComparisonSection from './ComparisonSection';
 import OutcomesSection from './OutcomesSection';
-
-gsap.registerPlugin(ScrollTrigger);
 
 /* ─────────────────────────────────────────────────────────────────────────
    LANDING_PALETTE_CSS
@@ -344,12 +339,17 @@ html.is-landing-route:not(.theme-dark) [class*="shadow-bridge-card"] {
 
 export default function Landing() {
   const { user } = useAuth();
-  const tier = usePerfTier();
-  const isLow = tier === 'low';
   const [ready, setReady] = useState(false);
   const [isDark, setIsDark] = useState(
     () => typeof window !== 'undefined' && document.documentElement.classList.contains('theme-dark')
   );
+
+  // Add landing class synchronously before the first browser paint so that
+  // LANDING_PALETTE_CSS vars are active when IntroLoader and hero render.
+  useLayoutEffect(() => {
+    document.documentElement.classList.add('is-landing-route');
+    return () => document.documentElement.classList.remove('is-landing-route');
+  }, []);
 
   useEffect(() => {
     const check = () => setIsDark(document.documentElement.classList.contains('theme-dark'));
@@ -363,43 +363,6 @@ export default function Landing() {
     const t = setTimeout(() => setReady(true), 60);
     return () => clearTimeout(t);
   }, []);
-
-  // Scope the landing-only color system: warm-cream bg + indigo accents in light,
-  // deep-indigo bg + warm orange accents in dark. Removed on unmount so other
-  // routes are untouched.
-  useEffect(() => {
-    document.documentElement.classList.add('is-landing-route');
-    return () => document.documentElement.classList.remove('is-landing-route');
-  }, []);
-
-  useEffect(() => {
-    if (isLow) {
-      document.querySelectorAll('[data-gsap-fade]').forEach(el => {
-        el.style.opacity = '1';
-        el.style.transform = 'none';
-      });
-      return;
-    }
-
-    // Generic fade-up
-    document.querySelectorAll('[data-gsap-fade]').forEach(el => {
-      gsap.fromTo(el, { y: 40, opacity: 0 }, {
-        y: 0, opacity: 1, duration: 0.9, ease: 'power3.out',
-        scrollTrigger: { trigger: el, start: 'top 85%', once: true },
-      });
-    });
-
-    // h2 headings
-    document.querySelectorAll('section h2').forEach(el => {
-      gsap.fromTo(el,
-        { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out',
-          scrollTrigger: { trigger: el, start: 'top 85%', once: true } }
-      );
-    });
-
-    return () => ScrollTrigger.getAll().forEach(t => t.kill());
-  }, [isLow]);
 
   return (
     <div className="landing-root relative overflow-x-hidden bg-[var(--bridge-canvas)] text-[var(--bridge-text)]">
