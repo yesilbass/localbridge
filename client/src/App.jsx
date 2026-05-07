@@ -39,6 +39,7 @@ import DevPortal from './pages/DevPortal/index.jsx';
 function AppContent() {
   const location = useLocation();
   const isVideoCall = location.pathname.includes('/video');
+  const isLanding = location.pathname === '/';
   const hideFooter =
     location.pathname.startsWith('/profile') ||
     location.pathname.startsWith('/settings') ||
@@ -63,7 +64,10 @@ function AppContent() {
       {!isVideoCall && <ScrollProgress />}
       {!isVideoCall && <MagneticPointer />}
       {!isVideoCall && <Navbar />}
-      <div key={location.pathname} className="relative z-10 flex-1 flex flex-col animate-page-enter">
+      <div
+        key={location.pathname}
+        className={`relative z-10 flex flex-1 flex-col animate-page-enter ${isLanding ? '' : 'pt-[5.25rem]'}`}
+      >
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />

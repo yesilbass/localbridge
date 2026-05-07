@@ -1,32 +1,64 @@
-import { useRef, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { gsap } from 'gsap';
+import { motion, useInView } from 'motion/react';
 import { Sparkles, ArrowRight, Star, Calendar, ShieldCheck } from 'lucide-react';
 
-export default function HeroSection({ user, isDark, ready }) {
-  const headRef = useRef(null);
+export default function HeroSection({ user, ready }) {
+  const [firstLineComplete, setFirstLineComplete] = useState(false);
+  const [heroDeployed, setHeroDeployed] = useState(false);
 
-  useEffect(() => {
-    if (!ready || !headRef.current) return;
-    const lines = headRef.current.querySelectorAll('.hero-line');
-    gsap.fromTo(
-      lines,
-      { opacity: 0, y: 36, filter: 'blur(12px)' },
-      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.05, stagger: 0.09, ease: 'power3.out' },
-    );
-  }, [ready]);
+  const flyRestState = {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    rotate: 0,
+    rotateX: 0,
+    rotateY: 0,
+    scale: 1,
+  };
+
+  const flyTransition = {
+    type: 'spring',
+    stiffness: 92,
+    damping: 15,
+    mass: 0.82,
+  };
+
+  const flyIn = (from, delay = 0) => ({
+    initial: from,
+    animate: heroDeployed ? flyRestState : from,
+    transition: { ...flyTransition, delay },
+  });
+
+  const eyebrowFly = flyIn(
+    { opacity: 0, x: -150, y: -18, rotate: -4, scale: 0.92 },
+    0.04,
+  );
+  const taglineFly = flyIn(
+    { opacity: 0, x: -86, y: 38, rotate: -3, scale: 0.96 },
+    0.08,
+  );
+  const copyFly = flyIn(
+    { opacity: 0, x: -180, y: 34, rotate: -2, scale: 0.96 },
+    0.2,
+  );
+  const ctaFly = flyIn(
+    { opacity: 0, x: -42, y: 128, rotate: 3, scale: 0.9 },
+    0.32,
+  );
+  const trustFly = flyIn(
+    { opacity: 0, x: 44, y: 118, rotate: 2.5, scale: 0.92 },
+    0.44,
+  );
+  const cardFly = flyIn(
+    { opacity: 0, x: 260, y: 54, rotate: 7, rotateY: -16, scale: 0.86 },
+    0.16,
+  );
 
   return (
     <section className="relative flex min-h-[94vh] items-center overflow-hidden px-5 pt-28 pb-24 sm:px-8 lg:pt-36">
-      {/* Subtle precision grid overlay */}
+      {/* Soft vignette overlay */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.10]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='44' height='44' viewBox='0 0 44 44' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 44V0H44' stroke='${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(79,70,229,0.10)'}' stroke-width='1'/%3E%3C/svg%3E")`,
-          }}
-        />
-        {/* radial vignette to soften grid edges */}
         <div
           className="absolute inset-0"
           style={{
@@ -39,7 +71,8 @@ export default function HeroSection({ user, isDark, ready }) {
         {/* ── Left: copy ─────────────────────────────────────────────── */}
         <div className="lg:col-span-7">
           {/* Eyebrow / status pill */}
-          <div
+          <motion.div
+            {...eyebrowFly}
             className="mb-7 inline-flex items-center gap-2.5 rounded-full px-3.5 py-1.5 text-[11px] font-semibold tracking-wide backdrop-blur-sm"
             style={{
               backgroundColor: 'color-mix(in srgb, var(--bridge-surface) 80%, transparent)',
@@ -54,23 +87,38 @@ export default function HeroSection({ user, isDark, ready }) {
             <span style={{ color: 'var(--bridge-text-muted)' }}>2,400+ vetted mentors live now</span>
             <span className="mx-0.5 h-3 w-px" style={{ backgroundColor: 'var(--bridge-border-strong)' }} />
             <span className="font-bold" style={{ color: 'var(--color-primary)' }}>YC-backed</span>
-          </div>
+          </motion.div>
 
           {/* Headline */}
           <h1
-            ref={headRef}
             className="font-display font-black leading-[0.96] tracking-[-0.04em]"
             style={{ fontSize: 'clamp(2.85rem, 7.6vw, 6rem)', color: 'var(--bridge-text)' }}
           >
-            <span className="hero-line block">The fastest path</span>
-            <span
-              className="hero-line block bg-clip-text text-transparent"
+            <TypingAnimation
+              as="span"
+              className="block min-h-[1em]"
+              text="The fastest path"
+              typeSpeed={42}
+              delay={ready ? 180 : 999999}
+              showCursor={!firstLineComplete}
+              cursorClassName="text-[var(--color-primary)]"
+              onComplete={() => setFirstLineComplete(true)}
+            />
+            <TypingAnimation
+              as="span"
+              className="block min-h-[1em] bg-clip-text text-transparent"
+              text="to your next role."
+              typeSpeed={42}
+              delay={120}
+              start={firstLineComplete}
+              showCursor={!heroDeployed}
+              cursorClassName="text-[var(--color-primary)]"
+              onComplete={() => setHeroDeployed(true)}
               style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)' }}
-            >
-              to your next role.
-            </span>
-            <span
-              className="hero-line block font-editorial italic font-normal pt-3"
+            />
+            <motion.span
+              className="block pt-3 font-editorial italic font-normal"
+              {...taglineFly}
               style={{
                 fontSize: 'clamp(1.5rem, 3.4vw, 2.4rem)',
                 color: 'color-mix(in srgb, var(--bridge-text) 60%, transparent)',
@@ -78,21 +126,25 @@ export default function HeroSection({ user, isDark, ready }) {
               }}
             >
               One conversation. Real outcomes.
-            </span>
+            </motion.span>
           </h1>
 
           {/* Sub */}
-          <p
-            className="mt-7 max-w-xl text-base leading-relaxed sm:text-[17px] sm:leading-[1.65] animate-fade-in-up delay-300 opacity-0 fill-mode-forwards"
+          <motion.p
+            {...copyFly}
+            className="mt-7 max-w-xl text-base leading-relaxed sm:text-[17px] sm:leading-[1.65]"
             style={{ color: 'var(--bridge-text-secondary)' }}
           >
             Bridge connects ambitious professionals with mentors who&rsquo;ve already done the job.
             AI-matched in seconds. Booked in a click. No subscriptions, no packages — just one
             session that moves your career forward.
-          </p>
+          </motion.p>
 
           {/* CTAs */}
-          <div className="mt-9 flex flex-col items-start gap-3.5 sm:flex-row sm:items-center animate-fade-in-up delay-500 opacity-0 fill-mode-forwards">
+          <motion.div
+            {...ctaFly}
+            className="mt-9 flex flex-col items-start gap-3.5 sm:flex-row sm:items-center"
+          >
             <Link
               to={user ? '/mentors' : '/register'}
               className="lp-cta group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full px-7 py-3.5 text-[15px] font-bold transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)]"
@@ -119,28 +171,116 @@ export default function HeroSection({ user, isDark, ready }) {
               Browse mentors
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </Link>
-          </div>
+          </motion.div>
 
           {/* Trust row */}
-          <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-3 animate-fade-in-up delay-700 opacity-0 fill-mode-forwards">
+          <motion.div
+            {...trustFly}
+            className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-3"
+          >
             <Trust icon={<ShieldCheck className="h-3.5 w-3.5" />} text="No credit card" />
             <Trust icon={<Calendar className="h-3.5 w-3.5" />} text="Book in 60 seconds" />
             <Trust icon={<Star className="h-3.5 w-3.5" style={{ fill: 'currentColor' }} />} text={<><b style={{ color: 'var(--bridge-text)' }}>4.9</b>/5 across 4,800+ sessions</>} />
-          </div>
+          </motion.div>
         </div>
 
         {/* ── Right: mentor preview card with floating chips ──────────── */}
-        <div className="relative lg:col-span-5 animate-fade-in-up delay-500 opacity-0 fill-mode-forwards">
+        <motion.div
+          initial={cardFly.initial}
+          animate={heroDeployed ? flyRestState : cardFly.initial}
+          transition={cardFly.transition}
+          className="relative lg:col-span-5"
+          style={{ transformPerspective: 1000, transformStyle: 'preserve-3d' }}
+        >
           <HeroPreviewCard />
-        </div>
+        </motion.div>
       </div>
 
       <style>{`
         @keyframes heroFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
         .hero-float-a { animation: heroFloat 6.5s ease-in-out infinite; }
         .hero-float-b { animation: heroFloat 7.5s ease-in-out -2s infinite; }
+        @keyframes heroTypeCursorBlink { 0%, 45% { opacity: 1; } 46%, 100% { opacity: 0; } }
+        .animate-hero-type-cursor { animation: heroTypeCursorBlink 0.9s steps(1, end) infinite; }
       `}</style>
     </section>
+  );
+}
+
+const motionElements = {
+  div: motion.div,
+  h1: motion.h1,
+  h2: motion.h2,
+  h3: motion.h3,
+  p: motion.p,
+  section: motion.section,
+  span: motion.span,
+};
+
+function joinClassNames(...classes) {
+  return classes.filter(Boolean).join(' ');
+}
+
+function TypingAnimation({
+  text = '',
+  className,
+  cursorClassName,
+  typeSpeed = 100,
+  delay = 0,
+  as: Component = 'span',
+  start = true,
+  startOnView = true,
+  showCursor = true,
+  blinkCursor = true,
+  cursorStyle = 'line',
+  onComplete,
+  ...props
+}) {
+  const MotionComponent = motionElements[Component] ?? motion.span;
+  const [displayedText, setDisplayedText] = useState('');
+  const [currentCharIndex, setCurrentCharIndex] = useState(0);
+  const [completed, setCompleted] = useState(false);
+  const elementRef = useRef(null);
+  const isInView = useInView(elementRef, { amount: 0.3, once: true });
+  const graphemes = useMemo(() => Array.from(text), [text]);
+  const shouldStart = start && (startOnView ? isInView : true);
+
+  useEffect(() => {
+    if (!shouldStart || completed) return undefined;
+
+    const timeoutDelay = delay > 0 && displayedText === '' ? delay : typeSpeed;
+    const timeout = window.setTimeout(() => {
+      if (currentCharIndex < graphemes.length) {
+        setDisplayedText(graphemes.slice(0, currentCharIndex + 1).join(''));
+        setCurrentCharIndex(currentCharIndex + 1);
+        return;
+      }
+
+      setCompleted(true);
+      onComplete?.();
+    }, timeoutDelay);
+
+    return () => window.clearTimeout(timeout);
+  }, [completed, currentCharIndex, delay, displayedText, graphemes, onComplete, shouldStart, typeSpeed]);
+
+  const cursorChar = cursorStyle === 'block' ? '▌' : cursorStyle === 'underscore' ? '_' : '|';
+  const shouldShowCursor = showCursor && !completed;
+
+  return (
+    <MotionComponent
+      ref={elementRef}
+      className={joinClassNames(Component === 'span' && 'inline-block', className)}
+      {...props}
+    >
+      {displayedText}
+      {shouldShowCursor && (
+        <span
+          className={joinClassNames('inline-block', blinkCursor && 'animate-hero-type-cursor', cursorClassName)}
+        >
+          {cursorChar}
+        </span>
+      )}
+    </MotionComponent>
   );
 }
 
