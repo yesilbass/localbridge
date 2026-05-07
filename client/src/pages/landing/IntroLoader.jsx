@@ -46,8 +46,15 @@ const CSS = `
   }
 `;
 
-const TOTAL  = { high: 2000, mid: 1200, low: 550 };
-const EXIT_D = { high:  420, mid:  360, low: 280 };
+const TOTAL  = { high: 1150, mid: 720, low: 280 };
+const EXIT_D = { high:  340, mid: 240, low: 180 };
+
+// Probe sessionStorage once at module load so we can short-circuit before mount.
+function introAlreadySeen() {
+  if (typeof window === 'undefined') return false;
+  try { return window.sessionStorage.getItem('bridge_intro_seen') === '1'; }
+  catch { return true; }
+}
 
 export default function IntroLoader() {
   const tier  = usePerfTier();
@@ -57,17 +64,12 @@ export default function IntroLoader() {
   const totalMs  = TOTAL[tier];
   const exitMs   = EXIT_D[tier];
 
-  const [done,    setDone]    = useState(false);
+  const [done,    setDone]    = useState(introAlreadySeen);
   const [exiting, setExiting] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useLayoutEffect(() => {
     setMounted(true);
-    try {
-      if (sessionStorage.getItem('bridge_intro_seen') === '1') setDone(true);
-    } catch {
-      setDone(true);
-    }
   }, []);
 
   useEffect(() => {
@@ -115,7 +117,7 @@ export default function IntroLoader() {
     }, exitMs);
   }
 
-  const letterDelay = (i) => (isLow ? 0 : isMid ? 0.06 : 0.08) * i + (isLow ? 0.05 : 0.12);
+  const letterDelay = (i) => (isLow ? 0 : isMid ? 0.04 : 0.055) * i + (isLow ? 0.02 : 0.06);
 
   return createPortal(
     <div
@@ -139,20 +141,22 @@ export default function IntroLoader() {
         style={{ background: 'radial-gradient(ellipse 130% 100% at 50% 55%, #0A0F2C 0%, #050818 50%, #000 100%)' }}
       />
 
-      {/* Ambient glows — high tier only */}
+      {/* Ambient glows — high tier only, blur kept light to avoid GPU thrash */}
       {!isLow && !isMid && (
         <>
           <div aria-hidden className="absolute pointer-events-none rounded-full" style={{
             left: '22%', top: '28%', width: '52vmin', height: '52vmin',
             background: 'radial-gradient(circle, rgba(124,124,255,0.32) 0%, transparent 65%)',
-            filter: 'blur(48px)',
-            animation: 'brFadeIn 1s ease-out 0.1s both',
+            filter: 'blur(28px)',
+            transform: 'translateZ(0)',
+            animation: 'brFadeIn 0.6s ease-out 0.05s both',
           }} />
           <div aria-hidden className="absolute pointer-events-none rounded-full" style={{
             left: '60%', top: '48%', width: '42vmin', height: '42vmin',
             background: 'radial-gradient(circle, rgba(165,180,252,0.20) 0%, transparent 65%)',
-            filter: 'blur(48px)',
-            animation: 'brFadeIn 1s ease-out 0.2s both',
+            filter: 'blur(28px)',
+            transform: 'translateZ(0)',
+            animation: 'brFadeIn 0.6s ease-out 0.12s both',
           }} />
         </>
       )}
@@ -195,7 +199,7 @@ export default function IntroLoader() {
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
               color: 'transparent',
-              animation: 'brFadeIn 0.45s cubic-bezier(0.22,1,0.36,1) 0.08s both, brShimmer 3s ease-in-out infinite',
+              animation: 'brFadeIn 0.32s cubic-bezier(0.22,1,0.36,1) 0.04s both',
             }}
           >
             BRIDGE
@@ -225,8 +229,9 @@ export default function IntroLoader() {
                   '--ly': VECTORS[i].ly,
                   '--rx': VECTORS[i].rx,
                   filter: 'drop-shadow(0 0 14px rgba(124,124,255,0.50))',
-                  animation: `brLetIn 0.75s cubic-bezier(0.22,1,0.36,1) ${letterDelay(i)}s forwards, brShimmer 3.2s ease-in-out 0.7s infinite`,
+                  animation: `brLetIn 0.55s cubic-bezier(0.22,1,0.36,1) ${letterDelay(i)}s forwards, brShimmer 3.2s ease-in-out 0.5s infinite`,
                   willChange: 'transform,opacity',
+                  transform: 'translateZ(0)',
                 }}
               >
                 {ch}
@@ -253,7 +258,7 @@ export default function IntroLoader() {
               transformOrigin: 'left',
               transform: 'scaleX(0)',
               opacity: 0,
-              animation: `brAccIn 0.55s cubic-bezier(0.22,1,0.36,1) ${isMid ? 0.38 : 0.62}s forwards`,
+              animation: `brAccIn 0.4s cubic-bezier(0.22,1,0.36,1) ${isMid ? 0.22 : 0.4}s forwards`,
             }} />
           </div>
         )}
@@ -270,7 +275,7 @@ export default function IntroLoader() {
               backdropFilter: 'blur(10px)',
               WebkitBackdropFilter: 'blur(10px)',
               opacity: 0,
-              animation: 'brTagIn 0.5s cubic-bezier(0.22,1,0.36,1) 0.82s forwards',
+              animation: 'brTagIn 0.4s cubic-bezier(0.22,1,0.36,1) 0.55s forwards',
             }}
           >
             <p
@@ -297,7 +302,7 @@ export default function IntroLoader() {
             letterSpacing: '0.22em',
             textTransform: 'uppercase',
             fontWeight: 600,
-            animation: `brFadeIn 0.5s ease-out ${isLow ? 0.18 : isMid ? 0.45 : 0.95}s both`,
+            animation: `brFadeIn 0.4s ease-out ${isLow ? 0.1 : isMid ? 0.28 : 0.55}s both`,
           }}
         >
           Click to skip
