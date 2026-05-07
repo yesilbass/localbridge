@@ -33,4 +33,18 @@ export const LANDING_CSS = `
   @media (prefers-reduced-motion: reduce){
     .b-ticker,.b-ticker-r{animation:none!important}
   }
+
+  /* ── Universal pulse for any "live" green dot on the page ────────
+       Single source of truth — defined once, consumed everywhere. */
+  @keyframes bridgePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.45); opacity: 0.6; }
+  }
+  .bridge-pulse {
+    animation: bridgePulse 1.4s ease-in-out infinite;
+    will-change: transform, opacity;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bridge-pulse { animation: none; }
+  }
 `;
