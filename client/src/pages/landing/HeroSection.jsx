@@ -2,10 +2,23 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'motion/react';
 import { Sparkles, ArrowRight, Star, Calendar, ShieldCheck } from 'lucide-react';
+import { usePerfTier } from './landingHooks';
 
 export default function HeroSection({ user, ready }) {
-  const [firstLineComplete, setFirstLineComplete] = useState(false);
-  const [heroDeployed, setHeroDeployed] = useState(false);
+  const tier = usePerfTier();
+  const isLow = tier === 'low';
+  const isMid = tier === 'mid';
+
+  // On low-tier we skip the typewriter (renders full text immediately) and
+  // collapse the spring fly-ins into simple opacity/translate.
+  const typeSpeed   = isLow ? 0   : isMid ? 18  : 24;
+  const firstDelay  = isLow ? 0   : isMid ? 60  : 90;
+  const secondDelay = isLow ? 0   : isMid ? 50  : 70;
+
+  // usePerfTier returns the correct tier on first client render, so seeding
+  // these straight from isLow lets low-tier skip every fly-in spring entirely.
+  const [firstLineComplete, setFirstLineComplete] = useState(isLow);
+  const [heroDeployed, setHeroDeployed] = useState(isLow);
 
   const flyRestState = {
     opacity: 1,
@@ -17,42 +30,55 @@ export default function HeroSection({ user, ready }) {
     scale: 1,
   };
 
-  const flyTransition = {
-    type: 'spring',
-    stiffness: 92,
-    damping: 15,
-    mass: 0.82,
+  // Snappier spring on high tier; lighter on mid tier.
+  const flyTransition = isMid
+    ? { type: 'spring', stiffness: 220, damping: 26, mass: 0.55 }
+    : { type: 'spring', stiffness: 180, damping: 22, mass: 0.7 };
+
+  // Smaller travel + smaller delays = visibly faster, less janky on low GPUs.
+  // On low-tier we just render at rest (no fly-in springs at all).
+  const travelScale = isMid ? 0.6 : 1;
+  const flyIn = (from, delay = 0) => {
+    if (isLow) {
+      return { initial: flyRestState, animate: flyRestState, transition: { duration: 0 } };
+    }
+    const scaled = isMid
+      ? {
+          ...from,
+          x: typeof from.x === 'number' ? from.x * travelScale : from.x,
+          y: typeof from.y === 'number' ? from.y * travelScale : from.y,
+        }
+      : from;
+    return {
+      initial: scaled,
+      animate: heroDeployed ? flyRestState : scaled,
+      transition: { ...flyTransition, delay },
+    };
   };
 
-  const flyIn = (from, delay = 0) => ({
-    initial: from,
-    animate: heroDeployed ? flyRestState : from,
-    transition: { ...flyTransition, delay },
-  });
-
   const eyebrowFly = flyIn(
-    { opacity: 0, x: -150, y: -18, rotate: -4, scale: 0.92 },
-    0.04,
+    { opacity: 0, x: -120, y: -14, rotate: -3, scale: 0.94 },
+    0.0,
   );
   const taglineFly = flyIn(
-    { opacity: 0, x: -86, y: 38, rotate: -3, scale: 0.96 },
-    0.08,
+    { opacity: 0, x: -60, y: 28, rotate: -2, scale: 0.97 },
+    0.04,
   );
   const copyFly = flyIn(
-    { opacity: 0, x: -180, y: 34, rotate: -2, scale: 0.96 },
-    0.2,
+    { opacity: 0, x: -120, y: 24, rotate: -1.5, scale: 0.97 },
+    0.08,
   );
   const ctaFly = flyIn(
-    { opacity: 0, x: -42, y: 128, rotate: 3, scale: 0.9 },
-    0.32,
+    { opacity: 0, x: -28, y: 80, rotate: 2, scale: 0.94 },
+    0.12,
   );
   const trustFly = flyIn(
-    { opacity: 0, x: 44, y: 118, rotate: 2.5, scale: 0.92 },
-    0.44,
+    { opacity: 0, x: 32, y: 72, rotate: 1.8, scale: 0.94 },
+    0.16,
   );
   const cardFly = flyIn(
-    { opacity: 0, x: 260, y: 54, rotate: 7, rotateY: -16, scale: 0.86 },
-    0.16,
+    { opacity: 0, x: 180, y: 36, rotate: 5, rotateY: -10, scale: 0.9 },
+    0.06,
   );
 
   return (
@@ -98,8 +124,9 @@ export default function HeroSection({ user, ready }) {
               as="span"
               className="block min-h-[1em]"
               text="The fastest path"
-              typeSpeed={42}
-              delay={ready ? 180 : 999999}
+              typeSpeed={typeSpeed}
+              delay={ready ? firstDelay : 999999}
+              instant={isLow}
               showCursor={!firstLineComplete}
               cursorClassName="text-[var(--color-primary)]"
               onComplete={() => setFirstLineComplete(true)}
@@ -108,8 +135,9 @@ export default function HeroSection({ user, ready }) {
               as="span"
               className="block min-h-[1em] bg-clip-text text-transparent"
               text="to your next role."
-              typeSpeed={42}
-              delay={120}
+              typeSpeed={typeSpeed}
+              delay={secondDelay}
+              instant={isLow}
               start={firstLineComplete}
               showCursor={!heroDeployed}
               cursorClassName="text-[var(--color-primary)]"
@@ -197,11 +225,14 @@ export default function HeroSection({ user, ready }) {
       </div>
 
       <style>{`
-        @keyframes heroFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-        .hero-float-a { animation: heroFloat 6.5s ease-in-out infinite; }
-        .hero-float-b { animation: heroFloat 7.5s ease-in-out -2s infinite; }
+        @keyframes heroFloat { 0%,100% { transform: translate3d(0,0,0); } 50% { transform: translate3d(0,-6px,0); } }
+        .hero-float-a { animation: heroFloat 6.5s ease-in-out infinite; will-change: transform; }
+        .hero-float-b { animation: heroFloat 7.5s ease-in-out -2s infinite; will-change: transform; }
         @keyframes heroTypeCursorBlink { 0%, 45% { opacity: 1; } 46%, 100% { opacity: 0; } }
         .animate-hero-type-cursor { animation: heroTypeCursorBlink 0.9s steps(1, end) infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .hero-float-a, .hero-float-b, .animate-hero-type-cursor { animation: none !important; }
+        }
       `}</style>
     </section>
   );
@@ -233,20 +264,31 @@ function TypingAnimation({
   showCursor = true,
   blinkCursor = true,
   cursorStyle = 'line',
+  instant = false,
   onComplete,
   ...props
 }) {
   const MotionComponent = motionElements[Component] ?? motion.span;
-  const [displayedText, setDisplayedText] = useState('');
-  const [currentCharIndex, setCurrentCharIndex] = useState(0);
-  const [completed, setCompleted] = useState(false);
+  const [displayedText, setDisplayedText] = useState(instant ? text : '');
+  const [currentCharIndex, setCurrentCharIndex] = useState(instant ? Array.from(text).length : 0);
+  const [completed, setCompleted] = useState(instant);
   const elementRef = useRef(null);
   const isInView = useInView(elementRef, { amount: 0.3, once: true });
   const graphemes = useMemo(() => Array.from(text), [text]);
   const shouldStart = start && (startOnView ? isInView : true);
 
+  // Instant mode: skip the per-character timer churn entirely (low-tier devices).
+  // We seed completed=true via useState already; this just fires onComplete once
+  // so parents that key on it stay in sync.
+  const firedRef = useRef(false);
   useEffect(() => {
-    if (!shouldStart || completed) return undefined;
+    if (!instant || firedRef.current) return;
+    firedRef.current = true;
+    onComplete?.();
+  }, [instant, onComplete]);
+
+  useEffect(() => {
+    if (instant || !shouldStart || completed) return undefined;
 
     const timeoutDelay = delay > 0 && displayedText === '' ? delay : typeSpeed;
     const timeout = window.setTimeout(() => {
@@ -261,7 +303,7 @@ function TypingAnimation({
     }, timeoutDelay);
 
     return () => window.clearTimeout(timeout);
-  }, [completed, currentCharIndex, delay, displayedText, graphemes, onComplete, shouldStart, typeSpeed]);
+  }, [completed, currentCharIndex, delay, displayedText, graphemes, instant, onComplete, shouldStart, typeSpeed]);
 
   const cursorChar = cursorStyle === 'block' ? '▌' : cursorStyle === 'underscore' ? '_' : '|';
   const shouldShowCursor = showCursor && !completed;

@@ -21,7 +21,7 @@ export async function getMentorById(mentorProfileId) {
   };
 }
 
-export async function getAllMentors({ search = '', industry = '', sortBy = 'rating', page = 0, pageSize = 12 } = {}) {
+export async function getAllMentors({ search = '', industry = '', tier = '', availableOnly = false, rateMin = '', rateMax = '', sortBy = 'rating', page = 0, pageSize = 12 } = {}) {
   const sortColumn = sortBy === 'experience' ? 'years_experience' : sortBy === 'sessions' ? 'total_sessions' : 'rating';
 
   let query = supabase
@@ -36,6 +36,18 @@ export async function getAllMentors({ search = '', industry = '', sortBy = 'rati
   }
   if (industry) {
     query = query.eq("industry", industry);
+  }
+  if (tier) {
+    query = query.eq("tier", tier);
+  }
+  if (availableOnly) {
+    query = query.eq("available", true);
+  }
+  if (rateMin !== '') {
+    query = query.gte("session_rate", Number(rateMin));
+  }
+  if (rateMax !== '') {
+    query = query.lte("session_rate", Number(rateMax));
   }
 
   query = query

@@ -338,14 +338,16 @@ export default function Landing() {
       <style>{LANDING_CSS}</style>
       <style>{LANDING_PALETTE_CSS}</style>
 
-      {/* Hero band ambient — driven by scoped landing palette tokens. */}
+      {/* Hero band ambient — driven by scoped landing palette tokens.
+          Blur lowered from 160px → 90px (perceptually identical, ~4× cheaper to paint)
+          and orbs are isolated onto their own GPU layer via translate3d(0,0,0). */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[100vh] overflow-hidden">
         <div className="absolute inset-0"
              style={{ background: 'linear-gradient(180deg, var(--lp-bg-top) 0%, var(--lp-bg-bottom) 100%)' }} />
-        <div className="absolute -top-[18%] left-[12%] h-[58%] w-[58%] rounded-full blur-[160px]"
-             style={{ background: 'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 55%, transparent) 0%, transparent 70%)', opacity: 'var(--lp-glow-opacity)' }} />
-        <div className="absolute top-[8%] right-[6%] h-[42%] w-[42%] rounded-full blur-[160px]"
-             style={{ background: 'radial-gradient(closest-side, color-mix(in srgb, var(--lp-counter) 55%, transparent) 0%, transparent 70%)', opacity: 'var(--lp-glow-opacity-soft)' }} />
+        <div className="absolute -top-[18%] left-[12%] h-[58%] w-[58%] rounded-full blur-[90px]"
+             style={{ background: 'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 55%, transparent) 0%, transparent 70%)', opacity: 'var(--lp-glow-opacity)', transform: 'translate3d(0,0,0)' }} />
+        <div className="absolute top-[8%] right-[6%] h-[42%] w-[42%] rounded-full blur-[90px]"
+             style={{ background: 'radial-gradient(closest-side, color-mix(in srgb, var(--lp-counter) 55%, transparent) 0%, transparent 70%)', opacity: 'var(--lp-glow-opacity-soft)', transform: 'translate3d(0,0,0)' }} />
       </div>
 
       <HeroSection user={user} ready={ready} />

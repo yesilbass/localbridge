@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import CustomCursor from '../../components/CustomCursor.jsx';
 import { getAllMentors } from '../../api/mentors';
 import { getMyFavorites, toggleFavorite } from '../../api/favorites';
 import { useAuth } from '../../context/useAuth';
@@ -111,13 +110,14 @@ export default function Mentors() {
     return () => document.removeEventListener('mousedown', outside);
   }, [sortOpen]);
 
-  // Fetch mentors from server
+  // Fetch mentors from server — all active filters applied server-side so pagination counts are accurate
   useEffect(() => {
     let cancelled = false;
     setLoading(true); setError(null);
     void (async () => {
       const { data, error: fetchError, totalCount: count } = await getAllMentors({
-        search: debouncedSearch, industry: activeIndustry, sortBy, page, pageSize: PAGE_SIZE,
+        search: debouncedSearch, industry: activeIndustry, tier: activeTier,
+        availableOnly, rateMin, rateMax, sortBy, page, pageSize: PAGE_SIZE,
       });
       if (cancelled) return;
       setLoading(false);
@@ -125,7 +125,7 @@ export default function Mentors() {
       setMentors(data ?? []); setTotalCount(count ?? 0);
     })();
     return () => { cancelled = true; };
-  }, [debouncedSearch, activeIndustry, sortBy, page, reloadKey]);
+  }, [debouncedSearch, activeIndustry, activeTier, availableOnly, rateMin, rateMax, sortBy, page, reloadKey]);
 
   const loadMentors = useCallback(() => { setLoading(true); setError(null); setReloadKey(k => k + 1); }, []);
 
@@ -228,14 +228,8 @@ export default function Mentors() {
     (activeIndustry ? 1 : 0) + (activeTier ? 1 : 0) + (debouncedSearch ? 1 : 0) +
     (rateMin !== '' || rateMax !== '' ? 1 : 0) + (availableOnly ? 1 : 0);
 
-  const visibleMentors = mentors.filter(m => {
-    if (asMentor && user?.id && m.user_id === user.id) return false;
-    if (activeTier && m.tier !== activeTier) return false;
-    if (rateMin !== '' && (m.session_rate == null || m.session_rate < Number(rateMin))) return false;
-    if (rateMax !== '' && (m.session_rate == null || m.session_rate > Number(rateMax))) return false;
-    if (availableOnly && !m.available) return false;
-    return true;
-  });
+  // Only exclude the mentor's own card — all other filters are applied server-side
+  const visibleMentors = mentors.filter(m => !(asMentor && user?.id && m.user_id === user.id));
 
   return (
     <main className="relative isolate min-h-screen overflow-x-hidden">
