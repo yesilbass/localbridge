@@ -87,8 +87,8 @@ html.is-landing-route:not(.theme-dark) {
   /* Hero band background */
   --lp-bg-top:    #FAFAF7;
   --lp-bg-bottom: #F1F0EA;
-  --lp-glow-opacity:      0.18;
-  --lp-glow-opacity-soft: 0.10;
+  --lp-glow-opacity:      0.28;
+  --lp-glow-opacity-soft: 0.16;
 
   /* Gradient stops (headline + card avatar). Indigo → violet → deeper indigo */
   --lp-grad-from: #4F46E5;
