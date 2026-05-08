@@ -1,19 +1,16 @@
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import { useAuth } from '../../context/useAuth';
 
 import { LANDING_CSS } from './landingStyles';
 import HeroSection from './HeroSection';
 import HowItWorksSection from './HowItWorksSection';
 import FinalCtaSection from './FinalCtaSection';
-import IntroLoader from './IntroLoader';
-import FloatingDock from './FloatingDock';
 import ScrollProgressBar from './ScrollProgressBar';
 import StatsBentoSection from './StatsBentoSection';
-import MentorMarqueeSection from './MentorMarqueeSection';
+import MentorShowcaseSection from './MentorShowcaseSection';
 import ManifestoSection from './ManifestoSection';
 import ComparisonSection from './ComparisonSection';
 import OutcomesSection from './OutcomesSection';
-import BrandStrip from './BrandStrip';
 
 /* ─────────────────────────────────────────────────────────────────────────
    LANDING_PALETTE_CSS — investor-grade palette
@@ -87,8 +84,8 @@ html.is-landing-route:not(.theme-dark) {
   /* Hero band background */
   --lp-bg-top:    #FAFAF7;
   --lp-bg-bottom: #F1F0EA;
-  --lp-glow-opacity:      0.18;
-  --lp-glow-opacity-soft: 0.10;
+  --lp-glow-opacity:      0.28;
+  --lp-glow-opacity-soft: 0.16;
 
   /* Gradient stops (headline + card avatar). Indigo → violet → deeper indigo */
   --lp-grad-from: #4F46E5;
@@ -318,30 +315,20 @@ html.is-landing-route ::selection {
 
 export default function Landing() {
   const { user } = useAuth();
-  const [ready, setReady] = useState(false);
 
   useLayoutEffect(() => {
     document.documentElement.classList.add('is-landing-route');
     return () => document.documentElement.classList.remove('is-landing-route');
   }, []);
 
-  useEffect(() => {
-    const t = setTimeout(() => setReady(true), 60);
-    return () => clearTimeout(t);
-  }, []);
-
   return (
     <div className="landing-root relative overflow-x-hidden bg-[var(--bridge-canvas)] text-[var(--bridge-text)]">
-      <IntroLoader />
       <ScrollProgressBar />
-      <FloatingDock />
       <style>{LANDING_CSS}</style>
       <style>{LANDING_PALETTE_CSS}</style>
 
-      {/* Hero band ambient — driven by scoped landing palette tokens.
-          Blur lowered from 160px → 90px (perceptually identical, ~4× cheaper to paint)
-          and orbs are isolated onto their own GPU layer via translate3d(0,0,0). */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[100vh] overflow-hidden">
+      {/* Hero band ambient — decorative atmosphere only, sits below content. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[100vh] overflow-hidden">
         <div className="absolute inset-0"
              style={{ background: 'linear-gradient(180deg, var(--lp-bg-top) 0%, var(--lp-bg-bottom) 100%)' }} />
         <div className="absolute -top-[18%] left-[12%] h-[58%] w-[58%] rounded-full blur-[90px]"
@@ -350,22 +337,13 @@ export default function Landing() {
              style={{ background: 'radial-gradient(closest-side, color-mix(in srgb, var(--lp-counter) 55%, transparent) 0%, transparent 70%)', opacity: 'var(--lp-glow-opacity-soft)', transform: 'translate3d(0,0,0)' }} />
       </div>
 
-      <HeroSection user={user} ready={ready} />
-
-      <BrandStrip />
-
-      <MentorMarqueeSection />
-
+      <HeroSection />
+      <MentorShowcaseSection />
       <StatsBentoSection />
-
       <ManifestoSection />
-
       <HowItWorksSection />
-
       <ComparisonSection />
-
       <OutcomesSection />
-
       <FinalCtaSection user={user} />
     </div>
   );

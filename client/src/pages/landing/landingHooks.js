@@ -1,5 +1,12 @@
 import { useRef, useState, useEffect } from 'react';
 
+// Motion language — one set of values for the entire landing page.
+export const EASE      = [0.16, 1, 0.3, 1];
+export const DUR_SHORT = 0.25;
+export const DUR_MED   = 0.45;
+export const DUR_LONG  = 0.7;
+export const STAGGER   = 0.06;
+
 export function useCountUp(target, duration = 1200) {
   const ref = useRef(null);
   const [val, setVal] = useState(0);

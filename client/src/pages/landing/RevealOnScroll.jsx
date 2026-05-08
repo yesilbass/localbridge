@@ -25,7 +25,7 @@ export default function RevealOnScroll({
   delay    = 0,
   className = '',
   variant  = 'up',
-  duration = 900,
+  duration = 1100,
 }) {
   const ref = useRef(null);
 
@@ -46,7 +46,7 @@ export default function RevealOnScroll({
       ease:     'power3.out',
       scrollTrigger: {
         trigger: el,
-        start:   'top 88%',
+        start:   'top 83%',
         once:    true,
         onEnter: () => revealed.add(el),
       },

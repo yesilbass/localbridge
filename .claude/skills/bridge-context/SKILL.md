@@ -25,13 +25,7 @@ two or three skills together.
 
 ## 1. Mission frame
 
-Bridge is pre-revenue and pursuing seed approval. Two consequences:
-
-- **Every change ships demo-ready.** No `// TODO`, no `console.log`, no half-states. The next investor walk-through could start now.
-- **Output is pitch material.** The diff is part of the founder's narrative. Tight, opinionated, and confident — not exploratory or apologetic.
-
-If a change cannot ship demo-ready in the same turn it is proposed, raise it
-as a follow-up rather than smuggling it into the diff.
+The mission frame, token discipline, output discipline, and change-verification contract live in `CLAUDE.md` Section 0 — already loaded into every turn. **Do not re-state them here**; this skill exists to add the project-specific facts and the companion-skill router on top.
 
 ---
 
@@ -125,102 +119,9 @@ exploration round.
 
 ---
 
-## 5. Token discipline (this is where most context is wasted)
+## 5–6. Token & output discipline
 
-These rules apply to every task. They are non-negotiable.
-
-### A · Parallel exploration is the default
-
-If you need three independent file reads, three greps, or any combination of
-non-dependent tool calls, **fire them in one turn**, not three. Sequential
-calls are only justified when output of step N feeds step N+1.
-
-Right:
-
-```
-turn 1: read A, read B, read C, grep X    ← all in parallel
-turn 2: edit A based on findings
-```
-
-Wrong:
-
-```
-turn 1: read A
-turn 2: read B  ← independent of A; should have been parallel
-turn 3: read C
-```
-
-### B · Read once, remember
-
-Once a file has been read in this conversation, do not re-read it unless you
-have edited it or have explicit reason to believe it changed. Re-reading
-costs as much as the first read.
-
-### C · Scope the read
-
-For files > 1000 lines (`MentorProfile.jsx`, `Profile.jsx`, `VideoCall.jsx`,
-`Settings.jsx`, `MentorOnboarding.jsx`):
-
-- Use `grep` first to locate the symbol or section.
-- Then `read_file` with `offset` + `limit`.
-- Avoid full-file reads on large files — they cost ~5–10× more tokens for the same answer.
-
-### D · Use `code_search` for unknown territory
-
-When the task references a symbol you cannot place from the file map,
-delegate first-pass exploration to the `code_search` subagent. It runs
-parallel grep/read in a separate context and returns line ranges. Far
-cheaper than searching in-context.
-
-### E · No speculative work
-
-Do not "fix while I'm here". Do not refactor adjacent code. Do not rename
-variables for clarity unless asked. Speculative edits double the diff,
-double the verification cost, and risk breaking unrelated paths.
-
-### F · No unnecessary intermediate files
-
-Do not create scratch markdown, helper scripts, or progress notes unless
-the user asks or the task spans multiple sessions. The workspace stays clean.
-
-### G · No re-explanation
-
-After completing a task, do not re-explain what was done in three formats
-(prose paragraph, then bullet list, then table). One terse summary, end.
-
----
-
-## 6. Output discipline
-
-### Default response shape after a code change
-
-```
-[1 short paragraph: what changed and why]
-
-[citation block(s) for the changed code]
-
-[Run this — only if user must run something. Otherwise omit.]
-
-[Followups — only if there are real risks deferred. Otherwise omit.]
-```
-
-That is the entire response. No preamble ("I'll now…"), no acknowledgement
-("Great idea!"), no recap of what they asked. Citation format is
-`@/abs/path:start-end`.
-
-### When proposing instead of executing
-
-- Lead with the recommendation, not the analysis.
-- One paragraph of reasoning, max.
-- One concrete next step the user can approve.
-
-### Never
-
-- Restate the user's request before answering.
-- Open with "Let me…" or "I'll…" — just do it.
-- Use emojis unless the user asked.
-- Add comments to code unless the user asked.
-- Add filler like "as discussed", "as you can see", "hopefully this helps".
+Authoritative copy lives in `CLAUDE.md` Section 0 (always loaded). It already covers parallel exploration, read-once, scoped reads, `code_search`, no speculation, no scratch files, response shape, and the change-verification contract. **Follow that — do not duplicate here.**
 
 ---
 

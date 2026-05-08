@@ -1,204 +1,134 @@
-import { useRef, useLayoutEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Search, UserCheck, CalendarCheck } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
-
-const revealed = new WeakSet();
+import RevealOnScroll from './RevealOnScroll';
 
 const STEPS = [
   {
     num: '01',
-    chip: '"Senior PM at a Series B"',
-    time: '10 sec',
-    Icon: Search,
-    title: 'Tell us your goal',
-    desc: 'Plain English. Our AI ranks the exact mentors most likely to move the needle for your specific situation.',
+    title: 'Tell us what you need.',
+    body:
+      'Two questions, sixty seconds. Our matching reads your goal and surfaces the right operators in real time.',
+    chip: 'Sixty seconds',
   },
   {
     num: '02',
-    chip: '98% match · $60/session',
-    time: '30 sec',
-    Icon: UserCheck,
-    title: 'Pick your mentor',
-    desc: 'Real bios, honest reviews, exact rates — visible before you commit. No surprises, ever.',
+    title: 'Pick someone who has done it.',
+    body:
+      'Real role, real company, real outcomes. Pricing, calendar, and reviews on every profile — no DMs, no waiting.',
+    chip: 'Pick a mentor',
   },
   {
     num: '03',
-    chip: 'Confirmed for tomorrow',
-    time: '13 sec',
-    Icon: CalendarCheck,
-    title: 'Book and get unstuck',
-    desc: 'Live availability. Built-in video room. No Zoom links, no scheduling back-and-forth, no friction.',
+    title: 'Talk. Walk away with momentum.',
+    body:
+      'One hour, one focused conversation. Notes, action items, and a follow-up path stay with you after the call.',
+    chip: 'Live in one click',
   },
 ];
 
 export default function HowItWorksSection() {
-  const containerRef = useRef(null);
-
-  useLayoutEffect(() => {
-    if (!containerRef.current) return;
-
-    const cards = Array.from(containerRef.current.querySelectorAll('.hiw-card'));
-    if (!cards.length) return;
-
-    gsap.set(cards, { y: 60, opacity: 0, scale: 0.96 });
-
-    const anim = gsap.to(cards, {
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      duration: 0.8,
-      stagger: 0.18,
-      ease: 'back.out(1.2)',
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top 75%',
-        once: true,
-        onEnter: () => cards.forEach(c => revealed.add(c)),
-      },
-      onComplete: () => cards.forEach(c => revealed.add(c)),
-    });
-
-    const safety = setTimeout(() => {
-      cards.forEach(c => {
-        if (!revealed.has(c)) { gsap.set(c, { clearProps: 'all' }); revealed.add(c); }
-      });
-    }, 4800);
-
-    return () => {
-      clearTimeout(safety);
-      anim.scrollTrigger?.kill();
-      anim.kill();
-    };
-  }, []);
-
   return (
     <section
       id="how"
-      ref={containerRef}
-      className="relative py-24 sm:py-32"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
+      aria-labelledby="how-heading"
+      className="relative py-24 lg:py-32"
+      style={{
+        backgroundColor: 'var(--bridge-surface-muted)',
+        borderTop: '1px solid var(--bridge-border)',
+      }}
     >
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
-        <div className="mb-16 flex flex-col items-center text-center">
+      <div className="mx-auto max-w-5xl px-5 sm:px-8">
+        <RevealOnScroll>
           <p
-            className="text-[10px] font-black uppercase tracking-[0.32em] mb-4"
-            style={{ color: 'var(--color-primary)' }}
+            className="text-[10px] font-black uppercase"
+            style={{ color: 'var(--color-primary)', letterSpacing: '0.32em' }}
           >
             How it works
           </p>
           <h2
-            className="font-display font-black leading-[0.98] tracking-[-0.035em] max-w-2xl"
-            style={{ fontSize: 'clamp(2rem, 5vw, 3.75rem)', color: 'var(--bridge-text)' }}
+            id="how-heading"
+            className="mt-3 font-display font-black"
+            style={{
+              fontSize: 'clamp(2rem, 5vw, 4rem)',
+              lineHeight: 0.98,
+              letterSpacing: '-0.035em',
+              color: 'var(--bridge-text)',
+              fontFeatureSettings: '"kern" 1, "ss01" 1',
+            }}
           >
-            Three steps. One hour. <br />
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)' }}
-            >
-              Real momentum.
-            </span>
+            Three steps.
+            <br />
+            <span style={{ color: 'var(--color-primary)' }}>Real momentum.</span>
           </h2>
           <p
-            className="mt-5 max-w-lg text-[14.5px] leading-relaxed"
-            style={{ color: 'var(--bridge-text-muted)' }}
+            className="mt-7 max-w-xl"
+            style={{ color: 'var(--bridge-text-secondary)', lineHeight: 1.6 }}
           >
-            From "I'm stuck" to "session booked" in under a minute. We've timed it.
+            From profile to booked session in under five minutes.
           </p>
-        </div>
+        </RevealOnScroll>
 
-        {/* Connecting line behind cards (desktop only) */}
-        <div className="relative">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute left-[16.66%] right-[16.66%] top-[3.5rem] hidden h-px sm:block"
-            style={{
-              background: 'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-primary) 30%, transparent) 20%, color-mix(in srgb, var(--color-primary) 30%, transparent) 80%, transparent 100%)',
-            }}
-          />
-
-          <div className="grid gap-6 sm:grid-cols-3">
-            {STEPS.map((step, i) => (
+        <div className="mt-12">
+          {STEPS.map((step, i) => (
+            <RevealOnScroll key={step.num}>
               <div
-                key={i}
-                className="hiw-card group relative rounded-2xl p-7 transition-all hover:-translate-y-1"
-                style={{
-                  backgroundColor: 'var(--bridge-surface)',
-                  boxShadow: '0 14px 32px -22px rgba(79,70,229,0.18), 0 0 0 1px var(--bridge-border) inset',
-                }}
+                className="grid grid-cols-[80px_1fr] sm:grid-cols-[140px_1fr] gap-6 sm:gap-12 py-12 sm:py-14"
+                style={i > 0 ? { borderTop: '1px solid var(--bridge-border)' } : undefined}
               >
-                {/* Step icon container */}
                 <div
-                  className="relative mb-6 flex h-14 w-14 items-center justify-center rounded-2xl"
+                  className="border-l-2 pl-4 sm:pl-6"
                   style={{
-                    backgroundImage: 'linear-gradient(135deg, var(--color-primary) 0%, var(--lp-grad-mid) 100%)',
-                    color: '#FFFFFF',
-                    boxShadow: '0 12px 28px -10px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                    borderColor:
+                      'color-mix(in srgb, var(--color-primary) 20%, transparent)',
                   }}
                 >
-                  <step.Icon className="h-6 w-6" strokeWidth={2} />
-                  {/* tiny step badge in corner */}
-                  <span
-                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-black"
+                  <p
+                    className="font-display font-black"
                     style={{
-                      backgroundColor: 'var(--bridge-surface)',
-                      color: 'var(--color-primary)',
-                      boxShadow: '0 0 0 1px var(--bridge-border)',
+                      fontSize: 'clamp(3.5rem, 8vw, 5.5rem)',
+                      lineHeight: 1,
+                      color:
+                        'color-mix(in srgb, var(--color-primary) 25%, transparent)',
+                      letterSpacing: '-0.04em',
+                      fontFeatureSettings: '"tnum" 1',
                     }}
                   >
-                    {i + 1}
-                  </span>
-                </div>
-
-                {/* meta row: step number · time */}
-                <div className="mb-2 flex items-baseline gap-2">
-                  <span
-                    className="font-display text-[11px] font-black"
-                    style={{ color: 'var(--color-primary)' }}
-                  >
                     {step.num}
-                  </span>
-                  <span
-                    className="text-[10px] font-bold uppercase tracking-wider"
-                    style={{ color: 'var(--bridge-text-faint)' }}
-                  >
-                    · {step.time}
-                  </span>
+                  </p>
                 </div>
-
-                <h3
-                  className="mb-2.5 text-[19px] font-bold tracking-tight"
-                  style={{ color: 'var(--bridge-text)' }}
-                >
-                  {step.title}
-                </h3>
-                <p
-                  className="text-[13.5px] leading-relaxed"
-                  style={{ color: 'var(--bridge-text-muted)' }}
-                >
-                  {step.desc}
-                </p>
-
-                {/* example chip */}
-                <div
-                  className="mt-6 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-semibold"
-                  style={{
-                    backgroundColor: 'var(--bridge-surface-muted)',
-                    color: 'var(--bridge-text-secondary)',
-                    boxShadow: '0 0 0 1px var(--bridge-border) inset',
-                  }}
-                >
-                  <span
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: 'var(--color-primary)' }}
-                  />
-                  {step.chip}
+                <div className="flex flex-col gap-3">
+                  <h3
+                    className="font-display font-black"
+                    style={{
+                      fontSize: 'clamp(1.5rem, 3vw, 2rem)',
+                      color: 'var(--bridge-text)',
+                      letterSpacing: '-0.02em',
+                      lineHeight: 1.05,
+                    }}
+                  >
+                    {step.title}
+                  </h3>
+                  <p
+                    className="max-w-xl"
+                    style={{ color: 'var(--bridge-text-secondary)', lineHeight: 1.6 }}
+                  >
+                    {step.body}
+                  </p>
+                  <div className="mt-1">
+                    <span
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold uppercase"
+                      style={{
+                        backgroundColor:
+                          'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                        color: 'var(--color-primary)',
+                        letterSpacing: '0.12em',
+                      }}
+                    >
+                      {step.chip}
+                    </span>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </RevealOnScroll>
+          ))}
         </div>
       </div>
     </section>
