@@ -121,7 +121,8 @@ export function MenteeDashboardContent({ dash, activeTab, setActiveTab, logout, 
                   : <p className="font-semibold">Your cancellation request was denied.{r.reviewer_note ? ` Reason: ${r.reviewer_note}` : ' Please reach out to your mentor to reschedule.'}</p>}
               </div>
               <button type="button" onClick={() => setCancellationBanners(b => b.filter(x => x.id !== r.id))}
-                className="ml-auto shrink-0 opacity-60 hover:opacity-100"><X className="h-4 w-4" /></button>
+                aria-label="Dismiss notification"
+                className="ml-auto shrink-0 opacity-60 hover:opacity-100"><X className="h-4 w-4" aria-hidden /></button>
             </div>
           ))}
 
@@ -376,8 +377,8 @@ function NextSessionHero({ session, mentorProfile, heroHint, setHeroHint, onJoin
           <div className="mt-4 flex items-start gap-2 rounded-xl bg-amber-400/15 px-4 py-3 ring-1 ring-amber-400/25">
             <span className="text-amber-300 mt-0.5">⚠</span>
             <p className="text-sm text-amber-100">{heroHint}</p>
-            <button type="button" onClick={() => setHeroHint(null)} className="ml-auto shrink-0 text-amber-300 transition hover:text-white">
-              <X className="h-4 w-4" />
+            <button type="button" onClick={() => setHeroHint(null)} aria-label="Dismiss" className="ml-auto shrink-0 text-amber-300 transition hover:text-white">
+              <X className="h-4 w-4" aria-hidden />
             </button>
           </div>
         )}

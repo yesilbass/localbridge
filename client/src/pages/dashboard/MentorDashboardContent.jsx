@@ -106,7 +106,8 @@ export function MentorDashboardContent({ dash, activeTab, setActiveTab, logout, 
                   : <p className="font-semibold">Your cancellation request was denied.{r.reviewer_note ? ` Reason: ${r.reviewer_note}` : ' Please contact your mentee to reschedule.'}</p>}
               </div>
               <button type="button" onClick={() => setCancellationBanners(b => b.filter(x => x.id !== r.id))}
-                className="ml-auto shrink-0 opacity-60 hover:opacity-100"><X className="h-4 w-4" /></button>
+                aria-label="Dismiss notification"
+                className="ml-auto shrink-0 opacity-60 hover:opacity-100"><X className="h-4 w-4" aria-hidden /></button>
             </div>
           ))}
 
