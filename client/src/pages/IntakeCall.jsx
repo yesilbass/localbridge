@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Mic, MicOff, CheckCircle2, Loader2, Type } from 'lucide-react'
 import supabase from '../api/supabase'
+import { callAIProxy } from '../api/ai'
 import { useAuth } from '../context/useAuth'
 
 const QUESTIONS = {
@@ -39,33 +40,25 @@ function isVoiceSupported() {
     typeof RTCPeerConnection !== 'undefined' &&
     typeof navigator !== 'undefined' &&
     typeof navigator.mediaDevices?.getUserMedia === 'function'
-  );
+  )
 }
-
-// flow states: idle | speaking | listening | processing | complete | error
 
 export default function IntakeCall() {
   const { sessionId } = useParams()
   const navigate = useNavigate()
   const { user, loading: authLoading } = useAuth()
 
-  const [pageState, setPageState] = useState('loading') // loading | ready | already_done | no_support
+  const [pageState, setPageState] = useState('loading')
   const [sessionData, setSessionData] = useState(null)
   const [mentorName, setMentorName] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [textFallback, setTextFallback] = useState(false)
 
-  // Text-fallback state
   const [textStep, setTextStep] = useState(0)
   const [textAnswers, setTextAnswers] = useState([])
   const [currentAnswer, setCurrentAnswer] = useState('')
 
-  // flow
   const [flowState, setFlowState] = useState('idle')
-  const [currentQuestion, setCurrentQuestion] = useState('')
-  const [interimText, setInterimText] = useState('')
-
-  // WebRTC
   const pcRef = useRef(null)
   const dcRef = useRef(null)
   const localStreamRef = useRef(null)
@@ -73,14 +66,12 @@ export default function IntakeCall() {
   const [isConnecting, setIsConnecting] = useState(false)
   const [transcriptItems, setTranscriptItems] = useState([])
 
-  // Detect voice support on mount
   useEffect(() => {
     if (!isVoiceSupported()) {
-      setTextFallback(true);
+      setTextFallback(true)
     }
   }, [])
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       localStreamRef.current?.getTracks().forEach(t => t.stop())
@@ -105,7 +96,6 @@ export default function IntakeCall() {
     return () => style.remove()
   }, [])
 
-  // Auth + session fetch
   useEffect(() => {
     if (authLoading) return
     if (!user) { navigate('/dashboard'); return }
@@ -135,54 +125,13 @@ export default function IntakeCall() {
     load().catch(() => navigate('/dashboard'))
   }, [authLoading, user, sessionId, navigate, pageState])
 
-  // ── Summary generation (shared by voice and text modes) ────────────
-
   async function runSummaryProcessing() {
     setFlowState('processing')
     try {
       const transcript = transcriptRef.current
       const sessionType = sessionData.session_type
 
-      const formatted = transcript
-        .map(t => `${t.role === 'assistant' ? 'Bridge' : 'Mentee'}: ${t.text}`)
-        .join('\n')
-
-      const summaryRes = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          max_tokens: 500,
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are generating a mentor briefing from an intake interview. ' +
-                'Write in third person about the mentee. Be specific and actionable. ' +
-                'Use plain text only, no markdown, no bullet symbols.',
-            },
-            {
-              role: 'user',
-              content:
-                `Session type: ${sessionType}\n\n` +
-                `Transcript:\n${formatted}\n\n` +
-                'Generate a mentor briefing in this exact format:\n\n' +
-                'MENTOR BRIEFING\n' +
-                'Session type: [session type]\n\n' +
-                'Who the mentee is: [2-3 sentences on background and situation]\n\n' +
-                'What they want from this session: [1-2 sentences on goal]\n\n' +
-                'Key challenges: [2-3 sentences on specific problems raised]\n\n' +
-                'What to focus on: [1-2 sentences of direct guidance for the mentor]',
-            },
-          ],
-        }),
-      })
-
-      const summaryData = await summaryRes.json()
-      const summary = summaryData.choices?.[0]?.message?.content?.trim() ?? ''
+      const summary = await callAIProxy('intake_summary', { sessionType, transcript })
 
       await supabase
         .from('sessions')
@@ -211,9 +160,10 @@ export default function IntakeCall() {
         },
         body: JSON.stringify({
           sessionType: sessionData.session_type,
-          sessionId: sessionId,
+          sessionId,
         }),
       })
+
       if (!res.ok) throw new Error('Failed to get realtime session token')
       const data = await res.json()
       const ephemeralKey = data.client_secret?.value
@@ -254,11 +204,11 @@ export default function IntakeCall() {
       dc.addEventListener('open', () => {
         dc.send(JSON.stringify({
           type: 'session.update',
-          session: { instructions: null }
+          session: { instructions: null },
         }))
         dc.send(JSON.stringify({
           type: 'response.create',
-          response: { modalities: ['audio', 'text'] }
+          response: { modalities: ['audio', 'text'] },
         }))
       })
 
@@ -276,6 +226,7 @@ export default function IntakeCall() {
           body: offer.sdp,
         }
       )
+
       if (!sdpRes.ok) throw new Error('WebRTC SDP exchange failed')
       const answerSdp = await sdpRes.text()
       await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp })
@@ -303,7 +254,6 @@ export default function IntakeCall() {
     ) {
       transcriptRef.current.push({ role: 'user', text: event.transcript })
       setTranscriptItems(prev => [...prev, { role: 'user', text: event.transcript }])
-      setInterimText(event.transcript)
     }
 
     if (
@@ -320,8 +270,6 @@ export default function IntakeCall() {
     document.querySelectorAll('audio[playsinline]').forEach(el => el.remove())
     await runSummaryProcessing()
   }
-
-  // ── Text fallback handlers ────────────────────────────────────────
 
   function handleTextNext() {
     if (!currentAnswer.trim()) return
@@ -347,8 +295,6 @@ export default function IntakeCall() {
     }
     await runSummaryProcessing()
   }
-
-  // ── Screens ────────────────────────────────────────────────────────
 
   if (pageState === 'loading' || (authLoading && pageState === 'loading')) {
     return (
@@ -420,8 +366,6 @@ export default function IntakeCall() {
       </div>
     )
   }
-
-  // ── Text fallback UI ──────────────────────────────────────────────
 
   const allQuestions = sessionData ? (QUESTIONS[sessionData.session_type] ?? QUESTIONS.career_advice) : []
 
@@ -508,23 +452,12 @@ export default function IntakeCall() {
             >
               {textStep < allQuestions.length - 1 ? 'Next question →' : 'Submit & generate briefing'}
             </button>
-
-            {!textFallback && (
-              <button
-                onClick={() => setTextFallback(false)}
-                className="mt-3 w-full py-2 text-xs font-medium transition"
-                style={{ color: 'var(--bridge-text-muted)' }}
-              >
-                Switch to voice mode
-              </button>
-            )}
           </div>
         </div>
       </div>
     )
   }
 
-  // Processing screen (shared by voice and text)
   if (flowState === 'processing') {
     return (
       <div className="min-h-screen flex items-center justify-center"
@@ -541,8 +474,6 @@ export default function IntakeCall() {
       </div>
     )
   }
-
-  // ── Main intake UI (voice) ─────────────────────────────────────────
 
   const questions = sessionData ? (QUESTIONS[sessionData.session_type] ?? QUESTIONS.career_advice) : []
   const totalQuestions = questions.length
@@ -582,7 +513,7 @@ export default function IntakeCall() {
     )
   }
 
-  if ((flowState === 'speaking' || flowState === 'listening') && !isConnecting) {
+  if (isLive && !isConnecting) {
     return (
       <div className="min-h-screen flex flex-col" style={{ background: 'var(--bridge-canvas)' }}>
         <div className="flex items-center justify-between px-6 py-4 border-b"
@@ -623,7 +554,7 @@ export default function IntakeCall() {
                   style={item.role === 'assistant' ? {
                     background: 'var(--bridge-surface)',
                     border: '1px solid var(--bridge-border)',
-                    color: 'var(--bridge-text)'
+                    color: 'var(--bridge-text)',
                   } : {}}
                 >
                   {item.text}
@@ -639,7 +570,8 @@ export default function IntakeCall() {
               <div
                 className="absolute rounded-full"
                 style={{
-                  width: '120px', height: '120px',
+                  width: '120px',
+                  height: '120px',
                   background: 'radial-gradient(circle, color-mix(in srgb, var(--color-accent) 15%, transparent) 0%, transparent 70%)',
                   animation: flowState === 'speaking'
                     ? 'orbPulse 1.2s ease-in-out infinite alternate'
@@ -649,7 +581,8 @@ export default function IntakeCall() {
               <div
                 className="absolute rounded-full"
                 style={{
-                  width: '90px', height: '90px',
+                  width: '90px',
+                  height: '90px',
                   background: 'radial-gradient(circle, color-mix(in srgb, var(--color-accent) 20%, transparent) 0%, transparent 70%)',
                   animation: flowState === 'speaking'
                     ? 'orbPulse 0.9s ease-in-out infinite alternate'
@@ -660,7 +593,8 @@ export default function IntakeCall() {
               <div
                 className="rounded-full"
                 style={{
-                  width: '64px', height: '64px',
+                  width: '64px',
+                  height: '64px',
                   background: flowState === 'speaking'
                     ? 'radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--color-accent) 40%, #ffffff), var(--color-primary), var(--color-primary-hover))'
                     : 'radial-gradient(circle at 35% 35%, #6ee7b7, var(--color-success), color-mix(in srgb, var(--color-success) 70%, var(--color-secondary)))',
@@ -692,7 +626,6 @@ export default function IntakeCall() {
     )
   }
 
-  // Idle card (flowState === 'idle' or 'error')
   return (
     <div className="min-h-screen" style={{ background: 'var(--bridge-canvas)' }}>
       <div className="bg-stone-950 border-b border-white/10 px-6 py-10 text-center">

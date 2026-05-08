@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { getAIResumeReview } from '../api/aiResumeReview';
 import { uploadResumeToBucket, saveResumeReview, getResumeReview, deleteResumeReview } from '../api/resumeReview';
-import { hasReachedLimit, recordUsage } from '../api/aiUsage';
+import { hasReachedLimit } from '../api/aiUsage';
 import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
 import { focusRing } from '../ui';
 
@@ -323,12 +323,7 @@ export default function ResumeReview() {
 
       setReview({ ...reviewData, experience_level: experienceLevel });
       setPageState('results');
-      try {
-        await recordUsage(user.id, 'resume_review');
-        setLimitReached(true);
-      } catch {
-        // recording failure is non-fatal — review still displays
-      }
+      setLimitReached(true);
     } catch (e) {
       setApiError(e.message || 'Something went wrong analyzing your resume.');
       setPageState('upload');
