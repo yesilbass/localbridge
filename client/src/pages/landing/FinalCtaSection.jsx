@@ -11,7 +11,8 @@ const GUARANTEES = [
 export default function FinalCtaSection({ user }) {
   return (
     <section
-      id="start"
+      id="final"
+      aria-labelledby="final-heading"
       className="relative overflow-hidden py-28 sm:py-32"
       style={{
         background:
@@ -51,6 +52,7 @@ export default function FinalCtaSection({ user }) {
           </div>
 
           <h2
+            id="final-heading"
             className="font-display font-black leading-[0.96] tracking-[-0.04em]"
             style={{ fontSize: 'clamp(2.5rem, 6vw, 4.75rem)', color: 'var(--bridge-text)' }}
           >
@@ -82,12 +84,12 @@ export default function FinalCtaSection({ user }) {
             >
               <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
               <span className="relative z-10 flex items-center gap-2">
-                Get started — free
+                Get matched
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
               </span>
             </Link>
             <Link
-              to="/about"
+              to="/#how"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-[15px] font-semibold transition-all hover:-translate-y-0.5 sm:w-auto"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
@@ -95,7 +97,7 @@ export default function FinalCtaSection({ user }) {
                 boxShadow: '0 0 0 1px var(--bridge-border) inset',
               }}
             >
-              See how it works
+              See how it works ↓
             </Link>
           </div>
         </RevealOnScroll>
