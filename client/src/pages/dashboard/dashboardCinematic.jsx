@@ -14,16 +14,16 @@ const CSS = `
 .bd-shine{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit}
 .bd-shine::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transform:translateX(-100%);animation:bDashShine 2.4s cubic-bezier(.2,.6,.2,1) infinite;mix-blend-mode:overlay}
 .bd-card-edge{position:relative;isolation:isolate}
-.bd-card-edge::before{content:'';position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(234,88,12,.0) 0%,rgba(234,88,12,.45) 35%,rgba(251,191,36,.35) 65%,rgba(234,88,12,0) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity 350ms ease;pointer-events:none;z-index:1}
+.bd-card-edge::before{content:'';position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(135deg,transparent 0%,color-mix(in srgb, var(--color-primary) 45%, transparent) 35%,color-mix(in srgb, var(--color-accent) 35%, transparent) 65%,transparent 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity 350ms ease;pointer-events:none;z-index:1}
 .bd-card-edge:hover::before{opacity:1}
 @keyframes bDashRise{from{opacity:0;transform:translate3d(0,12px,0)}to{opacity:1;transform:none}}
 .bd-rise{animation:bDashRise .55s cubic-bezier(.16,1,.3,1) both}
-@keyframes bDashGoalGlow{0%,100%{filter:drop-shadow(0 0 6px rgba(234,88,12,.45))}50%{filter:drop-shadow(0 0 14px rgba(251,191,36,.7))}}
+@keyframes bDashGoalGlow{0%,100%{filter:drop-shadow(0 0 6px color-mix(in srgb, var(--color-primary) 45%, transparent))}50%{filter:drop-shadow(0 0 14px color-mix(in srgb, var(--color-accent) 70%, transparent))}}
 .bd-goal-glow{animation:bDashGoalGlow 3.2s ease-in-out infinite}
 @keyframes bDashSpark{from{transform:scaleY(0)}to{transform:scaleY(var(--bd-h,1))}}
 .bd-spark-bar{transform-origin:bottom;animation:bDashSpark .9s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--bd-d,0ms)}
 .bd-grain{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:.06;background-image:radial-gradient(circle at 1px 1px,#fff 1px,transparent 0);background-size:3px 3px}
-@keyframes bDashPulseRing{0%{box-shadow:0 0 0 0 rgba(234,88,12,.55),0 0 0 0 rgba(251,191,36,.35)}70%{box-shadow:0 0 0 14px rgba(234,88,12,0),0 0 0 22px rgba(251,191,36,0)}100%{box-shadow:0 0 0 0 rgba(234,88,12,0),0 0 0 0 rgba(251,191,36,0)}}
+@keyframes bDashPulseRing{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--color-primary) 55%, transparent),0 0 0 0 color-mix(in srgb, var(--color-accent) 35%, transparent)}70%{box-shadow:0 0 0 14px transparent,0 0 0 22px transparent}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
 .bd-pulse-ring{animation:bDashPulseRing 2.4s cubic-bezier(.4,0,.6,1) infinite}
 @keyframes bDashNameShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .bd-name-shimmer{background-image:linear-gradient(110deg,transparent 0%,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%,transparent 100%);background-size:200% 100%;background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;animation:bDashNameShimmer 4.8s ease-in-out infinite}
@@ -113,12 +113,12 @@ export function GoalRing({ value = 0, max = 1, size = 152, label = 'Goal', sub =
       <svg width={size} height={size} className="bd-goal-glow -rotate-90">
         <defs>
           <linearGradient id="bdGoalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#f97316" />
-            <stop offset="60%" stopColor="#fbbf24" />
-            <stop offset="100%" stopColor="#fb923c" />
+            <stop offset="0%" stopColor="var(--color-primary)" />
+            <stop offset="60%" stopColor="var(--color-accent)" />
+            <stop offset="100%" stopColor="var(--color-primary-hover)" />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(234,88,12,0.10)" strokeWidth={stroke} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="color-mix(in srgb, var(--color-primary) 10%, transparent)" strokeWidth={stroke} fill="none" />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -279,11 +279,11 @@ export function AuroraBg() {
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <div
         className="bd-aurora absolute -top-1/4 -left-1/4 h-[60vmax] w-[60vmax] rounded-full opacity-[0.15]"
-        style={{ background: 'radial-gradient(circle, rgba(234,88,12,0.55) 0%, transparent 65%)', filter: 'blur(60px)' }}
+        style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 55%, transparent) 0%, transparent 65%)', filter: 'blur(60px)' }}
       />
       <div
         className="bd-aurora absolute top-1/3 -right-1/4 h-[55vmax] w-[55vmax] rounded-full opacity-[0.10]"
-        style={{ background: 'radial-gradient(circle, rgba(251,191,36,0.6) 0%, transparent 65%)', animationDelay: '-7s', filter: 'blur(70px)' }}
+        style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--color-accent) 60%, transparent) 0%, transparent 65%)', animationDelay: '-7s', filter: 'blur(70px)' }}
       />
       <div
         className="bd-aurora absolute -bottom-1/4 left-1/4 h-[40vmax] w-[40vmax] rounded-full opacity-[0.08]"

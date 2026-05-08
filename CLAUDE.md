@@ -4,6 +4,67 @@ Mentorship platform connecting job seekers with established professionals. React
 
 ---
 
+## 0. Always-on execution doctrine (read first, every turn)
+
+Bridge is pre-revenue and pursuing seed approval. Every change ships demo-ready. The diff is part of the founder's narrative — tight, opinionated, confident. No `// TODO`, no `console.log`, no half-states. If a change cannot ship demo-ready in this turn, raise it as a follow-up rather than smuggle it into the diff.
+
+### 0.1 Token discipline (non-negotiable)
+
+- **Parallel by default.** Independent reads, greps, and tool calls fire in one turn, never sequentially. Sequential is only justified when step N's output feeds step N+1.
+- **Read once, remember.** A file read in this conversation is not re-read unless edited or known-changed.
+- **Scope the read.** For files > 1000 lines (`MentorProfile.jsx`, `Profile.jsx`, `VideoCall.jsx`, `Settings.jsx`, `MentorOnboarding.jsx`), grep first, then `read_file` with `offset` + `limit`. No full-file reads on large files.
+- **Use `code_search` for unknown territory.** Delegate first-pass exploration to the subagent — it's cheaper than searching in-context.
+- **No speculative work.** No "fix while I'm here", no adjacent refactors, no rename-for-clarity. Speculative edits double the diff and the verification cost.
+- **No scratch files.** No helper scripts, progress notes, or `.md` artifacts unless the user asks or the task spans sessions.
+- **Climb the uncertainty ladder in order:** file map → grep → `code_search` → scoped `read_file` → ask the user. Skipping to "ask the user" wastes their time; skipping to full-file reads wastes tokens.
+
+### 0.2 Output discipline
+
+**Silent execution is the default.** Do the work, ship the diff, stop. No explanation of what changed, what was wrong, what was fixed, or what to do next — unless the user explicitly asks ("explain", "walk me through", "why", "summarize", etc.).
+
+Default response shape after a code change:
+
+```
+[citation block(s) for the changed code — @/abs/path:start-end]
+[Run this — only if the user MUST run something to see the change]
+[Followups — only if a real risk was deferred and the user needs to know]
+```
+
+No prose paragraph. No "what changed and why". No recap. If the user wants context, they'll ask.
+
+Exceptions where one short line is allowed:
+
+- The edit failed or was partially applied (you must say so — silence here violates the verification contract).
+- The user asked a question, not for a code change (answer the question).
+- A blocking ambiguity stopped you from coding (one-line question, 2–4 options).
+
+That is the entire response. Never:
+
+- Restate the user's request before answering.
+- Open with "Let me…", "I'll…", "Great idea!", "You're absolutely right!".
+- Re-explain the same thing in three formats (prose + bullets + table).
+- Add comments to code unless asked.
+- Use emojis unless asked.
+- Use filler ("as discussed", "as you can see", "hopefully this helps").
+
+When **proposing** instead of executing: lead with the recommendation, one paragraph of reasoning max, one concrete next step.
+
+### 0.3 Change verification contract (fixes "I changed it but nothing changed")
+
+A change is only **claimed** if it was actually written. Specifically:
+
+1. **Every change claim cites the file by absolute path and line range** (`@/Users/.../file.ext:start-end`). No claim without a citation.
+2. **Every edit goes through `edit` / `multi_edit` / `write_to_file`** — never describe a change in prose alone and call it done.
+3. **After an edit, the response identifies exactly what shipped**: which file, which lines, which symbol. If the edit failed, say so explicitly — do not silently move on.
+4. **If the user reports "I don't see the change"**: re-read the file at the cited lines first to verify what's actually on disk, then report the truth. Never re-edit blindly.
+5. **Multi-file changes list every file touched.** No hidden edits.
+
+### 0.4 Skill composition (always-on signal)
+
+This baseline applies to every prompt. Domain skills (`bridge-ui`, `bridge-web-design`, `bridge-motion`, `bridge-data-flow`, `bridge-debugging`, `bridge-cleanup`, `bridge-ai-features`, `bridge-transitions`, `bridge-layout`, `shipping-features`) compose on top — most non-trivial tasks fire two or three together. If a UI/design/motion task is in scope, treat the relevant skill's contract as binding even if the skill description didn't auto-trigger.
+
+---
+
 ## Stack & Key Package Versions
 
 | Layer | Package | Version |
@@ -75,6 +136,7 @@ Mentorship platform connecting job seekers with established professionals. React
 | comment | text | |
 | created_at | timestamptz | |
 **RLS**: SELECT public, INSERT authenticated, DELETE own.
+**Required trigger** (TODO — set up in Supabase): an `AFTER INSERT OR UPDATE OR DELETE ON reviews` trigger must recalculate `mentor_profiles.rating` (and ideally `total_sessions`) using AVG over all reviews for that `mentor_id`. The client must NOT recalculate this — `mentor_profiles` UPDATE is RLS-restricted to the row's own user, so a mentee write would silently fail, and concurrent inserts race. Until this trigger is in place, displayed mentor ratings will not reflect new reviews.
 
 ### `favorites`
 | Column | Type | Notes |

@@ -255,7 +255,7 @@ export default function NotificationPanel() {
       {open && (
         <div
           ref={null}
-          className="animate-pop-in absolute right-0 top-11 z-50 flex w-[22rem] flex-col overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)]/97 shadow-[0_24px_64px_-16px_rgba(28,25,23,0.3),0_0_0_1px_rgba(234,88,12,0.06)] backdrop-blur-2xl dark:shadow-[0_24px_80px_-16px_rgba(0,0,0,0.7),0_0_0_1px_rgba(234,88,12,0.1)]"
+          className="animate-pop-in absolute right-0 top-11 z-50 flex w-[22rem] flex-col overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)]/97 shadow-[0_24px_64px_-16px_color-mix(in srgb, var(--color-secondary) 30%, transparent),0_0_0_1px_color-mix(in srgb, var(--color-primary) 6%, transparent)] backdrop-blur-2xl dark:shadow-[0_24px_80px_-16px_rgba(0,0,0,0.7),0_0_0_1px_color-mix(in srgb, var(--color-primary) 10%, transparent)]"
           style={{ maxHeight: '76vh' }}
           role="dialog"
           aria-label="Notifications"

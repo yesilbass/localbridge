@@ -37,7 +37,7 @@ export default function Cookies() {
         className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[40vmax] w-[80vmax] -translate-x-1/2 opacity-40 dark:opacity-60"
         style={{
           background:
-            'conic-gradient(from 150deg at 50% 50%, rgba(251,146,60,0.12), rgba(253,230,138,0.08), rgba(234,88,12,0.14), rgba(251,146,60,0.12))',
+            'conic-gradient(from 150deg at 50% 50%, color-mix(in srgb, var(--color-primary) 12%, transparent), color-mix(in srgb, var(--color-accent) 8%, transparent), color-mix(in srgb, var(--color-primary) 14%, transparent), color-mix(in srgb, var(--color-primary) 12%, transparent))',
           filter: 'blur(90px)',
         }}
       />
@@ -69,7 +69,7 @@ export default function Cookies() {
                 className="group relative overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-5 shadow-bridge-tile transition-all duration-500 hover:-translate-y-0.5 hover:shadow-bridge-card"
               >
                 <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br from-orange-400/15 to-transparent opacity-0 blur-2xl transition group-hover:opacity-100" />
-                <div className={`relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${t.hue} text-white shadow-[0_8px_22px_-4px_rgba(234,88,12,0.35)] transition group-hover:scale-[1.04]`}>
+                <div className={`relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${t.hue} text-white shadow-[0_8px_22px_-4px_color-mix(in srgb, var(--color-primary) 35%, transparent)] transition group-hover:scale-[1.04]`}>
                   <t.Icon className="h-5 w-5" />
                 </div>
                 <p className="relative mt-4 font-display text-lg font-semibold text-[var(--bridge-text)]">{t.title}</p>

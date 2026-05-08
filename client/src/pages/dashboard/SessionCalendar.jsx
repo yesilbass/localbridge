@@ -78,6 +78,10 @@ function fmtTime(iso) {
   return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
+function normalizeStatus(status) {
+  return String(status ?? '').toLowerCase();
+}
+
 // ── Compact calendar-focused session card ─────────────────────────────────────
 function CalendarSessionCard({ session, isMentor, mentorProfile, handleStatusUpdate, actionLoading, onViewIntake, onReview, reviewed, onCancel }) {
   const navigate = useNavigate();
@@ -90,12 +94,14 @@ function CalendarSessionCard({ session, isMentor, mentorProfile, handleStatusUpd
     ? (session.mentee_name || 'Mentee')
     : (mentorProfile?.name || session.mentor_name || 'Mentor');
 
-  const statusInfo = STATUS_STYLE[session.status] || { label: session.status, cls: 'bg-stone-500/12 text-stone-400 ring-1 ring-stone-400/25' };
+  const status = normalizeStatus(session.status);
+  const statusInfo = STATUS_STYLE[status] || { label: session.status, cls: 'bg-stone-500/12 text-stone-400 ring-1 ring-stone-400/25' };
   const busy       = actionLoading === session.id;
-  const canJoin    = session.video_room_url && session.status === 'accepted';
+  const isPast     = session.scheduled_date && new Date(session.scheduled_date).getTime() <= Date.now();
+  const canJoin    = session.video_room_url && status === 'accepted' && !isPast;
 
   return (
-    <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-canvas)] overflow-hidden">
+    <div className="overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-canvas)] shadow-bridge-tile transition duration-300 hover:-translate-y-0.5 hover:shadow-bridge-card">
       {/* Colored top bar */}
       <div className={`h-1 w-full ${dot.bg}`} />
 
@@ -135,7 +141,7 @@ function CalendarSessionCard({ session, isMentor, mentorProfile, handleStatusUpd
         </div>
 
         {/* Action row */}
-        {(canJoin || (isMentor && session.status === 'pending') || (!isMentor && (session.status === 'pending' || session.status === 'accepted')) || onReview || onViewIntake) && (
+        {(canJoin || (isMentor && status === 'pending') || (!isMentor && !isPast && (status === 'pending' || status === 'accepted')) || onReview || onViewIntake) && (
           <div className="flex flex-wrap gap-2 pt-0.5">
             {canJoin && (
               <button type="button"
@@ -146,7 +152,7 @@ function CalendarSessionCard({ session, isMentor, mentorProfile, handleStatusUpd
               </button>
             )}
 
-            {isMentor && session.status === 'pending' && (
+            {isMentor && status === 'pending' && !isPast && (
               <>
                 <button type="button" disabled={busy}
                   onClick={() => handleStatusUpdate(session.id, 'accepted')}
@@ -161,7 +167,7 @@ function CalendarSessionCard({ session, isMentor, mentorProfile, handleStatusUpd
               </>
             )}
 
-            {(session.status === 'pending' || session.status === 'accepted') && onCancel && (
+            {!isPast && (status === 'pending' || status === 'accepted') && onCancel && (
               <button type="button"
                 onClick={() => onCancel(session)}
                 className="rounded-lg bg-red-500/10 px-3 py-1.5 text-[11px] font-bold text-red-500 ring-1 ring-red-400/30 hover:bg-red-500/20 transition">
@@ -217,7 +223,7 @@ export default function SessionCalendar({
     if (didAutoSelect.current || sessions.length === 0) return;
     didAutoSelect.current = true;
     const upcoming = sessions
-      .filter(s => s.scheduled_date && (s.status === 'pending' || s.status === 'accepted'))
+      .filter(s => s.scheduled_date && (normalizeStatus(s.status) === 'pending' || normalizeStatus(s.status) === 'accepted'))
       .map(s => new Date(s.scheduled_date))
       .filter(d => d >= today)
       .sort((a, b) => a - b);
@@ -263,12 +269,11 @@ export default function SessionCalendar({
   const upcomingInMonth = sessions.filter(s => {
     if (!s.scheduled_date) return false;
     const d = new Date(s.scheduled_date);
-    return d.getFullYear() === year && d.getMonth() === month &&
-      (s.status === 'pending' || s.status === 'accepted') && d >= today;
+    return d.getFullYear() === year && d.getMonth() === month && (normalizeStatus(s.status) === 'pending' || normalizeStatus(s.status) === 'accepted') && d >= today;
   }).length;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]"
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card"
       style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 40px rgba(0,0,0,0.12)' }}>
 
       {/* Ambient glow blobs */}
@@ -276,7 +281,7 @@ export default function SessionCalendar({
       <div aria-hidden className="pointer-events-none absolute -bottom-12 -left-12 h-48 w-48 rounded-full bg-violet-500/6 blur-3xl" />
 
       {/* ── Calendar header ── */}
-      <div className="relative flex items-center gap-3 border-b border-[var(--bridge-border)] px-6 py-5">
+      <div className="relative flex flex-wrap items-center gap-3 border-b border-[var(--bridge-border)] px-4 py-4 sm:px-6 sm:py-5">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-rose-500 shadow-md">
           <CalendarDays className="h-4.5 w-4.5 text-white" />
         </div>
@@ -321,13 +326,13 @@ export default function SessionCalendar({
           const isToday     = sameDay(cellDate, today);
           const isSelected  = sameDay(cellDate, selectedDate);
           const daySessions = cell.current ? sessionsForDate(cellDate) : [];
-          const hasUpcoming = daySessions.some(s => s.status === 'pending' || s.status === 'accepted');
+          const hasUpcoming = daySessions.some(s => normalizeStatus(s.status) === 'pending' || normalizeStatus(s.status) === 'accepted');
           const isPast      = cellDate < today && !isToday;
 
           // Sort: pending/accepted first, then by time
           const sorted = [...daySessions].sort((a, b) => {
-            const aUp = a.status === 'pending' || a.status === 'accepted' ? 0 : 1;
-            const bUp = b.status === 'pending' || b.status === 'accepted' ? 0 : 1;
+            const aUp = normalizeStatus(a.status) === 'pending' || normalizeStatus(a.status) === 'accepted' ? 0 : 1;
+            const bUp = normalizeStatus(b.status) === 'pending' || normalizeStatus(b.status) === 'accepted' ? 0 : 1;
             if (aUp !== bUp) return aUp - bUp;
             return new Date(a.scheduled_date) - new Date(b.scheduled_date);
           });
@@ -339,7 +344,7 @@ export default function SessionCalendar({
               disabled={!cell.current}
               onClick={() => { if (cell.current) setSelectedDate(cellDate); }}
               className={[
-                'relative flex min-h-[4.5rem] sm:min-h-[6.5rem] flex-col items-center gap-1 pt-2.5 pb-1.5 px-1 transition-all duration-150',
+                'relative flex min-h-[4.25rem] flex-col items-center gap-1 px-1 pb-1.5 pt-2.5 transition-all duration-200 sm:min-h-[6.5rem]',
                 'border-b border-r border-[var(--bridge-border)] last:border-r-0',
                 '[&:nth-child(7n)]:border-r-0',
                 !cell.current ? 'cursor-default' : 'cursor-pointer',
@@ -370,7 +375,7 @@ export default function SessionCalendar({
                   <div className="flex sm:hidden justify-center gap-0.5 flex-wrap">
                     {sorted.slice(0, 3).map((s, i) => {
                       const dot = TYPE_DOT[s.session_type] || { bg: 'bg-stone-400' };
-                      const isUp = s.status === 'pending' || s.status === 'accepted';
+                      const isUp = normalizeStatus(s.status) === 'pending' || normalizeStatus(s.status) === 'accepted';
                       return (
                         <span key={i}
                           className={`h-2 w-2 rounded-full ${dot.bg} ${isUp ? '' : 'opacity-40'} ${isUp ? 'ring-1 ring-white/20' : ''}`}
@@ -386,7 +391,7 @@ export default function SessionCalendar({
                   <div className="hidden sm:flex flex-col gap-0.5 w-full">
                     {sorted.slice(0, 2).map((s, i) => {
                       const dot = TYPE_DOT[s.session_type] || { bg: 'bg-stone-400', pillText: 'text-white' };
-                      const isUp = s.status === 'pending' || s.status === 'accepted';
+                      const isUp = normalizeStatus(s.status) === 'pending' || normalizeStatus(s.status) === 'accepted';
                       const t = s.scheduled_date
                         ? new Date(s.scheduled_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
                         : TYPE_LABEL_SHORT[s.session_type] || '—';
@@ -416,7 +421,7 @@ export default function SessionCalendar({
       </div>
 
       {/* ── Legend ── */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[var(--bridge-border)] px-6 py-3">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[var(--bridge-border)] px-4 py-3 sm:px-6">
         {Object.entries(TYPE_DOT).map(([key, val]) => (
           <span key={key} className="flex items-center gap-1.5">
             <span className={`h-2 w-2 rounded-full ${val.bg}`} />
@@ -433,7 +438,7 @@ export default function SessionCalendar({
       {/* ── Selected day detail panel ── */}
       {selectedSessions.length > 0 ? (
         <div ref={panelRef}
-          className="border-t border-orange-500/20 bg-orange-500/4 px-5 py-5 space-y-3"
+          className="space-y-3 border-t border-orange-500/20 bg-orange-500/[0.04] px-4 py-5 sm:px-5"
           style={{ animation: 'calDayIn 0.22s cubic-bezier(0.2,0.8,0.2,1) both' }}>
           <style>{`@keyframes calDayIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
@@ -443,8 +448,8 @@ export default function SessionCalendar({
                 {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
               <p className="text-[11px] text-[var(--bridge-text-muted)] mt-0.5">
-                {selectedSessions.filter(s => s.status === 'accepted' || s.status === 'pending').length > 0
-                  ? `${selectedSessions.filter(s => s.status === 'accepted').length} confirmed · ${selectedSessions.filter(s => s.status === 'pending').length} pending`
+                {selectedSessions.filter(s => normalizeStatus(s.status) === 'accepted' || normalizeStatus(s.status) === 'pending').length > 0
+                  ? `${selectedSessions.filter(s => normalizeStatus(s.status) === 'accepted').length} confirmed · ${selectedSessions.filter(s => normalizeStatus(s.status) === 'pending').length} pending`
                   : `${selectedSessions.length} session${selectedSessions.length !== 1 ? 's' : ''}`}
               </p>
             </div>

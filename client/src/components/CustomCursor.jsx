@@ -18,15 +18,15 @@ import { createPortal } from 'react-dom';
 
 const STYLE_ID = 'bridge-custom-cursor-styles';
 const CSS = `
-.custom-cursor-dot{position:fixed;left:0;top:0;z-index:10001;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(234,88,12,.95);pointer-events:none;opacity:0;transition:opacity 240ms ease;will-change:transform;transform:translate3d(-100px,-100px,0);contain:layout style paint}
+.custom-cursor-dot{position:fixed;left:0;top:0;z-index:10001;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:color-mix(in srgb, var(--color-primary) 95%, transparent);pointer-events:none;opacity:0;transition:opacity 240ms ease;will-change:transform;transform:translate3d(-100px,-100px,0);contain:layout style paint}
 .custom-cursor-dot.is-ready{opacity:1}
 .custom-cursor-ring{position:fixed;left:0;top:0;z-index:10000;width:38px;height:38px;margin:-19px 0 0 -19px;pointer-events:none;opacity:0;transition:opacity 240ms ease;will-change:transform;transform:translate3d(-100px,-100px,0);overflow:visible;contain:style}
 .custom-cursor-ring.is-ready{opacity:1}
-.custom-cursor-ring-inner{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(234,88,12,.55);background:transparent;display:flex;align-items:center;justify-content:center;transform:scale(1);transition:transform 260ms cubic-bezier(.16,1,.3,1),background-color 220ms ease,border-color 220ms ease;will-change:transform}
-.custom-cursor-ring.cursor-active .custom-cursor-ring-inner{transform:scale(1.35);background:rgba(234,88,12,.35);border-color:rgba(234,88,12,.9)}
-.custom-cursor-ring.cursor-press .custom-cursor-ring-inner{transform:scale(0.85);background:rgba(234,88,12,.5);border-color:rgba(234,88,12,1)}
+.custom-cursor-ring-inner{position:absolute;inset:0;border-radius:50%;border:1.5px solid color-mix(in srgb, var(--color-primary) 55%, transparent);background:transparent;display:flex;align-items:center;justify-content:center;transform:scale(1);transition:transform 260ms cubic-bezier(.16,1,.3,1),background-color 220ms ease,border-color 220ms ease;will-change:transform}
+.custom-cursor-ring.cursor-active .custom-cursor-ring-inner{transform:scale(1.35);background:color-mix(in srgb, var(--color-primary) 35%, transparent);border-color:color-mix(in srgb, var(--color-primary) 90%, transparent)}
+.custom-cursor-ring.cursor-press .custom-cursor-ring-inner{transform:scale(0.85);background:color-mix(in srgb, var(--color-primary) 50%, transparent);border-color:var(--color-primary)}
 .custom-cursor-ring.cursor-active.cursor-press .custom-cursor-ring-inner{transform:scale(0.85)}
-.custom-cursor-label{position:fixed;left:0;top:0;z-index:10002;pointer-events:none;opacity:0;font-family:var(--font-display,sans-serif);font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#fff;white-space:nowrap;background:rgba(20,8,2,.82);backdrop-filter:blur(10px);padding:5px 11px;border-radius:99px;border:1px solid rgba(234,88,12,.5);box-shadow:0 0 12px rgba(234,88,12,.3);transition:opacity 180ms ease;transform:translate3d(-100px,-100px,0);will-change:transform}
+.custom-cursor-label{position:fixed;left:0;top:0;z-index:10002;pointer-events:none;opacity:0;font-family:var(--font-display,sans-serif);font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#fff;white-space:nowrap;background:rgba(20,8,2,.82);backdrop-filter:blur(10px);padding:5px 11px;border-radius:99px;border:1px solid color-mix(in srgb, var(--color-primary) 50%, transparent);box-shadow:0 0 12px color-mix(in srgb, var(--color-primary) 30%, transparent);transition:opacity 180ms ease;transform:translate3d(-100px,-100px,0);will-change:transform}
 .custom-cursor-label.label-visible{opacity:1}
 @media(hover:none){.custom-cursor-dot,.custom-cursor-ring{display:none}}
 body:has(.custom-cursor-ring.is-ready),body:has(.custom-cursor-ring.is-ready) *{cursor:none!important}

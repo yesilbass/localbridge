@@ -80,7 +80,7 @@ export default function OnboardingModal() {
         className="pointer-events-none absolute left-1/2 top-1/2 h-[80vmax] w-[80vmax] -translate-x-1/2 -translate-y-1/2 opacity-60 dark:opacity-80"
         style={{
           background:
-            'conic-gradient(from 140deg at 50% 50%, rgba(251,146,60,0.22), rgba(234,88,12,0.14), rgba(253,230,138,0.16), rgba(251,146,60,0.22))',
+            'conic-gradient(from 140deg at 50% 50%, color-mix(in srgb, var(--color-primary) 22%, transparent), color-mix(in srgb, var(--color-primary) 14%, transparent), color-mix(in srgb, var(--color-accent) 16%, transparent), color-mix(in srgb, var(--color-primary) 22%, transparent))',
           filter: 'blur(110px)',
         }}
       />
@@ -108,7 +108,7 @@ export default function OnboardingModal() {
         <div className="relative px-8 pb-8 pt-10 sm:px-10 sm:pb-10 sm:pt-12">
           {step === 1 && (
             <div className="flex flex-col items-center text-center">
-              <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-gradient-to-br from-orange-500 via-orange-500 to-amber-500 shadow-[0_20px_50px_-10px_rgba(234,88,12,0.6)]">
+              <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-gradient-to-br from-orange-500 via-orange-500 to-amber-500 shadow-[0_20px_50px_-10px_color-mix(in srgb, var(--color-primary) 60%, transparent)]">
                 <Sparkles className="h-9 w-9 text-white" />
                 <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[1.5rem] bg-gradient-to-br from-white/25 to-transparent" />
               </div>
@@ -121,7 +121,7 @@ export default function OnboardingModal() {
               </p>
               <button
                 onClick={() => setStep(2)}
-                className={`btn-sheen group mt-9 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_36px_-8px_rgba(234,88,12,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_rgba(234,88,12,0.7)] ${focusRing}`}
+                className={`btn-sheen group mt-9 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_36px_-8px_color-mix(in srgb, var(--color-primary) 55%, transparent)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_color-mix(in srgb, var(--color-primary) 70%, transparent)] ${focusRing}`}
               >
                 Get started
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
@@ -149,7 +149,7 @@ export default function OnboardingModal() {
                       onClick={() => setSelectedGoal(key)}
                       className={`group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border p-4 text-left transition-all duration-300 ${
                         isSelected
-                          ? 'border-transparent border-gradient-bridge animate-border-bridge bg-gradient-to-br from-orange-50/90 to-amber-50/60 shadow-[0_12px_32px_-10px_rgba(234,88,12,0.45)] dark:from-orange-500/12 dark:to-amber-500/6'
+                          ? 'border-transparent border-gradient-bridge animate-border-bridge bg-gradient-to-br from-orange-50/90 to-amber-50/60 shadow-[0_12px_32px_-10px_color-mix(in srgb, var(--color-primary) 45%, transparent)] dark:from-orange-500/12 dark:to-amber-500/6'
                           : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] hover:-translate-y-0.5 hover:border-orange-300/70 hover:shadow-bridge-tile'
                       } ${focusRing}`}
                     >
@@ -191,7 +191,7 @@ export default function OnboardingModal() {
                   disabled={!selectedGoal}
                   className={`btn-sheen group relative inline-flex flex-1 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition ${
                     selectedGoal
-                      ? `bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 text-white shadow-[0_14px_36px_-8px_rgba(234,88,12,0.55)] hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_rgba(234,88,12,0.7)] ${focusRing}`
+                      ? `bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 text-white shadow-[0_14px_36px_-8px_color-mix(in srgb, var(--color-primary) 55%, transparent)] hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_color-mix(in srgb, var(--color-primary) 70%, transparent)] ${focusRing}`
                       : 'cursor-not-allowed bg-[var(--bridge-surface-muted)] text-[var(--bridge-text-faint)]'
                   }`}
                 >
@@ -217,7 +217,7 @@ export default function OnboardingModal() {
               </p>
               <button
                 onClick={handleFinish}
-                className={`btn-sheen group mt-9 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_36px_-8px_rgba(234,88,12,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_rgba(234,88,12,0.7)] ${focusRing}`}
+                className={`btn-sheen group mt-9 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_36px_-8px_color-mix(in srgb, var(--color-primary) 55%, transparent)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_color-mix(in srgb, var(--color-primary) 70%, transparent)] ${focusRing}`}
               >
                 {isMentor ? (
                   <>

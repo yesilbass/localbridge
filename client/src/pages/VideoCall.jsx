@@ -223,7 +223,7 @@ function PreJoinScreen({ session, isMentor, user, onJoin }) {
             <button
               type="button"
               onClick={join}
-              className="mt-1 w-full rounded-xl bg-orange-500 py-3 text-sm font-bold text-white shadow-[0_4px_16px_rgba(234,88,12,0.35)] transition hover:bg-orange-400 active:scale-95"
+              className="mt-1 w-full rounded-xl bg-orange-500 py-3 text-sm font-bold text-white shadow-[0_4px_16px_color-mix(in srgb, var(--color-primary) 35%, transparent)] transition hover:bg-orange-400 active:scale-95"
             >
               Join Meeting
             </button>
@@ -717,7 +717,7 @@ export default function VideoCall() {
         const offer = await conn.createOffer();
         await conn.setLocalDescription(offer);
         send({ type: 'offer', sdp: conn.localDescription.sdp });
-        setCallStatus('connecting');
+        setCallStatus((prev) => prev === 'connected' ? prev : 'connecting');
       } catch (err) {
         console.error('negotiate error', err);
       }
@@ -856,7 +856,7 @@ export default function VideoCall() {
               const answer = await conn.createAnswer();
               await conn.setLocalDescription(answer);
               send({ type: 'answer', sdp: conn.localDescription.sdp });
-              setCallStatus('connecting');
+              setCallStatus((prev) => prev === 'connected' ? prev : 'connecting');
             } else if (type === 'answer') {
               if (conn.signalingState === 'have-local-offer') {
                 await conn.setRemoteDescription({ type: 'answer', sdp: payload.sdp });
@@ -985,7 +985,7 @@ export default function VideoCall() {
       await ch.subscribe(async (status) => {
         if (status === 'SUBSCRIBED' && !cancelled) {
           await ch.track({ uid: user.id, joined_at: Date.now() });
-          setCallStatus('waiting');
+          setCallStatus((prev) => prev === 'connected' ? prev : 'waiting');
         }
       });
     }
@@ -1379,9 +1379,9 @@ export default function VideoCall() {
           />
 
           {/* Waiting / connecting overlay */}
-          {(callStatus === 'waiting' || callStatus === 'connecting' || callStatus === 'setup') && (
+          {!remoteActive && (callStatus === 'waiting' || callStatus === 'connecting' || callStatus === 'setup') && (
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-stone-950/90 backdrop-blur-sm">
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-400 text-xl font-black text-white shadow-[0_0_40px_rgba(234,88,12,0.35)]">
+              <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-400 text-xl font-black text-white shadow-[0_0_40px_color-mix(in srgb, var(--color-primary) 35%, transparent)]">
                 {getInitials(otherName)}
                 <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-stone-950">
                   <span className="inline-flex h-2.5 w-2.5 animate-ping rounded-full bg-amber-400 opacity-75" />

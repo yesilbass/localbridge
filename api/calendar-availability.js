@@ -1,16 +1,19 @@
 import { google } from 'googleapis';
 import supabase from './_lib/supabase.js';
 import { buildAuthedClient } from './_lib/oauth.js';
+import { applyCors } from './_lib/allowedOrigins.js';
+import { verifyAuthUser } from './_lib/auth.js';
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  applyCors(req, res, 'POST, OPTIONS');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { mentor_profile_id, date } = req.body;
+  const { user, error: authError } = await verifyAuthUser(req);
+  if (!user) return res.status(401).json({ error: authError || 'Unauthorized' });
+
+  const { mentor_profile_id, date } = req.body ?? {};
 
   if (!mentor_profile_id || !date) {
     return res.status(400).json({ error: 'mentor_profile_id and date are required' });
@@ -51,6 +54,6 @@ export default async function handler(req, res) {
     return res.json({ busy });
   } catch (err) {
     console.error('Availability error:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'Could not fetch calendar availability' });
   }
 }

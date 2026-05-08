@@ -12,8 +12,7 @@ import { focusRing } from '../../ui';
 import { SESSION_TYPE_MAP, getAvatarColor, getInitials, formatSessionDate } from './dashboardUtils';
 
 export function canJoinSession(scheduledDate) {
-  if (!scheduledDate) return false;
-  return Date.now() >= new Date(scheduledDate).getTime() - 3 * 60 * 60 * 1000;
+  return Boolean(scheduledDate);
 }
 
 // Session type → left accent bar gradient
@@ -39,20 +38,55 @@ function ensureStatusStyles() {
 }
 
 // ─── StatusBadge ──────────────────────────────────────────────────────────────
+// Each status maps to a semantic palette token (--color-success/info/warning/error)
+// so the pills track whichever palette is active on the current route.
+const STATUS_CFG = {
+  pending:   { token: 'warning', label: 'Pending'   },
+  accepted:  { token: 'success', label: 'Confirmed' },
+  completed: { token: 'info',    label: 'Completed' },
+  declined:  { token: 'error',   label: 'Declined'  },
+  cancelled: { token: 'muted',   label: 'Cancelled' },
+};
+
+function statusStyle(token) {
+  if (token === 'muted') {
+    return {
+      backgroundColor: 'color-mix(in srgb, var(--color-text-muted) 10%, transparent)',
+      color:           'var(--color-text-muted)',
+      boxShadow:       'inset 0 0 0 1px color-mix(in srgb, var(--color-text-muted) 30%, transparent)',
+    };
+  }
+  const c = `var(--color-${token})`;
+  return {
+    backgroundColor: `color-mix(in srgb, ${c} 12%, transparent)`,
+    color:           c,
+    boxShadow:       `inset 0 0 0 1px color-mix(in srgb, ${c} 35%, transparent)`,
+  };
+}
+
+function statusDotStyle(token) {
+  if (token === 'muted') {
+    return { backgroundColor: 'color-mix(in srgb, var(--color-text-muted) 70%, transparent)' };
+  }
+  return { backgroundColor: `var(--color-${token})` };
+}
+
 export function StatusBadge({ status }) {
   useEffect(() => { ensureStatusStyles(); }, []);
-  const cfg = {
-    pending:   { cls: 'bg-amber-400/12 text-amber-700 ring-1 ring-amber-400/35 dark:text-amber-300 dark:bg-amber-500/15',  dot: 'bg-amber-500',  label: 'Pending'   },
-    accepted:  { cls: 'bg-emerald-400/12 text-emerald-700 ring-1 ring-emerald-400/35 dark:text-emerald-300 dark:bg-emerald-500/15', dot: 'bg-emerald-500', label: 'Confirmed' },
-    completed: { cls: 'bg-sky-400/12 text-sky-700 ring-1 ring-sky-400/35 dark:text-sky-300 dark:bg-sky-500/15', dot: 'bg-sky-500', label: 'Completed' },
-    declined:  { cls: 'bg-red-400/12 text-red-700 ring-1 ring-red-400/35 dark:text-red-300 dark:bg-red-500/15', dot: 'bg-red-500', label: 'Declined'  },
-    cancelled: { cls: 'bg-stone-400/10 text-stone-500 ring-1 ring-stone-300/40 dark:text-stone-400 dark:ring-white/10', dot: 'bg-stone-400', label: 'Cancelled' },
-  };
-  const { cls, dot, label } = cfg[status] ?? { cls: 'bg-stone-100 text-stone-600', dot: 'bg-stone-400', label: status ?? 'Unknown' };
+  const cfg = STATUS_CFG[status];
+  const token = cfg?.token ?? 'muted';
+  const label = cfg?.label ?? status ?? 'Unknown';
   const shimmer = status === 'accepted';
+  const pulse = status === 'accepted' || status === 'pending';
   return (
-    <span className={`relative inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] ${cls} ${shimmer ? 'bd-status-shine' : ''}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${dot} ${status === 'accepted' || status === 'pending' ? 'animate-pulse-soft' : ''}`} />
+    <span
+      className={`relative inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] ${shimmer ? 'bd-status-shine' : ''}`}
+      style={statusStyle(token)}
+    >
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${pulse ? 'animate-pulse-soft' : ''}`}
+        style={statusDotStyle(token)}
+      />
       {label}
     </span>
   );
@@ -84,17 +118,17 @@ export function SectionHeading({ id, children, count, action, kicker }) {
 export function StatCard({ label, value, icon: Icon, gradient = 'from-orange-500 to-amber-500', hint, trend, subValue, kinetic = true }) {
   const numeric = typeof value === 'number';
   return (
-    <div className="bd-card-edge group relative overflow-hidden rounded-2xl bg-[var(--bridge-surface)] p-5 shadow-sm ring-1 ring-[var(--bridge-border)] transition-all duration-500 hover:-translate-y-1 hover:shadow-xl hover:ring-[var(--bridge-border-strong)]">
-      <div aria-hidden className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br opacity-15 blur-2xl transition-opacity duration-500 group-hover:opacity-40 ${gradient}`} />
+    <div className="bd-card-edge group relative overflow-hidden rounded-[1.35rem] bg-[var(--bridge-surface)] p-4 shadow-bridge-tile ring-1 ring-[var(--bridge-border)] transition-all duration-500 hover:-translate-y-1 hover:shadow-bridge-float hover:ring-[var(--bridge-border-strong)] sm:p-5">
+      <div aria-hidden className={`pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gradient-to-br opacity-[0.18] blur-2xl transition-opacity duration-500 group-hover:opacity-[0.45] ${gradient}`} />
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.025]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '14px 14px', color: 'currentColor' }} />
       <div className="relative flex items-start justify-between">
-        <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-[0_8px_22px_-6px_rgba(234,88,12,0.55)] ring-1 ring-white/15 transition-transform duration-500 group-hover:scale-105 group-hover:rotate-[-3deg] ${gradient}`}>
-          <Icon className="h-5 w-5" />
+        <div className={`inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-[0_8px_22px_-6px_color-mix(in srgb, var(--color-primary) 55%, transparent)] ring-1 ring-white/15 transition-transform duration-500 group-hover:scale-105 group-hover:rotate-[-3deg] sm:h-10 sm:w-10 ${gradient}`}>
+          <Icon className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
         </div>
         {trend && <StatTrendInline {...trend} />}
       </div>
-      <div className="relative mt-4 flex items-baseline gap-1.5">
-        <p className="font-display text-[2.35rem] font-black tabular-nums leading-none tracking-[-0.02em] text-[var(--bridge-text)]">
+      <div className="relative mt-4 flex items-baseline gap-1.5 sm:mt-5">
+        <p className="font-display text-[2rem] font-black tabular-nums leading-none tracking-[-0.03em] text-[var(--bridge-text)] sm:text-[2.45rem]">
           {kinetic && numeric ? <KineticInline to={value} /> : value}
         </p>
         {subValue != null && (
@@ -173,12 +207,12 @@ export function EmptyState({ message, cta, href, icon: Icon = CalendarDays }) {
     <div className="bd-card-edge relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)]/50 px-6 py-14 text-center">
       <div aria-hidden className="pointer-events-none absolute -top-16 left-1/2 h-44 w-72 -translate-x-1/2 rounded-full bg-orange-400/22 blur-3xl dark:bg-orange-500/20" />
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '14px 14px' }} />
-      <div className="relative mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 via-orange-500 to-amber-500 text-white shadow-[0_12px_32px_-6px_rgba(234,88,12,0.55)] ring-1 ring-white/15">
+      <div className="relative mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 via-orange-500 to-amber-500 text-white shadow-[0_12px_32px_-6px_color-mix(in srgb, var(--color-primary) 55%, transparent)] ring-1 ring-white/15">
         <Icon className="h-5 w-5" />
       </div>
       <p className="relative max-w-xs text-sm font-semibold leading-relaxed text-[var(--bridge-text-secondary)]">{message}</p>
       {cta && href && (
-        <Link to={href} data-cursor={cta} className={`mt-5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-3 text-sm font-black text-white shadow-[0_8px_24px_-6px_rgba(234,88,12,0.55)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-6px_rgba(234,88,12,0.75)] ${focusRing}`}>
+        <Link to={href} data-cursor={cta} className={`mt-5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-3 text-sm font-black text-white shadow-[0_8px_24px_-6px_color-mix(in srgb, var(--color-primary) 55%, transparent)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-6px_color-mix(in srgb, var(--color-primary) 75%, transparent)] ${focusRing}`}>
           {cta}
           <ChevronRight className="h-4 w-4" />
         </Link>
@@ -270,30 +304,35 @@ export function SessionCard({
           {showMentorActions && (
             <>
               <button type="button" onClick={() => onAccept(session.id)} disabled={actionLoading === session.id}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-bold text-white transition hover:bg-emerald-400 disabled:opacity-50">
+                className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-[var(--color-on-primary)] transition hover:brightness-110 disabled:opacity-50"
+                style={{ backgroundColor: 'var(--color-success)' }}>
                 <Check className="h-3.5 w-3.5" />Accept
               </button>
               <button type="button" onClick={() => onDecline(session.id)} disabled={actionLoading === session.id}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--bridge-border)] px-4 py-2 text-xs font-bold text-[var(--bridge-text-secondary)] transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-500/10 dark:hover:text-red-300">
+                className="bd-danger-hover inline-flex items-center gap-1.5 rounded-xl border border-[var(--bridge-border)] px-4 py-2 text-xs font-bold text-[var(--bridge-text-secondary)] transition disabled:opacity-50">
                 <X className="h-3.5 w-3.5" />Decline
               </button>
             </>
           )}
           {showJoinCall && (
             <button type="button" onClick={() => navigate(`/session/${session.id}/video`)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:from-emerald-500 hover:to-emerald-400">
+              className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-[var(--color-on-primary)] shadow-sm transition hover:brightness-110"
+              style={{
+                background: 'linear-gradient(90deg, var(--color-success), color-mix(in srgb, var(--color-success) 70%, var(--color-accent)))',
+                boxShadow: '0 6px 14px -4px color-mix(in srgb, var(--color-success) 55%, transparent)',
+              }}>
               <Video className="h-3.5 w-3.5" />Join Call
             </button>
           )}
           {showMentorCancelButton && (
             <button type="button" onClick={() => onCancel(session)} disabled={actionLoading === session.id}
-              className="inline-flex items-center rounded-xl border border-[var(--bridge-border)] px-4 py-2 text-xs font-bold text-[var(--bridge-text-secondary)] transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-500/10 dark:hover:text-red-300">
+              className="bd-danger-hover inline-flex items-center rounded-xl border border-[var(--bridge-border)] px-4 py-2 text-xs font-bold text-[var(--bridge-text-secondary)] transition disabled:opacity-50">
               Cancel
             </button>
           )}
           {showCancelButton && (
             <button type="button" onClick={() => onCancel(session)} disabled={actionLoading === session.id}
-              className="inline-flex items-center rounded-xl border border-[var(--bridge-border)] px-4 py-2 text-xs font-bold text-[var(--bridge-text-secondary)] transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-500/10 dark:hover:text-red-300">
+              className="bd-danger-hover inline-flex items-center rounded-xl border border-[var(--bridge-border)] px-4 py-2 text-xs font-bold text-[var(--bridge-text-secondary)] transition disabled:opacity-50">
               Cancel
             </button>
           )}
@@ -354,10 +393,10 @@ export function MentorCard({ mentor }) {
 // ─── SearchBar ─────────────────────────────────────────────────────────────────
 export function SearchBar({ value, onChange, placeholder }) {
   return (
-    <div className="relative max-w-xs flex-1 sm:min-w-[16rem]">
+    <div className="relative w-full flex-1 sm:max-w-xs sm:min-w-[16rem]">
       <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--bridge-text-muted)] transition-colors peer-focus:text-orange-500" />
       <input type="text" placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)}
-        className="peer w-full rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-3 pl-11 pr-4 text-sm font-semibold text-[var(--bridge-text)] shadow-sm transition focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25"
+        className="peer w-full rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-3 pl-11 pr-10 text-sm font-semibold text-[var(--bridge-text)] shadow-bridge-tile transition focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25"
       />
       {value && (
         <button type="button" onClick={() => onChange('')} aria-label="Clear"
@@ -380,11 +419,11 @@ export function NoMatch() {
 }
 
 // ─── ActivityFeed ──────────────────────────────────────────────────────────────
-export function ActivityFeed({ history, role, total, showAll, onToggle }) {
+export function ActivityFeed({ history, role, total, showAll, onToggle, mentorMap = {} }) {
   return (
-    <div className="bd-card-edge relative overflow-hidden rounded-3xl bg-[var(--bridge-surface)] p-5 shadow-sm ring-1 ring-[var(--bridge-border)]">
+    <div className="bd-card-edge relative overflow-hidden rounded-3xl bg-[var(--bridge-surface)] p-5 shadow-bridge-tile ring-1 ring-[var(--bridge-border)]">
       <div aria-hidden className="pointer-events-none absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-amber-400/12 blur-3xl" />
-      <div className="relative mb-4 flex items-center justify-between">
+      <div className="relative mb-5 flex items-center justify-between">
         <p className="text-[10px] font-black uppercase tracking-[0.22em] text-orange-500">Recent activity</p>
         <span className="text-[9px] font-bold text-[var(--bridge-text-faint)]">{total} total</span>
       </div>
@@ -393,9 +432,9 @@ export function ActivityFeed({ history, role, total, showAll, onToggle }) {
           <div aria-hidden className="absolute left-[0.6rem] top-2 bottom-2 w-px bg-gradient-to-b from-orange-400/40 via-[var(--bridge-border)] to-transparent" />
           {history.map((s) => {
             const done = s.status === 'completed';
-            const name = role === 'mentor' ? s.mentee_name : s.mentor_name;
+            const name = role === 'mentor' ? s.mentee_name : (mentorMap[s.mentor_id]?.name ?? s.mentor_name);
             return (
-              <div key={s.id} className="group relative flex items-start gap-3.5 pl-1">
+              <div key={s.id} className="group relative flex items-start gap-3.5 rounded-2xl py-1 pl-1 transition hover:bg-[var(--bridge-surface-muted)]/45">
                 <div className={`relative z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 ring-[var(--bridge-canvas)] transition-all duration-300 group-hover:scale-110 ${done ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-[0_0_14px_rgba(16,185,129,0.5)]' : 'bg-stone-300 dark:bg-stone-600'}`}>
                   {done ? <CheckCircle2 className="h-3 w-3 text-white" /> : <Clock className="h-3 w-3 text-white" />}
                 </div>
@@ -403,7 +442,7 @@ export function ActivityFeed({ history, role, total, showAll, onToggle }) {
                   <p className="text-xs font-bold text-[var(--bridge-text)]">
                     {done ? 'Session completed' : `Session ${s.status}`}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-[var(--bridge-text-muted)]">with {name}</p>
+                  <p className="mt-0.5 truncate text-[11px] text-[var(--bridge-text-muted)]">with {name ?? (role === 'mentor' ? 'Mentee' : 'Mentor')}</p>
                 </div>
               </div>
             );

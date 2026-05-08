@@ -64,7 +64,7 @@ export default function Trust() {
                 className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[45vmax] w-[80vmax] -translate-x-1/2 opacity-55 dark:opacity-80"
                 style={{
                     background:
-                        'conic-gradient(from 220deg at 50% 50%, rgba(251,146,60,0.14), rgba(253,230,138,0.1), rgba(234,88,12,0.18), rgba(251,146,60,0.14))',
+                        'conic-gradient(from 220deg at 50% 50%, color-mix(in srgb, var(--color-primary) 14%, transparent), color-mix(in srgb, var(--color-accent) 10%, transparent), color-mix(in srgb, var(--color-primary) 18%, transparent), color-mix(in srgb, var(--color-primary) 14%, transparent))',
                     filter: 'blur(100px)',
                 }}
             />
@@ -89,7 +89,7 @@ export default function Trust() {
                             <div className="group relative overflow-hidden rounded-[1.5rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-tile transition-all duration-500 hover:-translate-y-1 hover:shadow-bridge-card">
                                 <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-gradient-to-br from-orange-400/15 to-transparent opacity-0 blur-3xl transition group-hover:opacity-100" />
                                 <div className="relative flex items-start gap-4">
-                                    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${p.hue} text-white shadow-[0_10px_26px_-6px_rgba(234,88,12,0.4)] transition group-hover:scale-[1.04]`}>
+                                    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${p.hue} text-white shadow-[0_10px_26px_-6px_color-mix(in srgb, var(--color-primary) 40%, transparent)] transition group-hover:scale-[1.04]`}>
                                         <p.Icon className="h-5 w-5" />
                                     </div>
                                     <div className="min-w-0 flex-1">
@@ -167,7 +167,7 @@ export default function Trust() {
                                     <select
                                         value={form.type}
                                         onChange={(e) => setForm({ ...form, type: e.target.value })}
-                                        className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner outline-none transition focus:border-orange-400 focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                                        className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner outline-none transition focus:border-orange-400 focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 18%, transparent)]"
                                     >
                                         <option>Conduct issue</option>
                                         <option>Harassment or discrimination</option>
@@ -185,7 +185,7 @@ export default function Trust() {
                                         value={form.description}
                                         onChange={(e) => setForm({ ...form, description: e.target.value })}
                                         placeholder="Describe what happened — the more detail, the faster we can help."
-                                        className="w-full resize-none rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                                        className="w-full resize-none rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 18%, transparent)]"
                                     />
                                 </div>
                                 <div>
@@ -199,7 +199,7 @@ export default function Trust() {
                                         type="email"
                                         value={form.contact}
                                         onChange={(e) => setForm({ ...form, contact: e.target.value })}
-                                        className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                                        className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 18%, transparent)]"
                                     />
                                 </div>
                                 {submitError && (

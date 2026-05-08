@@ -38,7 +38,7 @@ export default function Footer() {
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/65 to-transparent" />
 
       {/* Ambient top glow */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_140%_65%_at_50%_-25%,rgba(234,88,12,0.13),transparent_52%)]" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_140%_65%_at_50%_-25%,color-mix(in srgb, var(--color-primary) 13%, transparent),transparent_52%)]" />
 
       {/* Grain */}
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.07] mix-blend-overlay" />
@@ -71,7 +71,7 @@ export default function Footer() {
                 />
                 <button
                   type="submit"
-                  className="btn-sheen shrink-0 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_22px_-4px_rgba(234,88,12,0.5)] transition hover:shadow-[0_8px_34px_-4px_rgba(234,88,12,0.72)] hover:brightness-105"
+                  className="btn-sheen shrink-0 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_22px_-4px_color-mix(in srgb, var(--color-primary) 50%, transparent)] transition hover:shadow-[0_8px_34px_-4px_color-mix(in srgb, var(--color-primary) 72%, transparent)] hover:brightness-105"
                 >
                   Subscribe
                 </button>
@@ -88,7 +88,7 @@ export default function Footer() {
           {/* ── Brand column ── */}
           <div className="space-y-5 lg:col-span-4">
             <Link to="/" className="group inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">
-              <span className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-lg font-bold text-white shadow-[0_8px_24px_-4px_rgba(234,88,12,0.55)] transition group-hover:shadow-[0_14px_36px_-4px_rgba(234,88,12,0.8)] group-hover:brightness-110">
+              <span className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-lg font-bold text-white shadow-[0_8px_24px_-4px_color-mix(in srgb, var(--color-primary) 55%, transparent)] transition group-hover:shadow-[0_14px_36px_-4px_color-mix(in srgb, var(--color-primary) 80%, transparent)] group-hover:brightness-110">
                 <span aria-hidden className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-white/28 to-transparent opacity-55 transition group-hover:opacity-85" />
                 <span className="relative">B</span>
               </span>
@@ -143,7 +143,7 @@ export default function Footer() {
                     title={label}
                     className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-semibold transition-all duration-200 ${
                       theme === value
-                        ? 'bg-orange-500/18 text-orange-400 shadow-[inset_0_1px_0_rgba(251,146,60,0.12)]'
+                        ? 'bg-orange-500/18 text-orange-400 shadow-[inset_0_1px_0_color-mix(in srgb, var(--color-primary) 12%, transparent)]'
                         : 'text-white hover:text-orange-200'
                     }`}
                   >

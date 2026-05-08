@@ -27,7 +27,7 @@ export default function Terms() {
                         className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[40vmax] w-[80vmax] -translate-x-1/2 opacity-40 dark:opacity-60"
                         style={{
                             background:
-                                'conic-gradient(from 260deg at 50% 50%, rgba(251,146,60,0.12), rgba(253,230,138,0.08), rgba(234,88,12,0.14), rgba(251,146,60,0.12))',
+                                'conic-gradient(from 260deg at 50% 50%, color-mix(in srgb, var(--color-primary) 12%, transparent), color-mix(in srgb, var(--color-accent) 8%, transparent), color-mix(in srgb, var(--color-primary) 14%, transparent), color-mix(in srgb, var(--color-primary) 12%, transparent))',
                             filter: 'blur(90px)',
                         }}
                     />

@@ -25,20 +25,10 @@ export async function createReview({ sessionId, mentorId, rating, comment }) {
     .select()
     .single();
 
-  if (!result.error) {
-    // Recalculate and persist the average rating on the mentor profile
-    const { data: allReviews } = await supabase
-      .from('reviews')
-      .select('rating')
-      .eq('mentor_id', mentorId);
-    if (allReviews?.length) {
-      const avg = allReviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / allReviews.length;
-      await supabase
-        .from('mentor_profiles')
-        .update({ rating: Math.round(avg * 100) / 100 })
-        .eq('id', mentorId);
-    }
-  }
+  // Rating is recalculated server-side via a Supabase database trigger on the
+  // reviews table. See CLAUDE.md. Doing it client-side raced when two reviews
+  // landed simultaneously and the mentor_profiles UPDATE silently failed under
+  // RLS for any caller other than the mentor themselves.
 
   return result;
 }

@@ -1,27 +1,50 @@
 export const LANDING_CSS = `
-  @keyframes bTicker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  @keyframes bTickerRev{from{transform:translateX(-50%)}to{transform:translateX(0)}}
-  @keyframes bFloat{0%,100%{transform:translateY(0) rotate(-.4deg)}50%{transform:translateY(-13px) rotate(.4deg)}}
-  @keyframes bFloatB{0%,100%{transform:translateY(0) rotate(.3deg)}50%{transform:translateY(-8px) rotate(-.5deg)}}
-  @keyframes bBlob{0%,100%{border-radius:42% 58% 36% 64%/54% 44% 56% 46%}50%{border-radius:58% 42% 64% 36%/44% 58% 46% 54%}}
-  @keyframes bSpin{to{transform:rotate(360deg)}}
-  @keyframes bAppear{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
-  @keyframes bPulse{0%{box-shadow:0 0 0 0 rgba(234,88,12,.65)}70%{box-shadow:0 0 0 16px rgba(234,88,12,0)}100%{box-shadow:0 0 0 0 rgba(234,88,12,0)}}
-  @keyframes bScanLine{0%{transform:translateY(-100%);opacity:0}10%{opacity:1}90%{opacity:.8}100%{transform:translateY(110vh);opacity:0}}
-  @keyframes bPortal{from{transform:rotateX(72deg) rotate(0)}to{transform:rotateX(72deg) rotate(360deg)}}
-  .b-ticker{animation:bTicker 44s linear infinite}
-  .b-ticker-r{animation:bTickerRev 50s linear infinite}
+  /* ── First-paint perf: skip layout/paint of deep-below-fold sections
+       (StatsBento → FinalCta) until they scroll near. Hero / BrandStrip /
+       MentorMarquee are left alone because they're often partially visible
+       on tall screens and their layout feeds into ScrollTrigger refs. */
+  .landing-root > section:nth-of-type(n+4){
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
+  }
+
+  /* ── Hero fade-up animation (used in HeroSection) ────────── */
+  @keyframes fadeInUp{from{opacity:0;transform:translate3d(0,20px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+  .animate-fade-in-up{animation:fadeInUp 0.8s ease-out forwards}
+  .delay-300{animation-delay:300ms}
+  .delay-500{animation-delay:500ms}
+  .delay-700{animation-delay:700ms}
+  .fill-mode-forwards{animation-fill-mode:forwards}
+
+  /* ── Primary CTA button (landing-specific) ───────────────── */
+  .lp-cta:hover{background-color:var(--color-primary-hover)!important;box-shadow:0 22px 50px -12px color-mix(in srgb, var(--color-primary) 75%, transparent)!important}
+  .lp-cta:active{transform:translateY(0)!important;box-shadow:0 10px 28px -12px color-mix(in srgb, var(--color-primary) 55%, transparent)!important}
+
+  /* ── Marquee tickers (used by BrandStrip + MentorMarquee) ──
+       translate3d() forces a GPU layer so the animation runs off the
+       compositor thread instead of repainting on the main thread. */
+  @keyframes bTicker{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+  @keyframes bTickerRev{from{transform:translate3d(-50%,0,0)}to{transform:translate3d(0,0,0)}}
+  .b-ticker{animation:bTicker 44s linear infinite;will-change:transform;backface-visibility:hidden}
+  .b-ticker-r{animation:bTickerRev 50s linear infinite;will-change:transform;backface-visibility:hidden}
   .b-marq:hover .b-ticker,.b-marq:hover .b-ticker-r{animation-play-state:paused}
-  .b-float{animation:bFloat 8s ease-in-out infinite}
-  .b-float-b{animation:bFloatB 10.5s ease-in-out infinite}
-  .b-blob{animation:bBlob 20s ease-in-out infinite}
-  .b-pulse{animation:bPulse 2.2s ease-out infinite}
-  .b-scan{animation:bScanLine 10s linear infinite;animation-delay:-4s}
   .b-mask-x{-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%)}
-  [data-w]{display:block;perspective:600px}
-  @keyframes bShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-  @keyframes bPulseFlow{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}
-  .b-pulse-flow{animation:bPulseFlow 3.5s cubic-bezier(.45,.05,.55,.95) infinite}
-  .shimmer-text{background:linear-gradient(90deg,rgba(234,88,12,.5) 0%,rgba(255,255,255,.95) 25%,rgba(251,191,36,.95) 50%,rgba(255,255,255,.95) 75%,rgba(234,88,12,.5) 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:bShimmer 4.5s linear infinite}
-  @media (prefers-reduced-motion: reduce){.b-ticker,.b-ticker-r,.b-float,.b-float-b,.b-blob,.b-pulse,.b-scan,.shimmer-text{animation:none!important}}
+
+  @media (prefers-reduced-motion: reduce){
+    .b-ticker,.b-ticker-r{animation:none!important}
+  }
+
+  /* ── Universal pulse for any "live" green dot on the page ────────
+       Single source of truth — defined once, consumed everywhere. */
+  @keyframes bridgePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.45); opacity: 0.6; }
+  }
+  .bridge-pulse {
+    animation: bridgePulse 1.4s ease-in-out infinite;
+    will-change: transform, opacity;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bridge-pulse { animation: none; }
+  }
 `;

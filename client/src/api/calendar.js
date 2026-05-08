@@ -1,8 +1,16 @@
 import supabase from './supabase';
 
+async function getAuthHeaders() {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function getCalendarAuthUrl(mentorProfileId) {
+  const auth = await getAuthHeaders();
   const res = await fetch(
     `/api/google-auth?mentor_profile_id=${encodeURIComponent(mentorProfileId)}`,
+    { headers: { ...auth } },
   );
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -14,9 +22,10 @@ export async function getCalendarAuthUrl(mentorProfileId) {
 
 export async function getMentorAvailability(mentorProfileId, date) {
   try {
+    const auth = await getAuthHeaders();
     const res = await fetch('/api/calendar-availability', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...auth },
       body: JSON.stringify({ mentor_profile_id: mentorProfileId, date }),
     });
     if (!res.ok) return { busy: [], notConnected: true };
@@ -29,9 +38,10 @@ export async function getMentorAvailability(mentorProfileId, date) {
 }
 
 export async function bookCalendarEvent(payload) {
+  const auth = await getAuthHeaders();
   const res = await fetch('/api/calendar-book', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...auth },
     body: JSON.stringify(payload),
   });
   if (!res.ok) {

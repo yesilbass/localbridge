@@ -21,18 +21,33 @@ export async function getMentorById(mentorProfileId) {
   };
 }
 
-export async function getAllMentors({ search = '', industry = '', sortBy = 'rating', page = 0, pageSize = 12 } = {}) {
+export async function getAllMentors({ search = '', industry = '', tier = '', availableOnly = false, rateMin = '', rateMax = '', sortBy = 'rating', page = 0, pageSize = 12 } = {}) {
   const sortColumn = sortBy === 'experience' ? 'years_experience' : sortBy === 'sessions' ? 'total_sessions' : 'rating';
 
   let query = supabase
     .from("mentor_profiles")
-    .select("*", { count: "exact" });
+    .select("*", { count: "exact" })
+    // Seeded/demo mentors have onboarding_complete = NULL — keep them visible.
+    // Hide only mentors who started real onboarding but didn't finish (false).
+    .or('onboarding_complete.is.null,onboarding_complete.eq.true');
 
   if (search) {
     query = query.or(`name.ilike.%${search}%,title.ilike.%${search}%,company.ilike.%${search}%`);
   }
   if (industry) {
     query = query.eq("industry", industry);
+  }
+  if (tier) {
+    query = query.eq("tier", tier);
+  }
+  if (availableOnly) {
+    query = query.eq("available", true);
+  }
+  if (rateMin !== '') {
+    query = query.gte("session_rate", Number(rateMin));
+  }
+  if (rateMax !== '') {
+    query = query.lte("session_rate", Number(rateMax));
   }
 
   query = query

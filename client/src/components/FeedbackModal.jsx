@@ -129,7 +129,7 @@ export default function FeedbackModal({ open, onClose }) {
         className="pointer-events-none absolute left-1/2 top-1/2 h-[80vmax] w-[80vmax] -translate-x-1/2 -translate-y-1/2 opacity-50 dark:opacity-70"
         style={{
           background:
-            'conic-gradient(from 200deg at 50% 50%, rgba(251,146,60,0.2), rgba(234,88,12,0.12), rgba(253,230,138,0.14), rgba(251,146,60,0.2))',
+            'conic-gradient(from 200deg at 50% 50%, color-mix(in srgb, var(--color-primary) 20%, transparent), color-mix(in srgb, var(--color-primary) 12%, transparent), color-mix(in srgb, var(--color-accent) 14%, transparent), color-mix(in srgb, var(--color-primary) 20%, transparent))',
           filter: 'blur(110px)',
         }}
       />
@@ -162,7 +162,7 @@ export default function FeedbackModal({ open, onClose }) {
             <button
               type="button"
               onClick={handleClose}
-              className={`btn-sheen mt-9 inline-flex items-center gap-2 rounded-full bg-stone-900 px-8 py-3 text-sm font-semibold text-amber-50 shadow-[0_12px_30px_-8px_rgba(28,25,23,0.45)] transition hover:-translate-y-0.5 hover:bg-stone-800 dark:bg-gradient-to-r dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 ${focusRing}`}
+              className={`btn-sheen mt-9 inline-flex items-center gap-2 rounded-full bg-stone-900 px-8 py-3 text-sm font-semibold text-amber-50 shadow-[0_12px_30px_-8px_color-mix(in srgb, var(--color-secondary) 45%, transparent)] transition hover:-translate-y-0.5 hover:bg-stone-800 dark:bg-gradient-to-r dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 ${focusRing}`}
             >
               Done
             </button>
@@ -198,7 +198,7 @@ export default function FeedbackModal({ open, onClose }) {
                   <div
                     key={n}
                     className={`h-1 flex-1 rounded-full transition-all duration-500 ${
-                      n <= step ? 'bg-gradient-to-r from-amber-400 to-orange-400 shadow-[0_0_10px_rgba(251,146,60,0.6)]' : 'bg-white/10'
+                      n <= step ? 'bg-gradient-to-r from-amber-400 to-orange-400 shadow-[0_0_10px_color-mix(in srgb, var(--color-primary) 60%, transparent)]' : 'bg-white/10'
                     }`}
                   />
                 ))}
@@ -218,7 +218,7 @@ export default function FeedbackModal({ open, onClose }) {
                       }}
                       className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border px-4 py-3.5 text-left transition-all duration-300 ${
                         category?.key === c.key
-                          ? 'border-orange-300/70 bg-gradient-to-r from-orange-50/95 to-amber-50/60 shadow-[0_10px_30px_-8px_rgba(234,88,12,0.35)] dark:from-orange-500/10 dark:to-amber-500/5'
+                          ? 'border-orange-300/70 bg-gradient-to-r from-orange-50/95 to-amber-50/60 shadow-[0_10px_30px_-8px_color-mix(in srgb, var(--color-primary) 35%, transparent)] dark:from-orange-500/10 dark:to-amber-500/5'
                           : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] hover:-translate-y-0.5 hover:border-orange-300/70 hover:bg-orange-50/40 hover:shadow-bridge-tile dark:hover:bg-white/[0.04]'
                       } ${focusRing}`}
                     >
@@ -247,7 +247,7 @@ export default function FeedbackModal({ open, onClose }) {
                       }}
                       className={`group relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border py-6 transition-all duration-300 ${
                         sentiment?.key === s.key
-                          ? 'border-orange-300/70 bg-gradient-to-b from-orange-50/80 to-white shadow-[0_10px_30px_-8px_rgba(234,88,12,0.35)] dark:from-orange-500/10 dark:to-[var(--bridge-surface)]'
+                          ? 'border-orange-300/70 bg-gradient-to-b from-orange-50/80 to-white shadow-[0_10px_30px_-8px_color-mix(in srgb, var(--color-primary) 35%, transparent)] dark:from-orange-500/10 dark:to-[var(--bridge-surface)]'
                           : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] hover:-translate-y-1 hover:border-orange-300/70 hover:shadow-bridge-tile'
                       } ${focusRing}`}
                     >
@@ -285,7 +285,7 @@ export default function FeedbackModal({ open, onClose }) {
                       onChange={(e) => setMessage(e.target.value)}
                       rows={5}
                       placeholder="What happened? What did you expect? The more specific, the better."
-                      className="w-full resize-none rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                      className="w-full resize-none rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 18%, transparent)]"
                     />
                     <p className="mt-1.5 text-right text-[10px] font-medium text-[var(--bridge-text-faint)]">
                       {message.length} characters
@@ -304,7 +304,7 @@ export default function FeedbackModal({ open, onClose }) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_rgba(251,146,60,0.18)]"
+                      className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 18%, transparent)]"
                     />
                   </div>
                 </div>
@@ -335,7 +335,7 @@ export default function FeedbackModal({ open, onClose }) {
                     type="button"
                     onClick={submit}
                     disabled={!message.trim() || submitting}
-                    className={`btn-sheen group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_-6px_rgba(234,88,12,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-8px_rgba(234,88,12,0.7)] disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
+                    className={`btn-sheen group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_-6px_color-mix(in srgb, var(--color-primary) 55%, transparent)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-8px_color-mix(in srgb, var(--color-primary) 70%, transparent)] disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
                   >
                     {submitting ? (
                       <>

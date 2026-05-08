@@ -122,9 +122,14 @@ export default function IntakeCall() {
 
     try {
       // 1. Fetch ephemeral token from our backend
+      const { data: { session: authSession } } = await supabase.auth.getSession()
+      const token = authSession?.access_token
       const res = await fetch('/api/realtime-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           sessionType: sessionData.session_type,
           sessionId: sessionId,
@@ -488,7 +493,7 @@ export default function IntakeCall() {
                 style={{
                   width: '120px',
                   height: '120px',
-                  background: 'radial-gradient(circle, rgba(251,191,36,0.15) 0%, transparent 70%)',
+                  background: 'radial-gradient(circle, color-mix(in srgb, var(--color-accent) 15%, transparent) 0%, transparent 70%)',
                   animation: flowState === 'speaking'
                     ? 'orbPulse 1.2s ease-in-out infinite alternate'
                     : 'orbPulse 2.5s ease-in-out infinite alternate',
@@ -499,7 +504,7 @@ export default function IntakeCall() {
                 style={{
                   width: '90px',
                   height: '90px',
-                  background: 'radial-gradient(circle, rgba(251,191,36,0.2) 0%, transparent 70%)',
+                  background: 'radial-gradient(circle, color-mix(in srgb, var(--color-accent) 20%, transparent) 0%, transparent 70%)',
                   animation: flowState === 'speaking'
                     ? 'orbPulse 0.9s ease-in-out infinite alternate'
                     : 'orbPulse 2s ease-in-out infinite alternate',
@@ -513,18 +518,18 @@ export default function IntakeCall() {
                   width: '64px',
                   height: '64px',
                   background: flowState === 'speaking'
-                    ? 'radial-gradient(circle at 35% 35%, #fde68a, #f59e0b, #d97706)'
+                    ? 'radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--color-accent) 40%, #ffffff), var(--color-primary), var(--color-primary-hover))'
                     : flowState === 'listening'
-                    ? 'radial-gradient(circle at 35% 35%, #6ee7b7, #10b981, #059669)'
-                    : 'radial-gradient(circle at 35% 35%, #fde68a, #f59e0b, #d97706)',
+                    ? 'radial-gradient(circle at 35% 35%, #6ee7b7, var(--color-success), color-mix(in srgb, var(--color-success) 70%, var(--color-secondary)))'
+                    : 'radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--color-accent) 40%, #ffffff), var(--color-primary), var(--color-primary-hover))',
                   animation: flowState === 'speaking'
                     ? 'orbBreath 1s ease-in-out infinite alternate'
                     : 'orbBreath 2.5s ease-in-out infinite alternate',
                   boxShadow: flowState === 'speaking'
-                    ? '0 0 30px rgba(245,158,11,0.6), 0 0 60px rgba(245,158,11,0.3)'
+                    ? '0 0 30px color-mix(in srgb, var(--color-primary) 60%, transparent), 0 0 60px color-mix(in srgb, var(--color-primary) 30%, transparent)'
                     : flowState === 'listening'
-                    ? '0 0 30px rgba(16,185,129,0.6), 0 0 60px rgba(16,185,129,0.3)'
-                    : '0 0 20px rgba(245,158,11,0.4)',
+                    ? '0 0 30px color-mix(in srgb, var(--color-success) 60%, transparent), 0 0 60px color-mix(in srgb, var(--color-success) 30%, transparent)'
+                    : '0 0 20px color-mix(in srgb, var(--color-primary) 40%, transparent)',
                 }}
               />
             </div>
@@ -600,7 +605,7 @@ export default function IntakeCall() {
                   <div
                     key={i}
                     className="h-1.5 w-6 rounded-full transition-colors"
-                    style={{ background: i <= currentQuestionIndex ? '#f59e0b' : 'var(--bridge-border)' }}
+                    style={{ background: i <= currentQuestionIndex ? 'var(--color-primary)' : 'var(--bridge-border)' }}
                   />
                 ))}
               </div>

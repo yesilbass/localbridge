@@ -4,11 +4,14 @@ import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import ScrollProgress from './components/ScrollProgress';
 import MagneticPointer from './components/MagneticPointer';
+import PaletteDevBadge from './components/PaletteDevBadge';
+import { applyPalette } from './utils/appearance';
+import { resolvePalette } from './utils/routePalette';
 import Landing from './pages/landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Mentors from './pages/Mentors';
-import MentorProfile from './pages/MentorProfile';
+import MentorProfile from './pages/mentor-profile';
 import Dashboard from './pages/dashboard/Dashboard.jsx';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
@@ -36,6 +39,7 @@ import DevPortal from './pages/DevPortal/index.jsx';
 function AppContent() {
   const location = useLocation();
   const isVideoCall = location.pathname.includes('/video');
+  const isLanding = location.pathname === '/';
   const hideFooter =
     location.pathname.startsWith('/profile') ||
     location.pathname.startsWith('/settings') ||
@@ -47,13 +51,23 @@ function AppContent() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.pathname, location.hash]);
 
+  // 3-palette comparison build: set <html data-palette="…"> based on the
+  // current route group. Modals/portals inherit via the cascade since they
+  // render below <html>. See utils/routePalette.js for the mapping.
+  useEffect(() => {
+    applyPalette(resolvePalette(location.pathname));
+  }, [location.pathname]);
+
   return (
     <div className="relative isolate min-h-screen bg-bridge-page text-stone-900 font-sans antialiased flex flex-col">
       <BridgeGlobalAtmosphere />
       {!isVideoCall && <ScrollProgress />}
       {!isVideoCall && <MagneticPointer />}
       {!isVideoCall && <Navbar />}
-      <div key={location.pathname} className="relative z-10 flex-1 flex flex-col animate-page-enter">
+      <div
+        key={location.pathname}
+        className={`relative z-10 flex flex-1 flex-col animate-page-enter ${isLanding ? '' : 'pt-[5.25rem]'}`}
+      >
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
@@ -84,6 +98,7 @@ function AppContent() {
       </div>
       {!location.pathname.includes('/video') && <FeedbackFAB />}
       {!hideFooter && <Footer />}
+      <PaletteDevBadge />
     </div>
   );
 }

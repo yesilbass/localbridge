@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, AlertTriangle, Clock, CheckCircle, ChevronDown } from 'lucide-react';
 import { requestCancellation, getMonthlyUsedCount } from '../api/cancellations.js';
+import { sendSupportEmail } from '../api/supportEmail.js';
+import { generateTicketId } from '../config/contact.js';
 
 const MONTHLY_LIMIT = 3;
 
@@ -48,6 +50,21 @@ export default function CancellationModal({ session, isMentor, onClose, onSucces
       setError(err);
       return;
     }
+
+    // Notify developer via email (fire-and-forget — don't block the user)
+    sendSupportEmail({
+      kind: 'contact',
+      ticketId: generateTicketId('CANCEL'),
+      subject: `[Bridge] Cancellation Request — ${isMentor ? 'Mentor' : 'Mentee'} cancelled session`,
+      body: `A ${isMentor ? 'mentor' : 'mentee'} has submitted a cancellation request.\n\nReason: ${reason}\nDetails: ${details || '(none)'}\nSession date: ${sessionDate}`,
+      meta: {
+        role: isMentor ? 'mentor' : 'mentee',
+        session_id: session.id,
+        reason,
+        session_date: sessionDate,
+      },
+    }).catch(() => {}); // silent — cancellation is already recorded in the database
+
     setSubmitted(true);
     setTimeout(() => { onSuccess?.(); }, 1800);
   }

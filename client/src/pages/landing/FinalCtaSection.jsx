@@ -1,109 +1,135 @@
 import { Link } from 'react-router-dom';
+import { ArrowRight, ShieldCheck, CreditCard, Unlock, Sparkles } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
-import MagneticWrapper from './MagneticWrapper';
 
-const GUARANTEE_BADGES = [
-  { icon: '💳', label: 'No credit card', sub: 'Sign up free · pay per session' },
-  { icon: '🛡️', label: 'First session guaranteed', sub: "Full refund if it isn't a fit" },
-  { icon: '🔓', label: 'Cancel any time', sub: 'No subscriptions, ever' },
+const GUARANTEES = [
+  { Icon: CreditCard,  label: 'No credit card',           sub: 'Sign up free · pay per session' },
+  { Icon: ShieldCheck, label: 'First session guaranteed', sub: "Full refund if it isn't a fit"   },
+  { Icon: Unlock,      label: 'Cancel any time',          sub: 'No subscriptions, ever'          },
 ];
 
 export default function FinalCtaSection({ user }) {
   return (
-    <section id="start" className="relative overflow-hidden py-24 sm:py-32 lg:py-40" style={{ backgroundColor: 'var(--bridge-hero-bg)' }}>
-      {/* Grid background */}
-      <div aria-hidden className="pointer-events-none absolute inset-0"
-        style={{ backgroundImage: 'linear-gradient(rgba(234,88,12,.038) 1px,transparent 1px),linear-gradient(90deg,rgba(234,88,12,.038) 1px,transparent 1px)', backgroundSize: '88px 88px' }} />
-
-      {/* Center glow blob */}
-      <div aria-hidden className="b-blob pointer-events-none absolute left-1/2 top-1/2 h-[960px] w-[960px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{ background: 'radial-gradient(circle,rgba(234,88,12,.3) 0%,rgba(234,88,12,.05) 42%,transparent 68%)' }} />
-
-      {/* Concentric portal rings */}
-      {[820, 640, 460, 300].map((size, i) => (
-        <div key={i} aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:block">
-          <div style={{
-            width: size, height: size, borderRadius: '50%',
-            border: `1px solid rgba(234,88,12,${0.16 - i * 0.025})`,
-            animation: `bPortal ${12 + i * 3}s linear infinite ${i % 2 ? 'reverse' : ''}`,
-            boxShadow: `0 0 ${30 + i * 8}px rgba(234,88,12,${0.1 - i * 0.018})`,
-          }} />
-        </div>
-      ))}
-
-      {/* Floating ember dots */}
-      {[[12, 18, 1], [78, 32, 2], [24, 72, 1.5], [88, 68, 1.2], [52, 12, 1.8], [66, 84, 1.3]].map(([x, y, d], i) => (
-        <span key={i} aria-hidden className="b-float pointer-events-none absolute hidden lg:block" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `-${d}s` }}>
-          <span className="flex h-1.5 w-1.5 rounded-full bg-orange-400 shadow-[0_0_18px_rgba(234,88,12,.85)]" />
-        </span>
-      ))}
-
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.022]" />
+    <section
+      id="final"
+      aria-labelledby="final-heading"
+      className="relative overflow-hidden py-28 sm:py-32"
+      style={{
+        background:
+          'linear-gradient(180deg, var(--bridge-canvas) 0%, color-mix(in srgb, var(--bridge-canvas) 78%, var(--color-secondary)) 100%)',
+        borderTop: '1px solid var(--bridge-border)',
+      }}
+    >
+      {/* Ambient primary glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-0 h-[820px] w-[820px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[140px]"
+        style={{
+          background: 'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, transparent 70%)',
+        }}
+      />
+      {/* Counter-tone accent */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute right-[8%] bottom-[-10%] h-[420px] w-[420px] rounded-full blur-[140px] opacity-50"
+        style={{
+          background: 'radial-gradient(closest-side, color-mix(in srgb, var(--lp-counter) 28%, transparent) 0%, transparent 70%)',
+        }}
+      />
 
       <div className="relative z-10 mx-auto max-w-3xl px-5 text-center sm:px-8">
         <RevealOnScroll>
-          {/* Badge */}
-          <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-orange-500/22 bg-orange-500/8 px-5 py-2 backdrop-blur-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-55" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-400" />
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.28em] text-orange-400/85">Ready to get unstuck?</span>
+          <div
+            className="mb-7 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.22em]"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+              color: 'var(--color-primary)',
+              boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-primary) 30%, transparent) inset',
+            }}
+          >
+            <Sparkles className="h-3 w-3" />
+            Ready to get unstuck?
           </div>
 
-          <h2 className="font-display font-black leading-[0.86] tracking-[-0.035em] text-white"
-            style={{ fontSize: 'clamp(2.2rem, min(6.5vw, 5.5rem), 5.5rem)' }}>
+          <h2
+            id="final-heading"
+            className="font-display font-black leading-[0.96] tracking-[-0.04em]"
+            style={{ fontSize: 'clamp(2.5rem, 6vw, 4.75rem)', color: 'var(--bridge-text)' }}
+          >
             One conversation<br />
-            <span className="shimmer-text" style={{ filter: 'drop-shadow(0 0 55px rgba(234,88,12,.7))' }}>
+            <span
+              className="bg-clip-text text-transparent"
+              style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)' }}
+            >
               changes everything.
             </span>
           </h2>
 
-          <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed sm:mt-7 sm:text-base" style={{ color: 'rgba(255,255,255,.42)' }}>
-            Stop spinning. Book a session with someone who's walked the exact path you're on — and made it through.
+          <p
+            className="mx-auto mt-6 max-w-xl text-[15.5px] leading-relaxed sm:text-[17px]"
+            style={{ color: 'var(--bridge-text-secondary)' }}
+          >
+            Stop spinning. Book a session with someone who&rsquo;s walked the exact path you&rsquo;re on — and made it through.
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-11 sm:gap-4">
-            <MagneticWrapper>
-              <Link
-                to={user ? '/mentors' : '/register'}
-                data-cursor="Start"
-                className="btn-sheen b-pulse inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-8 py-4 text-sm font-bold text-white shadow-[0_0_88px_rgba(234,88,12,.65)] transition hover:scale-[1.05] hover:shadow-[0_0_120px_rgba(234,88,12,.9)] active:scale-[.97] sm:gap-3 sm:px-11 sm:py-5 sm:text-base"
-              >
-                Get started for free
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </Link>
-            </MagneticWrapper>
-            <MagneticWrapper>
-              <Link
-                to="/about"
-                data-cursor="hover"
-                className="inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.04] px-6 py-4 text-sm font-semibold backdrop-blur-sm transition-all hover:border-white/[0.22] hover:bg-white/[0.08] sm:px-7 sm:py-5"
-                style={{ color: 'rgba(255,255,255,.65)' }}
-              >
-                Learn more
-                <svg className="h-3.5 w-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </Link>
-            </MagneticWrapper>
-          </div>
-
-          {/* Guarantee badges */}
-          <div className="mt-12 grid gap-2.5 sm:grid-cols-3">
-            {GUARANTEE_BADGES.map((b, i) => (
-              <div key={i} className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-4 py-3 backdrop-blur-xl text-left">
-                <span className="text-base">{b.icon}</span>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-bold text-white/80 leading-tight">{b.label}</p>
-                  <p className="text-[10px] text-white/35 leading-tight mt-0.5">{b.sub}</p>
-                </div>
-              </div>
-            ))}
+          <div className="mt-10 flex flex-col items-center justify-center gap-3.5 sm:flex-row">
+            <Link
+              to={user ? '/mentors' : '/register'}
+              className="lp-cta group relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full px-8 py-4 text-[15px] font-bold transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)] sm:w-auto"
+              style={{
+                backgroundColor: 'var(--color-primary)',
+                color: 'var(--color-on-primary)',
+                boxShadow: '0 22px 50px -12px color-mix(in srgb, var(--color-primary) 60%, transparent)',
+              }}
+            >
+              <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
+              <span className="relative z-10 flex items-center gap-2">
+                Get matched
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+              </span>
+            </Link>
+            <Link
+              to="/#how"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-[15px] font-semibold transition-all hover:-translate-y-0.5 sm:w-auto"
+              style={{
+                backgroundColor: 'var(--bridge-surface)',
+                color: 'var(--bridge-text-secondary)',
+                boxShadow: '0 0 0 1px var(--bridge-border) inset',
+              }}
+            >
+              See how it works ↓
+            </Link>
           </div>
         </RevealOnScroll>
+
+        {/* Guarantees */}
+        <div className="mt-16 grid gap-3 text-left sm:grid-cols-3">
+          {GUARANTEES.map(({ Icon, label, sub }, i) => (
+            <RevealOnScroll key={i} delay={100 + i * 130} variant="zoom">
+              <div
+                className="flex h-full items-center gap-4 rounded-2xl p-4 transition"
+                style={{
+                  backgroundColor: 'var(--bridge-surface)',
+                  boxShadow: '0 0 0 1px var(--bridge-border) inset, 0 12px 28px -22px color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                }}
+              >
+                <span
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+                    color: 'var(--color-primary)',
+                  }}
+                >
+                  <Icon className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[14px] font-bold leading-tight" style={{ color: 'var(--bridge-text)' }}>{label}</p>
+                  <p className="mt-1 text-[12px] leading-tight" style={{ color: 'var(--bridge-text-muted)' }}>{sub}</p>
+                </div>
+              </div>
+            </RevealOnScroll>
+          ))}
+        </div>
       </div>
     </section>
   );
