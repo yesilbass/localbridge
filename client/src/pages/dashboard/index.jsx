@@ -11,6 +11,7 @@ import ActivityFeed from './ActivityFeed.jsx';
 import MenteeSection from './MenteeSection.jsx';
 import MentorSection from './MentorSection.jsx';
 import SessionsPage from './SessionsPage.jsx';
+import AvailabilityPage from './AvailabilityPage.jsx';
 import SavedPage from './SavedPage.jsx';
 import EarningsPage from './EarningsPage.jsx';
 import ReviewsPage from './ReviewsPage.jsx';
@@ -87,6 +88,7 @@ function DashboardError({ onRetry }) {
 const TITLES = {
   '': 'Home',
   sessions: 'Sessions',
+  availability: 'Availability',
   saved: 'Saved',
   calendar: 'Calendar',
   earnings: 'Earnings',
@@ -157,6 +159,7 @@ export default function DashboardPage() {
         <Routes>
           <Route index element={<DashboardHome activeRole={activeRole} />} />
           <Route path="sessions" element={<SessionsPage />} />
+          {activeRole === 'mentor' && <Route path="availability" element={<AvailabilityPage />} />}
           {activeRole === 'mentee' && <Route path="saved" element={<SavedPage />} />}
           {activeRole === 'mentor' && <Route path="calendar" element={<Navigate to="/dashboard/sessions" replace />} />}
           {activeRole === 'mentor' && <Route path="earnings" element={<EarningsPage />} />}

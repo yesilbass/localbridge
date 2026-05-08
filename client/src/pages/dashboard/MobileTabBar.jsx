@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarCheck, Heart, UserRound, Settings,
-  Calendar, DollarSign,
+  Calendar, Clock, DollarSign,
 } from 'lucide-react';
 
 const MENTEE_TABS = [
@@ -14,9 +14,10 @@ const MENTEE_TABS = [
 
 const MENTOR_TABS = [
   { to: '/dashboard',          label: 'Home',     icon: LayoutDashboard, end: true },
-  { to: '/dashboard/sessions', label: 'Sessions', icon: CalendarCheck },
-  { to: '/dashboard/earnings', label: 'Earnings', icon: DollarSign },
-  { to: '/dashboard/profile',  label: 'Profile',  icon: UserRound },
+  { to: '/dashboard/sessions',     label: 'Sessions',     icon: CalendarCheck },
+  { to: '/dashboard/availability', label: 'Hours',        icon: Clock },
+  { to: '/dashboard/earnings',     label: 'Earnings',     icon: DollarSign },
+  { to: '/dashboard/profile',      label: 'Profile',      icon: UserRound },
 ];
 
 export default function MobileTabBar({ activeRole }) {

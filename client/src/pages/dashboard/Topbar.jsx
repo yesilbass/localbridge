@@ -1,13 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, Bell } from 'lucide-react';
-import { useAuth } from '../../context/useAuth.js';
-
-function getInitials(name = '', email = '') {
-  const src = (name || email || '').trim();
-  if (!src) return '?';
-  return src.split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase()).join('') || src[0].toUpperCase();
-}
+import { NavLink, useNavigate } from 'react-router-dom';
+import { Search, Bell, Home, Users } from 'lucide-react';
 
 function NotificationsPopover({ onClose }) {
   return (
@@ -46,8 +39,15 @@ function NotificationsPopover({ onClose }) {
   );
 }
 
+const topNavLinkStyle = ({ isActive }) => ({
+  backgroundColor: isActive
+    ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)'
+    : 'transparent',
+  color: isActive ? 'var(--color-primary)' : 'var(--bridge-text-secondary)',
+  boxShadow: isActive ? 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 30%, transparent)' : 'none',
+});
+
 export default function Topbar({ pageTitle = 'Home' }) {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef(null);
@@ -62,12 +62,9 @@ export default function Topbar({ pageTitle = 'Home' }) {
     return () => document.removeEventListener('mousedown', onDoc);
   }, [notifOpen]);
 
-  const fullName = user?.user_metadata?.full_name || user?.email || 'Account';
-  const email = user?.email || '';
-
   return (
     <header
-      className="topbar flex h-14 items-center justify-between px-5 sm:px-6"
+      className="topbar flex h-14 items-center justify-between gap-4 px-5 sm:px-6"
       style={{
         backgroundColor: 'color-mix(in srgb, var(--bridge-surface) 92%, transparent)',
         backdropFilter: 'blur(12px)',
@@ -80,13 +77,33 @@ export default function Topbar({ pageTitle = 'Home' }) {
         zIndex: 20,
       }}
     >
-      <h1
-        id="page-heading"
-        className="font-display text-[18px] font-black tracking-[-0.02em]"
-        style={{ color: 'var(--bridge-text)' }}
-      >
-        {pageTitle}
-      </h1>
+      <div className="flex min-w-0 items-center gap-4">
+        <h1
+          id="page-heading"
+          className="font-display truncate text-[18px] font-black tracking-[-0.02em]"
+          style={{ color: 'var(--bridge-text)' }}
+        >
+          {pageTitle}
+        </h1>
+
+        <nav aria-label="Quick links" className="hidden items-center gap-1 md:flex">
+          <NavLink
+            to="/"
+            end
+            className="bridge-focus inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-colors"
+            style={topNavLinkStyle}
+          >
+            <Home className="h-3.5 w-3.5" aria-hidden /> Home
+          </NavLink>
+          <NavLink
+            to="/mentors"
+            className="bridge-focus inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-colors"
+            style={topNavLinkStyle}
+          >
+            <Users className="h-3.5 w-3.5" aria-hidden /> Mentors
+          </NavLink>
+        </nav>
+      </div>
 
       <div className="flex items-center gap-2">
         {/* Desktop search trigger */}
@@ -148,18 +165,6 @@ export default function Topbar({ pageTitle = 'Home' }) {
           {notifOpen && <NotificationsPopover onClose={() => setNotifOpen(false)} />}
         </div>
 
-        {/* Avatar (label-only; sidebar owns the menu) */}
-        <span
-          aria-label={fullName}
-          title={fullName}
-          className="ml-1 grid h-9 w-9 place-items-center rounded-full text-[12px] font-black"
-          style={{
-            backgroundImage: 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
-            color: '#fff',
-          }}
-        >
-          {getInitials(fullName, email)}
-        </span>
       </div>
     </header>
   );

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Check, X as XIcon, Clock, Video, List, CalendarDays, Star } from 'lucide-react';
+import { Calendar, Check, X as XIcon, Clock, Video, List, CalendarDays, Star, AlertTriangle } from 'lucide-react';
 import { useDashboardSessions } from './dashboardHooks.js';
 import EmptyState from './EmptyState.jsx';
 import SessionCalendar from './SessionCalendar.jsx';
 import CancellationModal from '../../components/CancellationModal.jsx';
 import ReviewModal from '../../components/ReviewModal.jsx';
-import MentorAvailabilityPanel from './MentorAvailabilityPanel.jsx';
 import { getMyReviewedSessionIds } from '../../api/reviews';
+import supabase from '../../api/supabase';
+import { normalizeAvailabilitySchedule } from '../../utils/mentorAvailability';
 
 function formatDateTime(iso) {
   if (!iso) return 'Not scheduled';
@@ -199,8 +200,8 @@ function SectionHeader({ id, label, count }) {
 
 export default function SessionsPage() {
   const {
-    isMentor, upcoming, pending, past, mentorMap, mentorProfileId, calendarConnected,
-    isLoading, actionLoading, handleStatusUpdate, error, refetch,
+    isMentor, upcoming, pending, past, mentorMap, mentorProfileId,
+    isLoading, actionLoading, handleStatusUpdate, error,
   } = useDashboardSessions();
 
   const [filter, setFilter] = useState('all');
@@ -208,6 +209,7 @@ export default function SessionsPage() {
   const [cancellingSession, setCancelling] = useState(null);
   const [reviewingSession, setReviewing] = useState(null);
   const [reviewedIds, setReviewedIds] = useState(new Set());
+  const [availabilityEmpty, setAvailabilityEmpty] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -216,6 +218,25 @@ export default function SessionsPage() {
     });
     return () => { cancelled = true; };
   }, []);
+
+  // Mentors only: detect empty weekly schedule so we can nudge them to the
+  // Availability tab. Profile is hidden from search until at least one slot exists.
+  useEffect(() => {
+    if (!isMentor || !mentorProfileId) { setAvailabilityEmpty(false); return undefined; }
+    let cancelled = false;
+    supabase
+      .from('mentor_profiles')
+      .select('availability_schedule')
+      .eq('id', mentorProfileId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return;
+        const norm = normalizeAvailabilitySchedule(data?.availability_schedule);
+        const total = Object.values(norm.weekly).reduce((s, arr) => s + arr.length, 0);
+        setAvailabilityEmpty(total === 0);
+      });
+    return () => { cancelled = true; };
+  }, [isMentor, mentorProfileId]);
 
   // Cancel handler routes through the proper cancellation request flow
   // (server-side rate-limited to 3/month per user) when a session is already
@@ -276,12 +297,27 @@ export default function SessionsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      {isMentor && (
-        <MentorAvailabilityPanel
-          mentorProfileId={mentorProfileId}
-          calendarConnected={calendarConnected}
-          onSaved={refetch}
-        />
+      {isMentor && availabilityEmpty && (
+        <Link
+          to="/dashboard/availability"
+          className="bridge-focus flex items-center gap-3 rounded-2xl px-4 py-3 transition-colors"
+          style={{
+            backgroundColor: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+            boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-warning) 35%, transparent)',
+            color: 'var(--bridge-text)',
+          }}
+        >
+          <AlertTriangle className="h-4 w-4 shrink-0" style={{ color: 'var(--color-warning)' }} aria-hidden />
+          <span className="flex-1 text-[13px]">
+            <span className="font-bold">No bookable hours set.</span>{' '}
+            <span style={{ color: 'var(--bridge-text-secondary)' }}>
+              Your profile is hidden from search until you add availability.
+            </span>
+          </span>
+          <span className="text-[12px] font-bold" style={{ color: 'var(--color-primary)' }}>
+            Set availability →
+          </span>
+        </Link>
       )}
 
       {/* Filter + view-mode controls */}
@@ -393,7 +429,7 @@ export default function SessionsPage() {
                   ? 'When mentees book you, requests will appear here.'
                   : 'Find a mentor and book your first session.'}
                 ctaLabel={isMentor ? 'Update availability' : 'Browse mentors'}
-                ctaHref={isMentor ? '/dashboard/sessions' : '/mentors'}
+                ctaHref={isMentor ? '/dashboard/availability' : '/mentors'}
               />
             </div>
           )}
