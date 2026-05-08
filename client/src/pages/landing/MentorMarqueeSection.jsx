@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { MENTORS_ROW1, MENTORS_ROW2 } from './landingData';
 import MentorCard from './MentorCard';
 import MagneticWrapper from './MagneticWrapper';
@@ -6,13 +7,37 @@ import RevealOnScroll from './RevealOnScroll';
 
 export default function MentorMarqueeSection() {
   return (
-    <section id="mentors" className="relative overflow-hidden py-24 bg-[var(--bridge-canvas)]">
+    <section
+      id="mentors"
+      className="relative overflow-hidden py-24 sm:py-28"
+      style={{ backgroundColor: 'var(--bridge-canvas)' }}
+    >
       <RevealOnScroll>
-        <div className="mb-12 px-5 text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">Our mentors</p>
-          <h2 className="mt-4 font-display text-2xl font-black tracking-tight text-[var(--bridge-text)] sm:text-3xl md:text-4xl lg:text-5xl">
-            Professionals who've been<br /><span className="text-gradient-bridge">where you want to go</span>
+        <div className="mb-14 px-5 text-center">
+          <p
+            className="text-[10px] font-black uppercase tracking-[0.32em] mb-4"
+            style={{ color: 'var(--color-primary)' }}
+          >
+            Our mentors
+          </p>
+          <h2
+            className="font-display font-black leading-[1] tracking-tight"
+            style={{ fontSize: 'clamp(1.85rem, 4.6vw, 3.5rem)', color: 'var(--bridge-text)' }}
+          >
+            Professionals who&rsquo;ve been<br />
+            <span
+              className="bg-clip-text text-transparent"
+              style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)' }}
+            >
+              where you want to go
+            </span>
           </h2>
+          <p
+            className="mx-auto mt-4 max-w-lg text-[14px] leading-relaxed"
+            style={{ color: 'var(--bridge-text-muted)' }}
+          >
+            Vetted operators, founders and builders. No coaches, no influencers — just people who&rsquo;ve done it.
+          </p>
         </div>
       </RevealOnScroll>
 
@@ -34,17 +59,20 @@ export default function MentorMarqueeSection() {
         </div>
       </div>
 
-      <div className="mt-12 flex justify-center px-5">
+      <div className="mt-14 flex justify-center px-5">
         <MagneticWrapper>
           <Link
             to="/mentors"
             data-cursor="Browse"
-            className="btn-sheen group inline-flex items-center gap-2.5 rounded-full border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-8 py-4 text-sm font-bold text-[var(--bridge-text)] shadow-bridge-card transition-all hover:border-orange-500/42 hover:shadow-bridge-glow"
+            className="group inline-flex items-center gap-2.5 rounded-full px-8 py-4 text-sm font-bold transition-all hover:-translate-y-0.5"
+            style={{
+              backgroundColor: 'var(--bridge-surface)',
+              color: 'var(--bridge-text)',
+              boxShadow: '0 0 0 1px var(--bridge-border-strong) inset, 0 12px 28px -22px color-mix(in srgb, var(--color-primary) 30%, transparent)',
+            }}
           >
             Browse all 2,400+ mentors
-            <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-              <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </MagneticWrapper>
       </div>
