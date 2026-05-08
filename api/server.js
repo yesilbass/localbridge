@@ -1,3 +1,5 @@
+import { applySecurityHeaders } from './_lib/security.js';
+
 /**
  * Catch-all for unknown /api/* paths.
  * vercel.json's wildcard rewrite "/api/(.*)" routes anything not matched
@@ -5,5 +7,6 @@
  * Do not import the local Express app — /server is local-only.
  */
 export default function handler(req, res) {
+  applySecurityHeaders(res);
   res.status(404).json({ error: 'API route not found' });
 }

@@ -1,6 +1,8 @@
 import { getStripe } from './_lib/stripeClient.js';
 import { getPublicOrigin } from './_lib/publicOrigin.js';
 import { verifyAuthUser } from './_lib/auth.js';
+import { applySecurityHeaders, jsonError, validateJsonBody } from './_lib/security.js';
+import { z } from 'zod';
 
 const PLAN_PRICES = {
   Starter: 1200,
@@ -8,22 +10,27 @@ const PLAN_PRICES = {
   Premium: 4900,
 };
 
+const CHECKOUT_SCHEMA = z.object({
+  planName: z.enum(['Starter', 'Pro', 'Premium']),
+  userEmail: z.string().email().max(320).optional().or(z.literal('')),
+});
+
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  applySecurityHeaders(res);
+  if (req.method !== 'POST') return jsonError(res, 405, 'Method not allowed');
 
   const stripe = getStripe();
   if (!stripe) {
-    return res.status(503).json({ error: 'Stripe is not configured on the server.' });
+    return jsonError(res, 503, 'Stripe is not configured on the server.');
   }
 
   const { user, error: authError } = await verifyAuthUser(req);
-  if (!user) return res.status(401).json({ error: authError || 'Unauthorized' });
+  if (!user) return jsonError(res, 401, authError || 'Unauthorized');
 
-  const { planName, userEmail } = req.body;
+  const body = validateJsonBody(req, CHECKOUT_SCHEMA);
+  if (body.error) return jsonError(res, 400, body.error);
 
-  if (!PLAN_PRICES[planName]) {
-    return res.status(400).json({ error: 'Invalid plan selected.' });
-  }
+  const { planName, userEmail } = body.data;
 
   const origin = getPublicOrigin();
 
@@ -57,6 +64,6 @@ export default async function handler(req, res) {
     res.json({ clientSecret: session.client_secret });
   } catch (error) {
     console.error('Subscription checkout error:', error);
-    res.status(500).json({ error: 'Could not create subscription checkout.' });
+    return jsonError(res, 500, 'Could not create subscription checkout.');
   }
 }
