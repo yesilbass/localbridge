@@ -1,30 +1,11 @@
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-const CHAT_URL = 'https://api.openai.com/v1/chat/completions';
+import { callAIProxy } from './ai';
 
 async function chatCompletion(systemPrompt, userMessage, maxTokens) {
-  const res = await fetch(CHAT_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      max_tokens: maxTokens,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage },
-      ],
-    }),
+  return callAIProxy('claude_chat', {
+    systemPrompt,
+    prompt: userMessage,
+    maxTokens,
   });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`OpenAI error (${res.status}): ${err}`);
-  }
-
-  const data = await res.json();
-  return data.choices[0].message.content.trim();
 }
 
 export async function generateFollowUp(sessionType, question, answer) {
@@ -44,20 +25,7 @@ export async function generateFollowUp(sessionType, question, answer) {
 }
 
 export async function generateSummary(sessionType, transcript) {
-  const systemPrompt =
-    'You are an assistant that writes concise pre-session briefings for mentors on Bridge, a mentorship platform. ' +
-    'Write in third person about the mentee. Be specific and actionable. Use plain text, no markdown.';
-
-  const formattedTranscript = transcript
-    .map(({ question, answer }) => `Q: ${question}\nA: ${answer}`)
-    .join('\n\n');
-
-  const userMessage =
-    `Session type: ${sessionType}\n\n` +
-    `Intake responses:\n${formattedTranscript}\n\n` +
-    'Write a 3–5 sentence mentor briefing covering who this mentee is, what they want, their situation, and what the mentor should focus on:';
-
-  return chatCompletion(systemPrompt, userMessage, 400);
+  return callAIProxy('intake_summary', { sessionType, transcript });
 }
 
 // Resolves when the browser has finished speaking the text.

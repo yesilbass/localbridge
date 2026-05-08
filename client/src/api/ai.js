@@ -1,43 +1,27 @@
-const OPENAI_API = 'https://api.openai.com/v1/chat/completions';
+import supabase from './supabase';
 
-function apiKey() {
-  const k = import.meta.env.VITE_OPENAI_API_KEY;
-  if (!k) throw new Error('VITE_OPENAI_API_KEY is not set.');
-  return k;
-}
+export async function callAIProxy(action, payload) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+  if (!token) throw new Error('Please sign in to use Bridge AI.');
 
-async function callOpenAI(prompt, systemPrompt) {
-  const res = await fetch(OPENAI_API, {
+  const res = await fetch('/api/ai-proxy', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey()}`,
+      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      max_tokens: 2000,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: prompt },
-      ],
-      response_format: { type: 'json_object' },
-    }),
+    body: JSON.stringify({ action, payload }),
   });
 
   if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`OpenAI API error ${res.status}: ${body}`);
+    if (res.status === 401) throw new Error('Please sign in to use Bridge AI.');
+    if (res.status === 429) throw new Error('You have reached your AI usage limit.');
+    throw new Error('Bridge AI is unavailable right now. Please try again.');
   }
 
-  const json = await res.json();
-  const raw = json.choices?.[0]?.message?.content ?? '';
-  const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
-
-  try {
-    return JSON.parse(cleaned);
-  } catch {
-    throw new Error('Could not parse AI response as JSON. Try again.');
-  }
+  const data = await res.json();
+  return data.result;
 }
 
 export async function extractResumeData(resumeText) {
@@ -67,7 +51,12 @@ export async function extractResumeData(resumeText) {
 Resume text:
 ${resumeText.slice(0, 8000)}`;
 
-  return callOpenAI(prompt, system);
+  return callAIProxy('claude_chat', {
+    systemPrompt: system,
+    prompt,
+    maxTokens: 2000,
+    json: true,
+  });
 }
 
 export async function polishMentorProfile(rawData) {
@@ -85,5 +74,10 @@ Keep all other fields exactly as provided. The bio should be warm, specific, and
 Raw data:
 ${JSON.stringify(rawData, null, 2)}`;
 
-  return callOpenAI(prompt, system);
+  return callAIProxy('claude_chat', {
+    systemPrompt: system,
+    prompt,
+    maxTokens: 2000,
+    json: true,
+  });
 }
