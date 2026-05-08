@@ -8,15 +8,34 @@ export default function PricingFaq({ headingId, items }) {
         className="bd-card-edge relative overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 shadow-bridge-card sm:p-7"
         aria-labelledby={headingId}
       >
-        <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-400/12 blur-3xl bd-aurora" />
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent opacity-60" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl bd-aurora"
+          style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 12%, transparent) 0%, transparent 70%)' }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-60"
+          style={{ background: 'linear-gradient(to right, transparent, var(--color-primary), transparent)' }}
+        />
 
         <div className="relative flex items-center gap-2">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-65" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500" />
+            <span
+              className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-65"
+              style={{ backgroundColor: 'var(--color-primary)' }}
+            />
+            <span
+              className="relative inline-flex h-2 w-2 rounded-full"
+              style={{ backgroundColor: 'var(--color-primary)' }}
+            />
           </span>
-          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-orange-500">FAQ</p>
+          <p
+            className="text-[10px] font-black uppercase tracking-[0.24em]"
+            style={{ color: 'var(--color-primary)' }}
+          >
+            FAQ
+          </p>
         </div>
 
         <h2
@@ -37,7 +56,7 @@ export default function PricingFaq({ headingId, items }) {
                 <span className="flex items-start justify-between gap-3">
                   <span className="min-w-0">{item.q}</span>
                   <span
-                    className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-muted)] transition-all duration-300 group-open:rotate-180 group-open:border-orange-300/60 group-open:bg-gradient-to-br group-open:from-orange-500/15 group-open:to-amber-500/8 group-open:text-orange-600 dark:group-open:text-orange-300"
+                    className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-muted)] transition-all duration-300 group-open:rotate-180 group-open:[border-color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] group-open:[background-color:color-mix(in_srgb,var(--color-primary)_8%,transparent)] group-open:[color:var(--color-primary)]"
                     aria-hidden
                   >
                     <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

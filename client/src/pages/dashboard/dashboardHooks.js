@@ -1,0 +1,918 @@
+/**
+ * dashboardHooks — every data hook /dashboard depends on.
+ *
+ * Hooks here own their own Supabase fetches + realtime subscriptions and
+ * return { data, isLoading, isError, refetch }. Compose them at the page level.
+ *
+ * NOTE on schema gaps: the spec references `activity_log`, `payouts`,
+ * `mentor_recommendations` and `profile_completeness` tables. None of those
+ * exist in the current Bridge schema (see CLAUDE.md). Where missing, the
+ * hooks below derive the data from existing tables (`sessions`, `reviews`,
+ * `favorites`, `mentor_profiles`, `mentee_profiles`) so /dashboard still
+ * ships demo-ready in this turn.
+ */
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import supabase from '../../api/supabase';
+import { useAuth } from '../../context/useAuth.js';
+import { isMentorAccount } from '../../utils/accountRole';
+import { getMyFavorites } from '../../api/favorites';
+import { updateSessionStatus, acceptSession } from '../../api/sessions';
+
+const SIDEBAR_KEY = 'bridge.dashboard.sidebar';
+const ROLE_TAB_KEY = 'bridge.dashboard.activeRole';
+
+// Each subscription instance needs a unique channel name. Two components calling
+// the same hook (or React 18+ Strict Mode double-mounting) would otherwise collide
+// on `supabase.channel(name)` which returns the same instance and refuses
+// `.on()` after `.subscribe()` has been called.
+let _channelSeq = 0;
+function nextChannelId(prefix, userId) {
+  _channelSeq += 1;
+  return `${prefix}:${userId}:${_channelSeq}`;
+}
+
+// ─── role ──────────────────────────────────────────────────────────────────────
+
+export function useDashboardRole() {
+  const { user, loading } = useAuth();
+  const role = !user ? null : isMentorAccount(user) ? 'mentor' : 'mentee';
+  return { role, isLoading: loading, user };
+}
+
+// ─── persistent sidebar collapse state ────────────────────────────────────────
+
+export function useSidebarCollapsed() {
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return window.localStorage.getItem(SIDEBAR_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const toggle = useCallback(() => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try { window.localStorage.setItem(SIDEBAR_KEY, next ? '1' : '0'); } catch { /* ignore */ }
+      return next;
+    });
+  }, []);
+  return { collapsed, toggle };
+}
+
+// ─── persistent role tab (when user holds both roles) ─────────────────────────
+
+export function useActiveRole(role) {
+  const [active, setActive] = useState(() => {
+    if (role !== 'both') return role;
+    try { return window.localStorage.getItem(ROLE_TAB_KEY) || 'mentee'; } catch { return 'mentee'; }
+  });
+  useEffect(() => {
+    if (role && role !== 'both') setActive(role);
+  }, [role]);
+  const set = useCallback((r) => {
+    setActive(r);
+    try { window.localStorage.setItem(ROLE_TAB_KEY, r); } catch { /* ignore */ }
+  }, []);
+  return { active, set };
+}
+
+// ─── shared internal helpers ──────────────────────────────────────────────────
+
+async function fetchMentorProfileId(userId) {
+  if (!userId) return null;
+  const { data } = await supabase
+    .from('mentor_profiles')
+    .select('id')
+    .eq('user_id', userId)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
+async function fetchUserNamesMap(userIds) {
+  const ids = [...new Set((userIds ?? []).filter(Boolean))];
+  if (!ids.length) return {};
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    if (!token) return {};
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL ?? '';
+    const r = await fetch(`${SERVER_URL}/api/user-names`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ userIds: ids }),
+    });
+    if (!r.ok) return {};
+    return await r.json();
+  } catch { return {}; }
+}
+
+function toNextSession(row, otherParty, asMentor) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    scheduledAt: row.scheduled_date,
+    status: row.status,
+    sessionType: row.session_type,
+    topic: row.message ?? null,
+    prepNotes: row.prep_notes ?? null,
+    joinUrl: row.video_room_url ? `/session/${row.id}/video` : null,
+    asMentor,
+    otherParty,
+  };
+}
+
+// ─── useNextSession ───────────────────────────────────────────────────────────
+
+export function useNextSession() {
+  const { user } = useAuth();
+  const isMentor = user ? isMentorAccount(user) : false;
+  const [state, setState] = useState({ session: null, isLoading: true, isError: false });
+  const versionRef = useRef(0);
+
+  const load = useCallback(async () => {
+    if (!user) { setState({ session: null, isLoading: false, isError: false }); return; }
+    const v = ++versionRef.current;
+    try {
+      const nowIso = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      let row = null;
+      let other = null;
+
+      if (isMentor) {
+        const mpId = await fetchMentorProfileId(user.id);
+        if (!mpId) { if (v === versionRef.current) setState({ session: null, isLoading: false, isError: false }); return; }
+        const { data } = await supabase
+          .from('sessions')
+          .select('*')
+          .eq('mentor_id', mpId)
+          .in('status', ['pending', 'accepted'])
+          .gte('scheduled_date', nowIso)
+          .order('scheduled_date', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        row = data;
+        if (row) {
+          const names = await fetchUserNamesMap([row.mentee_id]);
+          other = { id: row.mentee_id, name: names[row.mentee_id] || row.mentee_name || 'Mentee', title: 'Mentee', company: '', avatarUrl: null };
+        }
+      } else {
+        const { data } = await supabase
+          .from('sessions')
+          .select('*')
+          .eq('mentee_id', user.id)
+          .in('status', ['pending', 'accepted'])
+          .gte('scheduled_date', nowIso)
+          .order('scheduled_date', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        row = data;
+        if (row?.mentor_id) {
+          const { data: mp } = await supabase
+            .from('mentor_profiles').select('id, name, title, company, image_url')
+            .eq('id', row.mentor_id).maybeSingle();
+          other = mp ? { id: mp.id, name: mp.name, title: mp.title, company: mp.company, avatarUrl: mp.image_url } : null;
+        }
+      }
+      if (v === versionRef.current) setState({ session: toNextSession(row, other, isMentor), isLoading: false, isError: false });
+    } catch (e) {
+      console.error('useNextSession failed:', e);
+      if (v === versionRef.current) setState({ session: null, isLoading: false, isError: true });
+    }
+  }, [user, isMentor]);
+
+  useEffect(() => { load(); }, [load]);
+
+  // realtime: any change to sessions row affecting this user → re-fetch.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(nextChannelId('dashboard-next-session', user.id))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, (payload) => {
+        const row = payload.new ?? payload.old;
+        if (!row) return;
+        if (row.mentee_id === user.id) load();
+        // mentor case: filter by mentor_profile_id is async; cheap to just reload.
+        if (isMentor) load();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, isMentor, load]);
+
+  return { ...state, refetch: load };
+}
+
+// ─── useDashboardActivity (synthesized from sessions + reviews + favorites) ──
+
+const ACTIVITY_TYPES = {
+  session_booked: 'session_booked',
+  session_completed: 'session_completed',
+  review_received: 'review_received',
+  review_left: 'review_left',
+  mentor_saved: 'mentor_saved',
+  payout_processed: 'payout_processed',
+};
+
+export function useDashboardActivity({ limit = 12 } = {}) {
+  const { user } = useAuth();
+  const isMentor = user ? isMentorAccount(user) : false;
+  const [items, setItems] = useState([]);
+  const [isLoading, setLoading] = useState(true);
+  const [isError, setError] = useState(false);
+  const [shown, setShown] = useState(limit);
+
+  const load = useCallback(async () => {
+    if (!user) { setItems([]); setLoading(false); return; }
+    setLoading(true);
+    setError(false);
+    try {
+      const all = [];
+
+      const mpId = isMentor ? await fetchMentorProfileId(user.id) : null;
+
+      // Sessions for this user (as mentee) or for their mentor profile.
+      const sessionsQuery = isMentor && mpId
+        ? supabase.from('sessions').select('id, status, scheduled_date, created_at, mentor_id, mentee_id, message').eq('mentor_id', mpId).order('created_at', { ascending: false }).limit(20)
+        : supabase.from('sessions').select('id, status, scheduled_date, created_at, mentor_id, mentee_id, message').eq('mentee_id', user.id).order('created_at', { ascending: false }).limit(20);
+      const { data: sessions = [] } = await sessionsQuery;
+
+      // Look up other-party names lazily.
+      let otherNameById = {};
+      if (isMentor && sessions.length) {
+        otherNameById = await fetchUserNamesMap(sessions.map((s) => s.mentee_id));
+      } else if (!isMentor && sessions.length) {
+        const ids = [...new Set(sessions.map((s) => s.mentor_id).filter(Boolean))];
+        if (ids.length) {
+          const { data: mps = [] } = await supabase.from('mentor_profiles').select('id, name').in('id', ids);
+          otherNameById = Object.fromEntries(mps.map((m) => [m.id, m.name]));
+        }
+      }
+
+      sessions.forEach((s) => {
+        const actorName = isMentor
+          ? (otherNameById[s.mentee_id] || 'A mentee')
+          : (otherNameById[s.mentor_id] || 'Your mentor');
+        const actorId = isMentor ? s.mentee_id : s.mentor_id;
+        all.push({
+          id: `s-booked-${s.id}`,
+          type: ACTIVITY_TYPES.session_booked,
+          timestamp: s.created_at,
+          actorName, actorId, actorAvatarUrl: null,
+          payload: { sessionId: s.id },
+        });
+        if (s.status === 'completed') {
+          all.push({
+            id: `s-done-${s.id}`,
+            type: ACTIVITY_TYPES.session_completed,
+            timestamp: s.scheduled_date ?? s.created_at,
+            actorName, actorId, actorAvatarUrl: null,
+            payload: { sessionId: s.id },
+          });
+        }
+      });
+
+      // Reviews — received (mentor) or left (mentee).
+      if (isMentor && mpId) {
+        const { data: revs = [] } = await supabase
+          .from('reviews').select('id, rating, comment, created_at, reviewer_id, session_id')
+          .eq('mentor_id', mpId).order('created_at', { ascending: false }).limit(10);
+        const reviewerNames = await fetchUserNamesMap(revs.map((r) => r.reviewer_id));
+        revs.forEach((r) => all.push({
+          id: `rcv-${r.id}`,
+          type: ACTIVITY_TYPES.review_received,
+          timestamp: r.created_at,
+          actorName: reviewerNames[r.reviewer_id] || 'A mentee',
+          actorId: r.reviewer_id, actorAvatarUrl: null,
+          payload: { rating: r.rating, comment: r.comment },
+        }));
+      } else {
+        const { data: revs = [] } = await supabase
+          .from('reviews').select('id, rating, mentor_id, created_at')
+          .eq('reviewer_id', user.id).order('created_at', { ascending: false }).limit(10);
+        if (revs.length) {
+          const ids = revs.map((r) => r.mentor_id);
+          const { data: mps = [] } = await supabase.from('mentor_profiles').select('id, name').in('id', ids);
+          const nameById = Object.fromEntries(mps.map((m) => [m.id, m.name]));
+          revs.forEach((r) => all.push({
+            id: `lft-${r.id}`,
+            type: ACTIVITY_TYPES.review_left,
+            timestamp: r.created_at,
+            actorName: nameById[r.mentor_id] || 'A mentor',
+            actorId: r.mentor_id, actorAvatarUrl: null,
+            payload: { rating: r.rating },
+          }));
+        }
+      }
+
+      // Favorites — saves (mentee only).
+      if (!isMentor) {
+        const { data: favs = [] } = await supabase
+          .from('favorites').select('id, mentor_id, created_at')
+          .eq('user_id', user.id).order('created_at', { ascending: false }).limit(10);
+        if (favs.length) {
+          const ids = favs.map((f) => f.mentor_id);
+          const { data: mps = [] } = await supabase.from('mentor_profiles').select('id, name').in('id', ids);
+          const nameById = Object.fromEntries(mps.map((m) => [m.id, m.name]));
+          favs.forEach((f) => all.push({
+            id: `sav-${f.id}`,
+            type: ACTIVITY_TYPES.mentor_saved,
+            timestamp: f.created_at,
+            actorName: nameById[f.mentor_id] || 'A mentor',
+            actorId: f.mentor_id, actorAvatarUrl: null,
+            payload: {},
+          }));
+        }
+      }
+
+      all.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      setItems(all);
+    } catch (e) {
+      console.error('useDashboardActivity failed:', e);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, isMentor]);
+
+  useEffect(() => { load(); }, [load]);
+
+  // realtime: prepend on new INSERT in sessions/reviews/favorites for this user.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(nextChannelId('dashboard-activity', user.id))
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sessions' }, () => load())
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, () => load())
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'favorites' }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, load]);
+
+  const visible = items.slice(0, shown);
+  const hasMore = items.length > shown;
+  const loadMore = useCallback(() => setShown((s) => s + limit), [limit]);
+
+  return { items: visible, isLoading, isError, hasMore, loadMore, total: items.length, refetch: load };
+}
+
+// ─── useSavedMentors ──────────────────────────────────────────────────────────
+
+export function useSavedMentors({ limit = 6 } = {}) {
+  const { user } = useAuth();
+  const [mentors, setMentors] = useState([]);
+  const [isLoading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    if (!user) { setMentors([]); setLoading(false); return; }
+    setLoading(true);
+    try {
+      const { data: ids = [] } = await getMyFavorites();
+      if (!ids.length) { setMentors([]); return; }
+      const { data: rows = [] } = await supabase
+        .from('mentor_profiles')
+        .select('id, name, title, company, image_url, rating, session_rate, total_sessions')
+        .in('id', ids);
+      setMentors(rows);
+    } finally { setLoading(false); }
+  }, [user]);
+
+  useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(nextChannelId('dashboard-favs', user.id))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'favorites' }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, load]);
+
+  const total = mentors.length;
+  return { mentors: mentors.slice(0, limit), total, isLoading, refetch: load };
+}
+
+// ─── useMentorRecommendations (derived; reasoned) ─────────────────────────────
+
+function reasonForMentor(m, ctx) {
+  // Build a single-sentence rationale ≤ 120 chars from available signals.
+  const target = ctx.targetIndustry?.toLowerCase();
+  const role = ctx.targetRole?.toLowerCase();
+  const goals = (ctx.topGoals || []).map((g) => String(g).toLowerCase());
+
+  if (target && m.industry && m.industry.toLowerCase() === target) {
+    return `You're targeting ${m.industry}; ${m.name.split(' ')[0]} has shipped in ${m.industry} for ${m.years_experience ?? '10+'} years.`;
+  }
+  if (role && role.includes('director') && (m.title || '').toLowerCase().includes('director')) {
+    return `You're aiming for ${ctx.targetRole}; ${m.name.split(' ')[0]} has hired into that role at ${m.company}.`;
+  }
+  if (goals.find((g) => g.includes('interview')) && m.expertise && JSON.stringify(m.expertise).toLowerCase().includes('interview')) {
+    return `You flagged interview prep; ${m.name.split(' ')[0]} runs interview loops at ${m.company}.`;
+  }
+  if ((m.total_sessions ?? 0) > 30) {
+    return `${m.total_sessions} sessions, ${(m.rating ?? 0).toFixed(1)}★ — booked operators give the sharpest answers.`;
+  }
+  return `${m.title} at ${m.company} — directly adjacent to where you're heading next.`;
+}
+
+export function useMentorRecommendations({ limit = 3 } = {}) {
+  const { user } = useAuth();
+  const [recommendations, setRecs] = useState([]);
+  const [isLoading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    if (!user) { setRecs([]); setLoading(false); return; }
+    setLoading(true);
+    try {
+      // Pull mentee context (best-effort).
+      let ctx = {};
+      try {
+        const { data } = await supabase
+          .from('mentee_profiles')
+          .select('target_role, target_industry, top_goals, session_types_needed')
+          .eq('user_id', user.id).maybeSingle();
+        ctx = {
+          targetRole: data?.target_role,
+          targetIndustry: data?.target_industry,
+          topGoals: data?.top_goals,
+        };
+      } catch { /* ignore */ }
+
+      // Exclude already-saved.
+      const { data: favIds = [] } = await getMyFavorites();
+      const exclude = new Set(favIds);
+
+      const { data: rows = [] } = await supabase
+        .from('mentor_profiles')
+        .select('id, name, title, company, industry, image_url, rating, session_rate, total_sessions, years_experience, expertise')
+        .or('onboarding_complete.is.null,onboarding_complete.eq.true')
+        .order('rating', { ascending: false })
+        .limit(20);
+
+      const filtered = rows.filter((r) => !exclude.has(String(r.id).toLowerCase()));
+      const ranked = filtered.sort((a, b) => {
+        const aMatch = ctx.targetIndustry && a.industry?.toLowerCase() === ctx.targetIndustry.toLowerCase() ? 1 : 0;
+        const bMatch = ctx.targetIndustry && b.industry?.toLowerCase() === ctx.targetIndustry.toLowerCase() ? 1 : 0;
+        if (aMatch !== bMatch) return bMatch - aMatch;
+        return (b.rating ?? 0) - (a.rating ?? 0);
+      }).slice(0, limit);
+
+      setRecs(ranked.map((m) => ({ mentor: m, reason: reasonForMentor(m, ctx) })));
+    } finally { setLoading(false); }
+  }, [user, limit]);
+
+  useEffect(() => { load(); }, [load]);
+
+  return { recommendations, isLoading, refetch: load };
+}
+
+// ─── usePastSessions ──────────────────────────────────────────────────────────
+
+export function usePastSessions({ limit = 5 } = {}) {
+  const { user } = useAuth();
+  const isMentor = user ? isMentorAccount(user) : false;
+  const [sessions, setSessions] = useState([]);
+  const [isLoading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    if (!user) { setSessions([]); setLoading(false); return; }
+    setLoading(true);
+    try {
+      const nowIso = new Date().toISOString();
+      let rows = [];
+      if (isMentor) {
+        const mpId = await fetchMentorProfileId(user.id);
+        if (!mpId) { setSessions([]); return; }
+        const { data = [] } = await supabase
+          .from('sessions').select('*')
+          .eq('mentor_id', mpId)
+          .or(`status.eq.completed,scheduled_date.lt.${nowIso}`)
+          .order('scheduled_date', { ascending: false }).limit(limit + 5);
+        rows = data;
+      } else {
+        const { data = [] } = await supabase
+          .from('sessions').select('*')
+          .eq('mentee_id', user.id)
+          .or(`status.eq.completed,scheduled_date.lt.${nowIso}`)
+          .order('scheduled_date', { ascending: false }).limit(limit + 5);
+        rows = data;
+      }
+      // Enrich with mentor profile for mentee view.
+      if (!isMentor && rows.length) {
+        const ids = [...new Set(rows.map((r) => r.mentor_id).filter(Boolean))];
+        const { data: mps = [] } = await supabase.from('mentor_profiles')
+          .select('id, name, title, company, image_url').in('id', ids);
+        const byId = Object.fromEntries(mps.map((m) => [m.id, m]));
+        rows = rows.map((r) => ({ ...r, _mentor: byId[r.mentor_id] }));
+      }
+      setSessions(rows);
+    } finally { setLoading(false); }
+  }, [user, isMentor, limit]);
+
+  useEffect(() => { load(); }, [load]);
+
+  return {
+    sessions: sessions.slice(0, limit),
+    total: sessions.length,
+    isLoading,
+    refetch: load,
+  };
+}
+
+// ─── useEarningsSummary (mentor) — derived from completed sessions ───────────
+
+export function useEarningsSummary() {
+  const { user } = useAuth();
+  const [summary, setSummary] = useState({
+    thisMonth: 0, lastMonth: 0, pendingPayout: 0, lifetime: 0, avgPerSession: 0,
+    monthlyHistory: [], trendPct: 0,
+  });
+  const [isLoading, setLoading] = useState(true);
+  const [streakLine, setStreakLine] = useState(null);
+
+  const load = useCallback(async () => {
+    if (!user || !isMentorAccount(user)) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const mpId = await fetchMentorProfileId(user.id);
+      if (!mpId) { setLoading(false); return; }
+      const { data: profile } = await supabase
+        .from('mentor_profiles').select('session_rate').eq('id', mpId).maybeSingle();
+      const rate = profile?.session_rate ?? 100;
+
+      const { data: sessions = [] } = await supabase
+        .from('sessions').select('id, status, scheduled_date, created_at')
+        .eq('mentor_id', mpId);
+
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfLast = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lifetimeSessions = sessions.filter((s) => s.status === 'completed' || s.status === 'accepted');
+
+      const inRange = (s, start, end) => {
+        const t = new Date(s.scheduled_date ?? s.created_at);
+        return t >= start && t < end;
+      };
+
+      const thisMonthCount = lifetimeSessions.filter((s) => inRange(s, startOfMonth, new Date(now.getFullYear(), now.getMonth() + 1, 1))).length;
+      const lastMonthCount = lifetimeSessions.filter((s) => inRange(s, startOfLast, startOfMonth)).length;
+      const lifetimeCount = lifetimeSessions.length;
+
+      const thisMonth = thisMonthCount * rate;
+      const lastMonth = lastMonthCount * rate;
+      const lifetime = lifetimeCount * rate;
+      const pendingPayout = sessions.filter((s) => s.status === 'accepted').length * rate;
+      const avgPerSession = lifetimeCount > 0 ? Math.round(lifetime / lifetimeCount) : rate;
+
+      // 6-month sparkline.
+      const monthlyHistory = [];
+      for (let i = 5; i >= 0; i--) {
+        const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+        const count = lifetimeSessions.filter((s) => inRange(s, start, end)).length;
+        monthlyHistory.push({
+          month: start.toLocaleString('en-US', { month: 'short' }),
+          total: count * rate,
+        });
+      }
+
+      const trendPct = lastMonth > 0
+        ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100)
+        : (thisMonth > 0 ? 100 : 0);
+
+      if (thisMonth > lastMonth && lastMonth > 0) {
+        setStreakLine('More than last month — keep the streak going.');
+      } else { setStreakLine(null); }
+
+      setSummary({ thisMonth, lastMonth, pendingPayout, lifetime, avgPerSession, monthlyHistory, trendPct });
+    } finally { setLoading(false); }
+  }, [user]);
+
+  useEffect(() => { load(); }, [load]);
+
+  // realtime: any session change for this mentor → reload.
+  useEffect(() => {
+    if (!user || !isMentorAccount(user)) return;
+    const channel = supabase
+      .channel(nextChannelId('dashboard-earnings', user.id))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, load]);
+
+  return { ...summary, streakLine, isLoading, refetch: load };
+}
+
+// ─── useMentorReviewsRecent ───────────────────────────────────────────────────
+
+export function useMentorReviewsRecent({ limit = 5 } = {}) {
+  const { user } = useAuth();
+  const [reviews, setReviews] = useState([]);
+  const [avgRating, setAvg] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    if (!user || !isMentorAccount(user)) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const mpId = await fetchMentorProfileId(user.id);
+      if (!mpId) { setLoading(false); return; }
+      const { data = [] } = await supabase
+        .from('reviews').select('*')
+        .eq('mentor_id', mpId)
+        .order('created_at', { ascending: false }).limit(20);
+      const reviewerNames = await fetchUserNamesMap(data.map((r) => r.reviewer_id));
+      const enriched = data.map((r) => ({
+        ...r,
+        reviewerName: reviewerNames[r.reviewer_id] || 'A mentee',
+      }));
+      setReviews(enriched);
+      setTotal(enriched.length);
+      setAvg(enriched.length ? enriched.reduce((s, r) => s + (r.rating ?? 0), 0) / enriched.length : 0);
+    } finally { setLoading(false); }
+  }, [user]);
+
+  useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (!user || !isMentorAccount(user)) return;
+    const channel = supabase
+      .channel(nextChannelId('dashboard-reviews', user.id))
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, load]);
+
+  return { reviews: reviews.slice(0, limit), total, avgRating, isLoading, refetch: load };
+}
+
+// ─── useUpcomingSessions (mentor) ─────────────────────────────────────────────
+
+export function useUpcomingSessions({ limit = 5 } = {}) {
+  const { user } = useAuth();
+  const [sessions, setSessions] = useState([]);
+  const [isLoading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    if (!user || !isMentorAccount(user)) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const mpId = await fetchMentorProfileId(user.id);
+      if (!mpId) { setSessions([]); return; }
+      const nowIso = new Date().toISOString();
+      const { data = [] } = await supabase
+        .from('sessions').select('*')
+        .eq('mentor_id', mpId)
+        .in('status', ['pending', 'accepted'])
+        .gte('scheduled_date', nowIso)
+        .order('scheduled_date', { ascending: true })
+        .limit(limit + 3);
+      const names = await fetchUserNamesMap(data.map((s) => s.mentee_id));
+      setSessions(data.map((s) => ({ ...s, mentee_name: names[s.mentee_id] || s.mentee_name || 'Mentee' })));
+    } finally { setLoading(false); }
+  }, [user, limit]);
+
+  useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (!user || !isMentorAccount(user)) return;
+    const channel = supabase
+      .channel(nextChannelId('dashboard-upcoming', user.id))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, load]);
+
+  return { sessions: sessions.slice(0, limit), total: sessions.length, isLoading, refetch: load };
+}
+
+// ─── useProfileHealth (mentor) — derived ──────────────────────────────────────
+
+const PROFILE_HEALTH_ITEMS = [
+  { key: 'photo',        label: 'Add a profile photo',     weight: 14, hrefMissing: '/onboarding' },
+  { key: 'bio',          label: 'Write a 2-line bio',      weight: 16, hrefMissing: '/onboarding' },
+  { key: 'expertise',    label: 'Pick 3+ expertise tags',  weight: 16, hrefMissing: '/onboarding' },
+  { key: 'rate',         label: 'Set your session rate',   weight: 12, hrefMissing: '/onboarding' },
+  { key: 'availability', label: 'Set weekly availability', weight: 14, hrefMissing: '/dashboard' },
+  { key: 'calendar',     label: 'Connect Google Calendar', weight: 14, hrefMissing: '/dashboard' },
+  { key: 'links',        label: 'Add LinkedIn or website', weight: 8,  hrefMissing: '/onboarding' },
+  { key: 'company',      label: 'Add company + title',     weight: 6,  hrefMissing: '/onboarding' },
+];
+
+export function useProfileHealth() {
+  const { user } = useAuth();
+  const [state, setState] = useState({ score: 0, breakdown: [], isLoading: true });
+
+  const load = useCallback(async () => {
+    if (!user || !isMentorAccount(user)) { setState({ score: 0, breakdown: [], isLoading: false }); return; }
+    try {
+      const { data } = await supabase
+        .from('mentor_profiles')
+        .select('image_url, bio, expertise, session_rate, availability_schedule, calendar_connected, linkedin_url, website_url, company, title')
+        .eq('user_id', user.id).maybeSingle();
+      if (!data) { setState({ score: 0, breakdown: [], isLoading: false }); return; }
+
+      const checks = {
+        photo: !!data.image_url,
+        bio: !!data.bio && String(data.bio).trim().length >= 40,
+        expertise: Array.isArray(data.expertise) && data.expertise.length >= 3,
+        rate: !!data.session_rate,
+        availability: !!data.availability_schedule && Object.keys(data.availability_schedule.weekly ?? {}).length > 0,
+        calendar: !!data.calendar_connected,
+        links: !!data.linkedin_url || !!data.website_url,
+        company: !!data.company && !!data.title,
+      };
+      const breakdown = PROFILE_HEALTH_ITEMS.map((item) => ({
+        ...item, done: !!checks[item.key],
+      }));
+      const score = breakdown.reduce((sum, b) => sum + (b.done ? b.weight : 0), 0);
+      setState({ score, breakdown, isLoading: false });
+    } catch (e) {
+      console.error('useProfileHealth failed:', e);
+      setState({ score: 0, breakdown: [], isLoading: false });
+    }
+  }, [user]);
+
+  useEffect(() => { load(); }, [load]);
+
+  return { ...state, refetch: load };
+}
+
+// ─── useAvailabilityToggle (mentor) ───────────────────────────────────────────
+
+export function useAvailabilityToggle() {
+  const { user } = useAuth();
+  const [isAvailable, setAvailable] = useState(false);
+  const [isLoading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    if (!user || !isMentorAccount(user)) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const { data } = await supabase
+        .from('mentor_profiles').select('available')
+        .eq('user_id', user.id).maybeSingle();
+      setAvailable(!!data?.available);
+    } finally { setLoading(false); }
+  }, [user]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const toggle = useCallback(async () => {
+    if (!user || busy) return;
+    setBusy(true);
+    const next = !isAvailable;
+    setAvailable(next); // optimistic
+    const { error } = await supabase
+      .from('mentor_profiles').update({ available: next })
+      .eq('user_id', user.id);
+    if (error) {
+      console.error('toggle availability failed:', error);
+      setAvailable(!next); // revert
+    }
+    setBusy(false);
+  }, [user, isAvailable, busy]);
+
+  return { isAvailable, toggle, isLoading: isLoading || busy };
+}
+
+// ─── useDashboardSessions — full sessions list + actions ────────────────────
+
+export function useDashboardSessions() {
+  const { user } = useAuth();
+  const isMentor = user ? isMentorAccount(user) : false;
+  const [sessions, setSessions] = useState([]);
+  const [mentorMap, setMentorMap] = useState({});
+  const [mentorProfileId, setMentorProfileId] = useState(null);
+  const [calendarConnected, setCalendarConnected] = useState(false);
+  const [isLoading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
+  const [error, setError] = useState(null);
+
+  const load = useCallback(async () => {
+    if (!user) { setSessions([]); setLoading(false); return; }
+    setLoading(true);
+    setError(null);
+    try {
+      if (isMentor) {
+        const { data: profile } = await supabase
+          .from('mentor_profiles')
+          .select('id, calendar_connected')
+          .eq('user_id', user.id).maybeSingle();
+        if (!profile?.id) {
+          setMentorProfileId(null);
+          setCalendarConnected(false);
+          setSessions([]);
+          return;
+        }
+        setMentorProfileId(profile.id);
+        setCalendarConnected(!!profile.calendar_connected);
+
+        const { data = [] } = await supabase
+          .from('sessions').select('*')
+          .eq('mentor_id', profile.id)
+          .order('scheduled_date', { ascending: true });
+
+        const menteeIds = [...new Set(data.map((s) => s.mentee_id).filter(Boolean))];
+        const names = await fetchUserNamesMap(menteeIds);
+        setSessions(data.map((s) => ({ ...s, mentee_name: names[s.mentee_id] || 'Mentee' })));
+      } else {
+        const { data = [] } = await supabase
+          .from('sessions').select('*')
+          .eq('mentee_id', user.id)
+          .order('scheduled_date', { ascending: true });
+        const ids = [...new Set(data.map((s) => s.mentor_id).filter(Boolean))];
+        if (ids.length) {
+          const { data: mps = [] } = await supabase.from('mentor_profiles').select('*').in('id', ids);
+          setMentorMap(Object.fromEntries(mps.map((m) => [m.id, m])));
+        } else { setMentorMap({}); }
+        setSessions(data);
+      }
+    } catch (e) {
+      console.error('useDashboardSessions failed:', e);
+      setError(e.message ?? 'Could not load sessions.');
+    } finally { setLoading(false); }
+  }, [user, isMentor]);
+
+  useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(nextChannelId('dashboard-sessions', user.id))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, load]);
+
+  const handleStatusUpdate = useCallback(async (sessionId, status) => {
+    setActionLoading(sessionId);
+    setError(null);
+    try {
+      const updated = status === 'accepted'
+        ? await acceptSession(sessionId)
+        : await updateSessionStatus(sessionId, status);
+      setSessions((prev) => prev.map((s) => s.id === sessionId ? { ...s, ...updated } : s));
+    } catch (e) {
+      setError(e.message ?? 'Failed to update session.');
+    } finally { setActionLoading(null); }
+  }, []);
+
+  const upcoming = useMemo(() => {
+    const now = Date.now();
+    return sessions.filter((s) => {
+      const status = String(s.status ?? '').toLowerCase();
+      if (!['pending', 'accepted'].includes(status)) return false;
+      if (!s.scheduled_date) return true;
+      return new Date(s.scheduled_date).getTime() > now - 30 * 60 * 1000;
+    });
+  }, [sessions]);
+
+  const pending = useMemo(
+    () => sessions.filter((s) => String(s.status).toLowerCase() === 'pending'),
+    [sessions],
+  );
+
+  const past = useMemo(() => {
+    const now = Date.now();
+    return sessions.filter((s) => {
+      const status = String(s.status ?? '').toLowerCase();
+      if (['completed', 'declined', 'cancelled'].includes(status)) return true;
+      return s.scheduled_date && new Date(s.scheduled_date).getTime() <= now - 30 * 60 * 1000;
+    }).sort((a, b) => new Date(b.scheduled_date ?? b.created_at).getTime() - new Date(a.scheduled_date ?? a.created_at).getTime());
+  }, [sessions]);
+
+  return {
+    isMentor, sessions, upcoming, pending, past,
+    mentorMap, mentorProfileId, calendarConnected,
+    isLoading, error, actionLoading, handleStatusUpdate, refetch: load,
+  };
+}
+
+// ─── formatters used by views ─────────────────────────────────────────────────
+
+export function formatRelativeTime(iso) {
+  if (!iso) return '';
+  const t = new Date(iso).getTime();
+  const delta = Date.now() - t;
+  const abs = Math.abs(delta);
+  const mins = Math.round(abs / 60000);
+  if (mins < 1) return delta >= 0 ? 'just now' : 'in a moment';
+  if (mins < 60) return delta >= 0 ? `${mins}m ago` : `in ${mins}m`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return delta >= 0 ? `${hours}h ago` : `in ${hours}h`;
+  const days = Math.round(hours / 24);
+  if (days < 7) return delta >= 0 ? `${days}d ago` : `in ${days}d`;
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+export function formatCurrency(n) {
+  if (!Number.isFinite(n)) return '0';
+  return Math.round(n).toLocaleString('en-US');
+}
+
+// Uses the same memo pattern across views; export helper for sparkline gating.
+export function useFlatMotion(reducedMotion, perfTier) {
+  return useMemo(() => reducedMotion || perfTier === 'low', [reducedMotion, perfTier]);
+}

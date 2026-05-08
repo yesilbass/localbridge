@@ -754,3 +754,22 @@ html.theme-dark {
   -webkit-backdrop-filter: blur(22px) saturate(160%);
   border-color: color-mix(in srgb, var(--bridge-border-strong) 70%, transparent);
 }
+
+/* Photo treatment — palette-aware ring + subtle warmth on avatars/images */
+@utility bridge-photo {
+  background-color: var(--bridge-surface-muted);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--bridge-border-strong) 70%, transparent);
+}
+
+/* Focus ring with halo — reuse for every interactive surface on the dashboard */
+@utility bridge-focus {
+  outline: none;
+}
+.bridge-focus:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--color-primary) 22%, transparent),
+    0 0 22px color-mix(in srgb, var(--color-primary) 28%, transparent);
+  border-radius: inherit;
+}

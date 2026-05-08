@@ -12,7 +12,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Mentors from './pages/Mentors';
 import MentorProfile from './pages/mentor-profile';
-import Dashboard from './pages/dashboard/Dashboard.jsx';
+import Dashboard from './pages/dashboard/index.jsx';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Pricing from './pages/Pricing';
@@ -41,10 +41,13 @@ function AppContent() {
   const location = useLocation();
   const isVideoCall = location.pathname.includes('/video');
   const isLanding = location.pathname === '/';
+  const isDashboard = location.pathname.startsWith('/dashboard');
   const hideFooter =
     location.pathname.startsWith('/profile') ||
     location.pathname.startsWith('/settings') ||
+    isDashboard ||
     isVideoCall;
+  const hideNavbar = isVideoCall || isDashboard;
 
   // Scroll to top on route change, but don't fight in-page anchor scrolling.
   useEffect(() => {
@@ -64,10 +67,10 @@ function AppContent() {
       <BridgeGlobalAtmosphere />
       {!isVideoCall && <ScrollProgress />}
       {!isVideoCall && <MagneticPointer />}
-      {!isVideoCall && <Navbar />}
+      {!hideNavbar && <Navbar />}
       <div
         key={location.pathname}
-        className={`relative z-10 flex flex-1 flex-col animate-page-enter ${isLanding ? '' : 'pt-[5.25rem]'}`}
+        className={`relative z-10 flex flex-1 flex-col animate-page-enter ${isLanding || isDashboard ? '' : 'pt-[5.25rem]'}`}
       >
         <ErrorBoundary>
         <Routes>
@@ -76,7 +79,7 @@ function AppContent() {
           <Route path="/register" element={<Register />} />
           <Route path="/mentors" element={<Mentors />} />
           <Route path="/mentors/:id" element={<MentorProfile />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="/onboarding" element={<MentorOnboarding />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />

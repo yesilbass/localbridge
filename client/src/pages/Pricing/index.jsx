@@ -6,7 +6,6 @@ import Reveal from '../../components/Reveal';
 import { focusRing } from '../../ui';
 import EmbeddedCheckoutPanel from '../../components/EmbeddedCheckoutPanel';
 import { createSubscriptionCheckout, finalizeCheckout } from '../../api/stripe';
-import CustomCursor from '../../components/CustomCursor.jsx';
 import { AuroraBg, KineticNumber, Tilt3D, Magnetic } from '../dashboard/dashboardCinematic.jsx';
 import { ANNUAL_DISCOUNT, MENTOR_TIERS, COMPARISON_ROWS, FAQ_ITEMS, tierMonthlyEquivalent } from './constants';
 import CheckCell from './CheckCell';
@@ -174,36 +173,60 @@ export default function Pricing() {
           </div>
         )}
 
-        {/* Hero header */}
-        <header className="relative z-[2] border-b border-[var(--bridge-border)] bg-[color-mix(in_srgb,var(--bridge-canvas)_82%,transparent)] backdrop-blur-2xl supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--bridge-canvas)_72%,transparent)]">
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent opacity-60" />
-          <div className="relative mx-auto max-w-bridge px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-            <nav aria-label="Breadcrumb" className="mb-6">
-              <ol className="flex flex-wrap items-center gap-2 text-[12px] font-bold tracking-wide text-[var(--bridge-text-muted)]">
-                <li>
-                  <Link to="/" data-cursor="hover" className={`rounded-md font-bold transition hover:text-orange-600 ${focusRing}`}>
-                    Home
-                  </Link>
-                </li>
-                <li aria-hidden className="text-stone-300">
-                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
-                  </svg>
-                </li>
-                <li className="rounded-full bg-orange-500/8 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-[0.14em] text-orange-600 ring-1 ring-orange-500/20 dark:text-orange-300">Pricing</li>
-              </ol>
-            </nav>
+        {/* Hero — open canvas, atmospheric */}
+        <section
+          aria-labelledby="pricing-heading"
+          className="relative overflow-hidden px-4 pt-12 pb-6 sm:px-6 sm:pt-14 sm:pb-8 lg:px-8"
+        >
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div
+              className="absolute -left-[8%] top-[-30%] h-[100%] w-[55%] rounded-full blur-[100px]"
+              style={{
+                background: 'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 30%, transparent) 0%, transparent 70%)',
+                opacity: 0.35,
+              }}
+            />
+            <div
+              className="absolute -right-[10%] top-[-20%] h-[80%] w-[40%] rounded-full blur-[110px]"
+              style={{
+                background: 'radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 36%, transparent) 0%, transparent 70%)',
+                opacity: 0.22,
+              }}
+            />
+          </div>
 
+          <div className="relative mx-auto max-w-bridge">
             <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
               <Reveal>
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-500">Pick your plan</p>
+                <div className="min-w-0 max-w-2xl">
+                  <div
+                    className="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-black tracking-wide"
+                    style={{
+                      backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                      color: 'var(--color-primary)',
+                      boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                    }}
+                  >
+                    <span className="relative flex h-1.5 w-1.5" aria-hidden>
+                      <span
+                        className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-65"
+                        style={{ backgroundColor: 'var(--color-primary)' }}
+                      />
+                      <span
+                        className="relative inline-flex h-1.5 w-1.5 rounded-full"
+                        style={{ backgroundColor: 'var(--color-primary)' }}
+                      />
+                    </span>
+                    Pick your plan
+                  </div>
                   <h1
                     id="pricing-heading"
-                    className="mt-3 font-display font-black tracking-[-0.03em] text-[var(--bridge-text)]"
-                    style={{ fontSize: 'clamp(2.4rem, 6vw, 4.8rem)', lineHeight: '0.96' }}
+                    className="font-display font-black"
+                    style={{ fontSize: 'clamp(2.4rem, 6vw, 4.8rem)', lineHeight: '0.96', letterSpacing: '-0.03em', color: 'var(--bridge-text)' }}
                   >
-                    Simple <span className="text-gradient-bridge italic">pricing</span>,<br className="hidden sm:block" /> pick what fits.
+                    Simple{' '}
+                    <span className="text-gradient-bridge italic">pricing</span>,
+                    <br className="hidden sm:block" />{' '}pick what fits.
                   </h1>
                   <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--bridge-text-secondary)] sm:text-lg">
                     Subscription plans cover Bridge platform access and features. Mentor sessions are paid separately based on each mentor's rate.
@@ -220,13 +243,17 @@ export default function Pricing() {
                   >
                     <span
                       aria-hidden
-                      className={`pointer-events-none absolute inset-y-1 w-[calc(50%-4px)] rounded-full bg-gradient-to-r from-stone-900 to-stone-800 shadow-[0_8px_22px_-6px_color-mix(in srgb, var(--color-secondary) 50%, transparent)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] dark:from-orange-500 dark:to-amber-500 dark:shadow-[0_8px_22px_-6px_color-mix(in srgb, var(--color-primary) 55%, transparent)] ${annual ? 'left-[calc(50%+0px)]' : 'left-1'}`}
+                      className={`pointer-events-none absolute inset-y-1 w-[calc(50%-4px)] rounded-full transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${annual ? 'left-[calc(50%+0px)]' : 'left-1'}`}
+                      style={{
+                        backgroundColor: 'var(--color-primary)',
+                        boxShadow: '0 8px 22px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                      }}
                     />
                     <button
                       type="button"
                       onClick={() => setAnnual(false)}
                       data-cursor="hover"
-                      className={`relative z-[1] rounded-full px-5 py-1.5 text-sm font-black tracking-tight transition ${!annual ? 'text-white dark:text-stone-950' : 'text-[var(--bridge-text-secondary)] hover:text-[var(--bridge-text)]'} ${focusRing}`}
+                      className={`relative z-[1] rounded-full px-5 py-1.5 text-sm font-black tracking-tight transition ${!annual ? 'text-[var(--color-on-primary)]' : 'text-[var(--bridge-text-secondary)] hover:text-[var(--bridge-text)]'} ${focusRing}`}
                     >
                       Monthly
                     </button>
@@ -234,15 +261,28 @@ export default function Pricing() {
                       type="button"
                       onClick={() => setAnnual(true)}
                       data-cursor="hover"
-                      className={`relative z-[1] rounded-full px-5 py-1.5 text-sm font-black tracking-tight transition ${annual ? 'text-white dark:text-stone-950' : 'text-[var(--bridge-text-secondary)] hover:text-[var(--bridge-text)]'} ${focusRing}`}
+                      className={`relative z-[1] rounded-full px-5 py-1.5 text-sm font-black tracking-tight transition ${annual ? 'text-[var(--color-on-primary)]' : 'text-[var(--bridge-text-secondary)] hover:text-[var(--bridge-text)]'} ${focusRing}`}
                     >
                       Annual
                     </button>
                   </div>
-                  <span className="bd-status-shine relative inline-flex items-center gap-1.5 overflow-hidden rounded-full border border-orange-300/55 bg-gradient-to-r from-orange-50 to-amber-50 px-3.5 py-1.5 text-xs font-black text-orange-900 shadow-sm dark:border-orange-400/30 dark:from-orange-500/15 dark:to-amber-500/10 dark:text-orange-200">
+                  <span
+                    className="bd-status-shine relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-3.5 py-1.5 text-xs font-black"
+                    style={{
+                      border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                      backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+                      color: 'var(--color-primary)',
+                    }}
+                  >
                     <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-orange-500" />
+                      <span
+                        className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                        style={{ backgroundColor: 'var(--color-primary)' }}
+                      />
+                      <span
+                        className="relative inline-flex h-1.5 w-1.5 rounded-full"
+                        style={{ backgroundColor: 'var(--color-primary)' }}
+                      />
                     </span>
                     Save {Math.round(ANNUAL_DISCOUNT * 100)}% annual
                   </span>
@@ -253,7 +293,14 @@ export default function Pricing() {
             {/* Trust strip */}
             <Reveal delay={180}>
               <div className="mt-8 flex flex-wrap items-center gap-3 text-[11px] font-bold text-[var(--bridge-text-muted)]">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-amber-700 dark:text-amber-300">
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"
+                  style={{
+                    border: '1px solid color-mix(in srgb, var(--color-primary) 25%, transparent)',
+                    backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+                    color: 'var(--color-primary)',
+                  }}
+                >
                   <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292Z" />
                   </svg>
@@ -268,7 +315,7 @@ export default function Pricing() {
               </div>
             </Reveal>
           </div>
-        </header>
+        </section>
 
         {/* Tier cards */}
         <div className="relative z-[2] mx-auto max-w-bridge px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
@@ -283,30 +330,61 @@ export default function Pricing() {
                     <div
                       className={`bd-card-edge group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border p-6 shadow-bridge-tile transition-all duration-500 hover:-translate-y-1 hover:shadow-xl sm:p-7 ${
                         tier.primary
-                          ? 'border-transparent border-gradient-bridge animate-border-bridge bg-gradient-to-br from-[var(--bridge-surface)] via-[var(--bridge-surface)] to-orange-50/35 shadow-[0_24px_60px_-16px_color-mix(in srgb, var(--color-primary) 45%, transparent)] lg:scale-[1.04] lg:z-[1] dark:to-orange-500/[0.06]'
-                          : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] hover:border-orange-300/60'
+                          ? 'border-gradient-bridge animate-border-bridge border-transparent lg:scale-[1.04] lg:z-[1]'
+                          : ''
                       }`}
+                      style={tier.primary ? {
+                        background: 'linear-gradient(160deg, var(--bridge-surface), var(--bridge-surface) 60%, color-mix(in srgb, var(--color-primary) 4%, transparent))',
+                        boxShadow: '0 24px 60px -16px color-mix(in srgb, var(--color-primary) 45%, transparent)',
+                        borderColor: 'transparent',
+                      } : {
+                        borderColor: 'var(--bridge-border)',
+                        backgroundColor: 'var(--bridge-surface)',
+                      }}
                     >
                       {tier.primary && (
-                        <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-60 w-60 rounded-full bg-gradient-to-br from-orange-400/35 via-amber-300/20 to-transparent blur-3xl bd-aurora" />
+                        <div
+                          aria-hidden
+                          className="pointer-events-none absolute -right-10 -top-10 h-60 w-60 rounded-full blur-3xl bd-aurora"
+                          style={{
+                            background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 35%, transparent) 0%, transparent 70%)',
+                          }}
+                        />
                       )}
                       <div
                         aria-hidden
-                        className={`absolute inset-x-0 top-0 z-[1] h-1 ${
-                          tier.primary
-                            ? 'bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 shadow-[0_0_12px_color-mix(in srgb, var(--color-primary) 55%, transparent)]'
-                            : 'bg-[var(--bridge-border-strong)]'
-                        }`}
+                        className="absolute inset-x-0 top-0 z-[1] h-1"
+                        style={tier.primary ? {
+                          background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-hover), var(--color-primary))',
+                          boxShadow: '0 0 12px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                        } : {
+                          backgroundColor: 'var(--bridge-border-strong)',
+                        }}
                       />
 
                       <div className="relative z-[1] flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <h2 className="font-display text-xl font-black tracking-tight text-[var(--bridge-text)] sm:text-2xl">{tier.name}</h2>
-                          <p className="mt-1 text-[10px] font-black uppercase tracking-[0.18em] text-orange-600 dark:text-orange-400">{tier.tagline}</p>
+                          <p
+                            className="mt-1 text-[10px] font-black uppercase tracking-[0.18em]"
+                            style={{ color: 'var(--color-primary)' }}
+                          >
+                            {tier.tagline}
+                          </p>
                         </div>
                         {tier.badge && (
-                          <span className="bd-status-shine shrink-0 inline-flex items-center gap-1.5 overflow-hidden rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_8px_22px_-4px_color-mix(in srgb, var(--color-primary) 55%, transparent)]">
-                            <span className="h-1.5 w-1.5 rounded-full bg-white/95 animate-pulse-soft" />
+                          <span
+                            className="bd-status-shine shrink-0 inline-flex items-center gap-1.5 overflow-hidden rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em]"
+                            style={{
+                              backgroundColor: 'var(--color-primary)',
+                              color: 'var(--color-on-primary)',
+                              boxShadow: '0 8px 22px -4px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                            }}
+                          >
+                            <span
+                              className="h-1.5 w-1.5 rounded-full animate-pulse-soft"
+                              style={{ backgroundColor: 'color-mix(in srgb, var(--color-on-primary) 90%, transparent)' }}
+                            />
                             {tier.badge}
                           </span>
                         )}
@@ -333,11 +411,16 @@ export default function Pricing() {
                         {tier.features.map((f) => (
                           <li key={f} className="flex gap-2.5">
                             <span
-                              className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-black ring-1 ${
-                                tier.primary
-                                  ? 'bg-gradient-to-br from-orange-500 to-amber-500 text-white ring-white/15 shadow-[0_0_10px_color-mix(in srgb, var(--color-primary) 40%, transparent)]'
-                                  : 'bg-emerald-500/10 text-emerald-600 ring-emerald-500/22 dark:text-emerald-300'
-                              }`}
+                              className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-black"
+                              style={tier.primary ? {
+                                backgroundColor: 'var(--color-primary)',
+                                color: 'var(--color-on-primary)',
+                                boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-on-primary) 15%, transparent), 0 0 10px color-mix(in srgb, var(--color-primary) 40%, transparent)',
+                              } : {
+                                backgroundColor: 'color-mix(in srgb, var(--color-success) 10%, transparent)',
+                                color: 'var(--color-success)',
+                                boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-success) 22%, transparent)',
+                              }}
                               aria-hidden
                             >
                               ✓
@@ -356,11 +439,16 @@ export default function Pricing() {
                           <Link
                             to={tier.href}
                             data-cursor={tier.cta}
-                            className={`block w-full rounded-full py-3 text-center text-sm font-black transition-all duration-200 ${
-                              tier.primary
-                                ? 'btn-sheen bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 text-white shadow-[0_12px_32px_-6px_color-mix(in srgb, var(--color-primary) 60%, transparent)] ring-1 ring-white/15 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-8px_color-mix(in srgb, var(--color-primary) 80%, transparent)]'
-                                : 'border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-raised)] text-[var(--bridge-text-secondary)] hover:border-orange-500/50 hover:text-[var(--bridge-text)] hover:bg-[var(--bridge-surface-raised)] hover:-translate-y-0.5'
-                            } ${focusRing}`}
+                            className={`block w-full rounded-full py-3 text-center text-sm font-black transition-all duration-200 hover:-translate-y-0.5 ${tier.primary ? 'btn-sheen ring-1 ring-white/15' : ''} ${focusRing}`}
+                            style={tier.primary ? {
+                              backgroundColor: 'var(--color-primary)',
+                              color: 'var(--color-on-primary)',
+                              boxShadow: '0 12px 32px -6px color-mix(in srgb, var(--color-primary) 60%, transparent)',
+                            } : {
+                              border: '1px solid var(--bridge-border-strong)',
+                              backgroundColor: 'var(--bridge-surface-raised)',
+                              color: 'var(--bridge-text-secondary)',
+                            }}
                           >
                             {tier.cta}
                           </Link>
@@ -369,11 +457,16 @@ export default function Pricing() {
                             type="button"
                             onClick={tier.onClick}
                             data-cursor={tier.cta}
-                            className={`w-full rounded-full py-3 text-sm font-black transition-all duration-200 ${
-                              tier.primary
-                                ? 'btn-sheen bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 text-white shadow-[0_12px_32px_-6px_color-mix(in srgb, var(--color-primary) 60%, transparent)] ring-1 ring-white/15 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-8px_color-mix(in srgb, var(--color-primary) 80%, transparent)]'
-                                : 'border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-raised)] text-[var(--bridge-text-secondary)] hover:border-orange-500/50 hover:text-[var(--bridge-text)] hover:-translate-y-0.5'
-                            } ${focusRing}`}
+                            className={`w-full rounded-full py-3 text-sm font-black transition-all duration-200 hover:-translate-y-0.5 ${tier.primary ? 'btn-sheen ring-1 ring-white/15' : ''} ${focusRing}`}
+                            style={tier.primary ? {
+                              backgroundColor: 'var(--color-primary)',
+                              color: 'var(--color-on-primary)',
+                              boxShadow: '0 12px 32px -6px color-mix(in srgb, var(--color-primary) 60%, transparent)',
+                            } : {
+                              border: '1px solid var(--bridge-border-strong)',
+                              backgroundColor: 'var(--bridge-surface-raised)',
+                              color: 'var(--bridge-text-secondary)',
+                            }}
                           >
                             {tier.cta}
                           </button>
@@ -395,11 +488,31 @@ export default function Pricing() {
             <Reveal delay={60} className="lg:col-span-8">
               <Tilt3D max={2} className="rounded-3xl">
                 <div className="bd-card-edge relative overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card">
-                  <div aria-hidden className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-orange-400/12 blur-3xl bd-aurora" />
-                  <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent opacity-50" />
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full blur-3xl bd-aurora"
+                    style={{
+                      background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 12%, transparent) 0%, transparent 70%)',
+                    }}
+                  />
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-50"
+                    style={{
+                      background: 'linear-gradient(to right, transparent, var(--color-primary), transparent)',
+                    }}
+                  />
                   <div className="relative border-b border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/70 px-6 py-5 sm:px-8">
-                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-orange-500">Side-by-side</p>
-                    <h2 className="mt-1 font-display font-black tracking-[-0.025em] text-[var(--bridge-text)]" style={{ fontSize: 'clamp(1.4rem, 2.4vw, 1.9rem)', lineHeight: '1.05' }}>
+                    <p
+                      className="text-[10px] font-black uppercase tracking-[0.24em]"
+                      style={{ color: 'var(--color-primary)' }}
+                    >
+                      Side-by-side
+                    </p>
+                    <h2
+                      className="mt-1 font-display font-black tracking-[-0.025em] text-[var(--bridge-text)]"
+                      style={{ fontSize: 'clamp(1.4rem, 2.4vw, 1.9rem)', lineHeight: '1.05' }}
+                    >
                       Compare <span className="text-gradient-bridge italic">plans</span>
                     </h2>
                     <p className="mt-1 text-sm text-[var(--bridge-text-secondary)]">Bridge platform features, side by side.</p>
@@ -411,10 +524,27 @@ export default function Pricing() {
                           <th scope="col" className="px-4 py-4 font-black text-[var(--bridge-text)] sm:px-6">Feature</th>
                           <th scope="col" className="px-2 py-4 text-center text-[11px] font-black uppercase tracking-[0.14em] text-[var(--bridge-text-muted)] sm:px-3">Free</th>
                           <th scope="col" className="px-2 py-4 text-center text-[11px] font-black uppercase tracking-[0.14em] text-[var(--bridge-text-muted)] sm:px-3">Starter</th>
-                          <th scope="col" className="bg-orange-500/[0.05] px-2 py-4 text-center font-black sm:px-3">
+                          <th
+                            scope="col"
+                            className="px-2 py-4 text-center font-black sm:px-3"
+                            style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 5%, transparent)' }}
+                          >
                             <div className="flex flex-col items-center gap-1">
-                              <span className="text-[12px] font-black text-orange-600 tracking-tight dark:text-orange-300">Pro</span>
-                              <span className="bd-status-shine relative overflow-hidden rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.16em] text-white">Best</span>
+                              <span
+                                className="text-[12px] font-black tracking-tight"
+                                style={{ color: 'var(--color-primary)' }}
+                              >
+                                Pro
+                              </span>
+                              <span
+                                className="bd-status-shine relative overflow-hidden rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.16em]"
+                                style={{
+                                  backgroundColor: 'var(--color-primary)',
+                                  color: 'var(--color-on-primary)',
+                                }}
+                              >
+                                Best
+                              </span>
                             </div>
                           </th>
                           <th scope="col" className="px-2 py-4 text-center text-[11px] font-black uppercase tracking-[0.14em] text-[var(--bridge-text-muted)] sm:px-3">Premium</th>
@@ -430,13 +560,20 @@ export default function Pricing() {
                               {row.label}
                             </th>
                             {(['free', 'starter', 'pro', 'premium']).map((col) => (
-                              <td key={col} className={`px-2 py-4 text-center sm:px-3 ${col === 'pro' ? 'bg-orange-500/[0.05]' : ''}`}>
+                              <td
+                                key={col}
+                                className="px-2 py-4 text-center sm:px-3"
+                                style={col === 'pro' ? { backgroundColor: 'color-mix(in srgb, var(--color-primary) 5%, transparent)' } : {}}
+                              >
                                 {typeof row[col] === 'boolean' ? (
                                   <div className="flex justify-center">
                                     <CheckCell included={row[col]} highlight={col === 'pro'} />
                                   </div>
                                 ) : (
-                                  <span className={col === 'pro' ? 'font-black text-orange-600 dark:text-orange-300' : 'font-bold text-[var(--bridge-text-secondary)]'}>
+                                  <span
+                                    className="font-bold"
+                                    style={col === 'pro' ? { color: 'var(--color-primary)' } : { color: 'var(--bridge-text-secondary)' }}
+                                  >
                                     {row[col]}
                                   </span>
                                 )}
@@ -460,10 +597,23 @@ export default function Pricing() {
           <div className="mt-20 border-t border-[var(--bridge-border)] pt-16">
             <Reveal delay={60}>
               <div className="mb-10 text-center">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-300/55 bg-orange-50/70 px-3.5 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-orange-700 dark:border-orange-400/30 dark:bg-orange-500/10 dark:text-orange-300">
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-black uppercase tracking-[0.16em]"
+                  style={{
+                    border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                    backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+                    color: 'var(--color-primary)',
+                  }}
+                >
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-65" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-orange-500" />
+                    <span
+                      className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-65"
+                      style={{ backgroundColor: 'var(--color-primary)' }}
+                    />
+                    <span
+                      className="relative inline-flex h-1.5 w-1.5 rounded-full"
+                      style={{ backgroundColor: 'var(--color-primary)' }}
+                    />
                   </span>
                   How Bridge categorizes mentors
                 </span>
@@ -522,7 +672,12 @@ export default function Pricing() {
                   <Link
                     to="/mentors"
                     data-cursor="Browse"
-                    className={`btn-sheen relative inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-8 py-3.5 text-sm font-black text-white shadow-[0_14px_36px_-6px_color-mix(in srgb, var(--color-primary) 65%, transparent)] ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-6px_color-mix(in srgb, var(--color-primary) 85%, transparent)] ${focusRing}`}
+                    className={`btn-sheen relative inline-flex items-center gap-2.5 rounded-full px-8 py-3.5 text-sm font-black ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:brightness-110 ${focusRing}`}
+                    style={{
+                      backgroundColor: 'var(--color-primary)',
+                      color: 'var(--color-on-primary)',
+                      boxShadow: '0 14px 36px -6px color-mix(in srgb, var(--color-primary) 65%, transparent)',
+                    }}
                   >
                     Browse mentors by tier
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

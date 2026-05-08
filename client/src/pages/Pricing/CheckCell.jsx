@@ -2,11 +2,16 @@ export default function CheckCell({ included, highlight }) {
   if (included === true) {
     return (
       <span
-        className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-black transition-transform duration-300 hover:scale-110 ${
-          highlight
-            ? 'bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_0_14px_color-mix(in srgb, var(--color-primary) 55%, transparent)] ring-1 ring-white/15'
-            : 'bg-emerald-500/12 text-emerald-600 ring-1 ring-emerald-500/25 dark:text-emerald-300'
-        }`}
+        className="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-black transition-transform duration-300 hover:scale-110"
+        style={highlight ? {
+          backgroundColor: 'var(--color-primary)',
+          color: 'var(--color-on-primary)',
+          boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-on-primary) 15%, transparent), 0 0 14px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+        } : {
+          backgroundColor: 'color-mix(in srgb, var(--color-success) 12%, transparent)',
+          color: 'var(--color-success)',
+          boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-success) 25%, transparent)',
+        }}
         aria-label="Included"
       >
         ✓
