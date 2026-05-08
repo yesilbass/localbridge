@@ -417,6 +417,19 @@ html.theme-dark {
   animation: bridge-pulse-soft 2.4s ease-in-out infinite;
 }
 
+@keyframes bridge-skeleton-shimmer {
+  0%   { opacity: 0.55; }
+  50%  { opacity: 0.85; }
+  100% { opacity: 0.55; }
+}
+
+@utility bridge-skeleton {
+  animation: bridge-skeleton-shimmer 1.6s ease-in-out infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 /* Hero product preview — scene row entrance + live cursor drift */
 @keyframes bridge-scene-row {
   from {
