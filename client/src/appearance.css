@@ -62,7 +62,6 @@ html[data-palette="modern-signal"] {
   --bridge-text:          var(--color-text);
   --bridge-text-secondary:var(--color-text-secondary);
   --bridge-text-muted:    var(--color-text-muted);
-  --bridge-text-faint:    color-mix(in srgb, var(--color-text-muted) 65%, transparent);
   --bridge-accent:        var(--color-primary);
   --bridge-accent-strong: var(--color-primary-hover);
 

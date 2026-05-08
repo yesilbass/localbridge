@@ -11,7 +11,7 @@ import Landing from './pages/landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Mentors from './pages/Mentors';
-import MentorProfile from './pages/mentor-profile';
+import MentorProfile from './pages/MentorProfile';
 import Dashboard from './pages/dashboard/Dashboard.jsx';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
