@@ -1,11 +1,19 @@
 import supabase from './_lib/supabase.js';
 import { verifyAuthUser } from './_lib/auth.js';
+import { applySecurityHeaders, jsonError, validateJsonBody } from './_lib/security.js';
+import { z } from 'zod';
 
 const CANCELLABLE_STATUSES = new Set(['pending', 'accepted']);
 const PLAN_LIMITS = {
   starter: 2,
   pro: 4,
 };
+
+const CANCEL_SCHEMA = z.object({
+  session_id: z.string().uuid(),
+  reason: z.string().trim().min(1).max(120),
+  details: z.string().max(2000).optional().or(z.literal('')),
+});
 
 function getMonthStartIso() {
   const monthStart = new Date();
@@ -29,14 +37,15 @@ function getPlanLabel(plan) {
 }
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  applySecurityHeaders(res);
+  if (req.method !== 'POST') return jsonError(res, 405, 'Method not allowed');
 
   const { user, error: authError } = await verifyAuthUser(req);
-  if (!user) return res.status(401).json({ error: authError || 'Unauthorized' });
+  if (!user) return jsonError(res, 401, authError || 'Unauthorized');
 
-  const { session_id, reason, details } = req.body ?? {};
-  if (!session_id) return res.status(400).json({ error: 'session_id is required' });
-  if (!reason) return res.status(400).json({ error: 'reason is required' });
+  const body = validateJsonBody(req, CANCEL_SCHEMA);
+  if (body.error) return jsonError(res, 400, body.error);
+  const { session_id, reason, details } = body.data;
 
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
@@ -46,9 +55,9 @@ export default async function handler(req, res) {
 
   if (sessionError) {
     console.error('[cancel-session] session lookup failed:', sessionError);
-    return res.status(500).json({ error: 'Could not load session' });
+    return jsonError(res, 500, 'Could not load session');
   }
-  if (!session) return res.status(404).json({ error: 'Session not found' });
+  if (!session) return jsonError(res, 404, 'Session not found');
 
   let requester_role = null;
   if (session.mentee_id === user.id) {
@@ -63,17 +72,17 @@ export default async function handler(req, res) {
 
     if (mentorError) {
       console.error('[cancel-session] mentor profile lookup failed:', mentorError);
-      return res.status(500).json({ error: 'Could not verify session participant' });
+      return jsonError(res, 500, 'Could not verify session participant');
     }
     if (mentorProfile) requester_role = 'mentor';
   }
 
   if (!requester_role) {
-    return res.status(403).json({ error: 'You are not a participant in this session' });
+    return jsonError(res, 403, 'You are not a participant in this session');
   }
 
   if (!CANCELLABLE_STATUSES.has(session.status)) {
-    return res.status(400).json({ error: 'Only pending or accepted sessions can be cancelled' });
+    return jsonError(res, 400, 'Only pending or accepted sessions can be cancelled');
   }
 
   const { data: settingsRow, error: settingsError } = await supabase
@@ -84,7 +93,7 @@ export default async function handler(req, res) {
 
   if (settingsError) {
     console.error('[cancel-session] user settings lookup failed:', settingsError);
-    return res.status(500).json({ error: 'Could not load cancellation limit' });
+    return jsonError(res, 500, 'Could not load cancellation limit');
   }
 
   const plan = normalizePlan(settingsRow?.settings?.subscription_plan);
@@ -100,7 +109,7 @@ export default async function handler(req, res) {
 
     if (countError) {
       console.error('[cancel-session] cancellation count failed:', countError);
-      return res.status(500).json({ error: 'Could not check cancellation limit' });
+      return jsonError(res, 500, 'Could not check cancellation limit');
     }
 
     used = count ?? 0;
@@ -127,7 +136,7 @@ export default async function handler(req, res) {
 
   if (insertError) {
     console.error('[cancel-session] cancellation insert failed:', insertError);
-    return res.status(500).json({ error: 'Could not record cancellation' });
+    return jsonError(res, 500, 'Could not record cancellation');
   }
 
   const { error: updateError } = await supabase

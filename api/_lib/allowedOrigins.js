@@ -1,3 +1,5 @@
+import { applySecurityHeaders } from './security.js';
+
 const origins = [
   'http://localhost:5173',
   'http://localhost:5174',
@@ -20,6 +22,7 @@ export function getClientUrl(origin) {
  * otherwise fall back to the configured production client URL.
  */
 export function applyCors(req, res, methods = 'POST, OPTIONS') {
+  applySecurityHeaders(res);
   const origin = req.headers?.origin || '';
   const allowed = ALLOWED_ORIGINS.has(origin) ? origin : getClientUrl('');
   res.setHeader('Access-Control-Allow-Origin', allowed);
