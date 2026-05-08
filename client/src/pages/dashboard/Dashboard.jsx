@@ -266,8 +266,9 @@ export default function Dashboard() {
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
             <p className="flex-1 text-red-700 dark:text-red-200">{dash.error}</p>
             <button type="button" onClick={() => dash.setError(null)}
+              aria-label="Dismiss error"
               className="shrink-0 rounded-full p-1 text-red-400 transition hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-500/10">
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4" aria-hidden />
             </button>
           </div>
         )}

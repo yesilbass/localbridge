@@ -8,25 +8,45 @@ import {
   WEEKDAY_LABELS,
 } from '../../utils/mentorAvailability';
 
-const TIMEZONE_OPTIONS = [
-  ['America/New_York', 'Eastern Time'],
-  ['America/Chicago', 'Central Time'],
-  ['America/Denver', 'Mountain Time'],
-  ['America/Los_Angeles', 'Pacific Time'],
-  ['America/Toronto', 'Toronto'],
-  ['Europe/London', 'London'],
-  ['Europe/Paris', 'Paris'],
-  ['Asia/Dubai', 'Dubai'],
-  ['Asia/Karachi', 'Karachi'],
-  ['Asia/Kolkata', 'India'],
-  ['Asia/Singapore', 'Singapore'],
-  ['Asia/Tokyo', 'Tokyo'],
-  ['Australia/Sydney', 'Sydney'],
+const TIMEZONE_FALLBACK = [
+  'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
+  'America/Toronto', 'America/Vancouver', 'America/Sao_Paulo',
+  'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Europe/Rome', 'Europe/Moscow',
+  'Africa/Cairo', 'Africa/Lagos',
+  'Asia/Dubai', 'Asia/Karachi', 'Asia/Kolkata', 'Asia/Dhaka',
+  'Asia/Bangkok', 'Asia/Singapore', 'Asia/Tokyo', 'Asia/Seoul', 'Asia/Shanghai',
+  'Australia/Sydney', 'Australia/Melbourne', 'Pacific/Auckland',
+  'UTC',
 ];
 
 function getBrowserTimezone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 }
+
+function buildTimezoneGroups() {
+  try {
+    const all = Intl.supportedValuesOf('timeZone');
+    const groups = {};
+    for (const tz of all) {
+      const slash = tz.indexOf('/');
+      const region = slash >= 0 ? tz.slice(0, slash) : 'Other';
+      if (!groups[region]) groups[region] = [];
+      groups[region].push(tz);
+    }
+    return groups;
+  } catch {
+    const groups = {};
+    for (const tz of TIMEZONE_FALLBACK) {
+      const slash = tz.indexOf('/');
+      const region = slash >= 0 ? tz.slice(0, slash) : 'Other';
+      if (!groups[region]) groups[region] = [];
+      groups[region].push(tz);
+    }
+    return groups;
+  }
+}
+
+const TIMEZONE_GROUPS = buildTimezoneGroups();
 
 export default function MentorAvailabilityModal({ open, onClose, mentorProfileId, userId, onSaved }) {
   const [loading, setLoading] = useState(true);
@@ -147,9 +167,10 @@ export default function MentorAvailabilityModal({ open, onClose, mentorProfileId
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close"
             className="rounded-full p-2 text-[var(--bridge-text-muted)] transition hover:bg-[color-mix(in_srgb,var(--bridge-surface-muted)_90%,var(--bridge-text)_4%)] hover:text-[var(--bridge-text)]"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5" aria-hidden />
           </button>
         </div>
 
@@ -254,13 +275,17 @@ export default function MentorAvailabilityModal({ open, onClose, mentorProfileId
               disabled={saving || loading}
               className="w-full rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3 py-2.5 text-sm font-semibold text-[var(--bridge-text)] outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/20 disabled:opacity-50"
             >
-              {!TIMEZONE_OPTIONS.some(([value]) => value === timezone) && (
-                <option value={timezone}>{timezone}</option>
+              {!Object.values(TIMEZONE_GROUPS).flat().includes(timezone) && (
+                <option value={timezone}>{timezone.replace(/_/g, ' ')}</option>
               )}
-              {TIMEZONE_OPTIONS.map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
+              {Object.entries(TIMEZONE_GROUPS).map(([region, tzs]) => (
+                <optgroup key={region} label={region}>
+                  {tzs.map((tz) => (
+                    <option key={tz} value={tz}>
+                      {tz.slice(tz.lastIndexOf('/') + 1).replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </label>

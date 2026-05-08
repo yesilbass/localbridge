@@ -8,7 +8,7 @@ import Reveal from '../../components/Reveal';
 import { focusRing } from '../../ui';
 import MentorMatchWizard from '../../components/MentorMatchWizard';
 import { getAIMatchedMentors, saveMenteeAssessment, loadMenteeAssessment } from '../../api/aiMatching';
-import { getRemainingUses, hasReachedLimit, recordUsage, LIMITS } from '../../api/aiUsage';
+import { getRemainingUses, hasReachedLimit, LIMITS } from '../../api/aiUsage';
 import { PAGE_SIZE, INDUSTRIES, TIERS, SORT_OPTIONS, normalizeMentorId } from './constants';
 import MentorCard, { MentorGridSkeleton } from './MentorCard';
 import { AiMatchCard, AiHonorableCard } from './AiMatchCards';
@@ -180,7 +180,7 @@ export default function Mentors() {
         resumeText: formData.resumeBase64 ?? null,
       });
       setAiResults(results);
-      try { await recordUsage(user.id, 'mentor_match'); setRemainingUses(prev => Math.max(0, (prev ?? 1) - 1)); } catch { /* non-fatal */ }
+      setRemainingUses(prev => Math.max(0, (prev ?? 1) - 1));
     } catch (e) {
       setAiError(e.message || 'Something went wrong. Please try again.');
     } finally {

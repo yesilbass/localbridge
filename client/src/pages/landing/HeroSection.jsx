@@ -116,7 +116,7 @@ export default function HeroSection() {
               {...enter(0.05, 'y', 14, DUR_MED)}
               className="block"
             >
-              Book the person
+              The fastest path
             </motion.span>
             <motion.span
               {...enter(0.18, 'y', 14, DUR_MED)}
@@ -126,7 +126,7 @@ export default function HeroSection() {
                   'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)',
               }}
             >
-              who&rsquo;s already done it.
+              to your next role.
             </motion.span>
           </h1>
 
@@ -140,7 +140,7 @@ export default function HeroSection() {
               color: 'color-mix(in srgb, var(--bridge-text) 55%, transparent)',
             }}
           >
-            A sharp hour with the operator you&rsquo;ve been chasing.
+            Talk to someone who's already done it.
           </motion.p>
 
           {/* Sub-copy (t=0.45) */}
