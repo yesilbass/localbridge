@@ -11,9 +11,9 @@ export default function HeroSection({ user, ready }) {
 
   // On low-tier we skip the typewriter (renders full text immediately) and
   // collapse the spring fly-ins into simple opacity/translate.
-  const typeSpeed   = isLow ? 0   : isMid ? 18  : 24;
-  const firstDelay  = isLow ? 0   : isMid ? 60  : 90;
-  const secondDelay = isLow ? 0   : isMid ? 50  : 70;
+  const typeSpeed   = isLow ? 0   : isMid ? 28  : 48;
+  const firstDelay  = isLow ? 0   : isMid ? 120 : 300;
+  const secondDelay = isLow ? 0   : isMid ? 90  : 140;
 
   // usePerfTier returns the correct tier on first client render, so seeding
   // these straight from isLow lets low-tier skip every fly-in spring entirely.
@@ -30,13 +30,11 @@ export default function HeroSection({ user, ready }) {
     scale: 1,
   };
 
-  // Snappier spring on high tier; lighter on mid tier.
+  // Heavier spring = longer, more physical settle. Mid tier is snappier.
   const flyTransition = isMid
-    ? { type: 'spring', stiffness: 220, damping: 26, mass: 0.55 }
-    : { type: 'spring', stiffness: 180, damping: 22, mass: 0.7 };
+    ? { type: 'spring', stiffness: 190, damping: 28, mass: 0.7 }
+    : { type: 'spring', stiffness: 110, damping: 22, mass: 1.3 };
 
-  // Smaller travel + smaller delays = visibly faster, less janky on low GPUs.
-  // On low-tier we just render at rest (no fly-in springs at all).
   const travelScale = isMid ? 0.6 : 1;
   const flyIn = (from, delay = 0) => {
     if (isLow) {
@@ -56,41 +54,60 @@ export default function HeroSection({ user, ready }) {
     };
   };
 
+  // Staggered cascade — each beat has room to breathe before the next fires.
   const eyebrowFly = flyIn(
-    { opacity: 0, x: -120, y: -14, rotate: -3, scale: 0.94 },
+    { opacity: 0, x: -100, y: -12, rotate: -2.5, scale: 0.93 },
     0.0,
   );
   const taglineFly = flyIn(
-    { opacity: 0, x: -60, y: 28, rotate: -2, scale: 0.97 },
-    0.04,
+    { opacity: 0, x: -50, y: 32, rotate: -1.5, scale: 0.97 },
+    0.34,
   );
   const copyFly = flyIn(
-    { opacity: 0, x: -120, y: 24, rotate: -1.5, scale: 0.97 },
-    0.08,
+    { opacity: 0, x: -80, y: 28, rotate: -1, scale: 0.97 },
+    0.58,
   );
   const ctaFly = flyIn(
-    { opacity: 0, x: -28, y: 80, rotate: 2, scale: 0.94 },
-    0.12,
+    { opacity: 0, x: -24, y: 64, rotate: 1.5, scale: 0.95 },
+    0.82,
   );
   const trustFly = flyIn(
-    { opacity: 0, x: 32, y: 72, rotate: 1.8, scale: 0.94 },
-    0.16,
+    { opacity: 0, x: 20, y: 56, rotate: 1, scale: 0.96 },
+    1.04,
   );
+  // Card leads slightly — visible before copy so the eye has something to lock on.
   const cardFly = flyIn(
-    { opacity: 0, x: 180, y: 36, rotate: 5, rotateY: -10, scale: 0.9 },
+    { opacity: 0, x: 160, y: 40, rotate: 4, rotateY: -8, scale: 0.88 },
     0.06,
   );
 
   return (
     <section className="relative flex min-h-[94vh] items-center overflow-hidden px-5 pt-28 pb-24 sm:px-8 lg:pt-36">
-      {/* Soft vignette overlay */}
+      {/* ── Background depth layers ─────────────────────────────────── */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse 80% 60% at 50% 35%, transparent 0%, var(--bridge-canvas) 90%)',
-          }}
-        />
+        {/* Subtle dot-mesh texture — adds surface over the flat canvas */}
+        <div className="absolute inset-0 opacity-[0.028]"
+          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, var(--bridge-text) 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+
+        {/* Left bloom — sits behind headline copy */}
+        <div className="absolute -left-[10%] top-[8%] h-[72%] w-[55%] rounded-full blur-[100px]"
+          style={{ background: 'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 32%, transparent) 0%, transparent 70%)', opacity: 0.38 }} />
+
+        {/* Right bloom — depth behind the preview card */}
+        <div className="absolute -right-[8%] top-[5%] h-[65%] w-[50%] rounded-full blur-[110px]"
+          style={{ background: 'radial-gradient(closest-side, color-mix(in srgb, var(--lp-counter) 40%, transparent) 0%, transparent 70%)', opacity: 0.22 }} />
+
+        {/* Bottom-edge fade — grounds the section into the next */}
+        <div className="absolute inset-x-0 bottom-0 h-40"
+          style={{ background: 'linear-gradient(to top, var(--bridge-canvas) 0%, transparent 100%)' }} />
+
+        {/* Top-edge radial vignette — focuses eye center */}
+        <div className="absolute inset-0"
+          style={{ background: 'radial-gradient(ellipse 90% 70% at 50% 30%, transparent 30%, color-mix(in srgb, var(--bridge-canvas) 55%, transparent) 100%)' }} />
+
+        {/* Section hairline at bottom */}
+        <div className="absolute inset-x-0 bottom-0 h-px"
+          style={{ background: 'linear-gradient(to right, transparent, color-mix(in srgb, var(--color-primary) 30%, transparent), transparent)' }} />
       </div>
 
       <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-14 lg:grid-cols-12 lg:gap-12">
