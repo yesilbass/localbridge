@@ -173,6 +173,7 @@ export default function HeroLiveMatch() {
   return (
     <div
       ref={rootRef}
+      data-hero-live-match
       className="relative w-full rounded-3xl p-7"
       style={{
         backgroundColor: 'var(--bridge-surface)',
@@ -184,7 +185,6 @@ export default function HeroLiveMatch() {
         @media (min-width: 640px) { [data-hero-live-match] { min-height: 440px !important; } }
         @media (min-width: 1024px) { [data-hero-live-match] { min-height: 520px !important; } }
       `}</style>
-      <div data-hero-live-match style={{ minHeight: 400 }} />
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
