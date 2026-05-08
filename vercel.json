@@ -12,6 +12,7 @@
     { "source": "/api/create-booking-checkout", "destination": "/api/create-booking-checkout.js" },
     { "source": "/api/finalize-checkout", "destination": "/api/finalize-checkout.js" },
     { "source": "/api/realtime-session", "destination": "/api/realtime-session.js" },
+    { "source": "/api/ai-proxy", "destination": "/api/ai-proxy.js" },
     { "source": "/api/cancel-session", "destination": "/api/cancel-session.js" },
     { "source": "/api/(.*)", "destination": "/api/server" },
     { "source": "/auth/(.*)", "destination": "/api/server" },

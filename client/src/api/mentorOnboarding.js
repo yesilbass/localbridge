@@ -1,4 +1,5 @@
 import supabase from "./supabase";
+import { callAIProxy } from "./ai";
 
 export const DEFAULT_BIO =
   "You're live on Bridge as a mentor. Update your headline, story, and focus areas so the right mentees know what to book you for.";
@@ -93,9 +94,6 @@ export async function completeMentorOnboarding(profileId) {
 }
 
 export async function polishMentorProfile({ bio, expertise, workExperience = [] }) {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  if (!apiKey) throw new Error('VITE_OPENAI_API_KEY is not set.');
-
   const prompt = `Polish the following mentor profile and return ONLY valid JSON with exactly these three keys:
 - bio: rewrite in first person, professional tone, 2-3 compelling sentences
 - expertise: keep as clean Title Case strings, max 8 tags
@@ -106,37 +104,12 @@ ${JSON.stringify({ bio, expertise, work_experience: workExperience }, null, 2)}
 
 Return ONLY valid JSON — no markdown, no preamble, no code fences.`;
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o',
-      max_tokens: 2000,
-      messages: [
-        { role: 'system', content: 'You are a professional profile writer. Return only valid JSON.' },
-        { role: 'user', content: prompt },
-      ],
-    }),
+  const parsed = await callAIProxy('claude_chat', {
+    systemPrompt: 'You are a professional profile writer. Return only valid JSON.',
+    prompt,
+    maxTokens: 2000,
+    json: true,
   });
-
-  if (!response.ok) {
-    const body = await response.text().catch(() => '');
-    throw new Error(`OpenAI API error ${response.status}: ${body}`);
-  }
-
-  const json = await response.json();
-  const rawText = json.choices?.[0]?.message?.content ?? '';
-  const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
-
-  let parsed;
-  try {
-    parsed = JSON.parse(cleaned);
-  } catch {
-    throw new Error('Failed to parse AI response as JSON.');
-  }
 
   if (typeof parsed.bio !== 'string') throw new Error('AI returned an invalid bio.');
   if (!Array.isArray(parsed.expertise)) throw new Error('AI returned invalid expertise.');

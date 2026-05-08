@@ -21,17 +21,6 @@ export async function hasReachedLimit(userId, feature) {
   return used >= LIMITS[feature];
 }
 
-export async function recordUsage(userId, feature) {
-  const { data, error } = await supabase
-    .from("ai_usage")
-    .insert({ user_id: userId, feature })
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
 export async function getRemainingUses(userId, feature) {
   const used = await getUsageCount(userId, feature);
   return Math.max(0, LIMITS[feature] - used);

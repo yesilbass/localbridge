@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Mic, MicOff, CheckCircle2, Loader2 } from 'lucide-react'
 import supabase from '../api/supabase'
+import { callAIProxy } from '../api/ai'
 import { useAuth } from '../context/useAuth'
 
 const QUESTIONS = {
@@ -259,47 +260,7 @@ export default function IntakeCall() {
       const transcript = transcriptRef.current
       const sessionType = sessionData.session_type
 
-      // Build summary via standard OpenAI chat completion
-      const formatted = transcript
-        .map(t => `${t.role === 'assistant' ? 'Bridge' : 'Mentee'}: ${t.text}`)
-        .join('\n')
-
-      const summaryRes = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          max_tokens: 500,
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are generating a mentor briefing from a voice intake interview transcript. ' +
-                'Write in third person about the mentee. Be specific and actionable. ' +
-                'Use plain text only, no markdown, no bullet symbols.',
-            },
-            {
-              role: 'user',
-              content:
-                `Session type: ${sessionType}\n\n` +
-                `Transcript:\n${formatted}\n\n` +
-                'Generate a mentor briefing in this exact format:\n\n' +
-                'MENTOR BRIEFING\n' +
-                'Session type: [session type]\n\n' +
-                'Who the mentee is: [2-3 sentences on background and situation]\n\n' +
-                'What they want from this session: [1-2 sentences on goal]\n\n' +
-                'Key challenges: [2-3 sentences on specific problems raised]\n\n' +
-                'What to focus on: [1-2 sentences of direct guidance for the mentor]',
-            },
-          ],
-        }),
-      })
-
-      const summaryData = await summaryRes.json()
-      const summary = summaryData.choices?.[0]?.message?.content?.trim() ?? ''
+      const summary = await callAIProxy('intake_summary', { sessionType, transcript })
 
       // Save to Supabase sessions table
       await supabase

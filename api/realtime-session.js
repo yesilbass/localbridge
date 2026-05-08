@@ -6,11 +6,56 @@
 import { intakePrompt } from './prompts/intakePrompt.js'
 import supabase from './_lib/supabase.js'
 import { verifyAuthUser } from './_lib/auth.js'
+import { applyCors } from './_lib/allowedOrigins.js'
 
 const VALID_SESSION_TYPES = ['career_advice', 'interview_prep', 'resume_review', 'networking']
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const REALTIME_FEATURE = 'realtime_session'
+
+function minuteStartIso() {
+  const date = new Date()
+  date.setSeconds(0, 0)
+  return date.toISOString()
+}
+
+function dayStartIso() {
+  const date = new Date()
+  date.setHours(0, 0, 0, 0)
+  return date.toISOString()
+}
+
+async function getUsageCount(userId, sinceIso) {
+  const { count, error } = await supabase
+    .from('ai_usage')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('feature', REALTIME_FEATURE)
+    .gte('created_at', sinceIso)
+
+  if (error) throw error
+  return count ?? 0
+}
+
+async function hasRealtimeCapacity(userId) {
+  const [usedThisMinute, usedToday] = await Promise.all([
+    getUsageCount(userId, minuteStartIso()),
+    getUsageCount(userId, dayStartIso()),
+  ])
+
+  return usedThisMinute < 1 && usedToday < 5
+}
+
+async function recordRealtimeUsage(userId) {
+  const { error } = await supabase
+    .from('ai_usage')
+    .insert({ user_id: userId, feature: REALTIME_FEATURE })
+
+  if (error) throw error
+}
 
 export default async function handler(req, res) {
+  applyCors(req, res, 'POST, OPTIONS')
+  if (req.method === 'OPTIONS') return res.status(204).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const { user, error: authError } = await verifyAuthUser(req)
@@ -39,6 +84,14 @@ export default async function handler(req, res) {
   }
   if (bridgeSession.mentee_id !== user.id) {
     return res.status(403).json({ error: 'You do not own this session' })
+  }
+
+  try {
+    const allowed = await hasRealtimeCapacity(user.id)
+    if (!allowed) return res.status(429).json({ error: 'Realtime session limit reached' })
+  } catch (err) {
+    console.error('[realtime-session] rate limit error:', err)
+    return res.status(500).json({ error: 'Could not create realtime session' })
   }
 
   const apiKey = process.env.OPENAI_API_KEY
@@ -92,6 +145,7 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json()
+    await recordRealtimeUsage(user.id)
     return res.json(data)
   } catch (err) {
     console.error('[realtime-session] error:', err)
