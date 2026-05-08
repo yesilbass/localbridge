@@ -3,7 +3,11 @@ import { loadStripe } from '@stripe/stripe-js';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+if (!PUBLISHABLE_KEY) {
+  console.error('[Stripe] VITE_STRIPE_PUBLISHABLE_KEY is missing — restart Vite after editing client/.env.');
+}
+const stripePromise = PUBLISHABLE_KEY ? loadStripe(PUBLISHABLE_KEY) : Promise.resolve(null);
 
 /**
  * Renders via portal to document.body so position:fixed is viewport-relative.
@@ -70,9 +74,15 @@ export default function EmbeddedCheckoutPanel({ clientSecret, onClose }) {
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-stone-50/50 p-4 sm:p-6 dark:bg-stone-900/80">
-            <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
-              <EmbeddedCheckout />
-            </EmbeddedCheckoutProvider>
+            {PUBLISHABLE_KEY ? (
+              <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
+                <EmbeddedCheckout />
+              </EmbeddedCheckoutProvider>
+            ) : (
+              <div className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm font-semibold text-red-800">
+                Stripe publishable key missing. Add VITE_STRIPE_PUBLISHABLE_KEY to client/.env and restart `npm run dev`.
+              </div>
+            )}
           </div>
 
           <div className="flex shrink-0 items-center justify-between border-t border-stone-200 bg-white px-6 py-3 dark:border-stone-800 dark:bg-stone-950">

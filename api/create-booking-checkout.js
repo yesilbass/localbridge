@@ -107,6 +107,6 @@ export default async function handler(req, res) {
     res.json({ clientSecret: session.client_secret });
   } catch (error) {
     console.error('Booking checkout error:', error);
-    return jsonError(res, 500, 'Could not create booking checkout.');
+    return jsonError(res, 500, error?.message || 'Could not create booking checkout.');
   }
 }

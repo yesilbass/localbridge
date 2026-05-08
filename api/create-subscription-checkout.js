@@ -64,6 +64,6 @@ export default async function handler(req, res) {
     res.json({ clientSecret: session.client_secret });
   } catch (error) {
     console.error('Subscription checkout error:', error);
-    return jsonError(res, 500, 'Could not create subscription checkout.');
+    return jsonError(res, 500, error?.message || 'Could not create subscription checkout.');
   }
 }
