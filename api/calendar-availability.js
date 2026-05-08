@@ -3,21 +3,26 @@ import supabase from './_lib/supabase.js';
 import { buildAuthedClient } from './_lib/oauth.js';
 import { applyCors } from './_lib/allowedOrigins.js';
 import { verifyAuthUser } from './_lib/auth.js';
+import { jsonError, validateJsonBody } from './_lib/security.js';
+import { z } from 'zod';
+
+const AVAILABILITY_SCHEMA = z.object({
+  mentor_profile_id: z.string().uuid(),
+  date: z.string().date(),
+});
 
 export default async function handler(req, res) {
   applyCors(req, res, 'POST, OPTIONS');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') return jsonError(res, 405, 'Method not allowed');
 
   const { user, error: authError } = await verifyAuthUser(req);
-  if (!user) return res.status(401).json({ error: authError || 'Unauthorized' });
+  if (!user) return jsonError(res, 401, authError || 'Unauthorized');
 
-  const { mentor_profile_id, date } = req.body ?? {};
-
-  if (!mentor_profile_id || !date) {
-    return res.status(400).json({ error: 'mentor_profile_id and date are required' });
-  }
+  const body = validateJsonBody(req, AVAILABILITY_SCHEMA);
+  if (body.error) return jsonError(res, 400, body.error);
+  const { mentor_profile_id, date } = body.data;
 
   const { data: profile, error } = await supabase
     .from('mentor_profiles')
@@ -26,7 +31,7 @@ export default async function handler(req, res) {
     .maybeSingle();
 
   if (error || !profile) {
-    return res.status(404).json({ error: 'Mentor profile not found' });
+    return jsonError(res, 404, 'Mentor profile not found');
   }
 
   if (!profile.google_refresh_token) {
@@ -54,6 +59,6 @@ export default async function handler(req, res) {
     return res.json({ busy });
   } catch (err) {
     console.error('Availability error:', err);
-    return res.status(500).json({ error: 'Could not fetch calendar availability' });
+    return jsonError(res, 500, 'Could not fetch calendar availability');
   }
 }

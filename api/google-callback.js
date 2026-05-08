@@ -1,23 +1,27 @@
 import { getOAuth2Client } from './_lib/oauth.js';
 import supabase from './_lib/supabase.js';
 import { getClientUrl } from './_lib/allowedOrigins.js';
+import { consumeOAuthState } from './_lib/oauthState.js';
+import { applySecurityHeaders } from './_lib/security.js';
 
 export default async function handler(req, res) {
+  applySecurityHeaders(res);
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   const { code, state: rawState, error: oauthError } = req.query;
+  let clientUrl = getClientUrl('');
 
-  let profileId, clientUrl;
+  let state = { ok: false };
   try {
-    const parsed = JSON.parse(rawState);
-    profileId = parsed.profileId;
-    clientUrl = getClientUrl(parsed.origin);
-  } catch {
-    profileId = rawState;
-    clientUrl = getClientUrl('');
+    state = await consumeOAuthState({ supabase, rawState });
+    if (state.ok) {
+      clientUrl = getClientUrl(state.origin);
+    }
+  } catch (error) {
+    console.error('[google-callback] state verification failed:', error);
   }
 
-  if (oauthError || !code || !profileId) {
+  if (oauthError || !code || !state.ok) {
     return res.redirect(`${clientUrl}/dashboard?calendar=error`);
   }
 
@@ -30,7 +34,7 @@ export default async function handler(req, res) {
     // calendar operations, so do NOT mark the mentor as connected — bounce them back
     // with an error so they reconnect via account.google.com revoke + reauthorize.
     if (!tokens.refresh_token) {
-      console.warn('OAuth callback: no refresh_token returned for profile', profileId);
+      console.warn('OAuth callback: no refresh_token returned for profile', state.profileId);
       return res.redirect(`${clientUrl}/dashboard?calendar=error&reason=no_refresh_token`);
     }
 
@@ -40,7 +44,8 @@ export default async function handler(req, res) {
         calendar_connected: true,
         google_refresh_token: tokens.refresh_token,
       })
-      .eq('id', profileId);
+      .eq('id', state.profileId)
+      .eq('user_id', state.userId);
 
     if (error) {
       console.error('Failed to store tokens:', error);

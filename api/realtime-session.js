@@ -7,10 +7,16 @@ import { intakePrompt } from './prompts/intakePrompt.js'
 import supabase from './_lib/supabase.js'
 import { verifyAuthUser } from './_lib/auth.js'
 import { applyCors } from './_lib/allowedOrigins.js'
+import { jsonError, validateJsonBody } from './_lib/security.js'
+import { z } from 'zod'
 
 const VALID_SESSION_TYPES = ['career_advice', 'interview_prep', 'resume_review', 'networking']
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const REALTIME_FEATURE = 'realtime_session'
+const REALTIME_SCHEMA = z.object({
+  sessionType: z.enum(VALID_SESSION_TYPES),
+  sessionId: z.string().regex(UUID_RE),
+})
 
 function minuteStartIso() {
   const date = new Date()
@@ -56,20 +62,14 @@ async function recordRealtimeUsage(userId) {
 export default async function handler(req, res) {
   applyCors(req, res, 'POST, OPTIONS')
   if (req.method === 'OPTIONS') return res.status(204).end()
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
+  if (req.method !== 'POST') return jsonError(res, 405, 'Method not allowed')
 
   const { user, error: authError } = await verifyAuthUser(req)
-  if (!user) return res.status(401).json({ error: authError || 'Unauthorized' })
+  if (!user) return jsonError(res, 401, authError || 'Unauthorized')
 
-  const { sessionType, sessionId } = req.body ?? {}
-
-  if (!sessionType || !VALID_SESSION_TYPES.includes(sessionType)) {
-    return res.status(400).json({ error: 'Invalid or missing sessionType' })
-  }
-
-  if (!sessionId || !UUID_RE.test(String(sessionId))) {
-    return res.status(400).json({ error: 'Invalid or missing sessionId' })
-  }
+  const body = validateJsonBody(req, REALTIME_SCHEMA)
+  if (body.error) return jsonError(res, 400, body.error)
+  const { sessionType, sessionId } = body.data
 
   // Confirm the caller actually owns the session they're running intake for —
   // prevents authenticated-but-unrelated users from burning quota on someone else's session.
@@ -80,22 +80,22 @@ export default async function handler(req, res) {
     .maybeSingle()
 
   if (sessionError || !bridgeSession) {
-    return res.status(404).json({ error: 'Session not found' })
+    return jsonError(res, 404, 'Session not found')
   }
   if (bridgeSession.mentee_id !== user.id) {
-    return res.status(403).json({ error: 'You do not own this session' })
+    return jsonError(res, 403, 'You do not own this session')
   }
 
   try {
     const allowed = await hasRealtimeCapacity(user.id)
-    if (!allowed) return res.status(429).json({ error: 'Realtime session limit reached' })
+    if (!allowed) return jsonError(res, 429, 'Realtime session limit reached')
   } catch (err) {
     console.error('[realtime-session] rate limit error:', err)
-    return res.status(500).json({ error: 'Could not create realtime session' })
+    return jsonError(res, 500, 'Could not create realtime session')
   }
 
   const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) return res.status(500).json({ error: 'OPENAI_API_KEY is not configured' })
+  if (!apiKey) return jsonError(res, 500, 'Realtime service is not configured')
 
   try {
     const instructions =
@@ -141,7 +141,7 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errText = await response.text()
       console.error('[realtime-session] OpenAI error', response.status, errText)
-      return res.status(502).json({ error: 'Could not create realtime session' })
+      return jsonError(res, 502, 'Could not create realtime session')
     }
 
     const data = await response.json()
@@ -149,6 +149,6 @@ export default async function handler(req, res) {
     return res.json(data)
   } catch (err) {
     console.error('[realtime-session] error:', err)
-    return res.status(500).json({ error: 'Failed to create realtime session' })
+    return jsonError(res, 500, 'Failed to create realtime session')
   }
 }

@@ -2,6 +2,8 @@ import { getStripe } from './_lib/stripeClient.js';
 import { getPublicOrigin } from './_lib/publicOrigin.js';
 import supabase from './_lib/supabase.js';
 import { verifyAuthUser } from './_lib/auth.js';
+import { applySecurityHeaders, jsonError, validateJsonBody } from './_lib/security.js';
+import { z } from 'zod';
 
 const SESSION_TYPE_MAP = {
   career_advice: 'Career Advice',
@@ -13,46 +15,57 @@ const SESSION_TYPE_KEY_FROM_NAME = Object.fromEntries(
   Object.entries(SESSION_TYPE_MAP).map(([key, value]) => [value, key]),
 );
 
+const CHECKOUT_SCHEMA = z.object({
+  userEmail: z.string().email().max(320).optional().or(z.literal('')),
+  menteeName: z.string().max(500).optional(),
+  mentorId: z.string().uuid(),
+  mentorName: z.string().max(500).optional(),
+  sessionType: z.string().max(80).optional(),
+  sessionTypeKey: z.enum(['career_advice', 'interview_prep', 'resume_review', 'networking']).optional(),
+  scheduledDate: z.string().datetime({ offset: true }),
+  message: z.string().max(350).optional(),
+});
+
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  applySecurityHeaders(res);
+  if (req.method !== 'POST') return jsonError(res, 405, 'Method not allowed');
 
   const stripe = getStripe();
   if (!stripe) {
-    return res.status(503).json({ error: 'Stripe is not configured on the server.' });
+    return jsonError(res, 503, 'Stripe is not configured on the server.');
   }
 
   const { user, error: authError } = await verifyAuthUser(req);
-  if (!user) return res.status(401).json({ error: authError || 'Unauthorized' });
+  if (!user) return jsonError(res, 401, authError || 'Unauthorized');
+
+  const body = validateJsonBody(req, CHECKOUT_SCHEMA);
+  if (body.error) return jsonError(res, 400, body.error);
 
   const {
     userEmail, menteeName, mentorId, mentorName,
     sessionType, sessionTypeKey, scheduledDate,
     message,
-  } = req.body;
+  } = body.data;
 
   const typeKey = sessionTypeKey || SESSION_TYPE_KEY_FROM_NAME[sessionType];
   if (!typeKey || !SESSION_TYPE_MAP[typeKey]) {
-    return res.status(400).json({ error: 'Invalid session type.' });
-  }
-
-  if (!mentorId) {
-    return res.status(400).json({ error: 'mentorId is required.' });
+    return jsonError(res, 400, 'Invalid session type.');
   }
 
   // Price comes from the mentor profile, not the client. Trusting the client
   // would let a caller set sessionPrice to $0.01 and pay almost nothing.
   const { data: mentorProfile, error: mentorError } = await supabase
     .from('mentor_profiles')
-    .select('session_rate, name')
+    .select('session_rate, name, onboarding_complete, available')
     .eq('id', mentorId)
     .maybeSingle();
 
-  if (mentorError || !mentorProfile) {
-    return res.status(404).json({ error: 'Mentor not found.' });
+  if (mentorError || !mentorProfile || mentorProfile.available === false || mentorProfile.onboarding_complete === false) {
+    return jsonError(res, 404, 'Mentor not found.');
   }
   const safePrice = Number(mentorProfile.session_rate);
   if (!safePrice || safePrice <= 0) {
-    return res.status(400).json({ error: 'This mentor has not set a session rate yet.' });
+    return jsonError(res, 400, 'This mentor has not set a session rate yet.');
   }
   const safeMentorName = mentorProfile.name || mentorName || 'mentor';
 
@@ -94,6 +107,6 @@ export default async function handler(req, res) {
     res.json({ clientSecret: session.client_secret });
   } catch (error) {
     console.error('Booking checkout error:', error);
-    res.status(500).json({ error: 'Could not create booking checkout.' });
+    return jsonError(res, 500, 'Could not create booking checkout.');
   }
 }

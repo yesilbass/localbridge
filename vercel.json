@@ -14,12 +14,20 @@
     { "source": "/api/realtime-session", "destination": "/api/realtime-session.js" },
     { "source": "/api/ai-proxy", "destination": "/api/ai-proxy.js" },
     { "source": "/api/cancel-session", "destination": "/api/cancel-session.js" },
-    { "source": "/api/(.*)", "destination": "/api/server" },
-    { "source": "/auth/(.*)", "destination": "/api/server" },
-    { "source": "/calendar/(.*)", "destination": "/api/server" },
+    { "source": "/api/(.*)", "destination": "/api/server.js" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Content-Security-Policy-Report-Only", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.openai.com https://api.anthropic.com; frame-src https://js.stripe.com https://hooks.stripe.com; media-src 'self' blob: data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'" }
+      ]
+    },
     {
       "source": "/index.html",
       "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]

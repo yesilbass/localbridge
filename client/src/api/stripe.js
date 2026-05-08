@@ -53,9 +53,10 @@ export async function createSubscriptionCheckout({ planName, userEmail }) {
 }
 
 export async function finalizeCheckout(sessionId) {
+  const auth = await getAuthHeaders();
   const res = await fetch('/api/finalize-checkout', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...auth },
     body: JSON.stringify({ sessionId }),
   });
   const data = await res.json().catch(() => ({}));
