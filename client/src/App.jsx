@@ -31,6 +31,7 @@ import Privacy from './pages/footer/Privacy.jsx';
 import Terms from './pages/footer/Terms.jsx';
 import Cookies from './pages/footer/Cookies.jsx';
 import FeedbackFAB from './components/FeedbackFAB';
+import ErrorBoundary from './components/ErrorBoundary';
 import VideoCall from './pages/VideoCall';
 import IntakeCall from './pages/IntakeCall';
 import MentorOnboarding from './pages/MentorOnboarding';
@@ -59,7 +60,7 @@ function AppContent() {
   }, [location.pathname]);
 
   return (
-    <div className="relative isolate min-h-screen bg-bridge-page text-stone-900 font-sans antialiased flex flex-col">
+    <div className="relative isolate min-h-screen overflow-x-hidden bg-bridge-page text-stone-900 font-sans antialiased flex flex-col">
       <BridgeGlobalAtmosphere />
       {!isVideoCall && <ScrollProgress />}
       {!isVideoCall && <MagneticPointer />}
@@ -68,6 +69,7 @@ function AppContent() {
         key={location.pathname}
         className={`relative z-10 flex flex-1 flex-col animate-page-enter ${isLanding ? '' : 'pt-[5.25rem]'}`}
       >
+        <ErrorBoundary>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
@@ -95,6 +97,7 @@ function AppContent() {
           <Route path="/cookies" element={<Cookies />} />
           <Route path="/onboarding" element={<MentorOnboarding />} />
         </Routes>
+        </ErrorBoundary>
       </div>
       {!location.pathname.includes('/video') && <FeedbackFAB />}
       {!hideFooter && <Footer />}

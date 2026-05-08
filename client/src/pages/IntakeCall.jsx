@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Mic, MicOff, CheckCircle2, Loader2 } from 'lucide-react'
+import { Mic, MicOff, CheckCircle2, Loader2, Type } from 'lucide-react'
 import supabase from '../api/supabase'
 import { callAIProxy } from '../api/ai'
 import { useAuth } from '../context/useAuth'
@@ -35,26 +35,30 @@ const SESSION_TYPE_LABELS = {
   networking: 'Networking',
 }
 
-// flow states: idle | speaking | listening | processing | complete | error
+function isVoiceSupported() {
+  return (
+    typeof RTCPeerConnection !== 'undefined' &&
+    typeof navigator !== 'undefined' &&
+    typeof navigator.mediaDevices?.getUserMedia === 'function'
+  )
+}
 
 export default function IntakeCall() {
   const { sessionId } = useParams()
   const navigate = useNavigate()
   const { user, loading: authLoading } = useAuth()
 
-  const [pageState, setPageState] = useState('loading') // loading | ready | already_done | no_support
+  const [pageState, setPageState] = useState('loading')
   const [sessionData, setSessionData] = useState(null)
   const [mentorName, setMentorName] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+  const [textFallback, setTextFallback] = useState(false)
 
-  // flow
+  const [textStep, setTextStep] = useState(0)
+  const [textAnswers, setTextAnswers] = useState([])
+  const [currentAnswer, setCurrentAnswer] = useState('')
+
   const [flowState, setFlowState] = useState('idle')
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [currentQuestion, setCurrentQuestion] = useState('')
-  const [phase, setPhase] = useState('main') // main | followup
-  const [interimText, setInterimText] = useState('')
-
-  // WebRTC
   const pcRef = useRef(null)
   const dcRef = useRef(null)
   const localStreamRef = useRef(null)
@@ -62,7 +66,12 @@ export default function IntakeCall() {
   const [isConnecting, setIsConnecting] = useState(false)
   const [transcriptItems, setTranscriptItems] = useState([])
 
-  // Cleanup on unmount
+  useEffect(() => {
+    if (!isVoiceSupported()) {
+      setTextFallback(true)
+    }
+  }, [])
+
   useEffect(() => {
     return () => {
       localStreamRef.current?.getTracks().forEach(t => t.stop())
@@ -87,7 +96,6 @@ export default function IntakeCall() {
     return () => style.remove()
   }, [])
 
-  // Auth + session fetch
   useEffect(() => {
     if (authLoading) return
     if (!user) { navigate('/dashboard'); return }
@@ -117,12 +125,31 @@ export default function IntakeCall() {
     load().catch(() => navigate('/dashboard'))
   }, [authLoading, user, sessionId, navigate, pageState])
 
+  async function runSummaryProcessing() {
+    setFlowState('processing')
+    try {
+      const transcript = transcriptRef.current
+      const sessionType = sessionData.session_type
+
+      const summary = await callAIProxy('intake_summary', { sessionType, transcript })
+
+      await supabase
+        .from('sessions')
+        .update({ intake_summary: summary, intake_completed: true })
+        .eq('id', sessionId)
+
+      setFlowState('complete')
+    } catch (err) {
+      setErrorMessage(err?.message ?? 'Failed to save intake summary')
+      setFlowState('error')
+    }
+  }
+
   async function startRealtimeSession() {
     setIsConnecting(true)
-    setFlowState('speaking') // 'speaking' = session is live
+    setFlowState('speaking')
 
     try {
-      // 1. Fetch ephemeral token from our backend
       const { data: { session: authSession } } = await supabase.auth.getSession()
       const token = authSession?.access_token
       const res = await fetch('/api/realtime-session', {
@@ -133,15 +160,15 @@ export default function IntakeCall() {
         },
         body: JSON.stringify({
           sessionType: sessionData.session_type,
-          sessionId: sessionId,
+          sessionId,
         }),
       })
+
       if (!res.ok) throw new Error('Failed to get realtime session token')
       const data = await res.json()
       const ephemeralKey = data.client_secret?.value
       if (!ephemeralKey) throw new Error('No ephemeral key returned')
 
-      // 2. Set up WebRTC peer connection
       const pc = new RTCPeerConnection()
       pcRef.current = pc
 
@@ -155,19 +182,16 @@ export default function IntakeCall() {
         }
       }
 
-      // 3. Play assistant audio in an audio element
       const audioEl = document.createElement('audio')
       audioEl.autoplay = true
       audioEl.setAttribute('playsinline', '')
       document.body.appendChild(audioEl)
       pc.ontrack = (e) => { audioEl.srcObject = e.streams[0] }
 
-      // 4. Add microphone track
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       localStreamRef.current = stream
       stream.getTracks().forEach(track => pc.addTrack(track, stream))
 
-      // 5. Set up data channel for events
       const dc = pc.createDataChannel('oai-events')
       dcRef.current = dc
 
@@ -180,19 +204,14 @@ export default function IntakeCall() {
       dc.addEventListener('open', () => {
         dc.send(JSON.stringify({
           type: 'session.update',
-          session: {
-            instructions: null
-          }
+          session: { instructions: null },
         }))
         dc.send(JSON.stringify({
           type: 'response.create',
-          response: {
-            modalities: ['audio', 'text']
-          }
+          response: { modalities: ['audio', 'text'] },
         }))
       })
 
-      // 6. Create SDP offer and get answer from OpenAI
       const offer = await pc.createOffer()
       await pc.setLocalDescription(offer)
 
@@ -207,6 +226,7 @@ export default function IntakeCall() {
           body: offer.sdp,
         }
       )
+
       if (!sdpRes.ok) throw new Error('WebRTC SDP exchange failed')
       const answerSdp = await sdpRes.text()
       await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp })
@@ -220,7 +240,6 @@ export default function IntakeCall() {
   }
 
   function handleRealtimeEvent(event) {
-    // Capture assistant transcript
     if (
       event.type === 'response.audio_transcript.done' &&
       event.transcript
@@ -229,17 +248,14 @@ export default function IntakeCall() {
       setTranscriptItems(prev => [...prev, { role: 'assistant', text: event.transcript }])
     }
 
-    // Capture user transcript
     if (
       event.type === 'conversation.item.input_audio_transcription.completed' &&
       event.transcript
     ) {
       transcriptRef.current.push({ role: 'user', text: event.transcript })
       setTranscriptItems(prev => [...prev, { role: 'user', text: event.transcript }])
-      setInterimText(event.transcript)
     }
 
-    // Handle complete_intake function call
     if (
       event.type === 'response.function_call_arguments.done' &&
       event.name === 'complete_intake'
@@ -249,33 +265,36 @@ export default function IntakeCall() {
   }
 
   async function endSessionAndSummarise() {
-    // Stop all tracks and close connection
     localStreamRef.current?.getTracks().forEach(t => t.stop())
     pcRef.current?.close()
     document.querySelectorAll('audio[playsinline]').forEach(el => el.remove())
+    await runSummaryProcessing()
+  }
 
-    setFlowState('processing')
+  function handleTextNext() {
+    if (!currentAnswer.trim()) return
+    const questions = sessionData ? (QUESTIONS[sessionData.session_type] ?? QUESTIONS.career_advice) : []
+    const updatedAnswers = [...textAnswers, currentAnswer.trim()]
+    setTextAnswers(updatedAnswers)
+    setCurrentAnswer('')
 
-    try {
-      const transcript = transcriptRef.current
-      const sessionType = sessionData.session_type
-
-      const summary = await callAIProxy('intake_summary', { sessionType, transcript })
-
-      // Save to Supabase sessions table
-      await supabase
-        .from('sessions')
-        .update({ intake_summary: summary, intake_completed: true })
-        .eq('id', sessionId)
-
-      setFlowState('complete')
-    } catch (err) {
-      setErrorMessage(err?.message ?? 'Failed to save intake summary')
-      setFlowState('error')
+    if (textStep < questions.length - 1) {
+      setTextStep(textStep + 1)
+    } else {
+      submitTextIntake(questions, updatedAnswers)
     }
   }
 
-  // ── Screens ────────────────────────────────────────────────────────────────
+  async function submitTextIntake(questions, answers) {
+    transcriptRef.current = []
+    for (let i = 0; i < questions.length; i++) {
+      transcriptRef.current.push({ role: 'assistant', text: questions[i] })
+      if (answers[i]) {
+        transcriptRef.current.push({ role: 'user', text: answers[i] })
+      }
+    }
+    await runSummaryProcessing()
+  }
 
   if (pageState === 'loading' || (authLoading && pageState === 'loading')) {
     return (
@@ -348,7 +367,113 @@ export default function IntakeCall() {
     )
   }
 
-  // ── Main intake UI ─────────────────────────────────────────────────────────
+  const allQuestions = sessionData ? (QUESTIONS[sessionData.session_type] ?? QUESTIONS.career_advice) : []
+
+  if (textFallback && flowState !== 'processing') {
+    return (
+      <div className="min-h-screen" style={{ background: 'var(--bridge-canvas)' }}>
+        <div className="bg-stone-950 border-b border-white/10 px-6 py-10 text-center">
+          <p className="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">
+            {SESSION_TYPE_LABELS[sessionData?.session_type] ?? 'Session'} · Intake
+          </p>
+          <h1 className="text-2xl font-bold text-white mb-2">
+            Session with {mentorName}
+          </h1>
+          <p className="text-sm text-stone-400 max-w-md mx-auto leading-relaxed">
+            Before your session, answer a few short questions to help your mentor prepare.
+          </p>
+        </div>
+
+        <div className="max-w-xl mx-auto px-4 py-10">
+          <div
+            className="rounded-2xl p-8 shadow-xl"
+            style={{ background: 'var(--bridge-surface)', border: '1px solid var(--bridge-border)' }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--bridge-text-muted)' }}>
+                Question {textStep + 1} of {allQuestions.length}
+              </p>
+              <div className="flex gap-1">
+                {allQuestions.map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-1.5 w-6 rounded-full transition-colors"
+                    style={{ background: i <= textStep ? 'var(--color-primary)' : 'var(--bridge-border)' }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <p
+              className="text-xl font-medium leading-snug mb-6"
+              style={{ color: 'var(--bridge-text)' }}
+            >
+              {allQuestions[textStep]}
+            </p>
+
+            <div className="flex items-center gap-1.5 mb-4 text-xs" style={{ color: 'var(--bridge-text-muted)' }}>
+              <Type size={12} aria-hidden />
+              <span>Type your answer below</span>
+            </div>
+
+            <textarea
+              value={currentAnswer}
+              onChange={(e) => setCurrentAnswer(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleTextNext()
+              }}
+              rows={4}
+              placeholder="Your answer..."
+              aria-label={`Answer for: ${allQuestions[textStep]}`}
+              className="w-full resize-none rounded-xl border px-4 py-3 text-sm leading-relaxed outline-none transition"
+              style={{
+                background: 'var(--bridge-canvas)',
+                border: '1px solid var(--bridge-border)',
+                color: 'var(--bridge-text)',
+              }}
+            />
+
+            <p className="text-xs mt-1 mb-4" style={{ color: 'var(--bridge-text-muted)' }}>
+              Ctrl+Enter to continue
+            </p>
+
+            {flowState === 'error' && (
+              <p className="text-sm text-red-400 mb-4">{errorMessage}</p>
+            )}
+
+            <button
+              onClick={handleTextNext}
+              disabled={!currentAnswer.trim()}
+              className="w-full py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-40"
+              style={{
+                background: 'var(--color-primary)',
+                color: 'var(--color-on-primary)',
+              }}
+            >
+              {textStep < allQuestions.length - 1 ? 'Next question →' : 'Submit & generate briefing'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (flowState === 'processing') {
+    return (
+      <div className="min-h-screen flex items-center justify-center"
+        style={{ background: 'var(--bridge-canvas)' }}>
+        <div className="text-center">
+          <Loader2 size={36} className="animate-spin text-amber-400 mx-auto mb-4" />
+          <p className="text-sm font-medium" style={{ color: 'var(--bridge-text)' }}>
+            Generating mentor briefing...
+          </p>
+          <p className="text-xs mt-1" style={{ color: 'var(--bridge-text-muted)' }}>
+            This will just take a moment
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   const questions = sessionData ? (QUESTIONS[sessionData.session_type] ?? QUESTIONS.career_advice) : []
   const totalQuestions = questions.length
@@ -367,7 +492,6 @@ export default function IntakeCall() {
         error: 'Error',
       }[flowState] ?? ''
 
-  // Connecting loading screen
   if (isConnecting) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center"
@@ -389,11 +513,9 @@ export default function IntakeCall() {
     )
   }
 
-  // Active session UI (live)
-  if ((flowState === 'speaking' || flowState === 'listening') && !isConnecting) {
+  if (isLive && !isConnecting) {
     return (
       <div className="min-h-screen flex flex-col" style={{ background: 'var(--bridge-canvas)' }}>
-        {/* Top bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b"
           style={{ borderColor: 'var(--bridge-border)' }}>
           <div>
@@ -405,12 +527,11 @@ export default function IntakeCall() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" aria-hidden />
             <span className="text-xs font-medium text-emerald-400">Live</span>
           </div>
         </div>
 
-        {/* Transcript area — scrollable */}
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-3 max-w-2xl mx-auto w-full">
           {transcriptItems.length === 0 ? (
             <div className="flex items-center justify-center h-full">
@@ -433,7 +554,7 @@ export default function IntakeCall() {
                   style={item.role === 'assistant' ? {
                     background: 'var(--bridge-surface)',
                     border: '1px solid var(--bridge-border)',
-                    color: 'var(--bridge-text)'
+                    color: 'var(--bridge-text)',
                   } : {}}
                 >
                   {item.text}
@@ -443,12 +564,9 @@ export default function IntakeCall() {
           )}
         </div>
 
-        {/* Bottom bar — visualizer + controls */}
         <div className="border-t px-6 py-5" style={{ borderColor: 'var(--bridge-border)', background: 'var(--bridge-surface)' }}>
-          {/* Orb visualizer */}
           <div className="flex justify-center mb-4">
             <div className="relative flex items-center justify-center">
-              {/* Outer glow rings */}
               <div
                 className="absolute rounded-full"
                 style={{
@@ -472,7 +590,6 @@ export default function IntakeCall() {
                   animationDelay: '0.2s',
                 }}
               />
-              {/* Core orb */}
               <div
                 className="rounded-full"
                 style={{
@@ -480,31 +597,27 @@ export default function IntakeCall() {
                   height: '64px',
                   background: flowState === 'speaking'
                     ? 'radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--color-accent) 40%, #ffffff), var(--color-primary), var(--color-primary-hover))'
-                    : flowState === 'listening'
-                    ? 'radial-gradient(circle at 35% 35%, #6ee7b7, var(--color-success), color-mix(in srgb, var(--color-success) 70%, var(--color-secondary)))'
-                    : 'radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--color-accent) 40%, #ffffff), var(--color-primary), var(--color-primary-hover))',
+                    : 'radial-gradient(circle at 35% 35%, #6ee7b7, var(--color-success), color-mix(in srgb, var(--color-success) 70%, var(--color-secondary)))',
                   animation: flowState === 'speaking'
                     ? 'orbBreath 1s ease-in-out infinite alternate'
                     : 'orbBreath 2.5s ease-in-out infinite alternate',
                   boxShadow: flowState === 'speaking'
                     ? '0 0 30px color-mix(in srgb, var(--color-primary) 60%, transparent), 0 0 60px color-mix(in srgb, var(--color-primary) 30%, transparent)'
-                    : flowState === 'listening'
-                    ? '0 0 30px color-mix(in srgb, var(--color-success) 60%, transparent), 0 0 60px color-mix(in srgb, var(--color-success) 30%, transparent)'
-                    : '0 0 20px color-mix(in srgb, var(--color-primary) 40%, transparent)',
+                    : '0 0 30px color-mix(in srgb, var(--color-success) 60%, transparent), 0 0 60px color-mix(in srgb, var(--color-success) 30%, transparent)',
                 }}
               />
             </div>
           </div>
-          {/* Status + end button */}
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium" style={{ color: 'var(--bridge-text-muted)' }}>
               {flowState === 'speaking' ? 'Bridge AI is speaking...' : 'Listening to you...'}
             </p>
             <button
               onClick={endSessionAndSummarise}
+              aria-label="End voice session"
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-red-500/80 hover:bg-red-500 transition-colors"
             >
-              <MicOff size={14} />
+              <MicOff size={14} aria-hidden />
               End Session
             </button>
           </div>
@@ -513,28 +626,8 @@ export default function IntakeCall() {
     )
   }
 
-  // Processing screen
-  if (flowState === 'processing') {
-    return (
-      <div className="min-h-screen flex items-center justify-center"
-        style={{ background: 'var(--bridge-canvas)' }}>
-        <div className="text-center">
-          <Loader2 size={36} className="animate-spin text-amber-400 mx-auto mb-4" />
-          <p className="text-sm font-medium" style={{ color: 'var(--bridge-text)' }}>
-            Generating mentor briefing...
-          </p>
-          <p className="text-xs mt-1" style={{ color: 'var(--bridge-text-muted)' }}>
-            This will just take a moment
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  // Idle card (flowState === 'idle' or 'error')
   return (
     <div className="min-h-screen" style={{ background: 'var(--bridge-canvas)' }}>
-      {/* Hero */}
       <div className="bg-stone-950 border-b border-white/10 px-6 py-10 text-center">
         <p className="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">
           {SESSION_TYPE_LABELS[sessionData?.session_type] ?? 'Session'} · Intake
@@ -547,43 +640,24 @@ export default function IntakeCall() {
         </p>
       </div>
 
-      {/* Card */}
       <div className="max-w-xl mx-auto px-4 py-10">
         <div
           className="rounded-2xl p-8 shadow-xl"
           style={{ background: 'var(--bridge-surface)', border: '1px solid var(--bridge-border)' }}
         >
-          {/* Progress */}
           <div className="flex items-center justify-between mb-6">
             <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--bridge-text-muted)' }}>
-              {isIdle
-                ? `${totalQuestions} questions`
-                : `Question ${Math.min(currentQuestionIndex + 1, totalQuestions)} of ${totalQuestions}${phase === 'followup' ? ' · follow-up' : ''}`}
+              {totalQuestions} questions
             </p>
-            {!isIdle && (
-              <div className="flex gap-1">
-                {questions.map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-1.5 w-6 rounded-full transition-colors"
-                    style={{ background: i <= currentQuestionIndex ? 'var(--color-primary)' : 'var(--bridge-border)' }}
-                  />
-                ))}
-              </div>
-            )}
           </div>
 
-          {/* Question text */}
           <p
             className="text-xl font-medium leading-snug text-center mb-10"
             style={{ color: 'var(--bridge-text)', minHeight: '4rem' }}
           >
-            {isIdle
-              ? "Ready when you are. We'll ask you a few short questions — just speak naturally."
-              : currentQuestion}
+            Ready when you are. We'll ask you a few short questions — just speak naturally.
           </p>
 
-          {/* Mic button */}
           <div className="flex flex-col items-center gap-3 mb-6">
             {isConnecting ? (
               <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: 'var(--bridge-border)' }}>
@@ -592,22 +666,14 @@ export default function IntakeCall() {
             ) : isIdle ? (
               <button
                 onClick={startRealtimeSession}
-                className="relative w-20 h-20 rounded-full flex items-center justify-center bg-amber-500 hover:bg-amber-400 shadow-lg transition-all"
+                aria-label="Start voice session"
+                className="relative w-20 h-20 rounded-full flex items-center justify-center bg-amber-500 hover:bg-amber-400 shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-400"
               >
-                <Mic size={32} className="text-white" />
-              </button>
-            ) : isLive ? (
-              <button
-                onClick={endSessionAndSummarise}
-                title="Tap to end session"
-                className="relative w-20 h-20 rounded-full flex items-center justify-center bg-amber-500 shadow-lg shadow-amber-500/40"
-              >
-                <span className="absolute inset-0 rounded-full bg-amber-400 animate-ping opacity-40" />
-                <Mic size={32} className="text-white relative z-10" />
+                <Mic size={32} className="text-white" aria-hidden />
               </button>
             ) : flowState === 'error' ? (
               <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: 'color-mix(in srgb, red 15%, transparent)' }}>
-                <MicOff size={32} className="text-red-400" />
+                <MicOff size={32} className="text-red-400" aria-hidden />
               </div>
             ) : (
               <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: 'var(--bridge-border)' }}>
@@ -620,31 +686,22 @@ export default function IntakeCall() {
             </p>
           </div>
 
-          {/* Live transcript box */}
-          {!isIdle && flowState !== 'error' && (
-            <div
-              className="rounded-xl px-4 py-3 text-sm leading-relaxed"
-              style={{
-                background: 'var(--bridge-canvas)',
-                border: '1px solid var(--bridge-border)',
-                color: 'var(--bridge-text)',
-                minHeight: '64px',
-              }}
-            >
-              {interimText ? (
-                interimText
-              ) : (
-                <span style={{ color: 'var(--bridge-text-muted)' }}>
-                  {isListening ? 'Waiting for speech…' : isBusy ? ' ' : ''}
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Error */}
           {flowState === 'error' && (
             <p className="text-sm text-red-400 text-center mt-4">{errorMessage}</p>
           )}
+
+          <button
+            onClick={() => setTextFallback(true)}
+            className="mt-4 w-full py-2.5 rounded-xl text-sm font-medium transition border"
+            style={{
+              borderColor: 'var(--bridge-border)',
+              color: 'var(--bridge-text-secondary)',
+              background: 'transparent',
+            }}
+          >
+            <Type size={14} className="inline mr-1.5" aria-hidden />
+            Use text instead
+          </button>
         </div>
       </div>
     </div>
