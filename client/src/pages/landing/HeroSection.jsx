@@ -30,7 +30,7 @@ export default function HeroSection() {
     <section
       id="hero"
       aria-labelledby="hero-heading"
-      className="relative flex min-h-[94vh] items-center overflow-hidden px-5 pt-28 pb-24 sm:px-8 lg:pt-36"
+      className="relative flex min-h-[88vh] items-start overflow-hidden px-5 pt-24 pb-20 sm:px-8 lg:pt-28"
       style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       {/* Background depth — decorative only */}
@@ -75,7 +75,7 @@ export default function HeroSection() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-14 lg:grid-cols-12 lg:gap-12">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-start gap-14 lg:grid-cols-12 lg:gap-12">
         {/* Left: copy column */}
         <div className="lg:col-span-7">
           {/* Eyebrow status pill (t=0.00) */}
@@ -237,7 +237,7 @@ export default function HeroSection() {
                 animate: { opacity: 1, x: 0 },
                 transition: { duration: DUR_LONG, delay: 0.4, ease: EASE },
               })}
-          className="relative lg:col-span-5"
+          className="relative lg:col-span-5 lg:self-start"
         >
           <HeroLiveMatch />
         </motion.div>
