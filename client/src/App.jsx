@@ -19,7 +19,7 @@ import Pricing from './pages/Pricing';
 import ResumeReview from './pages/ResumeReview';
 import Footer from './components/Footer';
 import BridgeGlobalAtmosphere from './components/BridgeGlobalAtmosphere';
-import About from './pages/About';
+import About from './pages/about';
 import Careers from './pages/footer/Careers.jsx';
 import Blog from './pages/footer/Blog.jsx';
 import FAQ from './pages/footer/FAQ.jsx';
@@ -63,7 +63,7 @@ function AppContent() {
   }, [location.pathname]);
 
   return (
-    <div className="relative isolate min-h-screen overflow-x-hidden bg-bridge-page text-stone-900 font-sans antialiased flex flex-col">
+    <div className="relative isolate min-h-screen bg-bridge-page text-stone-900 font-sans antialiased flex flex-col" style={{ overflowX: 'clip' }}>
       <BridgeGlobalAtmosphere />
       {!isVideoCall && <ScrollProgress />}
       {!isVideoCall && <MagneticPointer />}

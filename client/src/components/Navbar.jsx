@@ -4,6 +4,7 @@ import { useAuth } from '../context/useAuth';
 import { isMentorAccount } from '../utils/accountRole';
 import { LogOut, User, Settings, Sparkles, Menu, X, ChevronRight, Zap } from 'lucide-react';
 import NotificationPanel from './NotificationPanel';
+import { useI18n } from '../i18n';
 
 function getInitials(name = '') {
   return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
@@ -11,6 +12,7 @@ function getInitials(name = '') {
 
 export default function Navbar() {
   const { user, loading, logout } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -18,6 +20,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [headerHidden, setHeaderHidden] = useState(false);
   const asMentor = user ? isMentorAccount(user) : false;
+  const isDashboard = location.pathname.startsWith('/dashboard');
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -78,16 +81,16 @@ export default function Navbar() {
 
   const navItems = asMentor
     ? [
-        { path: '/dashboard', label: 'Dashboard' },
-        { path: '/pricing',   label: 'Pricing'   },
-        { path: '/about',     label: 'About', desktopOnly: true },
+        { path: '/dashboard', label: t('nav.dashboard', 'Dashboard') },
+        { path: '/pricing', label: t('nav.pricing', 'Pricing') },
+        { path: '/about', label: t('nav.about', 'About'), desktopOnly: true },
       ]
     : [
-        { path: '/mentors',  label: 'Mentors'  },
-        ...(user ? [{ path: '/dashboard', label: 'Dashboard' }] : []),
-        { path: '/resume',   label: 'Resume', ai: true },
-        { path: '/pricing',  label: 'Pricing'  },
-        { path: '/about',    label: 'About', desktopOnly: true },
+        { path: '/mentors', label: t('nav.mentors', 'Mentors') },
+        ...(user ? [{ path: '/dashboard', label: t('nav.dashboard', 'Dashboard') }] : []),
+        { path: '/resume', label: t('nav.resume', 'Resume'), ai: true },
+        { path: '/pricing', label: t('nav.pricing', 'Pricing') },
+        { path: '/about', label: t('nav.about', 'About'), desktopOnly: true },
       ];
 
   return (
@@ -97,14 +100,14 @@ export default function Navbar() {
       ═══════════════════════════════════════════════════ */}
       <header
         className={`fixed inset-x-0 top-0 z-50 isolate transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          headerHidden && !mobileOpen ? 'pointer-events-none opacity-0' : 'opacity-100'
+          headerHidden && !mobileOpen && !isDashboard ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
         style={{
           background: 'transparent',
           border: 0,
           boxShadow: 'none',
           outline: 0,
-          transform: headerHidden && !mobileOpen ? 'translateY(-1.5rem)' : 'translateY(0)',
+          transform: headerHidden && !mobileOpen && !isDashboard ? 'translateY(-1.5rem)' : 'translateY(0)',
         }}
       >
 
@@ -123,10 +126,10 @@ export default function Navbar() {
               <Link to="/"
                 className="group relative flex shrink-0 items-center rounded-full outline-none transition-opacity duration-200 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)]">
                 <span className="font-display text-[1.22rem] font-black leading-none tracking-[-0.035em] text-[var(--bridge-text)] sm:text-[1.32rem]">
-                  Bridge
+                  {t('brand.bridge', 'Bridge')}
                 </span>
                 <span className="ml-1.5 font-display text-[1.22rem] font-medium leading-none tracking-[-0.04em] text-[var(--bridge-text)] sm:text-[1.32rem]">
-                  Mentorship
+                  {t('brand.mentorship', 'Mentorship')}
                 </span>
               </Link>
 
@@ -263,7 +266,7 @@ export default function Navbar() {
                             >
                               <span className={`h-1.5 w-1.5 rounded-full animate-pulse-soft ${asMentor ? '' : 'bg-sky-500'}`}
                                 style={asMentor ? { backgroundColor: 'var(--color-primary)' } : undefined} />
-                              {asMentor ? 'Mentor Account' : 'Member Account'}
+                              {asMentor ? t('nav.mentorAccount', 'Mentor Account') : t('nav.memberAccount', 'Member Account')}
                             </span>
                           </div>
                         </div>
@@ -276,17 +279,17 @@ export default function Navbar() {
                             {
                               to: '/profile',
                               icon: <User className="h-4 w-4 shrink-0 text-[var(--bridge-text-faint)] transition-colors group-hover:text-[var(--color-primary)]" />,
-                              label: 'My Profile',
+                              label: t('nav.myProfile', 'My Profile'),
                             },
                             {
                               to: '/settings',
                               icon: <Settings className="h-4 w-4 shrink-0 text-[var(--bridge-text-faint)] transition-colors group-hover:text-[var(--color-primary)]" />,
-                              label: 'Settings',
+                              label: t('nav.settings', 'Settings'),
                             },
                             ...(!asMentor ? [{
                               to: '/mentors',
                               icon: <Sparkles className="h-4 w-4 shrink-0 text-[var(--bridge-text-faint)] transition-colors group-hover:text-[var(--color-primary)]" />,
-                              label: 'Find a Mentor',
+                              label: t('nav.findMentor', 'Find a Mentor'),
                             }] : []),
                           ].map(({ to, icon, label }) => (
                             <Link key={to} to={to} onClick={() => setMenuOpen(false)}
@@ -302,7 +305,7 @@ export default function Navbar() {
                           <button type="button" onClick={handleLogout}
                             className="mx-2 flex w-[calc(100%-1rem)] items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-bold text-red-500 transition-colors hover:bg-red-500/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 dark:text-red-400 dark:hover:bg-red-500/10">
                             <LogOut className="h-4 w-4 shrink-0" />
-                            Log out
+                            {t('nav.logout', 'Log out')}
                           </button>
                         </div>
                       </div>
@@ -313,7 +316,7 @@ export default function Navbar() {
                 <div className="hidden items-center gap-2 sm:flex">
                   <Link to="/login"
                     className="group relative rounded-full px-4 py-2 text-[14px] font-medium text-[var(--bridge-text-secondary)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-1 before:inset-y-1 before:scale-75 before:rounded-full before:bg-[var(--bridge-text)] before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:text-[var(--bridge-text)] hover:before:scale-100 hover:before:opacity-[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)]">
-                    <span className="relative z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-px">Log in</span>
+                    <span className="relative z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-px">{t('nav.login', 'Log in')}</span>
                     <span aria-hidden className="absolute -bottom-0.5 left-1/2 h-px w-[calc(100%-2rem)] -translate-x-1/2 scale-x-0 rounded-full bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent opacity-0 transition-all duration-300 ease-out group-hover:scale-x-100 group-hover:opacity-70" />
                   </Link>
                   <Link to="/register" data-magnet="6"
@@ -322,7 +325,7 @@ export default function Navbar() {
                       boxShadow: '0 16px 34px -22px color-mix(in srgb, var(--bridge-text) 80%, transparent)',
                     }}
                   >
-                    Get started
+                    {t('nav.getStarted', 'Get started')}
                   </Link>
                 </div>
               )}
@@ -331,7 +334,7 @@ export default function Navbar() {
               <button type="button"
                 onClick={() => setMobileOpen(v => !v)}
                 aria-expanded={mobileOpen}
-                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                aria-label={mobileOpen ? t('nav.closeMenu', 'Close menu') : t('nav.openMenu', 'Open menu')}
                 className="relative flex h-10 w-10 items-center justify-center rounded-full text-[var(--bridge-text)] transition hover:bg-[var(--bridge-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] md:hidden"
                 style={{
                   backgroundColor: mobileOpen || scrolled ? 'color-mix(in srgb, var(--bridge-surface) 76%, transparent)' : 'transparent',
@@ -376,12 +379,12 @@ export default function Navbar() {
             {/* Header */}
             <div className="relative flex shrink-0 items-center justify-between border-b border-[var(--bridge-border)]/80 px-5 py-4">
               <Link to="/" onClick={() => setMobileOpen(false)} className="group flex items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]">
-                <span className="font-display text-xl font-black leading-none tracking-[-0.035em] text-[var(--bridge-text)]">Bridge</span>
-                <span className="ml-1.5 font-display text-xl font-medium leading-none tracking-[-0.04em] text-[var(--bridge-text)]">Mentorship</span>
+                <span className="font-display text-xl font-black leading-none tracking-[-0.035em] text-[var(--bridge-text)]">{t('brand.bridge', 'Bridge')}</span>
+                <span className="ml-1.5 font-display text-xl font-medium leading-none tracking-[-0.04em] text-[var(--bridge-text)]">{t('brand.mentorship', 'Mentorship')}</span>
               </Link>
               <button type="button" onClick={() => setMobileOpen(false)}
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--bridge-border)]/80 text-[var(--bridge-text-muted)] transition hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-                aria-label="Close">
+                aria-label={t('common.close', 'Close')}>
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -437,7 +440,7 @@ export default function Navbar() {
 
               <Link to="/about" onClick={() => setMobileOpen(false)}
                 className="group flex items-center justify-between rounded-2xl px-4 py-3.5 text-sm font-bold text-[var(--bridge-text-muted)] transition hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]">
-                About
+                {t('nav.about', 'About')}
                 <ChevronRight className="h-4 w-4 text-[var(--bridge-text-faint)] transition-transform group-hover:translate-x-0.5" />
               </Link>
             </nav>
@@ -472,12 +475,12 @@ export default function Navbar() {
                     {
                       to: '/profile',
                       icon: <User className="h-4 w-4 text-[var(--bridge-text-faint)]" />,
-                      label: 'Profile',
+                      label: t('nav.profile', 'Profile'),
                     },
                     {
                       to: '/settings',
                       icon: <Settings className="h-4 w-4 text-[var(--bridge-text-faint)]" />,
-                      label: 'Settings',
+                      label: t('nav.settings', 'Settings'),
                     },
                   ].map(({ to, icon, label }) => (
                     <Link key={to} to={to} onClick={() => setMobileOpen(false)}
@@ -489,7 +492,7 @@ export default function Navbar() {
                   <button type="button" onClick={handleLogout}
                     className="flex w-full items-center gap-2.5 rounded-2xl px-3 py-2.5 text-[13px] font-bold text-red-500 transition hover:bg-red-500/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 dark:text-red-400">
                     <LogOut className="h-4 w-4" />
-                    Log out
+                    {t('nav.logout', 'Log out')}
                   </button>
                 </div>
               ) : (
@@ -501,14 +504,14 @@ export default function Navbar() {
                       boxShadow: '0 12px 30px -12px color-mix(in srgb, var(--color-primary) 70%, transparent)',
                     }}
                   >
-                    Get started free
+                    {t('nav.getStartedFree', 'Get started free')}
                     <ChevronRight className="h-4 w-4" />
                   </Link>
                   <Link to="/login" onClick={() => setMobileOpen(false)}
                     className="flex items-center justify-center rounded-2xl border px-4 py-3 text-sm font-bold text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     style={{ borderColor: 'var(--bridge-border)' }}
                   >
-                    Log in
+                    {t('nav.login', 'Log in')}
                   </Link>
                 </div>
               )}

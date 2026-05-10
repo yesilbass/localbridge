@@ -18,6 +18,7 @@ import ReviewsPage from './ReviewsPage.jsx';
 import BillingPage from './BillingPage.jsx';
 import SettingsPage from './SettingsPage.jsx';
 import ProfilePage from './ProfilePage.jsx';
+import { useI18n } from '../../i18n';
 
 // ─── home content ─────────────────────────────────────────────────────────
 
@@ -36,16 +37,17 @@ function DashboardHome({ activeRole }) {
 // ─── 404 inside dashboard (rare) ──────────────────────────────────────────
 
 function NotFoundStub() {
+  const { t } = useI18n();
   return (
     <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 text-center">
       <p
         className="font-display text-[28px] font-black tracking-[-0.02em]"
         style={{ color: 'var(--bridge-text)' }}
       >
-        That page doesn't exist.
+        {t('dashboard.pageMissingTitle', "That page doesn't exist.")}
       </p>
       <p className="text-[13px]" style={{ color: 'var(--bridge-text-secondary)' }}>
-        Use the sidebar to navigate.
+        {t('dashboard.pageMissingBody', 'Use the sidebar to navigate.')}
       </p>
     </div>
   );
@@ -54,6 +56,7 @@ function NotFoundStub() {
 // ─── error wrapper ────────────────────────────────────────────────────────
 
 function DashboardError({ onRetry }) {
+  const { t } = useI18n();
   return (
     <div
       className="rounded-3xl p-8 text-center"
@@ -66,10 +69,10 @@ function DashboardError({ onRetry }) {
         className="font-display text-[20px] font-black tracking-[-0.02em]"
         style={{ color: 'var(--bridge-text)' }}
       >
-        We couldn't load your dashboard.
+        {t('dashboard.loadErrorTitle', "We couldn't load your dashboard.")}
       </p>
       <p className="mt-2 text-[13px]" style={{ color: 'var(--bridge-text-secondary)' }}>
-        That's on us, not you.
+        {t('dashboard.loadErrorBody', "That's on us, not you.")}
       </p>
       <button
         type="button"
@@ -77,33 +80,31 @@ function DashboardError({ onRetry }) {
         className="bridge-focus mt-4 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] font-bold"
         style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
       >
-        Retry
+        {t('dashboard.retry', 'Retry')}
       </button>
     </div>
   );
 }
 
-// ─── route → page title ───────────────────────────────────────────────────
-
-const TITLES = {
-  '': 'Home',
-  sessions: 'Sessions',
-  availability: 'Availability',
-  saved: 'Saved',
-  calendar: 'Calendar',
-  earnings: 'Earnings',
-  reviews: 'Reviews',
-  billing: 'Billing',
-  profile: 'Profile',
-  settings: 'Settings',
-};
-
 function usePageTitle() {
+  const { t } = useI18n();
   const { pathname } = useLocation();
   return useMemo(() => {
+    const translated = {
+      '': t('common.home', 'Home'),
+      sessions: t('common.sessions', 'Sessions'),
+      availability: t('common.availability', 'Availability'),
+      saved: t('common.saved', 'Saved'),
+      calendar: 'Calendar',
+      earnings: t('common.earnings', 'Earnings'),
+      reviews: t('common.reviews', 'Reviews'),
+      billing: t('common.billing', 'Billing'),
+      profile: t('nav.profile', 'Profile'),
+      settings: t('nav.settings', 'Settings'),
+    };
     const tail = pathname.replace(/^\/dashboard\/?/, '').split('/')[0] ?? '';
-    return TITLES[tail] ?? 'Home';
-  }, [pathname]);
+    return translated[tail] ?? t('common.home', 'Home');
+  }, [pathname, t]);
 }
 
 // ─── page ─────────────────────────────────────────────────────────────────

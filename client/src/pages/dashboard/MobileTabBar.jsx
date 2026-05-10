@@ -3,6 +3,7 @@ import {
   LayoutDashboard, CalendarCheck, Heart, UserRound, Settings,
   Calendar, Clock, DollarSign,
 } from 'lucide-react';
+import { useI18n } from '../../i18n';
 
 const MENTEE_TABS = [
   { to: '/dashboard',          label: 'Home',     icon: LayoutDashboard, end: true },
@@ -21,7 +22,22 @@ const MENTOR_TABS = [
 ];
 
 export default function MobileTabBar({ activeRole }) {
-  const tabs = activeRole === 'mentor' ? MENTOR_TABS : MENTEE_TABS;
+  const { t } = useI18n();
+  const menteeTabs = [
+    { ...MENTEE_TABS[0], label: t('common.home', 'Home') },
+    { ...MENTEE_TABS[1], label: t('common.sessions', 'Sessions') },
+    { ...MENTEE_TABS[2], label: t('common.saved', 'Saved') },
+    { ...MENTEE_TABS[3], label: t('nav.profile', 'Profile') },
+    { ...MENTEE_TABS[4], label: t('nav.settings', 'Settings') },
+  ];
+  const mentorTabs = [
+    { ...MENTOR_TABS[0], label: t('common.home', 'Home') },
+    { ...MENTOR_TABS[1], label: t('common.sessions', 'Sessions') },
+    { ...MENTOR_TABS[2], label: t('common.hours', 'Hours') },
+    { ...MENTOR_TABS[3], label: t('common.earnings', 'Earnings') },
+    { ...MENTOR_TABS[4], label: t('nav.profile', 'Profile') },
+  ];
+  const tabs = activeRole === 'mentor' ? mentorTabs : menteeTabs;
   return (
     <nav
       aria-label="Primary"

@@ -26,7 +26,7 @@ export function applyPalette(palette) {
 }
 
 /** Keys we re-apply from localStorage on top of server settings so theme survives DB lag / stale rows. */
-const LOCAL_OVERRIDE_KEYS = ['theme', 'font_size', 'high_contrast'];
+const LOCAL_OVERRIDE_KEYS = ['theme', 'font_size', 'high_contrast', 'language'];
 
 /**
  * @param {'light' | 'dark' | 'system'} preference

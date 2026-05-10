@@ -2,6 +2,7 @@ import Sidebar from './Sidebar.jsx';
 import MobileTabBar from './MobileTabBar.jsx';
 import Navbar from '../../components/Navbar.jsx';
 import { useSidebarCollapsed } from './dashboardHooks.js';
+import { useI18n } from '../../i18n';
 
 /**
  * DashboardShell — the workspace chrome (sidebar + topbar + main + mobile tab bar).
@@ -15,6 +16,7 @@ export default function DashboardShell({
   children,
 }) {
   const { collapsed, toggle } = useSidebarCollapsed();
+  const { t } = useI18n();
 
   return (
     <>
@@ -37,7 +39,7 @@ export default function DashboardShell({
           className="bridge-focus sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:px-3 focus:py-2 focus:text-[12px] focus:font-bold"
           style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
         >
-          Skip to content
+          {t('dashboard.skipToContent', 'Skip to content')}
         </a>
 
         <Sidebar
