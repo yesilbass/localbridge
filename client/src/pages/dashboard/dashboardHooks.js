@@ -916,3 +916,19 @@ export function formatCurrency(n) {
 export function useFlatMotion(reducedMotion, perfTier) {
   return useMemo(() => reducedMotion || perfTier === 'low', [reducedMotion, perfTier]);
 }
+
+// Live countdown — re-renders at 1s when <5min, 30s when <60min, 60s otherwise.
+// Used by NextSessionCard, HomeFocusCard, and the sidebar mini "Next up" card.
+export function useLiveCountdown(scheduledAt) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!scheduledAt) return undefined;
+    const tick = () => setNow(Date.now());
+    const target = new Date(scheduledAt).getTime();
+    const delta = Math.abs(target - Date.now());
+    const interval = delta > 60 * 60 * 1000 ? 60_000 : delta > 5 * 60 * 1000 ? 30_000 : 1_000;
+    const id = setInterval(tick, interval);
+    return () => clearInterval(id);
+  }, [scheduledAt, now]);
+  return now;
+}

@@ -1,15 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Navigate, Routes, Route } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner.jsx';
 import OnboardingModal from '../../components/OnboardingModal.jsx';
 import CalendarSuccessToast from '../../components/CalendarSuccessToast.jsx';
 import supabase from '../../api/supabase';
 import { useDashboardRole, useActiveRole } from './dashboardHooks.js';
 import DashboardShell from './DashboardShell.jsx';
-import NextSessionCard from './NextSessionCard.jsx';
-import ActivityFeed from './ActivityFeed.jsx';
-import MenteeSection from './MenteeSection.jsx';
-import MentorSection from './MentorSection.jsx';
 import SessionsPage from './SessionsPage.jsx';
 import AvailabilityPage from './AvailabilityPage.jsx';
 import SavedPage from './SavedPage.jsx';
@@ -20,16 +16,119 @@ import SettingsPage from './SettingsPage.jsx';
 import ProfilePage from './ProfilePage.jsx';
 import { useI18n } from '../../i18n';
 
+import PageHeader from './home/PageHeader.jsx';
+import HomeHeader from './home/HomeHeader.jsx';
+import HomeNowStrip from './home/HomeNowStrip.jsx';
+import HomeFocusCard from './home/HomeFocusCard.jsx';
+import HomeAtAGlance from './home/HomeAtAGlance.jsx';
+import HomeQuickActions from './home/HomeQuickActions.jsx';
+import HomeWeeklyPulse from './home/HomeWeeklyPulse.jsx';
+import HomeSinceLastVisit from './home/HomeSinceLastVisit.jsx';
+import HomeMentorPanel from './home/HomeMentorPanel.jsx';
+import HomeMenteePanel from './home/HomeMenteePanel.jsx';
+
 // ─── home content ─────────────────────────────────────────────────────────
 
 function DashboardHome({ activeRole }) {
   return (
-    <>
-      <NextSessionCard activeRole={activeRole} />
-      <ActivityFeed activeRole={activeRole} />
-      <div className="mt-8">
-        {activeRole === 'mentor' ? <MentorSection /> : <MenteeSection />}
+    <div className="flex flex-col gap-6 sm:gap-8">
+      <HomeHeader activeRole={activeRole} />
+      <HomeNowStrip activeRole={activeRole} />
+
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="lg:col-span-8">
+          <HomeFocusCard activeRole={activeRole} />
+        </div>
+        <div className="lg:col-span-4">
+          <HomeAtAGlance activeRole={activeRole} />
+        </div>
       </div>
+
+      <HomeQuickActions activeRole={activeRole} />
+      <HomeWeeklyPulse activeRole={activeRole} />
+      <HomeSinceLastVisit activeRole={activeRole} />
+
+      {activeRole === 'mentor' ? <HomeMentorPanel /> : <HomeMenteePanel />}
+    </div>
+  );
+}
+
+// ─── sub-page wrappers (PageHeader + body) ────────────────────────────────
+
+function SessionsRoute() {
+  return (
+    <>
+      <PageHeader title="Sessions" subtitle="Past, upcoming, and pending." />
+      <SessionsPage />
+    </>
+  );
+}
+
+function AvailabilityRoute() {
+  return (
+    <>
+      <PageHeader
+        title="Hours"
+        subtitle="Set when mentees can book you."
+      />
+      <AvailabilityPage />
+    </>
+  );
+}
+
+function EarningsRoute() {
+  return (
+    <>
+      <PageHeader title="Earnings" subtitle="Tracked nightly. Paid weekly." />
+      <EarningsPage />
+    </>
+  );
+}
+
+function ReviewsRoute() {
+  return (
+    <>
+      <PageHeader title="Reviews" subtitle="Every review, including the threes." />
+      <ReviewsPage />
+    </>
+  );
+}
+
+function SavedRoute() {
+  return (
+    <>
+      <PageHeader title="Saved mentors" subtitle="Your shortlist." />
+      <SavedPage />
+    </>
+  );
+}
+
+function BillingRoute() {
+  return (
+    <>
+      <PageHeader title="Billing" subtitle="Payment methods and receipts." />
+      <BillingPage />
+    </>
+  );
+}
+
+function ProfileRoute({ isMentor }) {
+  return (
+    <>
+      <PageHeader
+        title={isMentor ? 'Your profile' : 'Your account'}
+        subtitle={isMentor ? 'What mentees see when they find you.' : undefined}
+      />
+      <ProfilePage />
+    </>
+  );
+}
+
+function SettingsRoute() {
+  return (
+    <>
+      <PageHeader title="Settings" />
+      <SettingsPage />
     </>
   );
 }
@@ -78,33 +177,12 @@ function DashboardError({ onRetry }) {
         type="button"
         onClick={onRetry}
         className="bridge-focus mt-4 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] font-bold"
-        style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
+        style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary, #fff)' }}
       >
         {t('dashboard.retry', 'Retry')}
       </button>
     </div>
   );
-}
-
-function usePageTitle() {
-  const { t } = useI18n();
-  const { pathname } = useLocation();
-  return useMemo(() => {
-    const translated = {
-      '': t('common.home', 'Home'),
-      sessions: t('common.sessions', 'Sessions'),
-      availability: t('common.availability', 'Availability'),
-      saved: t('common.saved', 'Saved'),
-      calendar: 'Calendar',
-      earnings: t('common.earnings', 'Earnings'),
-      reviews: t('common.reviews', 'Reviews'),
-      billing: t('common.billing', 'Billing'),
-      profile: t('nav.profile', 'Profile'),
-      settings: t('nav.settings', 'Settings'),
-    };
-    const tail = pathname.replace(/^\/dashboard\/?/, '').split('/')[0] ?? '';
-    return translated[tail] ?? t('common.home', 'Home');
-  }, [pathname, t]);
 }
 
 // ─── page ─────────────────────────────────────────────────────────────────
@@ -114,7 +192,6 @@ export default function DashboardPage() {
   const [onboardingComplete, setOnboardingComplete] = useState(true);
   const [checking, setChecking] = useState(role === 'mentor');
   const [errored, setErrored] = useState(false);
-  const pageTitle = usePageTitle();
 
   useEffect(() => {
     let cancelled = false;
@@ -149,7 +226,6 @@ export default function DashboardPage() {
 
   return (
     <DashboardShell
-      pageTitle={pageTitle}
       activeRole={activeRole}
       hasBothRoles={hasBothRoles}
       onSwitchRole={() => setActiveRole(activeRole === 'mentor' ? 'mentee' : 'mentor')}
@@ -159,15 +235,15 @@ export default function DashboardPage() {
       ) : (
         <Routes>
           <Route index element={<DashboardHome activeRole={activeRole} />} />
-          <Route path="sessions" element={<SessionsPage />} />
-          {activeRole === 'mentor' && <Route path="availability" element={<AvailabilityPage />} />}
-          {activeRole === 'mentee' && <Route path="saved" element={<SavedPage />} />}
+          <Route path="sessions" element={<SessionsRoute />} />
+          {activeRole === 'mentor' && <Route path="availability" element={<AvailabilityRoute />} />}
+          {activeRole === 'mentee' && <Route path="saved" element={<SavedRoute />} />}
           {activeRole === 'mentor' && <Route path="calendar" element={<Navigate to="/dashboard/sessions" replace />} />}
-          {activeRole === 'mentor' && <Route path="earnings" element={<EarningsPage />} />}
-          {activeRole === 'mentor' && <Route path="reviews" element={<ReviewsPage />} />}
-          {activeRole === 'mentee' && <Route path="billing" element={<BillingPage />} />}
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="settings" element={<SettingsPage />} />
+          {activeRole === 'mentor' && <Route path="earnings" element={<EarningsRoute />} />}
+          {activeRole === 'mentor' && <Route path="reviews" element={<ReviewsRoute />} />}
+          {activeRole === 'mentee' && <Route path="billing" element={<BillingRoute />} />}
+          <Route path="profile" element={<ProfileRoute isMentor={activeRole === 'mentor'} />} />
+          <Route path="settings" element={<SettingsRoute />} />
           <Route path="*" element={<NotFoundStub />} />
         </Routes>
       )}

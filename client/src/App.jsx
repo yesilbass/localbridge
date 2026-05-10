@@ -20,6 +20,7 @@ import ResumeReview from './pages/ResumeReview';
 import Footer from './components/Footer';
 import BridgeGlobalAtmosphere from './components/BridgeGlobalAtmosphere';
 import About from './pages/about';
+import WhyUs from './pages/why-us';
 import Careers from './pages/footer/Careers.jsx';
 import Blog from './pages/footer/Blog.jsx';
 import FAQ from './pages/footer/FAQ.jsx';
@@ -88,6 +89,7 @@ function AppContent() {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/resume" element={<ResumeReview />} />
           <Route path="/about" element={<About />} />
+          <Route path="/why-us" element={<WhyUs />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/faq" element={<FAQ />} />

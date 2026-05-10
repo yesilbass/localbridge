@@ -44,9 +44,16 @@ export default function MobileTabBar({ activeRole }) {
       className="fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around lg:hidden"
       style={{
         backgroundColor: 'var(--bridge-surface)',
-        borderTop: '1px solid var(--bridge-border)',
       }}
     >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, var(--bridge-border) 50%, transparent 100%)',
+        }}
+      />
       {tabs.map((t) => {
         const Icon = t.icon;
         return (

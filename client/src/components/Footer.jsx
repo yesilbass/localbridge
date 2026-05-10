@@ -179,6 +179,7 @@ export default function Footer() {
             <ul className="mt-4 space-y-3">
               {[
                 { label: t('nav.about', 'About'), to: '/about' },
+                { label: t('footer.whyUs', 'Why us'), to: '/why-us' },
                 { label: t('footer.blog', 'Blog'), to: '/blog' },
                 { label: t('footer.careers', 'Careers'), to: '/careers' },
                 { label: t('footer.trustSafety', 'Trust & Safety'), to: '/trust' },

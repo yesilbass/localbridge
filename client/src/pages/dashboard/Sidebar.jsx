@@ -3,7 +3,10 @@ import {
   LayoutDashboard, CalendarCheck, Heart, UserRound, CreditCard, Settings,
   Clock, DollarSign, Star, PanelLeftClose, PanelLeftOpen,
 } from 'lucide-react';
+import { useReducedMotion } from 'motion/react';
 import { useI18n } from '../../i18n';
+import { useNextSession, useLiveCountdown } from './dashboardHooks.js';
+import { usePerfTier, EASE, DUR_SHORT } from '../landing/landingHooks';
 
 const MENTEE_LINKS = [
   { to: '/dashboard',          label: 'Home',     icon: LayoutDashboard, end: true },
@@ -24,8 +27,55 @@ const MENTOR_LINKS = [
   { to: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
+function formatNextUp(scheduledAt, now) {
+  const delta = new Date(scheduledAt).getTime() - now;
+  if (delta <= 0) return 'live now';
+  const mins = Math.floor(delta / 60_000);
+  if (mins < 60) return `in ${mins}m`;
+  const hours = Math.floor(mins / 60);
+  const rem = mins - hours * 60;
+  return rem > 0 ? `in ${hours}h ${rem}m` : `in ${hours}h`;
+}
+
+function NextUpCard() {
+  const { session } = useNextSession();
+  const now = useLiveCountdown(session?.scheduledAt);
+  if (!session) return null;
+  const delta = new Date(session.scheduledAt).getTime() - now;
+  // Only show when within 24h.
+  if (delta > 24 * 60 * 60 * 1000 || delta < -30 * 60 * 1000) return null;
+
+  return (
+    <NavLink
+      to="/dashboard/sessions"
+      className="bridge-focus block rounded-xl p-3 transition-colors"
+      style={{
+        backgroundColor: 'var(--bridge-surface-muted)',
+        boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+      }}
+    >
+      <p
+        className="text-[10px] font-bold uppercase tracking-[0.18em]"
+        style={{ color: 'var(--bridge-text-muted)' }}
+      >
+        Next up
+      </p>
+      <p
+        className="mt-0.5 text-[12px] font-semibold tabular-nums"
+        style={{ color: 'var(--bridge-text)' }}
+      >
+        {formatNextUp(session.scheduledAt, now)}
+      </p>
+    </NavLink>
+  );
+}
+
 export default function Sidebar({ activeRole, isCollapsed, onToggleCollapsed }) {
   const { t } = useI18n();
+  const reduced = useReducedMotion();
+  const tier = usePerfTier();
+  const flat = reduced || tier === 'low';
+
   const menteeLinks = [
     { ...MENTEE_LINKS[0], label: t('common.home', 'Home') },
     { ...MENTEE_LINKS[1], label: t('common.sessions', 'Sessions') },
@@ -62,7 +112,7 @@ export default function Sidebar({ activeRole, isCollapsed, onToggleCollapsed }) 
       }}
     >
       {/* Nav */}
-      <nav aria-label="Dashboard" className="flex-1 flex flex-col gap-1 px-3 py-4 overflow-y-auto">
+      <nav aria-label="Dashboard" className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
         {links.map((link, i) => {
           const Icon = link.icon;
           return (
@@ -72,7 +122,7 @@ export default function Sidebar({ activeRole, isCollapsed, onToggleCollapsed }) 
               end={link.end}
               title={isCollapsed ? link.label : undefined}
               className={({ isActive }) =>
-                `bridge-focus group flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] font-semibold transition-colors ${
+                `bridge-focus group relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-2 text-[14px] font-semibold transition-colors ${
                   isActive ? 'is-active' : ''
                 }`
               }
@@ -81,23 +131,38 @@ export default function Sidebar({ activeRole, isCollapsed, onToggleCollapsed }) 
                 backgroundColor: isActive
                   ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)'
                   : 'transparent',
-                boxShadow: isActive ? 'inset 2px 0 0 var(--color-primary)' : 'none',
-                animation: `bridge-page-enter 360ms cubic-bezier(0.16,1,0.3,1) both`,
-                animationDelay: `${i * 30}ms`,
+                animation: flat ? 'none' : `bridge-page-enter 360ms cubic-bezier(0.16,1,0.3,1) both`,
+                animationDelay: flat ? '0ms' : `${i * 30}ms`,
               })}
             >
-              <Icon className="h-5 w-5 shrink-0" />
-              {!isCollapsed && <span className="truncate">{link.label}</span>}
+              {({ isActive }) => (
+                <>
+                  <span
+                    aria-hidden
+                    className="absolute left-0 top-1/2 w-[2px] -translate-y-1/2 rounded-full"
+                    style={{
+                      backgroundColor: 'var(--color-primary)',
+                      height: isActive ? '100%' : '0%',
+                      transition: flat
+                        ? 'none'
+                        : `height ${DUR_SHORT * 1000}ms cubic-bezier(${EASE.join(',')})`,
+                    }}
+                  />
+                  <Icon className="h-5 w-5 shrink-0" />
+                  {!isCollapsed && <span className="truncate">{link.label}</span>}
+                </>
+              )}
             </NavLink>
           );
         })}
       </nav>
 
-      {/* Bottom — collapse only (Navbar owns the account menu) */}
+      {/* Bottom */}
       <div
-        className="px-3 pb-4 pt-3 flex flex-col gap-2"
+        className="flex flex-col gap-3 px-3 pb-4 pt-3"
         style={{ borderTop: '1px solid var(--bridge-border)' }}
       >
+        {!isCollapsed ? <NextUpCard /> : null}
         <button
           type="button"
           onClick={onToggleCollapsed}
