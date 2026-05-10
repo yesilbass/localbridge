@@ -6,7 +6,7 @@ import Reveal from '../../components/Reveal';
 import { focusRing } from '../../ui';
 import EmbeddedCheckoutPanel from '../../components/EmbeddedCheckoutPanel';
 import { createSubscriptionCheckout, finalizeCheckout } from '../../api/stripe';
-import { AuroraBg, KineticNumber, Tilt3D, Magnetic } from '../dashboard/dashboardCinematic.jsx';
+import { AuroraBg, KineticNumber, Magnetic } from '../dashboard/dashboardCinematic.jsx';
 import { ANNUAL_DISCOUNT, MENTOR_TIERS, COMPARISON_ROWS, FAQ_ITEMS, tierMonthlyEquivalent } from './constants';
 import CheckCell from './CheckCell';
 import PricingFaq from './PricingFaq';
@@ -166,17 +166,17 @@ export default function Pricing() {
         />
 
         {billingNote && (
-          <div className="relative z-[3] mx-auto max-w-bridge px-4 pt-6 sm:px-6 lg:px-8">
+          <div className="relative z-[3] mx-auto max-w-7xl px-5 pt-6 sm:px-8">
             <p className="rounded-2xl border border-emerald-300/60 bg-emerald-50/95 px-4 py-3 text-sm font-bold text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300">
               {billingNote}
             </p>
           </div>
         )}
 
-        {/* Hero — open canvas, atmospheric */}
+        {/* Hero — open canvas, atmospheric (matches landing + mentors) */}
         <section
           aria-labelledby="pricing-heading"
-          className="relative overflow-hidden px-4 pt-12 pb-6 sm:px-6 sm:pt-14 sm:pb-8 lg:px-8"
+          className="relative overflow-hidden px-5 pt-12 pb-4 sm:px-8 lg:pt-14 lg:pb-6"
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
             <div
@@ -195,41 +195,36 @@ export default function Pricing() {
             />
           </div>
 
-          <div className="relative mx-auto max-w-bridge">
+          <div className="relative mx-auto max-w-7xl">
             <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
               <Reveal>
                 <div className="min-w-0 max-w-2xl">
                   <div
-                    className="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-black tracking-wide"
+                    className="mb-4 inline-flex items-center gap-2.5 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide backdrop-blur-sm"
                     style={{
-                      backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                      color: 'var(--color-primary)',
-                      boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                      backgroundColor: 'color-mix(in srgb, var(--bridge-surface) 80%, transparent)',
+                      color: 'var(--bridge-text-secondary)',
+                      boxShadow: '0 0 0 1px var(--bridge-border) inset, 0 4px 14px -8px color-mix(in srgb, var(--color-primary) 35%, transparent)',
                     }}
                   >
-                    <span className="relative flex h-1.5 w-1.5" aria-hidden>
-                      <span
-                        className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-65"
-                        style={{ backgroundColor: 'var(--color-primary)' }}
-                      />
-                      <span
-                        className="relative inline-flex h-1.5 w-1.5 rounded-full"
-                        style={{ backgroundColor: 'var(--color-primary)' }}
-                      />
-                    </span>
-                    Pick your plan
+                    <span aria-hidden className="bridge-pulse inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: '#10b981' }} />
+                    <span style={{ color: 'var(--bridge-text-muted)' }}>Pick your plan — no card to start</span>
                   </div>
                   <h1
                     id="pricing-heading"
                     className="font-display font-black"
-                    style={{ fontSize: 'clamp(2.4rem, 6vw, 4.8rem)', lineHeight: '0.96', letterSpacing: '-0.03em', color: 'var(--bridge-text)' }}
+                    style={{ fontSize: 'clamp(2.2rem, 5.2vw, 4rem)', lineHeight: 1.08, letterSpacing: '-0.03em', color: 'var(--bridge-text)' }}
                   >
-                    Simple{' '}
-                    <span className="text-gradient-bridge italic">pricing</span>,
-                    <br className="hidden sm:block" />{' '}pick what fits.
+                    <span className="block">Simple pricing,</span>
+                    <span
+                      className="block bg-clip-text text-transparent italic pr-[0.15em]"
+                      style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)' }}
+                    >
+                      pick what fits.
+                    </span>
                   </h1>
-                  <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--bridge-text-secondary)] sm:text-lg">
-                    Subscription plans cover Bridge platform access and features. Mentor sessions are paid separately based on each mentor's rate.
+                  <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-[var(--bridge-text-secondary)]">
+                    Subscription plans cover Bridge platform access. Mentor sessions are paid separately at each mentor's rate.
                   </p>
                 </div>
               </Reveal>
@@ -292,7 +287,7 @@ export default function Pricing() {
 
             {/* Trust strip */}
             <Reveal delay={180}>
-              <div className="mt-8 flex flex-wrap items-center gap-3 text-[11px] font-bold text-[var(--bridge-text-muted)]">
+              <div className="mt-5 flex flex-wrap items-center gap-3 text-[11px] font-bold text-[var(--bridge-text-muted)]">
                 <span
                   className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"
                   style={{
@@ -318,7 +313,7 @@ export default function Pricing() {
         </section>
 
         {/* Tier cards */}
-        <div className="relative z-[2] mx-auto max-w-bridge px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+        <div className="relative z-[2] mx-auto max-w-7xl px-5 pt-4 pb-12 sm:px-8 sm:pt-6 sm:pb-14">
           <div className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-4 lg:items-stretch">
             {tiers.map((tier, idx) => {
               const equiv = tierMonthlyEquivalent(tier.monthly, annual);
@@ -326,41 +321,29 @@ export default function Pricing() {
 
               return (
                 <Reveal key={tier.name} delay={40 + idx * 60}>
-                  <Tilt3D max={tier.primary ? 4 : 3} className="h-full rounded-[1.75rem]">
                     <div
-                      className={`bd-card-edge group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border p-6 shadow-bridge-tile transition-all duration-500 hover:-translate-y-1 hover:shadow-xl sm:p-7 ${
-                        tier.primary
-                          ? 'border-gradient-bridge animate-border-bridge border-transparent lg:scale-[1.04] lg:z-[1]'
-                          : ''
+                      className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 transition-all duration-500 hover:-translate-y-1 sm:p-7 ${
+                        tier.primary ? 'lg:scale-[1.02] lg:z-[1]' : ''
                       }`}
                       style={tier.primary ? {
-                        background: 'linear-gradient(160deg, var(--bridge-surface), var(--bridge-surface) 60%, color-mix(in srgb, var(--color-primary) 4%, transparent))',
-                        boxShadow: '0 24px 60px -16px color-mix(in srgb, var(--color-primary) 45%, transparent)',
-                        borderColor: 'transparent',
+                        background: 'linear-gradient(160deg, var(--bridge-surface), var(--bridge-surface) 60%, color-mix(in srgb, var(--color-primary) 5%, transparent))',
+                        borderColor: 'color-mix(in srgb, var(--color-primary) 35%, var(--bridge-border))',
+                        boxShadow: '0 24px 60px -22px color-mix(in srgb, var(--color-primary) 45%, transparent)',
                       } : {
                         borderColor: 'var(--bridge-border)',
                         backgroundColor: 'var(--bridge-surface)',
+                        boxShadow: '0 8px 24px -18px color-mix(in srgb, var(--bridge-text) 18%, transparent)',
                       }}
                     >
                       {tier.primary && (
                         <div
                           aria-hidden
-                          className="pointer-events-none absolute -right-10 -top-10 h-60 w-60 rounded-full blur-3xl bd-aurora"
+                          className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full blur-3xl"
                           style={{
-                            background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 35%, transparent) 0%, transparent 70%)',
+                            background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, transparent 70%)',
                           }}
                         />
                       )}
-                      <div
-                        aria-hidden
-                        className="absolute inset-x-0 top-0 z-[1] h-1"
-                        style={tier.primary ? {
-                          background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-hover), var(--color-primary))',
-                          boxShadow: '0 0 12px color-mix(in srgb, var(--color-primary) 55%, transparent)',
-                        } : {
-                          backgroundColor: 'var(--bridge-border-strong)',
-                        }}
-                      />
 
                       <div className="relative z-[1] flex items-start justify-between gap-3">
                         <div className="min-w-0">
@@ -473,7 +456,6 @@ export default function Pricing() {
                         )}
                       </div>
                     </div>
-                  </Tilt3D>
                 </Reveal>
               );
             })}
@@ -486,8 +468,7 @@ export default function Pricing() {
           {/* Compare plans + FAQ */}
           <div className="mt-16 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-start lg:gap-10">
             <Reveal delay={60} className="lg:col-span-8">
-              <Tilt3D max={2} className="rounded-3xl">
-                <div className="bd-card-edge relative overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card">
+              <div className="relative overflow-hidden rounded-3xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-card">
                   <div
                     aria-hidden
                     className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full blur-3xl bd-aurora"
@@ -584,8 +565,7 @@ export default function Pricing() {
                       </tbody>
                     </table>
                   </div>
-                </div>
-              </Tilt3D>
+              </div>
             </Reveal>
 
             <Reveal delay={120} className="lg:col-span-4 lg:sticky lg:top-24">
@@ -633,8 +613,7 @@ export default function Pricing() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-labelledby="mentor-tiers-heading">
               {MENTOR_TIERS.map((tier, idx) => (
                 <Reveal key={tier.name} delay={40 + idx * 60}>
-                  <Tilt3D max={4} className="h-full rounded-[1.75rem]">
-                    <div className={`bd-card-edge group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border p-6 shadow-bridge-tile backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl ${tier.edgeClass} ${tier.bgClass}`}>
+                    <div className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 shadow-bridge-tile transition-all duration-500 hover:-translate-y-1 ${tier.edgeClass} ${tier.bgClass}`}>
                       <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-30 blur-3xl bd-aurora" style={{ background: `radial-gradient(circle, ${tier.halo} 0%, transparent 70%)` }} />
                       <div aria-hidden className={`absolute inset-x-0 top-0 h-1 ${tier.accentBar} ${tier.isElite ? 'shadow-[0_0_14px_color-mix(in srgb, var(--color-primary) 60%, transparent)]' : ''}`} />
 
@@ -661,7 +640,6 @@ export default function Pricing() {
                         </ul>
                       </div>
                     </div>
-                  </Tilt3D>
                 </Reveal>
               ))}
             </div>

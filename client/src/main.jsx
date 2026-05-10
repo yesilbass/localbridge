@@ -4,12 +4,15 @@ import './index.css';
 import './appearance.css';
 import App from './App.jsx';
 import { applyAppearanceFromStorage, initGlobalThemeListeners } from './utils/appearance';
+import { I18nProvider } from './i18n';
 
 applyAppearanceFromStorage();
 initGlobalThemeListeners();
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
-        <App />
+        <I18nProvider>
+            <App />
+        </I18nProvider>
     </StrictMode>,
 );

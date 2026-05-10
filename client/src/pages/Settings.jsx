@@ -30,6 +30,7 @@ import {
   applyThemePreference,
   getStoredAppearanceOverlay,
 } from '../utils/appearance';
+import { LANGUAGE_OPTIONS, useI18n } from '../i18n';
 
 /** Never persist password fields to JSONB. */
 function settingsForPersistence(s) {
@@ -87,6 +88,7 @@ const DEFAULT_SETTINGS = {
 
 export default function Settings() {
   const { user, logout, loading: authLoading } = useAuth();
+  const { t, setLanguage } = useI18n();
   const navigate = useNavigate();
   const asMentor = user ? isMentorAccount(user) : false;
   const [loading, setLoading] = useState(true);
@@ -241,6 +243,9 @@ export default function Settings() {
   };
 
   const updateSettings = (section, field, value) => {
+    if (section === 'appearance' && field === 'language') {
+      setLanguage(value);
+    }
     setSettings((prev) => ({
       ...prev,
       [section]: {
@@ -683,25 +688,23 @@ export default function Settings() {
                     </div>
 
                     <div>
-                      <h3 className="text-lg font-medium text-stone-900 mb-4">Language & Region</h3>
+                      <h3 className="text-lg font-medium text-stone-900 mb-4">{t('settings.languageRegion', 'Language & Region')}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-stone-700 mb-2">Language</label>
+                          <label className="block text-sm font-medium text-stone-700 mb-2">{t('settings.language', 'Language')}</label>
                           <select
                               value={settings.appearance.language}
                               onChange={(e) => updateSettings('appearance', 'language', e.target.value)}
                               className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
                           >
-                            <option value="en">English</option>
-                            <option value="es">Spanish</option>
-                            <option value="fr">French</option>
-                            <option value="de">German</option>
-                            <option value="zh">Chinese</option>
+                            {LANGUAGE_OPTIONS.map((lang) => (
+                              <option key={lang.code} value={lang.code}>{lang.label}</option>
+                            ))}
                           </select>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-stone-700 mb-2">Timezone</label>
+                          <label className="block text-sm font-medium text-stone-700 mb-2">{t('settings.timezone', 'Timezone')}</label>
                           <select
                               value={settings.appearance.timezone}
                               onChange={(e) => updateSettings('appearance', 'timezone', e.target.value)}

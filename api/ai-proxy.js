@@ -224,8 +224,17 @@ function mentorListForPrompt(mentors) {
   }));
 }
 
+function preFilterMentors(mentors, menteeProfile, limit = 30) {
+  const targetIndustry = menteeProfile.target_industry?.toLowerCase();
+  if (!targetIndustry) return mentors.slice(0, limit);
+  const matched = mentors.filter((m) => m.industry?.toLowerCase() === targetIndustry);
+  const rest = mentors.filter((m) => m.industry?.toLowerCase() !== targetIndustry);
+  return [...matched, ...rest].slice(0, limit);
+}
+
 async function runMentorMatch({ menteeProfile, mentors, resumeText }) {
-  const mentorList = mentorListForPrompt(mentors);
+  const filtered = preFilterMentors(mentors, menteeProfile);
+  const mentorList = mentorListForPrompt(filtered);
   const userMessage = `
 MENTEE PROFILE:
 - Current role: ${menteeProfile.current_position ?? 'Not specified'}
@@ -265,7 +274,7 @@ top_matches must have exactly 3 entries. honorable_mentions must have exactly 2 
 `;
 
   const rawText = await callOpenAIChat({
-    model: 'gpt-4o',
+    model: 'gpt-4o-mini',
     maxTokens: 1500,
     messages: [
       {

@@ -1,27 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, MapPin, Phone, Sun, Moon, Monitor } from 'lucide-react';
 import { COMPANY_EMAIL, mailtoHref } from '../config/contact';
 import { applyAppearance, APPEARANCE_STORAGE_KEY } from '../utils/appearance';
+import { useI18n } from '../i18n';
 
 const linkClass =
   'text-sm text-white transition-colors duration-200 hover:text-orange-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded-sm';
 
 function useCurrentTheme() {
-  const [theme, setThemeState] = useState('light');
-  useEffect(() => {
+  const [theme, setThemeState] = useState(() => {
     try {
       const raw = localStorage.getItem(APPEARANCE_STORAGE_KEY);
       if (raw) {
         const o = JSON.parse(raw);
-        setThemeState(o?.theme || 'light');
+        return o?.theme || 'light';
       }
     } catch { /* ignore */ }
-  }, []);
+    return 'light';
+  });
   return [theme, setThemeState];
 }
 
 export default function Footer() {
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [theme, setThemeState] = useCurrentTheme();
@@ -48,13 +50,13 @@ export default function Footer() {
         <div className="mx-auto max-w-bridge px-4 py-10 sm:px-6 lg:px-8 xl:px-10">
           <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[1.05rem] font-bold text-stone-100 tracking-tight">Stay in the loop</p>
-              <p className="mt-1 text-sm text-stone-400">Mentor spotlights, career resources, product updates. No spam, ever.</p>
+              <p className="text-[1.05rem] font-bold text-stone-100 tracking-tight">{t('footer.stayInLoop', 'Stay in the loop')}</p>
+              <p className="mt-1 text-sm text-stone-400">{t('footer.newsletterBody', 'Mentor spotlights, career resources, product updates. No spam, ever.')}</p>
             </div>
             {subscribed ? (
               <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/22 bg-emerald-500/[0.09] px-5 py-3 text-sm font-medium text-emerald-400">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                You're subscribed!
+                {t('footer.subscribed', "You're subscribed!")}
               </div>
             ) : (
               <form
@@ -71,9 +73,9 @@ export default function Footer() {
                 />
                 <button
                   type="submit"
-                  className="btn-sheen shrink-0 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_22px_-4px_color-mix(in srgb, var(--color-primary) 50%, transparent)] transition hover:shadow-[0_8px_34px_-4px_color-mix(in srgb, var(--color-primary) 72%, transparent)] hover:brightness-105"
+                  className="btn-sheen shrink-0 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_22px_-4px_color-mix(in_srgb,_var(--color-primary)_50%,_transparent)] transition hover:shadow-[0_8px_34px_-4px_color-mix(in_srgb,_var(--color-primary)_72%,_transparent)] hover:brightness-105"
                 >
-                  Subscribe
+                  {t('footer.subscribe', 'Subscribe')}
                 </button>
               </form>
             )}
@@ -130,13 +132,13 @@ export default function Footer() {
 
             {/* Theme switcher */}
             <div className="pt-1">
-              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.22em] text-white">Display mode</p>
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.22em] text-white">{t('footer.displayMode', 'Display mode')}</p>
               <div className="inline-flex items-center rounded-xl border border-white/[0.065] bg-white/[0.025] p-1 gap-0.5">
                 {[
-                  { value: 'light',  label: 'Light',  Icon: Sun     },
-                  { value: 'system', label: 'System', Icon: Monitor  },
-                  { value: 'dark',   label: 'Dark',   Icon: Moon    },
-                ].map(({ value, label, Icon }) => (
+                  { value: 'light',  label: t('footer.light', 'Light'),  icon: <Sun className="h-3.5 w-3.5 shrink-0" /> },
+                  { value: 'system', label: t('footer.system', 'System'), icon: <Monitor className="h-3.5 w-3.5 shrink-0" /> },
+                  { value: 'dark',   label: t('footer.dark', 'Dark'),   icon: <Moon className="h-3.5 w-3.5 shrink-0" /> },
+                ].map(({ value, label, icon }) => (
                   <button
                     key={value}
                     onClick={() => handleTheme(value)}
@@ -147,7 +149,7 @@ export default function Footer() {
                         : 'text-white hover:text-orange-200'
                     }`}
                   >
-                    <Icon className="h-3.5 w-3.5 shrink-0" />
+                    {icon}
                     <span className="hidden sm:inline">{label}</span>
                   </button>
                 ))}
@@ -157,14 +159,14 @@ export default function Footer() {
 
           {/* ── Platform ── */}
           <div className="lg:col-span-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">Platform</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">{t('footer.platform', 'Platform')}</p>
             <ul className="mt-4 space-y-3">
               {[
-                { label: 'Browse Mentors', to: '/mentors'   },
-                { label: 'AI Matching',    to: '/mentors'   },
-                { label: 'Resume Review',  to: '/resume'    },
-                { label: 'Pricing',        to: '/pricing'   },
-                { label: 'Dashboard',      to: '/dashboard' },
+                { label: t('footer.browseMentors', 'Browse Mentors'), to: '/mentors' },
+                { label: t('footer.aiMatching', 'AI Matching'), to: '/mentors' },
+                { label: t('footer.resumeReview', 'Resume Review'), to: '/resume' },
+                { label: t('nav.pricing', 'Pricing'), to: '/pricing' },
+                { label: t('footer.dashboard', 'Dashboard'), to: '/dashboard' },
               ].map(({ label, to }) => (
                 <li key={label}><Link to={to} className={linkClass}>{label}</Link></li>
               ))}
@@ -173,14 +175,14 @@ export default function Footer() {
 
           {/* ── Company ── */}
           <div className="lg:col-span-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">Company</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">{t('footer.company', 'Company')}</p>
             <ul className="mt-4 space-y-3">
               {[
-                { label: 'About',          to: '/about'     },
-                { label: 'Blog',           to: '/blog'      },
-                { label: 'Careers',        to: '/careers'   },
-                { label: 'Trust & Safety', to: '/trust'     },
-                { label: 'Community',      to: '/community' },
+                { label: t('nav.about', 'About'), to: '/about' },
+                { label: t('footer.blog', 'Blog'), to: '/blog' },
+                { label: t('footer.careers', 'Careers'), to: '/careers' },
+                { label: t('footer.trustSafety', 'Trust & Safety'), to: '/trust' },
+                { label: t('footer.community', 'Community'), to: '/community' },
               ].map(({ label, to }) => (
                 <li key={label}><Link to={to} className={linkClass}>{label}</Link></li>
               ))}
@@ -189,7 +191,7 @@ export default function Footer() {
 
           {/* ── Contact ── */}
           <div className="lg:col-span-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">Get in touch</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">{t('footer.getInTouch', 'Get in touch')}</p>
             <ul className="mt-4 space-y-4 text-sm">
               <li className="flex items-start gap-3 text-stone-300">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-orange-400/65" aria-hidden />
@@ -211,7 +213,7 @@ export default function Footer() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]" />
               </span>
-              <span className="text-[11px] font-semibold text-stone-300">All systems operational</span>
+              <span className="text-[11px] font-semibold text-stone-300">{t('footer.allSystemsOperational', 'All systems operational')}</span>
             </div>
           </div>
         </div>
@@ -220,14 +222,14 @@ export default function Footer() {
       {/* ── Bottom bar ── */}
       <div className="relative border-t border-white/[0.045]">
         <div className="mx-auto flex max-w-bridge flex-col items-center justify-between gap-4 px-4 py-5 text-xs text-white sm:flex-row sm:px-6 lg:px-8 xl:px-10">
-          <p className="shrink-0">© {new Date().getFullYear()} Bridge. All rights reserved.</p>
+          <p className="shrink-0">© {new Date().getFullYear()} Bridge. {t('footer.rightsReserved', 'All rights reserved.')}</p>
           <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
             {[
-              { label: 'Privacy', to: '/privacy' },
-              { label: 'Terms',   to: '/terms'   },
-              { label: 'Cookies', to: '/cookies' },
-              { label: 'Help',    to: '/help'    },
-              { label: 'Contact', to: '/contact' },
+              { label: t('footer.privacy', 'Privacy'), to: '/privacy' },
+              { label: t('footer.terms', 'Terms'), to: '/terms' },
+              { label: t('footer.cookies', 'Cookies'), to: '/cookies' },
+              { label: t('footer.help', 'Help'), to: '/help' },
+              { label: t('footer.contact', 'Contact'), to: '/contact' },
             ].map(({ label, to }) => (
               <Link key={to} to={to} className="text-white transition-colors hover:text-orange-200">{label}</Link>
             ))}

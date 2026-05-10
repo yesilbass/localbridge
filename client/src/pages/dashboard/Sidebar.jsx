@@ -3,6 +3,7 @@ import {
   LayoutDashboard, CalendarCheck, Heart, UserRound, CreditCard, Settings,
   Clock, DollarSign, Star, PanelLeftClose, PanelLeftOpen,
 } from 'lucide-react';
+import { useI18n } from '../../i18n';
 
 const MENTEE_LINKS = [
   { to: '/dashboard',          label: 'Home',     icon: LayoutDashboard, end: true },
@@ -24,7 +25,25 @@ const MENTOR_LINKS = [
 ];
 
 export default function Sidebar({ activeRole, isCollapsed, onToggleCollapsed }) {
-  const links = activeRole === 'mentor' ? MENTOR_LINKS : MENTEE_LINKS;
+  const { t } = useI18n();
+  const menteeLinks = [
+    { ...MENTEE_LINKS[0], label: t('common.home', 'Home') },
+    { ...MENTEE_LINKS[1], label: t('common.sessions', 'Sessions') },
+    { ...MENTEE_LINKS[2], label: t('common.saved', 'Saved') },
+    { ...MENTEE_LINKS[3], label: t('nav.profile', 'Profile') },
+    { ...MENTEE_LINKS[4], label: t('common.billing', 'Billing') },
+    { ...MENTEE_LINKS[5], label: t('nav.settings', 'Settings') },
+  ];
+  const mentorLinks = [
+    { ...MENTOR_LINKS[0], label: t('common.home', 'Home') },
+    { ...MENTOR_LINKS[1], label: t('common.sessions', 'Sessions') },
+    { ...MENTOR_LINKS[2], label: t('common.availability', 'Availability') },
+    { ...MENTOR_LINKS[3], label: t('common.earnings', 'Earnings') },
+    { ...MENTOR_LINKS[4], label: t('common.reviews', 'Reviews') },
+    { ...MENTOR_LINKS[5], label: t('nav.profile', 'Profile') },
+    { ...MENTOR_LINKS[6], label: t('nav.settings', 'Settings') },
+  ];
+  const links = activeRole === 'mentor' ? mentorLinks : menteeLinks;
 
   return (
     <aside
@@ -82,7 +101,7 @@ export default function Sidebar({ activeRole, isCollapsed, onToggleCollapsed }) 
         <button
           type="button"
           onClick={onToggleCollapsed}
-          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={isCollapsed ? t('dashboard.expandSidebar', 'Expand sidebar') : t('dashboard.collapseSidebar', 'Collapse sidebar')}
           aria-expanded={!isCollapsed}
           className="bridge-focus mx-auto grid h-7 w-7 place-items-center rounded-md transition-colors"
           style={{
