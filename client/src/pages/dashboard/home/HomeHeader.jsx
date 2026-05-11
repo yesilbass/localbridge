@@ -1,11 +1,13 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useReducedMotion } from 'motion/react';
+import { ArrowRight, Search, Clock, UserRound } from 'lucide-react';
 import { useAuth } from '../../../context/useAuth.js';
 import {
   useNextSession,
-  useSavedMentors,
   useAvailabilityToggle,
   useLiveCountdown,
+  useProfileHealth,
 } from '../dashboardHooks.js';
 import { isMentorAccount } from '../../../utils/accountRole';
 import { usePerfTier } from '../../landing/landingHooks';
@@ -20,16 +22,6 @@ function firstNameOf(user) {
   const name = user?.user_metadata?.full_name?.trim();
   if (!name) return null;
   return name.split(/\s+/)[0];
-}
-
-function tzAbbr() {
-  try {
-    const parts = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' })
-      .formatToParts(new Date());
-    return parts.find((p) => p.type === 'timeZoneName')?.value ?? '';
-  } catch {
-    return '';
-  }
 }
 
 function formatCountdown(scheduledAt, now) {
@@ -49,6 +41,24 @@ function formatNowDate(d) {
   return `${day} · ${date} · ${time}`;
 }
 
+function PrimaryAction({ to, icon: Icon, children }) {
+  return (
+    <Link
+      to={to}
+      className="bridge-focus inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-3 text-[14px] font-bold transition-all duration-200 hover:-translate-y-0.5"
+      style={{
+        backgroundColor: 'var(--color-primary)',
+        color: 'var(--color-on-primary, #fff)',
+        boxShadow: '0 14px 32px -10px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+      }}
+    >
+      {Icon ? <Icon className="h-4 w-4 shrink-0" aria-hidden /> : null}
+      <span className="truncate">{children}</span>
+      <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+    </Link>
+  );
+}
+
 export default function HomeHeader({ activeRole }) {
   const { user } = useAuth();
   const reduced = useReducedMotion();
@@ -58,7 +68,7 @@ export default function HomeHeader({ activeRole }) {
   const { session } = useNextSession();
   const isMentor = activeRole === 'mentor' || (user ? isMentorAccount(user) : false);
   const { isAvailable } = useAvailabilityToggle();
-  const { total: savedTotal } = useSavedMentors({ limit: 1 });
+  const { score: profileScore } = useProfileHealth();
 
   const now = useLiveCountdown(session?.scheduledAt);
 
@@ -79,26 +89,38 @@ export default function HomeHeader({ activeRole }) {
   }
   if (!subline) {
     if (isMentor && !isAvailable) {
-      subline = 'Your mentor profile is hidden until you set hours.';
-    } else if (!isMentor && savedTotal === 0) {
-      subline = 'Browse mentors and save the ones you want to talk to.';
-    } else {
+      subline = 'Open your hours so mentees can book you.';
+    } else if (isMentor) {
       subline = formatNowDate(mountDate);
+    } else {
+      subline = 'Ready to book your next hour?';
     }
   }
 
   const headlineText = firstName ? `${greeting}, ${firstName}.` : 'Welcome back.';
   const enterClass = flat ? '' : 'animate-page-enter';
 
+  // Single primary action per role.
+  let action;
+  if (isMentor) {
+    if (profileScore < 60) {
+      action = <PrimaryAction to="/dashboard/profile" icon={UserRound}>Open profile</PrimaryAction>;
+    } else {
+      action = <PrimaryAction to="/dashboard/availability" icon={Clock}>Set availability</PrimaryAction>;
+    }
+  } else {
+    action = <PrimaryAction to="/mentors" icon={Search}>Browse mentors</PrimaryAction>;
+  }
+
   return (
     <header
       aria-labelledby="home-greeting"
-      className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between"
+      className="flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="min-w-0">
         <h1
           id="home-greeting"
-          className={`font-display font-black ${enterClass}`}
+          className={`truncate font-display font-black ${enterClass}`}
           style={{
             fontSize: 'clamp(28px, 3.4vw, 40px)',
             lineHeight: 1.05,
@@ -109,7 +131,7 @@ export default function HomeHeader({ activeRole }) {
           {headlineText}
         </h1>
         <p
-          className={`mt-1 text-[14px] ${enterClass}`}
+          className={`mt-1 truncate text-[14px] ${enterClass}`}
           style={{
             color: 'var(--bridge-text-secondary)',
             lineHeight: 1.5,
@@ -119,20 +141,7 @@ export default function HomeHeader({ activeRole }) {
           {subline}
         </p>
       </div>
-
-      <span
-        aria-hidden
-        className="hidden shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] lg:inline-flex"
-        style={{
-          backgroundColor: 'var(--bridge-surface)',
-          boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-          color: 'var(--bridge-text-muted)',
-        }}
-      >
-        {isMentor ? 'Mentor' : 'Mentee'}
-        <span style={{ color: 'var(--bridge-text-faint)' }}>·</span>
-        <span className="tabular-nums">{tzAbbr()}</span>
-      </span>
+      {action}
     </header>
   );
 }

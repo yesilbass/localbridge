@@ -1,6 +1,27 @@
 import { Link } from 'react-router-dom';
 import { CreditCard, Receipt, ArrowRight } from 'lucide-react';
-import { useDashboardSessions, formatCurrency } from './dashboardHooks.js';
+import { useDashboardSessions } from './dashboardHooks.js';
+
+const STATUS_META = {
+  pending:   { label: 'Awaiting mentor', color: 'var(--color-warning)' },
+  accepted:  { label: 'Confirmed',       color: 'var(--color-primary)' },
+  completed: { label: 'Completed',       color: 'var(--color-success)' },
+};
+
+function StatusPill({ status }) {
+  const meta = STATUS_META[status] ?? STATUS_META.pending;
+  return (
+    <span
+      className="inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-[0.14em]"
+      style={{
+        backgroundColor: `color-mix(in srgb, ${meta.color} 12%, transparent)`,
+        color: meta.color,
+      }}
+    >
+      {meta.label}
+    </span>
+  );
+}
 
 export default function BillingPage() {
   const { isMentor, sessions, isLoading } = useDashboardSessions();
@@ -38,10 +59,11 @@ export default function BillingPage() {
     return <div className="bridge-skeleton h-48 w-full rounded-2xl" />;
   }
 
-  const completed = sessions.filter((s) => String(s.status).toLowerCase() === 'completed');
-  const totalSpent = sessions
-    .filter((s) => ['completed', 'accepted'].includes(String(s.status).toLowerCase()))
-    .reduce((sum) => sum, 0); // amount per session unknown client-side; stays 0 unless backed by future ledger
+  const PAID_STATUSES = ['pending', 'accepted', 'completed'];
+  const purchases = sessions
+    .filter((s) => PAID_STATUSES.includes(String(s.status).toLowerCase()))
+    .slice()
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
     <div className="flex flex-col gap-6">
@@ -85,41 +107,47 @@ export default function BillingPage() {
             Recent purchases
           </h2>
         </div>
-        {completed.length === 0 ? (
+        {purchases.length === 0 ? (
           <p className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>
-            No purchases yet. Booked sessions will show up here.
+            No purchases yet. Sessions you book will show up here as soon as payment clears.
           </p>
         ) : (
-          <ul className="divide-y" style={{ borderColor: 'var(--bridge-border)' }}>
-            {completed.map((s, i) => {
+          <ul>
+            {purchases.map((s, i) => {
+              const status = String(s.status).toLowerCase();
               const d = s.scheduled_date ? new Date(s.scheduled_date) : new Date(s.created_at);
+              const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+              const sessionTypeLabel = (s.session_type ?? 'session').replace(/_/g, ' ');
               return (
                 <li
                   key={s.id}
-                  className="flex items-center justify-between py-3 text-[13px]"
+                  className="flex min-w-0 items-center gap-3 py-3 text-[13px]"
                   style={{ borderTop: i === 0 ? 'none' : '1px solid var(--bridge-border)' }}
                 >
-                  <span style={{ color: 'var(--bridge-text)' }}>
-                    {(s.session_type ?? '').replace('_', ' ')} · {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </span>
-                  <span
-                    className="inline-flex items-center gap-1 text-[12px]"
-                    style={{ color: 'var(--bridge-text-muted)' }}
-                  >
-                    <Receipt className="h-3.5 w-3.5" aria-hidden /> Receipt sent by email
-                  </span>
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate capitalize" style={{ color: 'var(--bridge-text)' }}>
+                      {sessionTypeLabel}
+                    </span>
+                    <span
+                      className="truncate text-[11.5px] tabular-nums"
+                      style={{ color: 'var(--bridge-text-muted)' }}
+                    >
+                      {dateLabel}
+                      {status === 'completed' ? (
+                        <>
+                          {' · '}
+                          <span className="inline-flex items-center gap-1">
+                            <Receipt className="h-3 w-3" aria-hidden /> Receipt sent
+                          </span>
+                        </>
+                      ) : null}
+                    </span>
+                  </div>
+                  <StatusPill status={status} />
                 </li>
               );
             })}
           </ul>
-        )}
-        {totalSpent > 0 && (
-          <p
-            className="mt-4 text-[12px] tabular-nums"
-            style={{ color: 'var(--bridge-text-muted)' }}
-          >
-            Lifetime spend on Bridge: ${formatCurrency(totalSpent)}
-          </p>
         )}
       </section>
     </div>

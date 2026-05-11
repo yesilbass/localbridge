@@ -95,9 +95,9 @@ function ScheduledState({ session }) {
     <ShellCard live={live}>
       <h2 id="next-session-heading" className="sr-only">Your next session</h2>
 
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+      <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-center">
         {/* Avatar + name */}
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4">
           {session.otherParty?.avatarUrl ? (
             <img
               src={session.otherParty.avatarUrl}
@@ -105,47 +105,47 @@ function ScheduledState({ session }) {
               width={96}
               height={96}
               loading="eager"
-              className="bridge-photo h-20 w-20 rounded-2xl object-cover sm:h-24 sm:w-24"
+              className="bridge-photo h-20 w-20 shrink-0 rounded-2xl object-cover sm:h-24 sm:w-24"
             />
           ) : (
             <div
-              className="bridge-photo grid h-20 w-20 place-items-center rounded-2xl font-display text-[24px] font-black sm:h-24 sm:w-24"
+              className="bridge-photo grid h-20 w-20 shrink-0 place-items-center rounded-2xl font-display text-[24px] font-black sm:h-24 sm:w-24"
               style={{ color: 'var(--bridge-text-secondary)' }}
               aria-hidden
             >
               {initials || 'B'}
             </div>
           )}
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-1">
             <span className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--bridge-text-muted)' }}>
               {eyebrow}
             </span>
             <span
-              className="font-display text-[20px] font-black leading-tight tracking-[-0.02em] sm:text-[22px]"
+              className="truncate font-display text-[20px] font-black leading-tight tracking-[-0.02em] sm:text-[22px]"
               style={{ color: 'var(--bridge-text)' }}
             >
               {session.otherParty?.name || 'Your operator'}
             </span>
             {(session.otherParty?.title || session.otherParty?.company) && (
-              <span className="text-[13px]" style={{ color: 'var(--bridge-text-secondary)' }}>
+              <span className="truncate text-[13px]" style={{ color: 'var(--bridge-text-secondary)' }}>
                 {[session.otherParty.title, session.otherParty.company].filter(Boolean).join(' · ')}
               </span>
             )}
           </div>
         </div>
 
-        {/* Time + topic — sm+ */}
+        {/* Time + topic — lg+ only to avoid 3-column squeeze */}
         <div
-          className="hidden flex-col gap-1 px-6 sm:flex"
+          className="hidden min-w-0 flex-col gap-1 px-6 lg:flex"
           style={{ borderLeft: '1px solid var(--bridge-border)' }}
         >
           <span className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--bridge-text-muted)' }}>
             When
           </span>
-          <span className="text-[15px] font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
+          <span className="truncate text-[15px] font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
             {dayLine}
           </span>
-          <span className="text-[15px] font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
+          <span className="truncate text-[15px] font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
             {timeLine} {tz}
           </span>
           {session.topic && (
@@ -164,7 +164,7 @@ function ScheduledState({ session }) {
         </div>
 
         {/* Countdown + CTA */}
-        <div className="flex shrink-0 flex-col items-start gap-3 sm:ml-auto sm:items-end">
+        <div className="flex shrink-0 flex-col items-start gap-3 lg:ml-auto lg:items-end">
           {live ? (
             <span
               className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.22em]"

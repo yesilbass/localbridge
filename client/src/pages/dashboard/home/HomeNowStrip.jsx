@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  AlertTriangle, Calendar, Check, Star, Video, ArrowRight, ShieldCheck, CreditCard,
+  AlertTriangle, Calendar, Check, Star, Video, ArrowRight, ShieldCheck,
 } from 'lucide-react';
 import supabase from '../../../api/supabase';
 import { useAuth } from '../../../context/useAuth.js';
@@ -296,39 +296,6 @@ export default function HomeNowStrip({ activeRole }) {
     );
   }
 
-  // 6. mentee failed payment (best-effort: a session left in pending > 24h with no
-  // accepted/cancelled state and unreachable mentor — surface a retry path. We
-  // don't have a payment table, so we treat any pending booking older than 24h
-  // as "did not process".
-  if (!isMentor) {
-    const stalePending = past.find((s) => {
-      const status = String(s.status ?? '').toLowerCase();
-      if (status !== 'pending') return false;
-      const t = new Date(s.created_at).getTime();
-      return mountNow - t > 24 * 60 * 60 * 1000;
-    });
-    if (stalePending) {
-      return (
-        <StripShell
-          severity="warning"
-          icon={CreditCard}
-          message={(
-            <span>
-              <span className="font-semibold" style={{ color: 'var(--bridge-text)' }}>
-                Your last booking didn&apos;t process.
-              </span>{' '}
-              <span style={{ color: 'var(--bridge-text-secondary)' }}>Retry?</span>
-            </span>
-          )}
-        >
-          <PrimaryButton to="/dashboard/billing">
-            Open billing <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-          </PrimaryButton>
-        </StripShell>
-      );
-    }
-  }
-
-  // No condition fired — render nothing.
+  // No actionable condition fired — render nothing.
   return null;
 }

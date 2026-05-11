@@ -651,10 +651,37 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
             </div>
           ) : !calendlyReady ? (
             <div
-              className="rounded-xl px-4 py-3 text-sm italic"
-              style={{ border: '1px solid var(--bridge-border)', backgroundColor: 'var(--bridge-surface-muted)', color: 'var(--bridge-text-secondary)' }}
+              className="rounded-2xl p-6 sm:p-7"
+              style={{ border: '1px solid var(--bridge-border)', backgroundColor: 'var(--bridge-surface-muted)' }}
             >
-              {(mentor.name?.split(' ')[0] || 'This mentor')} hasn't opened booking yet — check back soon.
+              <p
+                className="text-[10px] font-black uppercase tracking-[0.28em]"
+                style={{ color: 'var(--color-warning)' }}
+              >
+                Calendar not open
+              </p>
+              <p
+                className="font-display mt-2 font-black tracking-[-0.02em]"
+                style={{ fontSize: 'clamp(1.25rem, 2.4vw, 1.6rem)', color: 'var(--bridge-text)' }}
+              >
+                {(mentor.name?.split(' ')[0] || 'This mentor')} hasn't opened their calendar yet.
+              </p>
+              <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
+                We'll email you the moment booking opens. Until then, you can save them or keep browsing.
+              </p>
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <Link
+                  to="/mentors"
+                  className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition-all ${ring}`}
+                  style={{
+                    background: 'var(--color-primary)',
+                    color: 'var(--color-on-primary)',
+                    outlineColor: 'var(--color-primary)',
+                  }}
+                >
+                  Browse other mentors →
+                </Link>
+              </div>
             </div>
           ) : isPaid ? (
             <div
