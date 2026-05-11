@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import supabase from './_lib/supabase.js';
-import { verifyAuthUser } from './_lib/auth.js';
-import { getClientUrl } from './_lib/allowedOrigins.js';
-import { applySecurityHeaders, jsonError } from './_lib/security.js';
-import { createOAuthState } from './_lib/oauthState.js';
-import { getOAuthUrl } from './_lib/calendly.js';
+import supabase from '../supabase.js';
+import { verifyAuthUser } from '../auth.js';
+import { getClientUrl } from '../allowedOrigins.js';
+import { applySecurityHeaders, jsonError } from '../security.js';
+import { createOAuthState } from '../oauthState.js';
+import { getOAuthUrl } from '../calendly.js';
 
 const QUERY = z.object({
   mentor_profile_id: z.string().uuid(),

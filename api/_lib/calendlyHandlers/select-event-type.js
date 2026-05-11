@@ -1,13 +1,13 @@
 import { z } from 'zod';
-import supabase from './_lib/supabase.js';
-import { verifyAuthUser } from './_lib/auth.js';
-import { applyCors } from './_lib/allowedOrigins.js';
-import { jsonError, validateJsonBody } from './_lib/security.js';
+import supabase from '../supabase.js';
+import { verifyAuthUser } from '../auth.js';
+import { applyCors } from '../allowedOrigins.js';
+import { jsonError, validateJsonBody } from '../security.js';
 import {
   getValidAccessToken,
   getEventType,
   readCredentials,
-} from './_lib/calendly.js';
+} from '../calendly.js';
 
 const BODY = z.object({
   mentor_profile_id: z.string().uuid(),

@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import supabase from './_lib/supabase.js';
-import { applyCors } from './_lib/allowedOrigins.js';
-import { jsonError } from './_lib/security.js';
+import supabase from '../supabase.js';
+import { applyCors } from '../allowedOrigins.js';
+import { jsonError } from '../security.js';
 import {
   getValidAccessToken,
   getEventType,
   getAvailableTimes,
-} from './_lib/calendly.js';
+} from '../calendly.js';
 
 const QUERY = z.object({ mentor_profile_id: z.string().uuid() });
 
