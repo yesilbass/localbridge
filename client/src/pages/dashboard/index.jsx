@@ -19,38 +19,48 @@ import { useI18n } from '../../i18n';
 import PageHeader from './home/PageHeader.jsx';
 import HomeHeader from './home/HomeHeader.jsx';
 import HomeNowStrip from './home/HomeNowStrip.jsx';
-import HomeFocusCard from './home/HomeFocusCard.jsx';
 import HomeAtAGlance from './home/HomeAtAGlance.jsx';
-import HomeQuickActions from './home/HomeQuickActions.jsx';
-import HomeWeeklyPulse from './home/HomeWeeklyPulse.jsx';
-import HomeSinceLastVisit from './home/HomeSinceLastVisit.jsx';
-import HomeMentorPanel from './home/HomeMentorPanel.jsx';
-import HomeMenteePanel from './home/HomeMenteePanel.jsx';
+import HomeSpending from './home/HomeSpending.jsx';
+import NextSessionCard from './NextSessionCard.jsx';
+import RecommendationsBlock from './RecommendationsBlock.jsx';
+import UpcomingSessionsBlock from './UpcomingSessionsBlock.jsx';
+import ProfileHealthCard from './ProfileHealthCard.jsx';
+import { useProfileHealth } from './dashboardHooks.js';
 
 // ─── home content ─────────────────────────────────────────────────────────
 
-function DashboardHome({ activeRole }) {
+function MentorHome({ activeRole }) {
+  const { score, isLoading: healthLoading } = useProfileHealth();
+  const showHealth = !healthLoading && score < 100;
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
       <HomeHeader activeRole={activeRole} />
       <HomeNowStrip activeRole={activeRole} />
-
-      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12 lg:gap-6">
-        <div className="lg:col-span-8">
-          <HomeFocusCard activeRole={activeRole} />
-        </div>
-        <div className="lg:col-span-4">
-          <HomeAtAGlance activeRole={activeRole} />
-        </div>
-      </div>
-
-      <HomeQuickActions activeRole={activeRole} />
-      <HomeWeeklyPulse activeRole={activeRole} />
-      <HomeSinceLastVisit activeRole={activeRole} />
-
-      {activeRole === 'mentor' ? <HomeMentorPanel /> : <HomeMenteePanel />}
+      <NextSessionCard activeRole={activeRole} />
+      <HomeAtAGlance activeRole={activeRole} />
+      <UpcomingSessionsBlock />
+      {showHealth ? <ProfileHealthCard /> : null}
     </div>
   );
+}
+
+function MenteeHome({ activeRole }) {
+  return (
+    <div className="flex flex-col gap-6 sm:gap-8">
+      <HomeHeader activeRole={activeRole} />
+      <HomeNowStrip activeRole={activeRole} />
+      <NextSessionCard activeRole={activeRole} />
+      <HomeAtAGlance activeRole={activeRole} />
+      <RecommendationsBlock limit={2} />
+      <HomeSpending />
+    </div>
+  );
+}
+
+function DashboardHome({ activeRole }) {
+  return activeRole === 'mentor'
+    ? <MentorHome activeRole={activeRole} />
+    : <MenteeHome activeRole={activeRole} />;
 }
 
 // ─── sub-page wrappers (PageHeader + body) ────────────────────────────────

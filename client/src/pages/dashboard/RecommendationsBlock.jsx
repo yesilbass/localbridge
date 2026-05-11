@@ -8,13 +8,13 @@ function ReasonedCard({ rec }) {
   const initials = (m.name || '?').split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase()).join('');
   return (
     <article
-      className="flex h-full flex-col gap-4 rounded-2xl p-5"
+      className="flex h-full min-w-0 flex-col gap-4 rounded-3xl p-5"
       style={{
         backgroundColor: 'var(--bridge-surface)',
         boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
       }}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3">
         {m.image_url ? (
           <img
             src={m.image_url}
@@ -33,7 +33,7 @@ function ReasonedCard({ rec }) {
             {initials}
           </div>
         )}
-        <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 flex-col">
           <p className="truncate text-[15px] font-bold" style={{ color: 'var(--bridge-text)' }}>
             {m.name}
           </p>
@@ -63,31 +63,32 @@ function ReasonedCard({ rec }) {
         </p>
       </div>
 
-      <div className="mt-auto flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[11px]">
-          <Star aria-hidden className="h-3 w-3" fill="#F59E0B" stroke="#F59E0B" />
+      <div className="mt-auto flex min-w-0 items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2 truncate text-[11px]">
+          <Star aria-hidden className="h-3 w-3 shrink-0" fill="#F59E0B" stroke="#F59E0B" />
           <span className="font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
             {(m.rating ?? 0).toFixed(1)}
           </span>
           <span aria-hidden style={{ color: 'var(--bridge-text-muted)' }}>•</span>
-          <span className="font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
+          <span className="truncate font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
             ${m.session_rate ?? '—'}/session
           </span>
         </div>
         <Link
           to={`/mentors/${m.id}`}
-          className="bridge-focus rounded-lg px-3 py-1.5 text-[12px] font-bold transition-colors"
-          style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
+          className="bridge-focus shrink-0 rounded-lg px-3 py-1.5 text-[12px] font-bold transition-colors"
+          style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary, #fff)' }}
         >
-          View profile
+          View
         </Link>
       </div>
     </article>
   );
 }
 
-export default function RecommendationsBlock() {
-  const { recommendations, isLoading } = useMentorRecommendations({ limit: 3 });
+export default function RecommendationsBlock({ limit = 3 } = {}) {
+  const { recommendations, isLoading } = useMentorRecommendations({ limit });
+  const cols = limit <= 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-3';
 
   return (
     <section aria-labelledby="recs-heading">
@@ -105,8 +106,8 @@ export default function RecommendationsBlock() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
+        <div className={`grid grid-cols-1 gap-5 ${cols}`}>
+          {Array.from({ length: limit }).map((_, i) => (
             <div
               key={i}
               className="rounded-2xl p-5"
@@ -144,7 +145,7 @@ export default function RecommendationsBlock() {
           />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <div className={`grid grid-cols-1 gap-5 ${cols}`}>
           {recommendations.map((rec) => <ReasonedCard key={rec.mentor.id} rec={rec} />)}
         </div>
       )}

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Calendar, DollarSign, Star, Activity,
-  CalendarCheck, Heart, MessageSquare, Clock,
+  CalendarCheck, Heart, MessageSquare, Clock, ArrowUpRight,
 } from 'lucide-react';
 import {
   useDashboardSessions,
@@ -36,25 +36,37 @@ function endOfWeek(d) {
 
 function StatCard({ icon, label, value, sub, to, sublineColor }) {
   const IconCmp = icon;
+  const interactive = !!to;
   const inner = (
     <article
-      className="flex h-full flex-col gap-1 rounded-2xl p-4 transition-shadow"
+      className={`relative flex h-full flex-col gap-1 rounded-3xl p-5 transition-all duration-200 ${
+        interactive
+          ? 'group-hover:-translate-y-0.5 group-hover:shadow-[0_8px_30px_-12px_rgb(0_0_0_/0.15)]'
+          : ''
+      }`}
       style={{
         backgroundColor: 'var(--bridge-surface)',
         boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
       }}
     >
-      <div className="flex items-center gap-2">
-        <IconCmp className="h-3.5 w-3.5" style={{ color: 'var(--color-primary)' }} aria-hidden />
+      <div className="flex min-w-0 items-center gap-2">
+        <IconCmp className="h-3.5 w-3.5 shrink-0" style={{ color: 'var(--color-primary)' }} aria-hidden />
         <span
-          className="text-[10px] font-bold uppercase tracking-[0.18em]"
+          className="truncate text-[10px] font-bold uppercase tracking-[0.18em]"
           style={{ color: 'var(--bridge-text-muted)' }}
         >
           {label}
         </span>
+        {interactive ? (
+          <ArrowUpRight
+            aria-hidden
+            className="ml-auto h-3.5 w-3.5 shrink-0 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100 group-focus-visible:opacity-100"
+            style={{ color: 'var(--color-primary)' }}
+          />
+        ) : null}
       </div>
       <p
-        className="font-display font-black tabular-nums"
+        className="truncate font-display font-black tabular-nums"
         style={{
           fontSize: 'clamp(24px, 2.4vw, 30px)',
           letterSpacing: '-0.025em',
@@ -74,9 +86,13 @@ function StatCard({ icon, label, value, sub, to, sublineColor }) {
       ) : null}
     </article>
   );
-  if (to) {
+  if (interactive) {
     return (
-      <Link to={to} className="bridge-focus block rounded-2xl">
+      <Link
+        to={to}
+        aria-label={`${label}: ${value}`}
+        className="bridge-focus group block rounded-3xl"
+      >
         {inner}
       </Link>
     );
@@ -117,7 +133,7 @@ function MentorAtAGlance() {
   })();
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1">
+    <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
       <StatCard
         icon={Calendar}
         label="Hours this week"
@@ -170,7 +186,7 @@ function MenteeAtAGlance() {
   const topRec = recs.recommendations?.[0]?.mentor ?? null;
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1">
+    <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
       <StatCard
         icon={CalendarCheck}
         label="Sessions completed"

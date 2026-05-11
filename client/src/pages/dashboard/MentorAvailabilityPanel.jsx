@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Check, ExternalLink, AlertTriangle, RefreshCw, Trash2 } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Check, ExternalLink, AlertTriangle, RefreshCw, Trash2, ArrowRight } from 'lucide-react';
 import {
   getCalendlyAuthUrl,
   getCalendlyEventTypes,
@@ -304,14 +304,20 @@ function StateConfigured({ profile, onChange, onDisconnect, busy }) {
 export default function MentorAvailabilityPanel({ mentorProfileId, reloadKey, onSaved }) {
   const [profile, setProfile] = useState(null);
   const [eventTypes, setEventTypes] = useState([]);
-  const [phase, setPhase] = useState('idle'); // idle | not_connected | pick | configured
+  const [phase, setPhase] = useState('idle'); // idle | no_profile | not_connected | pick | configured
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [selectingUri, setSelectingUri] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const refresh = useCallback(async () => {
-    if (!mentorProfileId) return;
+    if (!mentorProfileId) {
+      setError(null);
+      setEventTypes([]);
+      setProfile(null);
+      setPhase('no_profile');
+      return;
+    }
     setError(null);
     const { data, error: profileError } = await supabase
       .from('mentor_profiles')
@@ -421,7 +427,7 @@ export default function MentorAvailabilityPanel({ mentorProfileId, reloadKey, on
     onSaved?.();
   }
 
-  if (!mentorProfileId || phase === 'idle') {
+  if (phase === 'idle') {
     return (
       <CardShell>
         <p
@@ -433,6 +439,41 @@ export default function MentorAvailabilityPanel({ mentorProfileId, reloadKey, on
         <p className="mt-4 text-sm" style={{ color: 'var(--bridge-text-muted)' }}>
           Loading your booking calendar…
         </p>
+      </CardShell>
+    );
+  }
+
+  if (phase === 'no_profile') {
+    return (
+      <CardShell>
+        <p
+          className="text-[10px] font-black uppercase tracking-[0.32em]"
+          style={{ color: 'var(--color-primary)' }}
+        >
+          Availability
+        </p>
+        <h2
+          className="font-display mt-2 font-black tracking-[-0.02em]"
+          style={{ fontSize: 'clamp(1.4rem, 2.8vw, 1.9rem)', color: 'var(--bridge-text)' }}
+        >
+          Finish onboarding to set availability.
+        </h2>
+        <p
+          className="mt-3 max-w-xl text-sm leading-relaxed"
+          style={{ color: 'var(--bridge-text-secondary)' }}
+        >
+          Your mentor profile isn't ready yet. Complete onboarding to publish your hours and start accepting bookings.
+        </p>
+        <Link
+          to="/onboarding"
+          className="bridge-focus mt-6 inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-black"
+          style={{
+            background: 'var(--color-primary)',
+            color: 'var(--color-on-primary)',
+          }}
+        >
+          Finish onboarding <ArrowRight className="h-4 w-4" aria-hidden />
+        </Link>
       </CardShell>
     );
   }
