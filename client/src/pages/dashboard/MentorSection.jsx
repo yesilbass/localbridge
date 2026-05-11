@@ -7,12 +7,11 @@ import UpcomingSessionsBlock from './UpcomingSessionsBlock.jsx';
 import ReviewsRecentBlock from './ReviewsRecentBlock.jsx';
 import supabase from '../../api/supabase';
 import { useDashboardSessions } from './dashboardHooks.js';
-import { normalizeAvailabilitySchedule } from '../../utils/mentorAvailability';
 
 /**
- * Compact one-liner that only renders when the mentor has *no* hours set
- * (which means their profile is hidden from search). Quietly disappears
- * once availability is configured — no nag.
+ * Compact one-liner that only renders when the mentor has not yet connected
+ * Calendly (which means their profile is hidden from search). Quietly
+ * disappears once Calendly is set up — no nag.
  */
 function NoAvailabilityBanner() {
   const { mentorProfileId } = useDashboardSessions();
@@ -22,13 +21,11 @@ function NoAvailabilityBanner() {
     if (!mentorProfileId) return;
     supabase
       .from('mentor_profiles')
-      .select('availability_schedule')
+      .select('calendly_connected, calendly_event_type_uri')
       .eq('id', mentorProfileId)
       .maybeSingle()
       .then(({ data }) => {
-        const norm = normalizeAvailabilitySchedule(data?.availability_schedule ?? null);
-        const total = Object.values(norm.weekly).reduce((s, arr) => s + arr.length, 0);
-        setHidden(total > 0);
+        setHidden(!!(data?.calendly_connected && data?.calendly_event_type_uri));
       });
   }, [mentorProfileId]);
 
@@ -36,7 +33,7 @@ function NoAvailabilityBanner() {
 
   return (
     <Link
-      to="/dashboard/sessions"
+      to="/dashboard/availability"
       className="bridge-focus flex items-center gap-3 rounded-2xl px-4 py-3 transition-colors"
       style={{
         backgroundColor: 'color-mix(in srgb, var(--color-warning) 12%, transparent)',
@@ -49,13 +46,13 @@ function NoAvailabilityBanner() {
         aria-hidden
       />
       <span className="flex-1 text-[13px] font-bold" style={{ color: 'var(--bridge-text)' }}>
-        You haven't set any hours — mentees can't book you yet.
+        Connect your booking calendar — mentees can't book you yet.
       </span>
       <span
         className="inline-flex items-center gap-1 text-[12px] font-bold"
         style={{ color: 'var(--color-warning)' }}
       >
-        Set availability <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        Open availability <ArrowRight className="h-3.5 w-3.5" aria-hidden />
       </span>
     </Link>
   );

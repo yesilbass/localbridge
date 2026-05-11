@@ -82,14 +82,14 @@ export default function Navbar() {
   const navItems = asMentor
     ? [
         { path: '/dashboard', label: t('nav.dashboard', 'Dashboard') },
-        { path: '/why-us', label: t('nav.whyUs', 'Why us') },
+        { path: '/why-us', label: t('nav.whyUs', 'Why Bridge') },
         { path: '/pricing', label: t('nav.pricing', 'Pricing') },
         { path: '/about', label: t('nav.about', 'About'), desktopOnly: true },
       ]
     : [
         { path: '/mentors', label: t('nav.mentors', 'Mentors') },
         ...(user ? [{ path: '/dashboard', label: t('nav.dashboard', 'Dashboard') }] : []),
-        { path: '/why-us', label: t('nav.whyUs', 'Why us') },
+        { path: '/why-us', label: t('nav.whyUs', 'Why Bridge') },
         { path: '/resume', label: t('nav.resume', 'Resume'), ai: true },
         { path: '/pricing', label: t('nav.pricing', 'Pricing') },
         { path: '/about', label: t('nav.about', 'About'), desktopOnly: true },

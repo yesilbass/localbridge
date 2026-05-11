@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, Video, ArrowRight, Plus, Search } from 'lucide-react';
 import { useNextSession, useLiveCountdown } from '../dashboardHooks.js';
 import { useAuth } from '../../../context/useAuth.js';
 import { isMentorAccount } from '../../../utils/accountRole';
-import MentorAvailabilityModal from '../MentorAvailabilityModal.jsx';
-import supabase from '../../../api/supabase';
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -326,8 +324,7 @@ function CalendarDots() {
   );
 }
 
-function MentorEmpty({ mentorProfileId, userId, onSaved }) {
-  const [open, setOpen] = useState(false);
+function MentorEmpty() {
   return (
     <article
       className="relative overflow-hidden rounded-3xl"
@@ -362,25 +359,15 @@ function MentorEmpty({ mentorProfileId, userId, onSaved }) {
           Set the hours that actually work for you. Mentees only see what you publish.
         </p>
         <div className="mt-7">
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
+          <Link
+            to="/dashboard/availability"
             className="bridge-focus inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-[14px] font-bold"
             style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary, #fff)' }}
           >
             <Plus className="h-4 w-4" aria-hidden /> Set hours
-          </button>
+          </Link>
         </div>
       </div>
-      {open ? (
-        <MentorAvailabilityModal
-          open={open}
-          onClose={() => setOpen(false)}
-          mentorProfileId={mentorProfileId}
-          userId={userId}
-          onSaved={() => { setOpen(false); onSaved?.(); }}
-        />
-      ) : null}
     </article>
   );
 }
@@ -457,25 +444,12 @@ export default function HomeFocusCard({ activeRole }) {
   const { user } = useAuth();
   const isMentor = activeRole === 'mentor' || (user ? isMentorAccount(user) : false);
   const { session, isLoading } = useNextSession();
-  const [mentorProfileId, setMentorProfileId] = useState(null);
-  const [reload, setReload] = useState(0);
-
-  useEffect(() => {
-    if (!isMentor || !user) return undefined;
-    let cancelled = false;
-    void (async () => {
-      const { data } = await supabase
-        .from('mentor_profiles').select('id').eq('user_id', user.id).maybeSingle();
-      if (!cancelled) setMentorProfileId(data?.id ?? null);
-    })();
-    return () => { cancelled = true; };
-  }, [isMentor, user, reload]);
 
   const sessionMemo = useMemo(() => session, [session]);
 
   if (isLoading) return <FocusSkeleton />;
   if (sessionMemo) return <ScheduledOrLive session={sessionMemo} />;
   return isMentor
-    ? <MentorEmpty mentorProfileId={mentorProfileId} userId={user?.id} onSaved={() => setReload((r) => r + 1)} />
+    ? <MentorEmpty />
     : <MenteeEmpty />;
 }

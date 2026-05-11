@@ -50,7 +50,7 @@ function MentorRow({ mentor, onToggle, onUpdate }) {
         </td>
         <td className="py-3.5 px-3">
           <div className="flex items-center gap-1.5">
-            {mentor.google_refresh_token
+            {mentor.calendly_connected
               ? <span className="flex items-center gap-1 text-[10px] text-emerald-400"><CheckCircle className="h-3 w-3" /> Cal</span>
               : <span className="flex items-center gap-1 text-[10px] text-stone-600"><XCircle className="h-3 w-3" /> No Cal</span>
             }

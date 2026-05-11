@@ -10,7 +10,6 @@ export default function AvailabilityPage() {
   const { user } = useAuth();
   const isMentor = user ? isMentorAccount(user) : false;
   const [mentorProfileId, setMentorProfileId] = useState(null);
-  const [calendarConnected, setCalendarConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -21,12 +20,11 @@ export default function AvailabilityPage() {
     void (async () => {
       const { data } = await supabase
         .from('mentor_profiles')
-        .select('id, calendar_connected')
+        .select('id')
         .eq('user_id', user.id)
         .maybeSingle();
       if (cancelled) return;
       setMentorProfileId(data?.id ?? null);
-      setCalendarConnected(!!data?.calendar_connected);
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -39,7 +37,7 @@ export default function AvailabilityPage() {
   return (
     <MentorAvailabilityPanel
       mentorProfileId={mentorProfileId}
-      calendarConnected={calendarConnected}
+      reloadKey={reloadKey}
       onSaved={() => setReloadKey((k) => k + 1)}
     />
   );

@@ -58,7 +58,7 @@ export default function WhyUsHero() {
                 letterSpacing: '0.22em',
               }}
             >
-              Why us
+              Why Bridge
             </motion.div>
 
             <h1

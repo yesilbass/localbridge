@@ -22,7 +22,7 @@ const CHECKOUT_SCHEMA = z.object({
   mentorName: z.string().max(500).optional(),
   sessionType: z.string().max(80).optional(),
   sessionTypeKey: z.enum(['career_advice', 'interview_prep', 'resume_review', 'networking']).optional(),
-  scheduledDate: z.string().datetime({ offset: true }),
+  scheduledDate: z.string().datetime({ offset: true }).optional(),
   message: z.string().max(350).optional(),
 });
 
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
 
   const {
     userEmail, menteeName, mentorId, mentorName,
-    sessionType, sessionTypeKey, scheduledDate,
+    sessionType, sessionTypeKey,
     message,
   } = body.data;
 
@@ -97,11 +97,10 @@ export default async function handler(req, res) {
         mentorName: String(safeMentorName ?? '').slice(0, 500),
         sessionTypeKey: String(typeKey ?? ''),
         sessionTypeName: String(sessionType ?? ''),
-        scheduledDate: String(scheduledDate ?? ''),
         sessionPrice: String(safePrice),
         message: String(message ?? '').slice(0, 350),
       },
-      return_url: `${origin}/mentors/${mentorId}?session_id={CHECKOUT_SESSION_ID}`,
+      return_url: `${origin}/booking/finalize?session_id={CHECKOUT_SESSION_ID}`,
     });
 
     res.json({ clientSecret: session.client_secret });

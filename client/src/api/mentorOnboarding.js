@@ -36,7 +36,6 @@ export async function ensureMentorProfileForUser(user) {
           tier: "rising",
           image_url: meta.avatar_url ?? null,
           onboarding_complete: false,
-          calendar_connected: false,
         },
         { onConflict: "user_id", ignoreDuplicates: true }
       );

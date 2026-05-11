@@ -693,8 +693,7 @@ const PROFILE_HEALTH_ITEMS = [
   { key: 'bio',          label: 'Write a 2-line bio',      weight: 16, hrefMissing: '/onboarding' },
   { key: 'expertise',    label: 'Pick 3+ expertise tags',  weight: 16, hrefMissing: '/onboarding' },
   { key: 'rate',         label: 'Set your session rate',   weight: 12, hrefMissing: '/onboarding' },
-  { key: 'availability', label: 'Set weekly availability', weight: 14, hrefMissing: '/dashboard' },
-  { key: 'calendar',     label: 'Connect Google Calendar', weight: 14, hrefMissing: '/dashboard' },
+  { key: 'calendly',     label: 'Connect your Calendly',   weight: 28, hrefMissing: '/dashboard/availability' },
   { key: 'links',        label: 'Add LinkedIn or website', weight: 8,  hrefMissing: '/onboarding' },
   { key: 'company',      label: 'Add company + title',     weight: 6,  hrefMissing: '/onboarding' },
 ];
@@ -708,7 +707,7 @@ export function useProfileHealth() {
     try {
       const { data } = await supabase
         .from('mentor_profiles')
-        .select('image_url, bio, expertise, session_rate, availability_schedule, calendar_connected, linkedin_url, website_url, company, title')
+        .select('image_url, bio, expertise, session_rate, calendly_connected, calendly_event_type_uri, linkedin_url, website_url, company, title')
         .eq('user_id', user.id).maybeSingle();
       if (!data) { setState({ score: 0, breakdown: [], isLoading: false }); return; }
 
@@ -717,8 +716,7 @@ export function useProfileHealth() {
         bio: !!data.bio && String(data.bio).trim().length >= 40,
         expertise: Array.isArray(data.expertise) && data.expertise.length >= 3,
         rate: !!data.session_rate,
-        availability: !!data.availability_schedule && Object.keys(data.availability_schedule.weekly ?? {}).length > 0,
-        calendar: !!data.calendar_connected,
+        calendly: !!data.calendly_connected && !!data.calendly_event_type_uri,
         links: !!data.linkedin_url || !!data.website_url,
         company: !!data.company && !!data.title,
       };
@@ -785,7 +783,7 @@ export function useDashboardSessions() {
   const [sessions, setSessions] = useState([]);
   const [mentorMap, setMentorMap] = useState({});
   const [mentorProfileId, setMentorProfileId] = useState(null);
-  const [calendarConnected, setCalendarConnected] = useState(false);
+  const [calendlyConnected, setCalendlyConnected] = useState(false);
   const [isLoading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState(null);
@@ -798,16 +796,16 @@ export function useDashboardSessions() {
       if (isMentor) {
         const { data: profile } = await supabase
           .from('mentor_profiles')
-          .select('id, calendar_connected')
+          .select('id, calendly_connected')
           .eq('user_id', user.id).maybeSingle();
         if (!profile?.id) {
           setMentorProfileId(null);
-          setCalendarConnected(false);
+          setCalendlyConnected(false);
           setSessions([]);
           return;
         }
         setMentorProfileId(profile.id);
-        setCalendarConnected(!!profile.calendar_connected);
+        setCalendlyConnected(!!profile.calendly_connected);
 
         const { data = [] } = await supabase
           .from('sessions').select('*')
@@ -885,7 +883,7 @@ export function useDashboardSessions() {
 
   return {
     isMentor, sessions, upcoming, pending, past,
-    mentorMap, mentorProfileId, calendarConnected,
+    mentorMap, mentorProfileId, calendlyConnected,
     isLoading, error, actionLoading, handleStatusUpdate, refetch: load,
   };
 }

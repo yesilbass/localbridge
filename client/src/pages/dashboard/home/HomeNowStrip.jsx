@@ -12,9 +12,7 @@ import {
   usePastSessions,
   useLiveCountdown,
 } from '../dashboardHooks.js';
-import { normalizeAvailabilitySchedule } from '../../../utils/mentorAvailability';
 import { getMyReviewedSessionIds } from '../../../api/reviews';
-import MentorAvailabilityModal from '../MentorAvailabilityModal.jsx';
 
 const SEVERITY = {
   info: {
@@ -102,9 +100,8 @@ export default function HomeNowStrip({ activeRole }) {
   const { sessions: past } = usePastSessions({ limit: 10 });
 
   const [vetted, setVetted] = useState(true);
-  const [hoursCount, setHoursCount] = useState(null);
+  const [bookingReady, setBookingReady] = useState(true);
   const [reviewedIds, setReviewedIds] = useState(new Set());
-  const [showAvailModal, setShowAvailModal] = useState(false);
   const [accepting, setAccepting] = useState(null);
 
   const now = useLiveCountdown(session?.scheduledAt);
@@ -116,14 +113,12 @@ export default function HomeNowStrip({ activeRole }) {
     void (async () => {
       const { data } = await supabase
         .from('mentor_profiles')
-        .select('onboarding_complete, availability_schedule')
+        .select('onboarding_complete, calendly_connected, calendly_event_type_uri')
         .eq('user_id', user.id)
         .maybeSingle();
       if (cancelled) return;
       setVetted(data?.onboarding_complete !== false);
-      const norm = normalizeAvailabilitySchedule(data?.availability_schedule ?? null);
-      const total = Object.values(norm.weekly).reduce((s, arr) => s + arr.length, 0);
-      setHoursCount(total);
+      setBookingReady(!!(data?.calendly_connected && data?.calendly_event_type_uri));
     })();
     return () => { cancelled = true; };
   }, [user, isMentor, mentorProfileId]);
@@ -190,34 +185,23 @@ export default function HomeNowStrip({ activeRole }) {
     );
   }
 
-  // 2. mentor zero hours
-  if (isMentor && hoursCount === 0) {
+  // 2. mentor not yet bookable (Calendly not connected or event type unset)
+  if (isMentor && !bookingReady) {
     return (
-      <>
-        <StripShell
-          severity="warning"
-          icon={AlertTriangle}
-          message={(
-            <span>
-              <span className="font-semibold" style={{ color: 'var(--bridge-text)' }}>You haven&apos;t set any hours.</span>{' '}
-              <span style={{ color: 'var(--bridge-text-secondary)' }}>Mentees can&apos;t book until you do.</span>
-            </span>
-          )}
-        >
-          <PrimaryButton onClick={() => setShowAvailModal(true)}>
-            Set hours <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-          </PrimaryButton>
-        </StripShell>
-        {showAvailModal ? (
-          <MentorAvailabilityModal
-            open={showAvailModal}
-            onClose={() => setShowAvailModal(false)}
-            mentorProfileId={mentorProfileId}
-            userId={user?.id}
-            onSaved={() => { setShowAvailModal(false); setHoursCount(null); }}
-          />
-        ) : null}
-      </>
+      <StripShell
+        severity="warning"
+        icon={AlertTriangle}
+        message={(
+          <span>
+            <span className="font-semibold" style={{ color: 'var(--bridge-text)' }}>Connect your booking calendar.</span>{' '}
+            <span style={{ color: 'var(--bridge-text-secondary)' }}>Mentees can&apos;t book until you do.</span>
+          </span>
+        )}
+      >
+        <PrimaryButton to="/dashboard/availability">
+          Open availability <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        </PrimaryButton>
+      </StripShell>
     );
   }
 

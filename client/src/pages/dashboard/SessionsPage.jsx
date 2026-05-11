@@ -8,7 +8,6 @@ import CancellationModal from '../../components/CancellationModal.jsx';
 import ReviewModal from '../../components/ReviewModal.jsx';
 import { getMyReviewedSessionIds } from '../../api/reviews';
 import supabase from '../../api/supabase';
-import { normalizeAvailabilitySchedule } from '../../utils/mentorAvailability';
 
 function formatDateTime(iso) {
   if (!iso) return 'Not scheduled';
@@ -226,14 +225,13 @@ export default function SessionsPage() {
     let cancelled = false;
     supabase
       .from('mentor_profiles')
-      .select('availability_schedule')
+      .select('calendly_connected, calendly_event_type_uri')
       .eq('id', mentorProfileId)
       .maybeSingle()
       .then(({ data }) => {
         if (cancelled) return;
-        const norm = normalizeAvailabilitySchedule(data?.availability_schedule);
-        const total = Object.values(norm.weekly).reduce((s, arr) => s + arr.length, 0);
-        setAvailabilityEmpty(total === 0);
+        const ready = !!(data?.calendly_connected && data?.calendly_event_type_uri);
+        setAvailabilityEmpty(!ready);
       });
     return () => { cancelled = true; };
   }, [isMentor, mentorProfileId]);

@@ -86,6 +86,7 @@ function AppContent() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/session/:sessionId/video" element={<VideoCall />} />
           <Route path="/intake/:sessionId" element={<IntakeCall />} />
+          <Route path="/booking/finalize" element={<BookingFinalize />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/resume" element={<ResumeReview />} />
           <Route path="/about" element={<About />} />

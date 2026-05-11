@@ -6,7 +6,6 @@ import {
 } from 'lucide-react';
 import supabase from '../../../api/supabase';
 import { useAuth } from '../../../context/useAuth.js';
-import MentorAvailabilityModal from '../MentorAvailabilityModal.jsx';
 
 const TIP_KEY = 'bridge.dashboard.tipShown';
 
@@ -67,7 +66,6 @@ export default function HomeQuickActions({ activeRole }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [toast, setToast] = useState(null);
-  const [openAvail, setOpenAvail] = useState(false);
   const [mentorProfileId, setMentorProfileId] = useState(null);
   const tipShownRef = useRef(false);
 
@@ -121,7 +119,7 @@ export default function HomeQuickActions({ activeRole }) {
       const k = e.key?.toLowerCase();
       const fire = (fn) => { e.preventDefault(); fn(); };
       if (isMentor) {
-        if (k === 'h') return fire(() => setOpenAvail(true));
+        if (k === 'h') return fire(() => navigate('/dashboard/availability'));
         if (k === 'e') return fire(() => navigate('/dashboard/earnings'));
         if (k === 'r') return fire(() => navigate('/dashboard/reviews'));
         if (k === 'p') return fire(() => navigate('/dashboard/profile'));
@@ -140,7 +138,7 @@ export default function HomeQuickActions({ activeRole }) {
     <div className="flex flex-wrap items-center gap-2">
       {isMentor ? (
         <>
-          <Chip icon={Clock} label="Set hours" kbd="⌃H" onClick={() => setOpenAvail(true)} />
+          <Chip icon={Clock} label="Set hours" kbd="⌃H" to="/dashboard/availability" />
           <Chip icon={DollarSign} label="Open earnings" kbd="⌃E" to="/dashboard/earnings" />
           <Chip icon={Star} label="Open reviews" kbd="⌃R" to="/dashboard/reviews" />
           <Chip icon={UserRound} label="Edit profile" kbd="⌃P" to="/dashboard/profile" />
@@ -155,16 +153,6 @@ export default function HomeQuickActions({ activeRole }) {
           <Chip icon={FileText} label="Resume review" to="/resume" />
         </>
       )}
-
-      {openAvail ? (
-        <MentorAvailabilityModal
-          open={openAvail}
-          onClose={() => setOpenAvail(false)}
-          mentorProfileId={mentorProfileId}
-          userId={user?.id}
-          onSaved={() => setOpenAvail(false)}
-        />
-      ) : null}
 
       <Toast message={toast} onDone={() => setToast(null)} />
     </div>

@@ -6,17 +6,11 @@ import { useAuth } from '../../context/useAuth';
 import { isMentorAccount } from '../../utils/accountRole';
 import { SESSION_TYPES } from '../../constants/sessionTypes';
 import { addRecentlyViewedMentor } from '../../utils/recentlyViewed';
-import {
-  buildAvailabilityCalendar,
-  getSlotsForDate,
-  normalizeAvailabilitySchedule,
-  localDateStr,
-} from '../../utils/mentorAvailability';
 import { getMentorById } from '../../api/mentors';
 import { getReviewsForMentor } from '../../api/reviews';
-import { getMentorAvailability } from '../../api/calendar';
-import { createBookingCheckout, finalizeCheckout } from '../../api/stripe';
+import { createBookingCheckout } from '../../api/stripe';
 import EmbeddedCheckoutPanel from '../../components/EmbeddedCheckoutPanel';
+import CalendlyInlineWidget from '../../components/CalendlyInlineWidget';
 import { AuroraBg, KineticNumber } from '../dashboard/dashboardCinematic.jsx';
 import supabase from '../../api/supabase';
 import { ArrowLeft, BadgeCheck, Heart, Share } from 'lucide-react';
@@ -51,40 +45,6 @@ function SessionTypeIcon({ typeKey, className = 'h-5 w-5' }) {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────
-function fmtTime(iso) {
-  return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-}
-
-function toNewYorkUtcIso(dateStr, timeStr) {
-  const [yr, mo, dy] = dateStr.split('-').map(Number);
-  const [hr, mn] = timeStr.split(':').map(Number);
-  const utcGuess = new Date(Date.UTC(yr, mo - 1, dy, hr, mn, 0));
-  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(utcGuess);
-  const nyH = parseInt(parts.find((p) => p.type === 'hour').value) % 24;
-  const nyM = parseInt(parts.find((p) => p.type === 'minute').value);
-  const diffMs = ((hr * 60 + mn) - (nyH * 60 + nyM)) * 60_000;
-  return new Date(utcGuess.getTime() + diffMs).toISOString();
-}
-
-function computeSlots(baseSlots, calBusy, pickedDate) {
-  const now = new Date();
-  return baseSlots.map(({ time, available }) => {
-    if (!available) return { time, available: false };
-    if (pickedDate) {
-      const [h, m] = time.split(':').map(Number);
-      const slotDate = new Date(pickedDate); slotDate.setHours(h, m, 0, 0);
-      if (slotDate <= now) return { time, available: false };
-    }
-    if (calBusy?.length > 0 && pickedDate) {
-      const [h, m] = time.split(':').map(Number);
-      const s = new Date(pickedDate); s.setHours(h, m, 0, 0);
-      const e = new Date(pickedDate); e.setHours(h + 1, m, 0, 0);
-      if (calBusy.some(({ start, end }) => s < new Date(end) && e > new Date(start))) return { time, available: false, calendarBusy: true };
-    }
-    return { time, available: true };
-  });
-}
-
 // ─── MentorHero ───────────────────────────────────────────────────────
 function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare, shareCopied, onBook, heroCtaRef, flat }) {
   const rate = rawMentor?.session_rate ?? null;
@@ -571,38 +531,29 @@ function FocusAreasSection({ mentor, rawMentor }) {
   );
 }
 
-// ─── BookingFlow ──────────────────────────────────────────────────────
-function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, navigate, mentorId, preselectedDate }) {
-  const [pickedDate, setPickedDate] = useState(preselectedDate ?? null);
-  const [pickedTime, setPickedTime] = useState(null);
-  const [calBusy, setCalBusy] = useState(null);
-  const [calLoading, setCalLoading] = useState(false);
-
-  const scheduleNorm = useMemo(() => normalizeAvailabilitySchedule(mentor.availability_schedule), [mentor.availability_schedule]);
+// ─── BookingFlow (Calendly) ───────────────────────────────────────────
+function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, navigate, mentorId }) {
   const acceptingBookings = mentor.available !== false;
-  const availability = useMemo(() => buildAvailabilityCalendar(scheduleNorm, acceptingBookings, 14), [scheduleNorm, acceptingBookings]);
-  const baseSlots = useMemo(() => getSlotsForDate(scheduleNorm, pickedDate, acceptingBookings), [scheduleNorm, pickedDate, acceptingBookings]);
-  const slots = useMemo(() => computeSlots(baseSlots, calBusy, pickedDate), [baseSlots, calBusy, pickedDate]);
-  const hasAnyWeeklySlots = useMemo(() => Object.values(scheduleNorm.weekly).some((a) => Array.isArray(a) && a.length > 0), [scheduleNorm]);
+  const calendlyReady = !!(mentor.calendly_connected && mentor.calendly_event_type_uri && mentor.calendly_scheduling_url);
+  const isPaid = Number(mentor.session_rate) > 0;
 
-  useEffect(() => { setPickedTime(null); }, [pickedDate]);
-
-  useEffect(() => {
-    if (!pickedDate || !mentor.calendar_connected) { setCalBusy(null); return; }
-    setCalLoading(true); setCalBusy(null);
-    getMentorAvailability(mentor.id, localDateStr(pickedDate))
-      .then(({ busy, notConnected }) => { setCalBusy(notConnected ? null : (busy ?? [])); setCalLoading(false); })
-      .catch(() => { setCalBusy(null); setCalLoading(false); });
-  }, [pickedDate, mentor.calendar_connected, mentor.id]);
-
-  const canBook = Boolean(sessionType && pickedDate && pickedTime);
-
-  function handleBookClick() {
-    if (!canBook) return;
+  function handlePaidClick() {
     if (!user) { navigate('/login', { state: { from: `/mentors/${mentorId}` } }); return; }
-    const iso = toNewYorkUtcIso(localDateStr(pickedDate), pickedTime);
-    onRequestConfirm({ sessionType, isoDate: iso, prettyDate: pickedDate, prettyTime: pickedTime });
+    onRequestConfirm({ sessionType });
   }
+
+  const prefill = useMemo(() => ({
+    name: user?.user_metadata?.full_name || user?.email || undefined,
+    email: user?.email || undefined,
+    customAnswers: { a1: 'Booked via Bridge' },
+  }), [user]);
+
+  const utm = useMemo(() => ({
+    utmSource: 'bridge',
+    utmMedium: 'mentor_profile',
+    utmCampaign: mentor.id || 'bridge',
+    utmContent: sessionType?.key || '',
+  }), [mentor.id, sessionType]);
 
   return (
     <div
@@ -653,39 +604,22 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
             </div>
           ) : null}
 
-          <div className="relative mt-5 pt-4 text-sm" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-            <dl className="space-y-2.5">
-              <div className="flex items-center justify-between gap-2">
-                <dt className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: 'rgba(255,255,255,0.45)' }}>Date</dt>
-                <dd className="text-right font-bold" style={{ color: pickedDate ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.25)' }}>
-                  {pickedDate ? pickedDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) : 'Pick a day →'}
-                </dd>
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                <dt className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: 'rgba(255,255,255,0.45)' }}>Time</dt>
-                <dd className="text-right font-bold" style={{ color: pickedTime ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.25)' }}>
-                  {pickedTime ?? 'Pick a time →'}
-                </dd>
-              </div>
-            </dl>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleBookClick}
-            disabled={!canBook}
-            className={`mt-6 relative w-full rounded-2xl px-6 py-4 text-sm font-black tracking-wide transition-all duration-300 ${ringWhite}`}
-            style={{
-              background: canBook ? 'var(--color-primary)' : 'rgba(255,255,255,0.08)',
-              color: canBook ? 'var(--color-on-primary)' : 'rgba(255,255,255,0.25)',
-              cursor: canBook ? 'pointer' : 'not-allowed',
-              boxShadow: canBook ? '0 12px 32px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)' : 'none',
-            }}
-            onMouseEnter={(e) => { if (canBook) e.currentTarget.style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = ''; }}
-          >
-            {canBook ? (mentor.session_rate ? 'Continue to payment →' : 'Book session →') : 'Pick a date & time'}
-          </button>
+          {isPaid && calendlyReady && acceptingBookings && (
+            <button
+              type="button"
+              onClick={handlePaidClick}
+              className={`mt-6 relative w-full rounded-2xl px-6 py-4 text-sm font-black tracking-wide transition-all duration-300 ${ringWhite}`}
+              style={{
+                background: 'var(--color-primary)',
+                color: 'var(--color-on-primary)',
+                boxShadow: '0 12px 32px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = ''; }}
+            >
+              Pay ${mentor.session_rate} → pick a time
+            </button>
+          )}
 
           <button
             type="button"
@@ -699,128 +633,72 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
           </button>
         </div>
 
-        {/* Right: date + time picker */}
+        {/* Right: Calendly inline widget or paid summary */}
         <div className="relative p-7 lg:col-span-8 lg:p-8">
           <div className="relative mb-6">
             <p className="text-[10px] font-black uppercase tracking-[0.28em]" style={{ color: 'var(--color-primary)' }}>Step 2 of 2</p>
             <h3 className="mt-1.5 font-display font-black tracking-[-0.02em]" style={{ fontSize: 'clamp(1.4rem, 2.8vw, 1.85rem)', lineHeight: '1.05', color: 'var(--bridge-text)' }}>
-              When works for you?
+              Pick an hour
             </h3>
           </div>
 
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] mb-3" style={{ color: 'var(--bridge-text-muted)' }}>Next 14 days</p>
-
           {!acceptingBookings ? (
             <div
-              className="mb-4 rounded-xl px-4 py-3 text-sm"
+              className="rounded-xl px-4 py-3 text-sm"
               style={{ border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)', background: 'color-mix(in srgb, var(--color-warning) 8%, var(--bridge-surface-muted))', color: 'var(--color-warning)' }}
             >
-              This mentor is not accepting new session requests right now.
+              This mentor is not accepting new bookings right now.
             </div>
-          ) : !hasAnyWeeklySlots ? (
-            <div className="mb-4 rounded-xl border px-4 py-3 text-sm" style={{ borderColor: 'var(--bridge-border)', backgroundColor: 'var(--bridge-surface-muted)', color: 'var(--bridge-text-secondary)' }}>
-              This mentor has not published open hours yet. Check back later.
+          ) : !calendlyReady ? (
+            <div
+              className="rounded-xl px-4 py-3 text-sm italic"
+              style={{ border: '1px solid var(--bridge-border)', backgroundColor: 'var(--bridge-surface-muted)', color: 'var(--bridge-text-secondary)' }}
+            >
+              {(mentor.name?.split(' ')[0] || 'This mentor')} hasn't opened booking yet — check back soon.
             </div>
-          ) : null}
-
-          <div className="mb-3 flex items-center gap-3 text-[11px]" style={{ color: 'var(--bridge-text-muted)' }}>
-            <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: 'var(--color-success)' }} /> Open</span>
-            <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: 'var(--color-warning)' }} /> Limited</span>
-            <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: 'var(--bridge-border-strong)' }} /> Booked</span>
-          </div>
-
-          <div className="grid grid-cols-7 gap-1.5">
-            {availability.map(({ date, status }) => {
-              const iso = localDateStr(date);
-              const isSelected = pickedDate ? localDateStr(pickedDate) === iso : false;
-              const isClickable = status !== 'booked';
-              let bg, shadow, color, cursor;
-              if (isSelected) {
-                bg = 'color-mix(in srgb, var(--color-primary) 15%, transparent)';
-                shadow = 'inset 0 0 0 2px var(--color-primary)';
-                color = 'var(--bridge-text)';
-                cursor = 'pointer';
-              } else if (status === 'free') {
-                bg = 'color-mix(in srgb, var(--color-success) 10%, var(--bridge-surface-muted))';
-                shadow = 'inset 0 0 0 1px color-mix(in srgb, var(--color-success) 35%, transparent)';
-                color = 'var(--bridge-text-secondary)';
-                cursor = 'pointer';
-              } else if (status === 'limited') {
-                bg = 'color-mix(in srgb, var(--color-warning) 10%, var(--bridge-surface-muted))';
-                shadow = 'inset 0 0 0 1px color-mix(in srgb, var(--color-warning) 35%, transparent)';
-                color = 'var(--bridge-text-secondary)';
-                cursor = 'pointer';
-              } else {
-                bg = 'var(--bridge-surface-muted)';
-                shadow = 'inset 0 0 0 1px var(--bridge-border)';
-                color = 'var(--bridge-text-faint)';
-                cursor = 'not-allowed';
-              }
-              return (
-                <button
-                  key={iso}
-                  type="button"
-                  disabled={!isClickable}
-                  onClick={() => setPickedDate(date)}
-                  aria-label={`${date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })} — ${status}`}
-                  aria-pressed={isSelected}
-                  className={`flex aspect-square flex-col items-center justify-center rounded-lg text-xs font-semibold transition-all ${isClickable ? ring : ''}`}
-                  style={{ background: bg, boxShadow: shadow, color, cursor, outlineColor: 'var(--color-primary)' }}
-                >
-                  <span style={{ fontSize: '9px', fontWeight: 500, opacity: 0.7 }}>{date.toLocaleDateString(undefined, { weekday: 'short' })[0]}</span>
-                  <span className="font-bold">{date.getDate()}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {mentor.calendar_connected && pickedDate && (
-            <div className="mt-3 text-xs">
-              {calLoading
-                ? <span style={{ color: 'var(--bridge-text-muted)' }}>Checking calendar…</span>
-                : calBusy !== null
-                  ? calBusy.length === 0
-                    ? <span className="font-medium" style={{ color: 'var(--color-success)' }}>All day available</span>
-                    : <span style={{ color: 'var(--color-warning)' }}>Busy: {calBusy.map((b) => `${fmtTime(b.start)}–${fmtTime(b.end)}`).join(', ')}</span>
-                  : null}
+          ) : isPaid ? (
+            <div
+              className="rounded-2xl p-6"
+              style={{
+                backgroundColor: 'var(--bridge-surface-muted)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              }}
+            >
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
+                Pay first, then pick a time that works for both of you. Real-time availability comes straight from {mentor.name?.split(' ')[0] || 'your mentor'}'s calendar.
+              </p>
+              <button
+                type="button"
+                onClick={handlePaidClick}
+                className={`mt-5 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-black ${ring}`}
+                style={{
+                  background: 'var(--color-primary)',
+                  color: 'var(--color-on-primary)',
+                  boxShadow: '0 12px 32px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                  outlineColor: 'var(--color-primary)',
+                }}
+              >
+                Pay ${mentor.session_rate} → pick a time
+              </button>
             </div>
+          ) : (
+            <CalendlyInlineWidget
+              url={mentor.calendly_scheduling_url}
+              prefill={prefill}
+              utm={utm}
+              minHeight={680}
+              onScheduled={() => navigate('/dashboard/sessions?booked=1')}
+            />
           )}
 
-          <div className={`mt-6 overflow-hidden transition-all duration-300 ${pickedDate ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-            <div className="rounded-xl p-4" style={{ border: '1px solid var(--bridge-border)', backgroundColor: 'var(--bridge-surface-muted)' }}>
-              <div className="mb-3 flex items-baseline justify-between">
-                <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--bridge-text-muted)' }}>Available times</p>
-                {pickedDate && <p className="text-xs font-medium" style={{ color: 'var(--bridge-text-secondary)' }}>{pickedDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>}
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {slots.map(({ time, available, calendarBusy }) => {
-                  const isSelected = pickedTime === time;
-                  return (
-                    <button
-                      key={time}
-                      type="button"
-                      disabled={!available}
-                      onClick={() => setPickedTime(time)}
-                      aria-pressed={isSelected}
-                      title={calendarBusy ? 'Blocked by calendar' : undefined}
-                      className={`relative rounded-lg px-2 py-2.5 text-sm font-semibold transition-all ${available ? ring : ''}`}
-                      style={{
-                        background: isSelected ? 'color-mix(in srgb, var(--color-primary) 15%, transparent)' : available ? 'var(--bridge-surface)' : 'transparent',
-                        boxShadow: isSelected ? 'inset 0 0 0 2px var(--color-primary)' : 'inset 0 0 0 1px var(--bridge-border)',
-                        color: isSelected ? 'var(--bridge-text)' : available ? 'var(--bridge-text)' : 'var(--bridge-text-faint)',
-                        cursor: available ? 'pointer' : 'not-allowed',
-                        outlineColor: 'var(--color-primary)',
-                      }}
-                    >
-                      {time}
-                    </button>
-                  );
-                })}
-              </div>
-              {slots.every((s) => !s.available) && <p className="mt-3 text-xs" style={{ color: 'var(--bridge-text-muted)' }}>No open slots this day — try another date.</p>}
-            </div>
-          </div>
-          {!pickedDate && <p className="mt-4 text-xs" style={{ color: 'var(--bridge-text-muted)' }}>Pick a day above to see available times.</p>}
+          <button
+            type="button"
+            onClick={onReset}
+            className={`mt-4 inline-flex items-center gap-1 text-xs font-bold transition-colors ${ring}`}
+            style={{ color: 'var(--bridge-text-muted)', outlineColor: 'var(--color-primary)' }}
+          >
+            ← Change session type
+          </button>
         </div>
       </div>
     </div>
@@ -847,13 +725,11 @@ function ConfirmModal({ mentor, user, confirmation, onClose }) {
     setSubmitting(true); setResult(null);
     try {
       const res = await createBookingCheckout({
-        userId: user?.id, userEmail: user?.email,
+        userEmail: user?.email,
         menteeName: user?.user_metadata?.full_name ?? user?.email ?? 'Mentee',
         mentorId: mentor.id, mentorName: mentor.name,
         sessionTypeName: confirmation.sessionType.name,
         sessionTypeKey: confirmation.sessionType.key,
-        scheduledDate: confirmation.isoDate,
-        sessionPrice: mentor.session_rate ?? 25,
         message,
       });
       if (!res.ok) { setResult({ ok: false, message: res.error || 'Could not start booking checkout.' }); return; }
@@ -864,7 +740,6 @@ function ConfirmModal({ mentor, user, confirmation, onClose }) {
   }
 
   const mentorFirst = mentor.name?.split(/\s+/)[0] ?? 'your mentor';
-  const prettyDate = confirmation.prettyDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
 
   return createPortal(
     <div
@@ -882,7 +757,7 @@ function ConfirmModal({ mentor, user, confirmation, onClose }) {
             <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-full text-4xl text-white" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 18px 44px -8px rgba(16,185,129,0.55)' }}>✓</div>
             <h2 id="confirm-modal-title" className="relative font-display text-3xl font-black tracking-[-0.025em]" style={{ color: 'var(--bridge-text)' }}>Request sent</h2>
             <p className="relative mx-auto mt-3 max-w-sm leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
-              {mentorFirst} will confirm or suggest another time. We'll email you as soon as they do.
+              Payment cleared. Opening {mentorFirst}'s booking calendar so you can pick a time.
             </p>
             <button type="button" onClick={handleClose}
               className={`relative mt-8 inline-flex items-center gap-2 rounded-full px-10 py-3 text-sm font-black transition-all hover:-translate-y-0.5 ${ring}`}
@@ -915,8 +790,7 @@ function ConfirmModal({ mentor, user, confirmation, onClose }) {
                     {[
                       { label: 'Mentor', value: mentor.name },
                       { label: 'Format', value: confirmation.sessionType.name },
-                      { label: 'Date', value: prettyDate },
-                      { label: 'Time', value: confirmation.prettyTime },
+                      { label: 'Next', value: 'Pick a time after payment' },
                     ].map(({ label, value }, i) => (
                       <div key={label} className={`flex items-start justify-between gap-3 ${i > 0 ? 'pt-3' : ''}`} style={i > 0 ? { borderTop: '1px solid var(--bridge-border)' } : {}}>
                         <dt className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: 'var(--bridge-text-muted)' }}>{label}</dt>
@@ -1035,7 +909,6 @@ export default function MentorProfilePage() {
   const [selectedType, setSelectedType] = useState(null);
   const [pendingConfirm, setPendingConfirm] = useState(null);
   const [checkoutNotice, setCheckoutNotice] = useState(null);
-  const [checkoutError, setCheckoutError] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [stickyVisible, setStickyVisible] = useState(false);
 
@@ -1065,32 +938,26 @@ export default function MentorProfilePage() {
       .channel(`mentor-profile-${id}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'mentor_profiles', filter: `id=eq.${id}` }, (payload) => {
         if (!payload.new) return;
-        setRawMentor((prev) => prev ? { ...prev, availability_schedule: payload.new.availability_schedule, available: payload.new.available } : prev);
+        setRawMentor((prev) => prev ? {
+          ...prev,
+          available: payload.new.available,
+          calendly_connected: payload.new.calendly_connected,
+          calendly_event_type_uri: payload.new.calendly_event_type_uri,
+          calendly_scheduling_url: payload.new.calendly_scheduling_url,
+        } : prev);
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [id]);
 
-  // Stripe finalization
+  // If we ever land here with a `?booked=1` after the Calendly success
+  // callback, surface a transient success banner and strip the param.
   useEffect(() => {
-    const sessionId = searchParams.get('session_id');
-    if (!sessionId) return;
-    let cancelled = false;
-    (async () => {
-      const result = await finalizeCheckout(sessionId);
-      if (cancelled) return;
-      if (!result.ok) {
-        setCheckoutError(result.error || 'Could not verify booking payment.');
-      } else {
-        setPendingConfirm(null); setSelectedType(null);
-        if (result.data?.bridge_session_id) { navigate(`/intake/${result.data.bridge_session_id}`); return; }
-        setCheckoutNotice('Booking payment successful. Your session request is in your dashboard.');
-      }
-      const next = new URLSearchParams(searchParams);
-      next.delete('session_id');
-      setSearchParams(next, { replace: true });
-    })();
-    return () => { cancelled = true; };
+    if (searchParams.get('booked') !== '1') return;
+    setCheckoutNotice('Booking confirmed. Check your dashboard for details.');
+    const next = new URLSearchParams(searchParams);
+    next.delete('booked');
+    setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
 
   // Sticky bar: observe hero CTA
@@ -1170,13 +1037,8 @@ export default function MentorProfilePage() {
       )}
 
       {/* Checkout notices */}
-      {(checkoutError || checkoutNotice) && (
+      {checkoutNotice && (
         <div className="relative max-w-7xl mx-auto px-5 sm:px-8 mt-4">
-          {checkoutError && (
-            <p className="rounded-2xl px-4 py-3 text-sm" style={{ border: '1px solid color-mix(in srgb, var(--color-error) 30%, transparent)', background: 'color-mix(in srgb, var(--color-error) 8%, var(--bridge-surface-muted))', color: 'var(--color-error)' }}>
-              {checkoutError}
-            </p>
-          )}
           {checkoutNotice && (
             <p className="rounded-2xl px-4 py-3 text-sm" style={{ border: '1px solid color-mix(in srgb, var(--color-success) 30%, transparent)', background: 'color-mix(in srgb, var(--color-success) 8%, var(--bridge-surface-muted))', color: 'var(--color-success)' }}>
               {checkoutNotice}

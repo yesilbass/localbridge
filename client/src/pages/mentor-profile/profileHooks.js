@@ -2,12 +2,6 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getMentorById } from '../../api/mentors';
 import { getReviewsForMentor } from '../../api/reviews';
 import { getMyFavorites, toggleFavorite } from '../../api/favorites';
-import {
-  buildAvailabilityCalendar,
-  getSlotsForDate,
-  normalizeAvailabilitySchedule,
-  localDateStr,
-} from '../../utils/mentorAvailability';
 import { useAuth } from '../../context/useAuth';
 
 export const EASE = [0.16, 1, 0.3, 1];
@@ -133,34 +127,6 @@ export function useShareLink() {
   return { share, copied };
 }
 
-export function useNextAvailableSlots(mentor, count = 4) {
-  return useMemo(() => {
-    if (!mentor?.availability_schedule || mentor.available === false) return [];
-    const norm = normalizeAvailabilitySchedule(mentor.availability_schedule);
-    const hasSlots = Object.values(norm.weekly).some((a) => Array.isArray(a) && a.length > 0);
-    if (!hasSlots) return [];
-
-    const calendar = buildAvailabilityCalendar(norm, true, 14);
-    const now = new Date();
-    const slots = [];
-
-    for (const { date, status } of calendar) {
-      if (status === 'booked') continue;
-      const daySlots = getSlotsForDate(norm, date, true);
-      for (const { time, available } of daySlots) {
-        if (!available) continue;
-        const [h, m] = time.split(':').map(Number);
-        const slotDate = new Date(date);
-        slotDate.setHours(h, m, 0, 0);
-        if (slotDate <= now) continue;
-        slots.push({ date: new Date(slotDate), time, id: `${localDateStr(date)}-${time}` });
-        if (slots.length >= count) return slots;
-      }
-    }
-    return slots;
-  }, [mentor]);
-}
-
 export function normalizeMentor(raw, reviews = []) {
   if (!raw) return null;
 
@@ -227,7 +193,7 @@ export function normalizeMentor(raw, reviews = []) {
     })(),
     totalSessions: raw.total_sessions ?? 0,
     rate: raw.session_rate ?? null,
-    timezone: raw.availability_schedule?.timezone ?? null,
+    timezone: null,
   };
 }
 
