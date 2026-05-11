@@ -37,6 +37,7 @@ import VideoCall from './pages/VideoCall';
 import IntakeCall from './pages/IntakeCall';
 import MentorOnboarding from './pages/MentorOnboarding';
 import DevPortal from './pages/DevPortal/index.jsx';
+import BookingFinalize from './pages/booking/finalize.jsx';
 
 function AppContent() {
   const location = useLocation();
