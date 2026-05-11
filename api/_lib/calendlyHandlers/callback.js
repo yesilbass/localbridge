@@ -1,14 +1,14 @@
-import supabase from './_lib/supabase.js';
-import { getClientUrl } from './_lib/allowedOrigins.js';
-import { consumeOAuthState } from './_lib/oauthState.js';
-import { applySecurityHeaders } from './_lib/security.js';
+import supabase from '../supabase.js';
+import { getClientUrl } from '../allowedOrigins.js';
+import { consumeOAuthState } from '../oauthState.js';
+import { applySecurityHeaders } from '../security.js';
 import {
   exchangeCode,
   getMe,
   writeCredentials,
   ensureWebhookSubscription,
-} from './_lib/calendly.js';
-import { getPublicOrigin } from './_lib/publicOrigin.js';
+} from '../calendly.js';
+import { getPublicOrigin } from '../publicOrigin.js';
 
 export default async function handler(req, res) {
   applySecurityHeaders(res);
