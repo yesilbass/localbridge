@@ -30,7 +30,7 @@ export default function HeroSection() {
     <section
       id="hero"
       aria-labelledby="hero-heading"
-      className="relative flex min-h-[88vh] items-start overflow-hidden px-5 pt-24 pb-20 sm:px-8 lg:pt-28"
+      className="relative flex min-h-[100vh] items-start overflow-hidden px-5 pt-24 pb-20 sm:px-8 lg:pt-28"
       style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       {/* Background depth — decorative only */}

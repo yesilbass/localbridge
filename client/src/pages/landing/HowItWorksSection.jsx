@@ -1,26 +1,33 @@
+import { Search, Video } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
+import { DUR_SHORT } from './landingHooks';
 
+// PATTERN A: three static CSS-only product mocks (no asset dependency).
+// To swap to PATTERN B (single looping demo video), replace the three
+// <StepCard> renders below with a single centered <video playsInline muted
+// autoPlay loop poster="/landing/booking-demo.jpg" src="/landing/booking-demo.mp4" />
+// in a 16/10 device frame, plus a compact horizontal numbered list of STEPS.
 const STEPS = [
   {
     num: '01',
     title: 'Tell us what you need.',
-    body:
-      'Two questions, sixty seconds. Our matching reads your goal and surfaces the right operators in real time.',
+    body: 'Two questions, sixty seconds. Matching surfaces the right operators in real time.',
     chip: 'Sixty seconds',
+    Mock: SearchMock,
   },
   {
     num: '02',
     title: 'Pick someone who has done it.',
-    body:
-      'Real role, real company, real outcomes. Pricing, calendar, and reviews on every profile — no DMs, no waiting.',
-    chip: 'Pick a mentor',
+    body: 'Real role, real company, real outcomes. Pricing, calendar, reviews on every profile.',
+    chip: 'Pick a slot',
+    Mock: CalendarMock,
   },
   {
     num: '03',
     title: 'Talk. Walk away with momentum.',
-    body:
-      'One hour, one focused conversation. Notes, action items, and a follow-up path stay with you after the call.',
+    body: 'One hour, one focused conversation. Notes and action items stay with you after.',
     chip: 'Live in one click',
+    Mock: VideoMock,
   },
 ];
 
@@ -29,17 +36,17 @@ export default function HowItWorksSection() {
     <section
       id="how"
       aria-labelledby="how-heading"
-      className="relative py-24 lg:py-32"
+      className="relative py-20 lg:py-28"
       style={{
         backgroundColor: 'var(--bridge-surface-muted)',
         borderTop: '1px solid var(--bridge-border)',
       }}
     >
-      <div className="mx-auto max-w-5xl px-5 sm:px-8">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
           <p
             className="text-[10px] font-black uppercase"
-            style={{ color: 'var(--color-primary)', letterSpacing: '0.32em' }}
+            style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.32em' }}
           >
             How it works
           </p>
@@ -47,90 +54,299 @@ export default function HowItWorksSection() {
             id="how-heading"
             className="mt-3 font-display font-black"
             style={{
-              fontSize: 'clamp(2rem, 5vw, 4rem)',
-              lineHeight: 0.98,
-              letterSpacing: '-0.035em',
+              fontSize: 'clamp(1.75rem, 4.2vw, 3rem)',
+              lineHeight: 1.05,
+              letterSpacing: '-0.03em',
               color: 'var(--bridge-text)',
               fontFeatureSettings: '"kern" 1, "ss01" 1',
             }}
           >
-            Three steps.
-            <br />
+            Three steps.{' '}
             <span style={{ color: 'var(--color-primary)' }}>Real momentum.</span>
           </h2>
           <p
-            className="mt-7 max-w-xl"
-            style={{ color: 'var(--bridge-text-secondary)', lineHeight: 1.6 }}
+            className="mt-6 max-w-xl"
+            style={{
+              color: 'var(--bridge-text-secondary)',
+              fontSize: 'clamp(0.95rem, 1.6vw, 1.0625rem)',
+              lineHeight: 1.55,
+            }}
           >
             From profile to booked session in under five minutes.
           </p>
         </RevealOnScroll>
 
-        <div className="mt-12">
-          {STEPS.map((step, i) => (
-            <RevealOnScroll key={step.num}>
-              <div
-                className="grid grid-cols-[80px_1fr] sm:grid-cols-[140px_1fr] gap-6 sm:gap-12 py-12 sm:py-14"
-                style={i > 0 ? { borderTop: '1px solid var(--bridge-border)' } : undefined}
-              >
-                <div
-                  className="border-l-2 pl-4 sm:pl-6"
-                  style={{
-                    borderColor:
-                      'color-mix(in srgb, var(--color-primary) 20%, transparent)',
-                  }}
-                >
-                  <p
-                    className="font-display font-black"
-                    style={{
-                      fontSize: 'clamp(3.5rem, 8vw, 5.5rem)',
-                      lineHeight: 1,
-                      color:
-                        'color-mix(in srgb, var(--color-primary) 25%, transparent)',
-                      letterSpacing: '-0.04em',
-                      fontFeatureSettings: '"tnum" 1',
-                    }}
-                  >
-                    {step.num}
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <h3
-                    className="font-display font-black"
-                    style={{
-                      fontSize: 'clamp(1.5rem, 3vw, 2rem)',
-                      color: 'var(--bridge-text)',
-                      letterSpacing: '-0.02em',
-                      lineHeight: 1.05,
-                    }}
-                  >
-                    {step.title}
-                  </h3>
-                  <p
-                    className="max-w-xl"
-                    style={{ color: 'var(--bridge-text-secondary)', lineHeight: 1.6 }}
-                  >
-                    {step.body}
-                  </p>
-                  <div className="mt-1">
-                    <span
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold uppercase"
-                      style={{
-                        backgroundColor:
-                          'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                        color: 'var(--color-primary)',
-                        letterSpacing: '0.12em',
-                      }}
-                    >
-                      {step.chip}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </RevealOnScroll>
-          ))}
-        </div>
+        <RevealOnScroll>
+          <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-5">
+            {STEPS.map((step) => (
+              <StepCard key={step.num} step={step} />
+            ))}
+          </div>
+        </RevealOnScroll>
       </div>
     </section>
+  );
+}
+
+function StepCard({ step }) {
+  const { num, title, body, chip, Mock } = step;
+  return (
+    <div
+      className="flex h-full flex-col overflow-hidden rounded-2xl"
+      style={{
+        backgroundColor: 'var(--bridge-surface)',
+        boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+        transform: 'translateY(0)',
+        transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-1px)';
+        e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border-strong)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border)';
+      }}
+    >
+      <div
+        className="relative w-full overflow-hidden"
+        style={{
+          aspectRatio: '16 / 11',
+          backgroundColor: 'var(--bridge-surface-muted)',
+          borderBottom: '1px solid var(--bridge-border)',
+        }}
+      >
+        <Mock />
+      </div>
+      <div className="flex flex-col gap-2 p-6">
+        <p
+          className="font-display font-black"
+          style={{
+            fontSize: 'clamp(2.25rem, 4vw, 3rem)',
+            lineHeight: 1,
+            color: 'color-mix(in srgb, var(--color-primary) 35%, transparent)',
+            letterSpacing: '-0.04em',
+            fontFeatureSettings: '"tnum" 1',
+          }}
+        >
+          {num}
+        </p>
+        <h3
+          className="mt-1 font-display font-black"
+          style={{
+            fontSize: 'clamp(1.125rem, 2vw, 1.375rem)',
+            color: 'var(--bridge-text)',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.15,
+          }}
+        >
+          {title}
+        </h3>
+        <p
+          className="text-[15px]"
+          style={{ color: 'var(--bridge-text-secondary)', lineHeight: 1.55 }}
+        >
+          {body}
+        </p>
+        <div className="mt-1">
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold uppercase"
+            style={{
+              backgroundColor:
+                'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+              color: 'var(--color-primary)',
+              letterSpacing: '0.12em',
+            }}
+          >
+            {chip}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- CSS-only product mocks (decorative, aria-hidden) ---------- */
+
+function MockShell({ children }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="absolute inset-4 flex flex-col gap-2 rounded-xl p-3"
+      style={{
+        backgroundColor: 'var(--bridge-canvas)',
+        boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SearchMock() {
+  const chips = ['Product', 'Strategy', 'Promo prep'];
+  return (
+    <MockShell>
+      <div
+        className="flex items-center gap-2 rounded-md px-2.5 py-2"
+        style={{
+          backgroundColor: 'var(--bridge-surface)',
+          boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+        }}
+      >
+        <Search className="h-3 w-3" style={{ color: 'var(--bridge-text-muted)' }} />
+        <span className="text-[11px]" style={{ color: 'var(--bridge-text-secondary)' }}>
+          Product manager, Series B
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {chips.map((c) => (
+          <span
+            key={c}
+            className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+              color: 'var(--color-primary)',
+            }}
+          >
+            {c}
+          </span>
+        ))}
+      </div>
+      {[0, 1].map((i) => (
+        <div
+          key={i}
+          className="flex items-center gap-2 rounded-md px-2 py-1.5"
+          style={{
+            backgroundColor: 'var(--bridge-surface)',
+            boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+          }}
+        >
+          <div
+            className="h-5 w-5 rounded-full"
+            style={{ background: 'linear-gradient(135deg,#4F46E5,#818CF8)' }}
+          />
+          <div className="flex-1 space-y-1">
+            <div
+              className="h-1.5 w-2/3 rounded"
+              style={{ backgroundColor: 'var(--bridge-border-strong)' }}
+            />
+            <div
+              className="h-1 w-1/2 rounded"
+              style={{ backgroundColor: 'var(--bridge-border)' }}
+            />
+          </div>
+          <span
+            className="rounded-full px-2 py-0.5 text-[9px] font-bold"
+            style={{
+              backgroundColor: 'var(--color-primary)',
+              color: 'var(--color-on-primary)',
+            }}
+          >
+            View
+          </span>
+        </div>
+      ))}
+    </MockShell>
+  );
+}
+
+function CalendarMock() {
+  const days = [15, 16, 17, 18, 19, 20, 21];
+  const cats = ['Career', 'Interview', 'Resume'];
+  return (
+    <MockShell>
+      <p
+        className="text-[10px] font-bold uppercase"
+        style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.18em' }}
+      >
+        This week
+      </p>
+      <div className="grid grid-cols-7 gap-1">
+        {days.map((d) => {
+          const active = d === 17;
+          return (
+            <div
+              key={d}
+              className="flex aspect-square items-center justify-center rounded-md text-[11px] font-bold"
+              style={{
+                backgroundColor: active
+                  ? 'var(--color-primary)'
+                  : 'var(--bridge-surface)',
+                color: active
+                  ? 'var(--color-on-primary)'
+                  : 'var(--bridge-text-secondary)',
+                boxShadow: active
+                  ? '0 0 0 2px color-mix(in srgb, var(--color-primary) 25%, transparent)'
+                  : 'inset 0 0 0 1px var(--bridge-border)',
+                fontFeatureSettings: '"tnum" 1',
+              }}
+            >
+              {d}
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-auto flex flex-wrap gap-1">
+        {cats.map((c) => (
+          <span
+            key={c}
+            className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+            style={{
+              backgroundColor: 'var(--bridge-surface)',
+              color: 'var(--bridge-text-secondary)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+            }}
+          >
+            {c}
+          </span>
+        ))}
+      </div>
+    </MockShell>
+  );
+}
+
+function VideoMock() {
+  return (
+    <MockShell>
+      <div
+        className="relative flex flex-1 flex-col justify-between overflow-hidden rounded-lg p-3"
+        style={{
+          background:
+            'linear-gradient(160deg, #0A0A14 0%, #1A1A2E 100%)',
+        }}
+      >
+        <div className="flex items-center gap-1.5">
+          <span
+            className="inline-block h-1.5 w-1.5 rounded-full"
+            style={{ backgroundColor: 'var(--color-success)' }}
+          />
+          <span
+            className="text-[10px] font-bold uppercase tracking-widest"
+            style={{ color: 'color-mix(in srgb, var(--color-success) 60%, white)' }}
+          >
+            Confirmed
+          </span>
+        </div>
+        <div>
+          <p
+            className="text-[11px] font-semibold"
+            style={{ color: 'color-mix(in srgb, white 85%, transparent)' }}
+          >
+            Tue, 2:00 PM
+          </p>
+          <span
+            className="mt-1.5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold"
+            style={{
+              backgroundColor: 'var(--color-primary)',
+              color: 'var(--color-on-primary)',
+            }}
+          >
+            <Video className="h-2.5 w-2.5" />
+            Join video call
+          </span>
+        </div>
+      </div>
+    </MockShell>
   );
 }

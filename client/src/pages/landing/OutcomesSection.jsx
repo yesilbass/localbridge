@@ -20,9 +20,9 @@ export default function OutcomesSection() {
     <section
       id="outcomes"
       aria-labelledby="outcomes-heading"
-      className="relative py-24 lg:py-32"
+      className="relative py-20 lg:py-28"
       style={{
-        backgroundColor: 'var(--bridge-surface-muted)',
+        backgroundColor: 'var(--bridge-canvas)',
         borderTop: '1px solid var(--bridge-border)',
       }}
     >
@@ -32,9 +32,9 @@ export default function OutcomesSection() {
             id="outcomes-heading"
             className="font-display font-black"
             style={{
-              fontSize: 'clamp(2rem, 5vw, 4rem)',
-              lineHeight: 0.98,
-              letterSpacing: '-0.035em',
+              fontSize: 'clamp(1.75rem, 4.2vw, 3rem)',
+              lineHeight: 1.05,
+              letterSpacing: '-0.03em',
               color: 'var(--bridge-text)',
               fontFeatureSettings: '"kern" 1, "ss01" 1',
             }}
@@ -44,62 +44,24 @@ export default function OutcomesSection() {
             <span style={{ color: 'var(--color-primary)' }}>unstuck.</span>
           </h2>
           <p
-            className="mt-7 max-w-xl"
-            style={{ color: 'var(--bridge-text-secondary)', lineHeight: 1.6 }}
+            className="mt-6 max-w-xl"
+            style={{
+              color: 'var(--bridge-text-secondary)',
+              fontSize: 'clamp(0.95rem, 1.6vw, 1.0625rem)',
+              lineHeight: 1.55,
+            }}
           >
             Real outcomes from people who booked the session. We use first-name and role only.
           </p>
         </RevealOnScroll>
 
-        <div className="mt-12 grid grid-cols-1 gap-5">
-          <RevealOnScroll>
-            <FeaturedCard outcome={featured} index={0} />
-          </RevealOnScroll>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {rest.map((o, i) => (
-              <RevealOnScroll key={o.name}>
-                <SupportingCard outcome={o} index={i + 1} />
-              </RevealOnScroll>
-            ))}
-          </div>
-        </div>
-
         <RevealOnScroll>
-          <div
-            className="mt-12 flex items-start gap-4 max-w-2xl mx-auto pt-10"
-            style={{ borderTop: '1px solid var(--bridge-border)' }}
-          >
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-full font-display font-black shrink-0"
-              style={{
-                backgroundColor: 'var(--color-primary)',
-                color: 'var(--color-on-primary)',
-                fontSize: 16,
-              }}
-              aria-hidden="true"
-            >
-              B
-            </div>
-            <div className="flex-1">
-              <p
-                className="italic font-display"
-                style={{
-                  fontSize: 'clamp(1rem, 1.6vw, 1.125rem)',
-                  lineHeight: 1.55,
-                  color: 'var(--bridge-text)',
-                }}
-              >
-                Bridge is built by a small team. We hand-vet every mentor and read every review. If a session doesn&rsquo;t earn the rebook, we want to know.
-              </p>
-              <p
-                className="mt-3 text-[12px] uppercase font-bold"
-                style={{
-                  color: 'var(--bridge-text-muted)',
-                  letterSpacing: '0.18em',
-                }}
-              >
-                The Bridge team
-              </p>
+          <div className="mt-12 grid grid-cols-1 gap-5">
+            <FeaturedCard outcome={featured} index={0} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {rest.map((o, i) => (
+                <SupportingCard key={o.name} outcome={o} index={i + 1} />
+              ))}
             </div>
           </div>
         </RevealOnScroll>
@@ -168,8 +130,8 @@ function FeaturedCard({ outcome }) {
           <span
             className="ml-auto px-4 py-2 rounded-full text-[14px] font-bold"
             style={{
-              backgroundColor: 'var(--color-primary)',
-              color: 'var(--color-on-primary)',
+              backgroundColor: 'color-mix(in srgb, var(--color-primary) 14%, transparent)',
+              color: 'var(--color-primary)',
               fontFeatureSettings: '"tnum" 1',
             }}
           >
