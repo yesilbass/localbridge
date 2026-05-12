@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Star } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
 import { findMentor } from './landingData';
 import { DUR_SHORT } from './landingHooks';
@@ -18,6 +18,12 @@ const TONE_GRADIENTS = {
   pink:    'linear-gradient(135deg,#312E81,#818CF8)',
 };
 
+const FEATURED_BIO =
+  'Twelve years in product, four product launches at Linear. I help PMs sharpen scope, ship faster, and tell the story that gets them promoted.';
+const FEATURED_QUOTE =
+  '“Most PMs aren\u2019t stuck on craft \u2014 they\u2019re stuck on narrative. We fix that in one session.”';
+const FEATURED_FOCUS = ['PM Strategy', 'Promotion', 'Scoping', 'Roadmaps'];
+
 function initialsOf(name) {
   return name.split(' ').filter(Boolean).map(p => p[0]).slice(0, 2).join('').toUpperCase();
 }
@@ -30,60 +36,77 @@ export default function MentorShowcaseSection() {
     <section
       id="mentors"
       aria-labelledby="mentors-heading"
-      className="relative py-24 lg:py-32"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
+      className="relative py-12 lg:py-16"
+      style={{
+        backgroundColor: 'var(--bridge-surface-muted)',
+        borderTop: '1px solid var(--bridge-border)',
+      }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
+          <p
+            className="text-[10px] font-black uppercase"
+            style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.32em' }}
+          >
+            This week&rsquo;s spotlight
+          </p>
           <h2
             id="mentors-heading"
-            className="font-display font-black"
+            className="mt-3 font-display font-black"
             style={{
-              fontSize: 'clamp(2rem, 5vw, 4rem)',
-              lineHeight: 0.98,
-              letterSpacing: '-0.035em',
+              fontSize: 'clamp(1.75rem, 4.2vw, 3rem)',
+              lineHeight: 1.05,
+              letterSpacing: '-0.03em',
               color: 'var(--bridge-text)',
               fontFeatureSettings: '"kern" 1, "ss01" 1',
             }}
           >
-            People who&rsquo;ve already
-            <br />
-            <span style={{ color: 'var(--color-primary)' }}>been there.</span>
+            One mentor, <span style={{ color: 'var(--color-primary)' }}>up close.</span>
           </h2>
           <p
-            className="mt-7 max-w-xl"
-            style={{ color: 'var(--bridge-text-secondary)', lineHeight: 1.6 }}
+            className="mt-6 max-w-xl"
+            style={{
+              color: 'var(--bridge-text-secondary)',
+              fontSize: 'clamp(0.95rem, 1.6vw, 1.0625rem)',
+              lineHeight: 1.55,
+            }}
           >
-            Vetted operators, founders and builders. No coaches, no influencers — just people who&rsquo;ve done it.
+            Every profile on Bridge looks like this — real bio, real numbers, real booking.
           </p>
         </RevealOnScroll>
 
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 lg:auto-rows-fr gap-4 lg:gap-5">
-          {featured && (
-            <RevealOnScroll className="sm:col-span-2 lg:col-span-6 lg:row-span-2">
-              <FeaturedCard mentor={featured} />
-            </RevealOnScroll>
-          )}
-          {smalls.map((m) => (
-            <RevealOnScroll key={m.id} className="lg:col-span-3 lg:row-span-1">
-              <SmallCard mentor={m} />
-            </RevealOnScroll>
-          ))}
-        </div>
+        {featured && (
+          <div className="mt-10">
+            <Centerpiece mentor={featured} />
+          </div>
+        )}
 
         <RevealOnScroll>
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>
-              5 of 2,400+ vetted mentors. New profiles every week.
-            </p>
-            <Link
-              to="/mentors"
-              className="inline-flex items-center gap-1.5 text-[13px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
-              style={{ color: 'var(--color-primary)', outlineColor: 'var(--color-primary)' }}
+          <div className="mt-14">
+            <p
+              className="text-[10px] font-bold uppercase"
+              style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.22em' }}
             >
-              See every mentor
-              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-            </Link>
+              Also booking this week
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+              {smalls.map((m) => (
+                <MentorChip key={m.id} mentor={m} />
+              ))}
+            </div>
+            <div className="mt-6 flex items-center justify-between">
+              <p className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>
+                5 of 2,400+ vetted mentors.
+              </p>
+              <Link
+                to="/mentors"
+                className="inline-flex items-center gap-1.5 text-[13px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
+                style={{ color: 'var(--color-primary)', outlineColor: 'var(--color-primary)' }}
+              >
+                See every mentor
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </Link>
+            </div>
           </div>
         </RevealOnScroll>
       </div>
@@ -91,220 +114,229 @@ export default function MentorShowcaseSection() {
   );
 }
 
-function FeaturedCard({ mentor }) {
+function Centerpiece({ mentor }) {
   return (
-    <Link
-      to={`/mentors/${mentor.id}`}
-      className="group flex flex-col h-full overflow-hidden rounded-3xl focus-visible:outline-2 focus-visible:outline-offset-2"
+    <div
+      className="grid grid-cols-1 overflow-hidden rounded-3xl lg:grid-cols-12"
       style={{
         backgroundColor: 'var(--bridge-surface)',
-        boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 14px 32px -22px rgba(79,70,229,0.18)',
-        transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`,
-        outlineColor: 'var(--color-primary)',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-2px)';
-        e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border), 0 22px 50px -22px color-mix(in srgb, var(--color-primary) 32%, transparent)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border), 0 14px 32px -22px rgba(79,70,229,0.18)';
+        boxShadow:
+          'inset 0 0 0 1px var(--bridge-border), 0 22px 60px -28px color-mix(in srgb, var(--color-primary) 30%, transparent)',
       }}
     >
-      <FeaturedImage mentor={mentor} />
-      <div className="shrink-0 p-6 sm:p-8">
-        <div className="flex items-center gap-2">
-          <span
-            aria-hidden="true"
-            className="bridge-pulse inline-block h-1.5 w-1.5 rounded-full"
-            style={{ backgroundColor: '#10b981' }}
-          />
-          <p
-            className="text-[11px] font-bold uppercase"
-            style={{ color: 'var(--bridge-text-secondary)', letterSpacing: '0.22em' }}
-          >
-            Booking this week
-          </p>
-        </div>
-        <p
-          className="mt-3 font-display font-black"
-          style={{
-            fontSize: 'clamp(1.625rem, 3vw, 1.875rem)',
-            color: 'var(--bridge-text)',
-            letterSpacing: '-0.025em',
-          }}
-        >
-          {mentor.name}
-        </p>
-        <p
-          className="text-[14px]"
-          style={{ color: 'var(--bridge-text-secondary)' }}
-        >
-          {mentor.title} · {mentor.company}
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {mentor.tags.slice(0, 3).map(t => (
-            <span
-              key={t}
-              className="px-3 py-1 rounded-full text-[11px] font-semibold"
+      {/* Left: dark identity panel (40%) */}
+      <div
+        className="flex flex-col gap-5 p-7 sm:p-9 lg:col-span-5"
+        style={{
+          background:
+            'linear-gradient(160deg, #0A0A14 0%, #1A1A2E 100%)',
+          color: 'color-mix(in srgb, white 92%, transparent)',
+        }}
+      >
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div
+              className="flex h-16 w-16 items-center justify-center rounded-full font-display font-black text-white"
               style={{
-                backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                color: 'var(--color-primary)',
+                background: TONE_GRADIENTS[mentor.tone] || 'var(--color-primary)',
+                fontSize: 24,
+                letterSpacing: '-0.04em',
               }}
+              aria-hidden="true"
             >
-              {t}
-            </span>
-          ))}
+              {initialsOf(mentor.name)}
+            </div>
+            {mentor.online && (
+              <span
+                aria-hidden="true"
+                className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full"
+                style={{
+                  backgroundColor: 'var(--color-success)',
+                  boxShadow: '0 0 0 2px #0A0A14',
+                }}
+              />
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="font-display font-black" style={{ fontSize: 20, letterSpacing: '-0.02em' }}>
+              {mentor.name}
+            </p>
+            <p className="text-[13px]" style={{ color: 'color-mix(in srgb, white 70%, transparent)' }}>
+              {mentor.title} · {mentor.company}
+            </p>
+          </div>
         </div>
-        <div className="mt-6 flex items-center justify-between">
-          <p
-            className="text-[16px] font-black"
-            style={{
-              color: 'var(--bridge-text)',
-              fontFeatureSettings: '"tnum" 1',
-            }}
-          >
-            ${mentor.rate}/session
-          </p>
-          <span
-            className="inline-flex items-center gap-1.5 text-[12px] font-semibold"
-            style={{ color: 'var(--color-primary)' }}
-          >
-            View profile
-            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+
+        <div className="flex items-center gap-2 text-[13px]" style={{ color: 'color-mix(in srgb, white 85%, transparent)' }}>
+          <span className="inline-flex items-center gap-0.5" style={{ color: 'var(--color-primary)' }}>
+            {[0,1,2,3,4].map(i => (
+              <Star key={i} className="h-3.5 w-3.5" style={{ fill: 'currentColor' }} aria-hidden="true" />
+            ))}
+          </span>
+          <span style={{ fontFeatureSettings: '"tnum" 1' }}>
+            <b>{mentor.rating}</b> · {mentor.sessions} sessions
           </span>
         </div>
+
+        <blockquote
+          className="rounded-xl p-4 text-[14px] italic"
+          style={{
+            backgroundColor: 'color-mix(in srgb, white 6%, transparent)',
+            color: 'color-mix(in srgb, white 85%, transparent)',
+            boxShadow: 'inset 0 0 0 1px color-mix(in srgb, white 8%, transparent)',
+            lineHeight: 1.55,
+          }}
+        >
+          {FEATURED_QUOTE}
+        </blockquote>
       </div>
-    </Link>
+
+      {/* Right: light info panel (60%) */}
+      <div className="flex flex-col gap-5 p-7 sm:p-9 lg:col-span-7">
+        <div>
+          <p
+            className="text-[10px] font-bold uppercase"
+            style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.22em' }}
+          >
+            About
+          </p>
+          <p
+            className="mt-2 text-[15px]"
+            style={{ color: 'var(--bridge-text-secondary)', lineHeight: 1.55 }}
+          >
+            {FEATURED_BIO}
+          </p>
+        </div>
+
+        <div>
+          <p
+            className="text-[10px] font-bold uppercase"
+            style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.22em' }}
+          >
+            Focus areas
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {FEATURED_FOCUS.map((t) => (
+              <span
+                key={t}
+                className="rounded-full px-3 py-1 text-[11px] font-semibold"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                  color: 'var(--color-primary)',
+                }}
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div
+          className="grid grid-cols-2 rounded-xl"
+          style={{
+            backgroundColor: 'var(--bridge-surface-muted)',
+            boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+          }}
+        >
+          <Stat label="Rating" value={mentor.rating.toFixed(1)} />
+          <Stat label="Sessions" value={String(mentor.sessions)} divider />
+        </div>
+
+        <div className="mt-1 flex flex-wrap items-center gap-3">
+          <Link
+            to={`/mentors/${mentor.id}`}
+            className="inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[14px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{
+              backgroundColor: 'var(--color-primary)',
+              color: 'var(--color-on-primary)',
+              boxShadow: '0 14px 32px -14px color-mix(in srgb, var(--color-primary) 60%, transparent)',
+              outlineColor: 'var(--color-primary)',
+              transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`,
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
+          >
+            Open full profile
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
 
-function FeaturedImage({ mentor }) {
-  // Aspect ratios at small viewports; lg+ flex-1 fills remaining grid-cell height.
-  const wrapperClass =
-    'shrink-0 aspect-[4/5] sm:aspect-[16/9] lg:aspect-auto lg:flex-1 lg:min-h-[280px]';
-
-  if (mentor.avatarUrl) {
-    return (
-      <div className={wrapperClass}>
-        <img
-          src={mentor.avatarUrl}
-          alt={`${mentor.name}, ${mentor.title}`}
-          width={640}
-          height={800}
-          loading="eager"
-          className="h-full w-full object-cover"
-          style={{ objectPosition: 'center top' }}
-        />
-      </div>
-    );
-  }
+function Stat({ label, value, divider }) {
   return (
     <div
-      className={`${wrapperClass} flex items-center justify-center`}
-      style={{
-        background: TONE_GRADIENTS[mentor.tone] || 'var(--color-primary)',
-      }}
-      aria-hidden="true"
+      className="flex flex-col items-center justify-center px-3 py-4"
+      style={divider ? { borderLeft: '1px solid var(--bridge-border)' } : undefined}
     >
       <p
-        className="font-display font-black text-white"
-        style={{ fontSize: 80, letterSpacing: '-0.04em' }}
+        className="font-display font-black"
+        style={{
+          fontSize: 18,
+          color: 'var(--bridge-text)',
+          letterSpacing: '-0.02em',
+          fontFeatureSettings: '"tnum" 1',
+        }}
       >
-        {initialsOf(mentor.name)}
+        {value}
+      </p>
+      <p
+        className="mt-0.5 text-[10px] font-bold uppercase"
+        style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.18em' }}
+      >
+        {label}
       </p>
     </div>
   );
 }
 
-function SmallCard({ mentor }) {
+function MentorChip({ mentor }) {
   return (
     <Link
       to={`/mentors/${mentor.id}`}
-      className="group flex flex-col h-full overflow-hidden rounded-3xl focus-visible:outline-2 focus-visible:outline-offset-2"
+      className="group flex items-center gap-3 rounded-2xl p-3 focus-visible:outline-2 focus-visible:outline-offset-2"
       style={{
         backgroundColor: 'var(--bridge-surface)',
-        boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 14px 32px -22px rgba(79,70,229,0.16)',
-        transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`,
+        boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
         outlineColor: 'var(--color-primary)',
+        transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`,
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-2px)';
-        e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border), 0 18px 40px -22px color-mix(in srgb, var(--color-primary) 28%, transparent)';
+        e.currentTarget.style.transform = 'translateY(-1px)';
+        e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border-strong)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border), 0 14px 32px -22px rgba(79,70,229,0.16)';
+        e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border)';
       }}
     >
-      <SmallImage mentor={mentor} />
-      <div className="mt-auto p-4">
+      <div
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-display font-black text-white"
+        style={{
+          background: TONE_GRADIENTS[mentor.tone] || 'var(--color-primary)',
+          fontSize: 14,
+          letterSpacing: '-0.04em',
+        }}
+        aria-hidden="true"
+      >
+        {initialsOf(mentor.name)}
+      </div>
+      <div className="min-w-0">
         <p
-          className="font-display font-black"
-          style={{ fontSize: 15, color: 'var(--bridge-text)' }}
+          className="truncate font-display font-black"
+          style={{ fontSize: 13, color: 'var(--bridge-text)' }}
         >
           {mentor.name}
         </p>
         <p
-          className="text-[11px] truncate"
+          className="truncate text-[11px]"
           style={{ color: 'var(--bridge-text-muted)' }}
         >
-          {mentor.title} · {mentor.company}
+          {mentor.title}
         </p>
-        <div className="mt-2 flex items-center justify-between gap-2">
-          <p
-            className="text-[12px] font-bold"
-            style={{
-              color: 'var(--bridge-text)',
-              fontFeatureSettings: '"tnum" 1',
-            }}
-          >
-            ${mentor.rate}
-          </p>
-          {mentor.tags?.[0] && (
-            <span
-              className="px-2 py-0.5 rounded-full text-[10px] font-semibold truncate"
-              style={{
-                backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
-                color: 'var(--color-primary)',
-              }}
-            >
-              {mentor.tags[0]}
-            </span>
-          )}
-        </div>
       </div>
     </Link>
-  );
-}
-
-function SmallImage({ mentor }) {
-  if (mentor.avatarUrl) {
-    return (
-      <img
-        src={mentor.avatarUrl}
-        alt={`${mentor.name}, ${mentor.title}`}
-        width={320}
-        height={320}
-        loading="lazy"
-        className="aspect-square w-full object-cover shrink-0"
-      />
-    );
-  }
-  return (
-    <div
-      className="aspect-square w-full flex items-center justify-center shrink-0"
-      style={{
-        background: TONE_GRADIENTS[mentor.tone] || 'var(--color-primary)',
-      }}
-      aria-hidden="true"
-    >
-      <p
-        className="font-display font-black text-white"
-        style={{ fontSize: 56, letterSpacing: '-0.04em' }}
-      >
-        {initialsOf(mentor.name)}
-      </p>
-    </div>
   );
 }

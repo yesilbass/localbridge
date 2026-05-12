@@ -13,7 +13,7 @@ export default function FinalCtaSection({ user }) {
     <section
       id="final"
       aria-labelledby="final-heading"
-      className="relative overflow-hidden py-28 sm:py-32"
+      className="relative overflow-hidden py-20 sm:py-24"
       style={{
         background:
           'linear-gradient(180deg, var(--bridge-canvas) 0%, color-mix(in srgb, var(--bridge-canvas) 78%, var(--color-secondary)) 100%)',
@@ -23,7 +23,7 @@ export default function FinalCtaSection({ user }) {
       {/* Ambient primary glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 h-[820px] w-[820px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[140px]"
+        className="pointer-events-none absolute left-1/2 top-0 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]"
         style={{
           background: 'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, transparent 70%)',
         }}
@@ -31,7 +31,7 @@ export default function FinalCtaSection({ user }) {
       {/* Counter-tone accent */}
       <div
         aria-hidden
-        className="pointer-events-none absolute right-[8%] bottom-[-10%] h-[420px] w-[420px] rounded-full blur-[140px] opacity-50"
+        className="pointer-events-none absolute right-[8%] bottom-[-10%] h-[420px] w-[420px] rounded-full blur-[140px] opacity-[0.35]"
         style={{
           background: 'radial-gradient(closest-side, color-mix(in srgb, var(--lp-counter) 28%, transparent) 0%, transparent 70%)',
         }}
@@ -53,8 +53,8 @@ export default function FinalCtaSection({ user }) {
 
           <h2
             id="final-heading"
-            className="font-display font-black leading-[0.96] tracking-[-0.04em]"
-            style={{ fontSize: 'clamp(2.5rem, 6vw, 4.75rem)', color: 'var(--bridge-text)' }}
+            className="font-display font-black leading-[1.04] tracking-[-0.04em]"
+            style={{ fontSize: 'clamp(2rem, 5vw, 3.75rem)', color: 'var(--bridge-text)' }}
           >
             One conversation<br />
             <span
@@ -66,8 +66,12 @@ export default function FinalCtaSection({ user }) {
           </h2>
 
           <p
-            className="mx-auto mt-6 max-w-xl text-[15.5px] leading-relaxed sm:text-[17px]"
-            style={{ color: 'var(--bridge-text-secondary)' }}
+            className="mx-auto mt-6 max-w-xl"
+            style={{
+              color: 'var(--bridge-text-secondary)',
+              fontSize: 'clamp(0.95rem, 1.6vw, 1.0625rem)',
+              lineHeight: 1.55,
+            }}
           >
             Stop spinning. Book a session with someone who&rsquo;s walked the exact path you&rsquo;re on — and made it through.
           </p>
@@ -88,28 +92,18 @@ export default function FinalCtaSection({ user }) {
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
               </span>
             </Link>
-            <Link
-              to="/#how"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-[15px] font-semibold transition-all hover:-translate-y-0.5 sm:w-auto"
-              style={{
-                backgroundColor: 'var(--bridge-surface)',
-                color: 'var(--bridge-text-secondary)',
-                boxShadow: '0 0 0 1px var(--bridge-border) inset',
-              }}
-            >
-              See how it works ↓
-            </Link>
           </div>
         </RevealOnScroll>
 
         {/* Guarantees */}
-        <div className="mt-16 grid gap-3 text-left sm:grid-cols-3">
-          {GUARANTEES.map(({ Icon, label, sub }, i) => (
-            <RevealOnScroll key={i} delay={100 + i * 130} variant="zoom">
+        <RevealOnScroll>
+          <div className="mt-14 grid gap-3 text-left sm:grid-cols-3">
+            {GUARANTEES.map(({ Icon, label, sub }, i) => (
               <div
+                key={i}
                 className="flex h-full items-center gap-4 rounded-2xl p-4 transition"
                 style={{
-                  backgroundColor: 'var(--bridge-surface)',
+                  backgroundColor: 'color-mix(in srgb, var(--bridge-canvas) 60%, var(--bridge-surface))',
                   boxShadow: '0 0 0 1px var(--bridge-border) inset, 0 12px 28px -22px color-mix(in srgb, var(--color-primary) 30%, transparent)',
                 }}
               >
@@ -127,9 +121,9 @@ export default function FinalCtaSection({ user }) {
                   <p className="mt-1 text-[12px] leading-tight" style={{ color: 'var(--bridge-text-muted)' }}>{sub}</p>
                 </div>
               </div>
-            </RevealOnScroll>
-          ))}
-        </div>
+            ))}
+          </div>
+        </RevealOnScroll>
       </div>
     </section>
   );

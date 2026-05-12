@@ -8,14 +8,23 @@ const STATS = [
 export default function StatsBentoSection() {
   return (
     <section
-      aria-label="Bridge by the numbers"
+      aria-labelledby="stats-heading"
       className="relative"
       style={{
-        backgroundColor: 'var(--bridge-surface-muted)',
+        backgroundColor: 'var(--bridge-canvas)',
         borderTop: '1px solid var(--bridge-border)',
         borderBottom: '1px solid var(--bridge-border)',
       }}
     >
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 pt-10 pb-5 sm:pt-12 sm:pb-6">
+        <p
+          id="stats-heading"
+          className="text-center text-[10px] font-black uppercase"
+          style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.32em' }}
+        >
+          By the numbers
+        </p>
+      </div>
       <div
         className="grid grid-cols-2 lg:grid-cols-4"
         style={{ backgroundColor: 'var(--bridge-border)', gap: '1px' }}
@@ -23,13 +32,13 @@ export default function StatsBentoSection() {
         {STATS.map((s) => (
           <div
             key={s.label}
-            className="flex flex-col gap-2 px-6 py-14 sm:px-8 sm:py-16"
-            style={{ backgroundColor: 'var(--bridge-surface-muted)' }}
+            className="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center sm:px-6 sm:py-12"
+            style={{ backgroundColor: 'var(--bridge-canvas)' }}
           >
             <p
               className="font-display font-black"
               style={{
-                fontSize: 'clamp(2.25rem, 5vw, 3.75rem)',
+                fontSize: 'clamp(2rem, 4vw, 3rem)',
                 lineHeight: 1,
                 letterSpacing: '-0.025em',
                 color: 'var(--bridge-text)',
@@ -39,8 +48,8 @@ export default function StatsBentoSection() {
               {s.value}
             </p>
             <p
-              className="text-[13px]"
-              style={{ color: 'var(--bridge-text-muted)' }}
+              className="text-[12.5px] font-medium uppercase"
+              style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.04em' }}
             >
               {s.label}
             </p>
