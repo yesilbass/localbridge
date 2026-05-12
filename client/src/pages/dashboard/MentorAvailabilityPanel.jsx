@@ -325,7 +325,16 @@ export default function MentorAvailabilityPanel({ mentorProfileId, reloadKey, on
       .eq('id', mentorProfileId)
       .maybeSingle();
     if (profileError) {
-      setError(profileError.message ?? 'Could not load profile');
+      const msg = profileError.message ?? 'Could not load profile';
+      const missingColumn = /column .* does not exist/i.test(msg) || profileError.code === '42703';
+      setError(
+        missingColumn
+          ? 'Calendly database migration has not been applied yet. Run supabase/migrations/20261108000000_calendly_migration.sql.'
+          : msg,
+      );
+      setProfile(null);
+      setEventTypes([]);
+      setPhase('not_connected');
       return;
     }
     setProfile(data);
