@@ -146,7 +146,9 @@ function ScheduledState({ session }) {
   if (live) primaryLabel = 'Join now';
   else if (ended) primaryLabel = session.asMentor ? 'View notes' : 'Add review';
   else if (awaitingMentor) primaryLabel = session.asMentor ? 'Review request' : 'Awaiting mentor';
-  else if (timeTbd) primaryLabel = session.rescheduleUrl ? 'Confirm time' : 'Time TBD';
+  // Time-TBD is informational — never expose a Calendly URL that lets the
+  // mentee accidentally re-trigger a booking.
+  else if (timeTbd) primaryLabel = 'Awaiting time';
 
   function onSecondaryDetailClick() {
     navigate('/dashboard/sessions');

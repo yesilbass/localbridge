@@ -234,10 +234,9 @@ export function useNextSession() {
       }
       if (v === versionRef.current) setState({ session: toNextSession(row, other, isMentor), isLoading: false, isError: false });
 
-      // Self-heal: if the row references a Calendly event but `scheduled_date`
-      // never got written (token expired between booking and now), retry the
-      // sync once. Realtime will refresh the UI when the row updates.
-      if (row && !isMentor && row.calendly_event_uri && !row.scheduled_date && !_calendlyResyncAttempted.has(row.id)) {
+      // Self-heal: any row with Calendly URIs but no scheduled_date triggers
+      // a server-side retry. Both mentor and mentee accounts are authorised.
+      if (row && row.calendly_event_uri && !row.scheduled_date && !_calendlyResyncAttempted.has(row.id)) {
         _calendlyResyncAttempted.add(row.id);
         void resyncCalendlySession(row.id).catch(() => { /* non-fatal */ });
       }
@@ -763,6 +762,14 @@ export function useUpcomingSessions({ limit = 5 } = {}) {
       const data = Array.isArray(dataRaw) ? dataRaw : [];
       const now = Date.now();
       const upcoming = (data || []).filter((s) => !s.scheduled_date || new Date(s.scheduled_date).getTime() >= now - 60 * 60 * 1000);
+
+      // Trigger self-heal for any row missing scheduled_date — both roles.
+      upcoming.forEach((s) => {
+        if (s.calendly_event_uri && !s.scheduled_date && !_calendlyResyncAttempted.has(s.id)) {
+          _calendlyResyncAttempted.add(s.id);
+          void resyncCalendlySession(s.id).catch(() => { /* non-fatal */ });
+        }
+      });
 
       if (isMentor) {
         const names = await fetchUserNamesMap(upcoming.map((s) => s.mentee_id).filter(Boolean));

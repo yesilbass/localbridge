@@ -39,7 +39,21 @@ export default async function handler(req, res) {
     : sessionQuery.eq('stripe_session_id', stripeSessionId);
   const { data: session, error: sessionError } = await sessionQuery.maybeSingle();
   if (sessionError || !session) return jsonError(res, 404, 'Session not found.');
-  if (session.mentee_id !== user.id) return jsonError(res, 403, 'Forbidden');
+
+  // Either the mentee on the booking OR the mentor who owns the linked
+  // mentor_profiles row may trigger a sync. Mentors hold the Calendly token,
+  // so it's actively useful for them to be allowed.
+  let allowed = session.mentee_id === user.id;
+  if (!allowed) {
+    const { data: ownedMentor } = await supabase
+      .from('mentor_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('id', session.mentor_id)
+      .maybeSingle();
+    allowed = !!ownedMentor;
+  }
+  if (!allowed) return jsonError(res, 403, 'Forbidden');
 
   // Reuse stored URIs as fallback so the dashboard can re-trigger sync without
   // having to re-supply them.
@@ -49,14 +63,25 @@ export default async function handler(req, res) {
     return jsonError(res, 400, 'No Calendly references on this session yet.');
   }
 
+  // Always commit the URIs first, even if the Calendly API lookup later
+  // fails. That way the row has *something* to retry against next time, and
+  // the mentee/mentor isn't left with an empty record.
+  const baselinePatch = {
+    calendly_event_uri:   effectiveEventUri   || session.calendly_event_uri   || null,
+    calendly_invitee_uri: effectiveInviteeUri || session.calendly_invitee_uri || null,
+  };
+  if (stripeSessionId) baselinePatch.status = 'pending';
+  await supabase.from('sessions').update(baselinePatch).eq('id', session.id);
+
+  let scheduledAt = null;
+  let joinUrl = null;
+  let resolvedEventUri = effectiveEventUri;
+  let cancelUrl = null;
+  let rescheduleUrl = null;
+  let calendlyError = null;
+
   try {
     const accessToken = await getValidAccessToken(session.mentor_id);
-
-    let scheduledAt = null;
-    let joinUrl = null;
-    let resolvedEventUri = effectiveEventUri;
-    let cancelUrl = null;
-    let rescheduleUrl = null;
 
     if (effectiveInviteeUri) {
       const invitee = await callApi(effectiveInviteeUri, { accessToken });
@@ -71,36 +96,39 @@ export default async function handler(req, res) {
       scheduledAt = r.start_time || null;
       joinUrl = r.location?.join_url || r.location?.location || null;
     }
-
-    // Build patch with only the fields we have — never blank out an existing
-    // value during a self-heal call.
-    const patch = {
-      calendly_event_uri:   resolvedEventUri      || session.calendly_event_uri   || null,
-      calendly_invitee_uri: effectiveInviteeUri   || session.calendly_invitee_uri || null,
-    };
-    if (scheduledAt)    patch.scheduled_date          = scheduledAt;
-    if (cancelUrl)      patch.calendly_cancel_url     = cancelUrl;
-    if (rescheduleUrl)  patch.calendly_reschedule_url = rescheduleUrl;
-    if (joinUrl)        patch.join_url                = joinUrl;
-    // Only flip status to 'pending' on the original confirm path (stripeSessionId).
-    // Self-heal calls (sessionId) preserve whatever state the row is in.
-    if (stripeSessionId) patch.status = 'pending';
-
-    const { error: updateError } = await supabase
-      .from('sessions')
-      .update(patch)
-      .eq('id', session.id);
-    if (updateError) {
-      console.error('[booking-confirm-scheduled] update failed', { message: updateError.message });
-      return jsonError(res, 500, 'Could not confirm booking.');
-    }
-    return res.json({ ok: true, scheduled_date: scheduledAt });
   } catch (err) {
-    console.error('[booking-confirm-scheduled] failed', {
+    calendlyError = err?.message || 'Calendly fetch failed';
+    console.error('[booking-confirm-scheduled] Calendly API failed', {
       message: err?.message,
       status: err?.status,
       sessionId: session.id,
     });
-    return jsonError(res, 502, 'Could not verify Calendly booking.');
+    // Fall through — we still write whatever we already have.
   }
+
+  // Patch only the fields we actually resolved. Never overwrite known good
+  // data with null on a self-heal that partially failed.
+  const patch = {};
+  if (resolvedEventUri && resolvedEventUri !== session.calendly_event_uri) {
+    patch.calendly_event_uri = resolvedEventUri;
+  }
+  if (scheduledAt)   patch.scheduled_date          = scheduledAt;
+  if (cancelUrl)     patch.calendly_cancel_url     = cancelUrl;
+  if (rescheduleUrl) patch.calendly_reschedule_url = rescheduleUrl;
+  if (joinUrl)       patch.join_url                = joinUrl;
+
+  if (Object.keys(patch).length > 0) {
+    const { error: updateError } = await supabase
+      .from('sessions').update(patch).eq('id', session.id);
+    if (updateError) {
+      console.error('[booking-confirm-scheduled] update failed', { message: updateError.message });
+      return jsonError(res, 500, 'Could not save booking details.');
+    }
+  }
+
+  return res.json({
+    ok: !!scheduledAt,
+    scheduled_date: scheduledAt,
+    calendly_error: calendlyError,
+  });
 }
