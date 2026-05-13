@@ -668,11 +668,8 @@ export default function VideoCall() {
           if (!cancelled) setAccessError('This session has not been confirmed yet.');
           return;
         }
-        const scheduledMs = new Date(data.scheduled_date).getTime();
-        if (Date.now() < scheduledMs - 3 * 60 * 60 * 1000) {
-          if (!cancelled) setAccessError('The video room opens 3 hours before the session starts.');
-          return;
-        }
+        // Time-window gate intentionally disabled during testing — sessions
+        // can be entered at any time as long as they are accepted.
         if (!cancelled) setSession(data);
       } catch (err) {
         if (!cancelled) setAccessError(err.message ?? 'Could not load session.');

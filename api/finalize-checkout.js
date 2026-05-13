@@ -5,7 +5,11 @@ import { applySecurityHeaders, jsonError, validateJsonBody } from './_lib/securi
 import {
   getValidAccessToken,
   createSchedulingLink,
+  ensureWebhookSubscription,
+  readCredentials,
+  writeCredentials,
 } from './_lib/calendly.js';
+import { getPublicOrigin } from './_lib/publicOrigin.js';
 import { z } from 'zod';
 
 const SESSION_TYPES = new Set(['career_advice', 'interview_prep', 'resume_review', 'networking']);
@@ -78,6 +82,37 @@ async function syncSubscription({ supabaseClient, meta, checkoutSession }) {
 
 async function mintCalendlyScheduling({ supabaseClient, mentor, mentorProfileId }) {
   const accessToken = await getValidAccessToken(mentorProfileId);
+
+  // Lazy webhook backfill: if this mentor connected Calendly before the
+  // signing key was configured, register the subscription now.
+  try {
+    const signingKey = process.env.CALENDLY_WEBHOOK_SIGNING_KEY;
+    if (signingKey) {
+      const creds = await readCredentials(mentorProfileId);
+      if (creds && !creds.webhook_subscription_uri) {
+        const subUri = await ensureWebhookSubscription({
+          accessToken,
+          webhookUrl: `${getPublicOrigin()}/api/calendly-webhook`,
+          signingKey,
+          organizationUri: creds.organization_uri,
+          userUri: creds.user_uri,
+        });
+        if (subUri) {
+          await writeCredentials(mentorProfileId, {
+            user_uri: creds.user_uri,
+            access_token: creds.access_token,
+            refresh_token: creds.refresh_token,
+            expires_at: creds.expires_at,
+            organization_uri: creds.organization_uri,
+            webhook_subscription_uri: subUri,
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[finalize-checkout] webhook backfill failed', { message: err?.message });
+  }
+
   const link = await createSchedulingLink(accessToken, mentor.calendly_event_type_uri);
   if (!link?.booking_url) throw new Error('Calendly did not return a scheduling URL');
   return link.booking_url;
@@ -119,7 +154,7 @@ async function syncPaidBooking({ supabaseClient, meta, checkoutSession, mintLink
         mentee_id: meta.userId,
         mentor_id: meta.mentorId,
         session_type: meta.sessionTypeKey,
-        status: 'pending_calendly',
+        status: 'pending',
         scheduled_date: null,
         message: fullMessage,
         mentee_name: sanitizeMenteeName(meta.menteeName),

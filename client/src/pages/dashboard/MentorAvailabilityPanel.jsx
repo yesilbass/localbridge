@@ -1,13 +1,104 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Check, ExternalLink, AlertTriangle, RefreshCw, Trash2, ArrowRight } from 'lucide-react';
+import { Check, ExternalLink, AlertTriangle, RefreshCw, Trash2, ArrowRight, Video, Copy } from 'lucide-react';
 import {
   getCalendlyAuthUrl,
   getCalendlyEventTypes,
   selectCalendlyEventType,
   disconnectCalendly,
 } from '../../api/calendly';
+import { getMyRoomSlug } from '../../api/meet';
 import supabase from '../../api/supabase';
+
+function MeetingLinkCard() {
+  const [slug, setSlug] = useState(null);
+  const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await getMyRoomSlug();
+      if (cancelled) return;
+      if (!res.ok) { setError(res.error); return; }
+      setSlug(res.slug);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const url = slug ? `${window.location.origin}/meet/${slug}` : '';
+
+  async function copy() {
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* clipboard blocked */ }
+  }
+
+  return (
+    <div
+      className="mt-6 rounded-2xl p-5"
+      style={{
+        backgroundColor: 'var(--bridge-surface-muted)',
+        boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+      }}
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className="flex h-9 w-9 flex-none items-center justify-center rounded-xl"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary)' }}
+        >
+          <Video className="h-4 w-4" aria-hidden />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p
+            className="text-[10px] font-black uppercase tracking-[0.18em]"
+            style={{ color: 'var(--bridge-text-muted)' }}
+          >
+            Your Bridge meeting link
+          </p>
+          <p className="mt-1 text-sm" style={{ color: 'var(--bridge-text-secondary)' }}>
+            Paste this into your Calendly event type's <span className="font-bold" style={{ color: 'var(--bridge-text)' }}>Location</span> field
+            (Custom URL). It will auto-appear in every booking confirmation email and calendar invite.
+          </p>
+          {error && (
+            <p className="mt-2 text-xs" style={{ color: 'var(--color-error)' }}>{error}</p>
+          )}
+          {url && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <code
+                className="flex-1 truncate rounded-lg px-3 py-2 text-[12px] font-mono"
+                style={{
+                  backgroundColor: 'var(--bridge-surface)',
+                  color: 'var(--bridge-text)',
+                  boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                }}
+              >
+                {url}
+              </code>
+              <button
+                type="button"
+                onClick={copy}
+                className="bridge-focus inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold"
+                style={{
+                  backgroundColor: copied ? 'var(--color-success)' : 'var(--color-primary)',
+                  color: 'var(--color-on-primary)',
+                }}
+              >
+                {copied ? <><Check className="h-3.5 w-3.5" /> Copied</> : <><Copy className="h-3.5 w-3.5" /> Copy link</>}
+              </button>
+            </div>
+          )}
+          <p className="mt-3 text-[11px]" style={{ color: 'var(--bridge-text-muted)' }}>
+            Mentees who book you will land here and wait for you to admit them — like a Zoom waiting room.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function CardShell({ children }) {
   return (
@@ -267,6 +358,8 @@ function StateConfigured({ profile, onChange, onDisconnect, busy }) {
           </a>
         </div>
       </div>
+
+      <MeetingLinkCard />
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <button

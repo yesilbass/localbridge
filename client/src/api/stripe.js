@@ -52,6 +52,18 @@ export async function createSubscriptionCheckout({ planName, userEmail }) {
   return { ok: true, clientSecret: data.clientSecret };
 }
 
+export async function confirmScheduledBooking({ stripeSessionId, eventUri, inviteeUri }) {
+  const auth = await getAuthHeaders();
+  const res = await fetch('/api/booking-confirm-scheduled', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...auth },
+    body: JSON.stringify({ stripeSessionId, eventUri, inviteeUri }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) return { ok: false, error: data.error || 'Could not confirm booking.' };
+  return { ok: true, data };
+}
+
 export async function finalizeCheckout(sessionId) {
   const auth = await getAuthHeaders();
   const res = await fetch('/api/finalize-checkout', {
