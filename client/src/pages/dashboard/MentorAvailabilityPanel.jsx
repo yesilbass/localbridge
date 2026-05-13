@@ -26,6 +26,25 @@ function MeetingLinkCard() {
     return () => { cancelled = true; };
   }, []);
 
+  // Auto-capture the mentor's timezone so we can show "their local time" to mentees.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+        if (!tz) return;
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || cancelled) return;
+        const { data: mp } = await supabase
+          .from('mentor_profiles').select('id, timezone')
+          .eq('user_id', user.id).maybeSingle();
+        if (cancelled || !mp || mp.timezone === tz) return;
+        await supabase.from('mentor_profiles').update({ timezone: tz }).eq('id', mp.id);
+      } catch { /* non-fatal — column may not exist yet pre-migration */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const url = slug ? `${window.location.origin}/meet/${slug}` : '';
 
   async function copy() {

@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useNextSession, useSavedMentors, useMentorRecommendations } from './dashboardHooks.js';
+import ReviewModal from '../../components/ReviewModal.jsx';
+import CancellationModal from '../../components/CancellationModal.jsx';
+import { getMyReviewedSessionIds } from '../../api/reviews';
+import { getViewerTimezone, formatInZone, zonesAreEquivalent, shortZoneCity } from '../../utils/timezone';
 
 // ─── countdown helpers ────────────────────────────────────────────────────────
 
@@ -65,31 +69,105 @@ function ShellCard({ live, children }) {
 function ScheduledState({ session }) {
   const navigate = useNavigate();
   const now = useLiveCountdown(session.scheduledAt);
-  const phase = useMemo(() => formatCountdown(session.scheduledAt, now), [session.scheduledAt, now]);
+  const hasTime = !!session.scheduledAt;
+  const phase = useMemo(
+    () => (hasTime ? formatCountdown(session.scheduledAt, now) : 'awaiting'),
+    [session.scheduledAt, now, hasTime],
+  );
   const live = phase === 'live';
-  const delta = new Date(session.scheduledAt).getTime() - now;
-  const joinable = delta <= 5 * 60 * 1000 && delta > -30 * 60 * 1000;
+  const delta = hasTime ? new Date(session.scheduledAt).getTime() - now : Infinity;
+  const joinable = hasTime && delta <= 5 * 60 * 1000 && delta > -30 * 60 * 1000;
+  const ended = phase === 'past';
 
-  const date = new Date(session.scheduledAt);
-  const dayLine = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-  const timeLine = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  const tz = date.toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop();
+  const [showReview, setShowReview] = useState(false);
+  const [showCancel, setShowCancel] = useState(false);
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+
+  // Hide "Add review" once the mentee has submitted one for this session.
+  useEffect(() => {
+    if (session.asMentor) return;
+    let cancelled = false;
+    getMyReviewedSessionIds().then(({ data }) => {
+      if (cancelled || !data) return;
+      const ids = data instanceof Set ? data : new Set(data);
+      if (ids.has(session.id)) setAlreadyReviewed(true);
+    });
+    return () => { cancelled = true; };
+  }, [session.id, session.asMentor]);
+
+  const status = String(session.status || '').toLowerCase();
+  const awaitingMentor = status === 'pending';
+  const timeTbd = !hasTime && !awaitingMentor && !ended;
+
+  const viewerTz = getViewerTimezone();
+  const otherTz = session.otherParty?.timezone || null;
+  const showDualTime = hasTime && otherTz && !zonesAreEquivalent(otherTz, viewerTz, new Date(session.scheduledAt));
+  const date = hasTime ? new Date(session.scheduledAt) : null;
+  const dayLine = date
+    ? new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: viewerTz }).format(date)
+    : 'Time TBD';
+  const timeLine = date
+    ? new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: viewerTz }).format(date)
+    : (awaitingMentor ? 'Mentor will confirm' : 'Calendly slot pending');
+  const tz = date
+    ? new Intl.DateTimeFormat('en-US', { timeZone: viewerTz, timeZoneName: 'short' })
+        .formatToParts(date).find((p) => p.type === 'timeZoneName')?.value || ''
+    : '';
+  const otherTimeLabel = showDualTime
+    ? formatInZone(date, { timeZone: otherTz, withDate: false, withTz: true })
+    : null;
 
   const eyebrow = session.asMentor ? 'Your next session is with' : 'Your next session with';
   const initials = (session.otherParty?.name || 'Mentor')
     .split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase()).join('');
 
+  // (status / awaitingMentor / timeTbd hoisted above so the time-display
+  // helpers can use them.)
+
   function onPrimary() {
     if (joinable && session.joinUrl) {
       navigate(session.joinUrl);
-    } else if (delta <= -30 * 60 * 1000) {
-      navigate(session.asMentor ? '/dashboard/sessions' : '/dashboard/sessions');
+      return;
+    }
+    if (timeTbd && session.rescheduleUrl) {
+      window.open(session.rescheduleUrl, '_blank', 'noreferrer');
+      return;
+    }
+    if (ended) {
+      if (session.asMentor) {
+        navigate('/dashboard/sessions');
+      } else if (!alreadyReviewed && session.mentorId) {
+        setShowReview(true);
+      }
     }
   }
 
   let primaryLabel = 'Join session';
   if (live) primaryLabel = 'Join now';
-  else if (delta <= -30 * 60 * 1000) primaryLabel = session.asMentor ? 'View notes' : 'Add review';
+  else if (ended) primaryLabel = session.asMentor ? 'View notes' : 'Add review';
+  else if (awaitingMentor) primaryLabel = session.asMentor ? 'Review request' : 'Awaiting mentor';
+  else if (timeTbd) primaryLabel = session.rescheduleUrl ? 'Confirm time' : 'Time TBD';
+
+  function onSecondaryDetailClick() {
+    navigate('/dashboard/sessions');
+  }
+
+  // Awaiting mentor → mentor's primary jumps to sessions tab to accept;
+  // mentee's primary is informational and disabled.
+  function onPrimaryAwaiting() {
+    if (session.asMentor) navigate('/dashboard/sessions');
+  }
+
+  // Decide which onClick is wired in.
+  const handlePrimary = awaitingMentor ? onPrimaryAwaiting : onPrimary;
+
+  const primaryDisabled = ended
+    ? (session.asMentor ? false : alreadyReviewed || !session.mentorId)
+    : awaitingMentor
+      ? !session.asMentor // mentee can't act, mentor goes to sessions
+      : timeTbd
+        ? true // informational only — no action available
+        : !joinable;
 
   return (
     <ShellCard live={live}>
@@ -146,8 +224,13 @@ function ScheduledState({ session }) {
             {dayLine}
           </span>
           <span className="truncate text-[15px] font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
-            {timeLine} {tz}
+            {timeLine} {tz} <span className="font-normal" style={{ color: 'var(--bridge-text-muted)' }}>(your time)</span>
           </span>
+          {otherTimeLabel && (
+            <span className="truncate text-[12.5px] tabular-nums" style={{ color: 'var(--bridge-text-secondary)' }}>
+              {otherTimeLabel} · {shortZoneCity(otherTz)} <span style={{ color: 'var(--bridge-text-muted)' }}>({session.asMentor ? 'mentee' : 'mentor'}'s time)</span>
+            </span>
+          )}
           {session.topic && (
             <>
               <span className="mt-3 text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--bridge-text-muted)' }}>
@@ -189,46 +272,103 @@ function ScheduledState({ session }) {
             className="font-display text-[28px] font-black leading-none tabular-nums tracking-[-0.025em] sm:text-[32px]"
             style={{ color: 'var(--bridge-text)' }}
           >
-            {live ? formatStartedAgo(session.scheduledAt, now) : phase === 'past' ? 'Recently ended' : phase}
+            {live
+              ? formatStartedAgo(session.scheduledAt, now)
+              : phase === 'past'
+                ? 'Recently ended'
+                : phase === 'awaiting'
+                  ? (awaitingMentor ? 'Awaiting mentor' : 'Time TBD')
+                  : phase}
           </span>
 
-          <button
-            type="button"
-            onClick={onPrimary}
-            disabled={!joinable && phase !== 'past'}
-            title={!joinable && phase !== 'past' ? 'Available 5 minutes before start' : undefined}
-            className={`bridge-focus rounded-xl px-5 py-2.5 text-[14px] font-bold transition-shadow ${
-              live ? 'bridge-cta-live' : ''
-            }`}
-            style={{
-              backgroundColor: 'var(--color-primary)',
-              color: '#fff',
-              opacity: !joinable && phase !== 'past' ? 0.55 : 1,
-              cursor: !joinable && phase !== 'past' ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {primaryLabel}
-          </button>
+          {ended && session.asMentor === false && alreadyReviewed ? (
+            <span
+              className="rounded-xl px-5 py-2.5 text-[14px] font-bold"
+              style={{
+                backgroundColor: 'var(--bridge-surface-muted)',
+                color: 'var(--bridge-text-muted)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              }}
+            >
+              Review submitted
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={handlePrimary}
+              disabled={primaryDisabled}
+              title={
+                awaitingMentor
+                  ? (session.asMentor ? 'Open the sessions tab to accept or decline' : 'Your mentor will confirm this session shortly.')
+                  : (!joinable && !ended ? 'Available 5 minutes before start' : undefined)
+              }
+              className={`bridge-focus rounded-xl px-5 py-2.5 text-[14px] font-bold transition-shadow ${
+                live ? 'bridge-cta-live' : ''
+              }`}
+              style={{
+                backgroundColor: 'var(--color-primary)',
+                color: '#fff',
+                opacity: primaryDisabled ? 0.55 : 1,
+                cursor: primaryDisabled ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {primaryLabel}
+            </button>
+          )}
 
-          <div className="mt-1 flex items-center gap-3 text-[12px]">
-            <Link
-              to="/dashboard/sessions"
-              className="bridge-focus rounded-md transition-colors"
-              style={{ color: 'var(--bridge-text-muted)' }}
-            >
-              Reschedule
-            </Link>
-            <span aria-hidden style={{ color: 'var(--bridge-text-faint)' }}>•</span>
-            <Link
-              to="/dashboard/sessions"
-              className="bridge-focus rounded-md transition-colors"
-              style={{ color: 'var(--bridge-text-muted)' }}
-            >
-              Cancel
-            </Link>
-          </div>
+          {/* Reschedule + Cancel are only meaningful on a *confirmed* session
+              with a real time. Hide them while pending or while the time has
+              not been written back from Calendly — exposing Calendly URLs in
+              those states leads mentees into accidental rebooking. */}
+          {!ended && !awaitingMentor && !timeTbd && (
+            <div className="mt-1 flex items-center gap-3 text-[12px]">
+              {session.rescheduleUrl ? (
+                <a
+                  href={session.rescheduleUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bridge-focus rounded-md transition-colors hover:text-[var(--bridge-text)]"
+                  style={{ color: 'var(--bridge-text-muted)' }}
+                >
+                  Reschedule
+                </a>
+              ) : null}
+              {session.rescheduleUrl && !session.asMentor ? (
+                <span aria-hidden style={{ color: 'var(--bridge-text-faint)' }}>•</span>
+              ) : null}
+              {!session.asMentor ? (
+                <button
+                  type="button"
+                  onClick={() => setShowCancel(true)}
+                  className="bridge-focus rounded-md transition-colors hover:text-[var(--bridge-text)]"
+                  style={{ color: 'var(--bridge-text-muted)' }}
+                >
+                  Cancel
+                </button>
+              ) : null}
+            </div>
+          )}
         </div>
       </div>
+
+      {showReview && session.mentorId && (
+        <ReviewModal
+          sessionId={session.id}
+          mentorId={session.mentorId}
+          mentorName={session.otherParty?.name || 'your mentor'}
+          onClose={() => setShowReview(false)}
+          onSubmitted={() => { setAlreadyReviewed(true); setShowReview(false); }}
+        />
+      )}
+
+      {showCancel && (
+        <CancellationModal
+          session={session.raw}
+          isMentor={!!session.asMentor}
+          onClose={() => setShowCancel(false)}
+          onSubmitted={() => setShowCancel(false)}
+        />
+      )}
 
       {/* live-pulse keyframe */}
       <style>{`

@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import supabase from "../api/supabase";
+import supabase, { readPersistedUser } from "../api/supabase";
 import { ensureMentorProfileForUser } from "../api/mentorOnboarding";
 import { isMentorAccount } from "../utils/accountRole";
 
@@ -15,8 +15,10 @@ async function syncMentorProfile(user) {
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Hydrate synchronously from localStorage so the very first render already
+  // has the right user — no full-page spinner flicker on reload or tab focus.
+  const [user, setUser] = useState(() => readPersistedUser());
+  const [loading, setLoading] = useState(() => readPersistedUser() === null);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,16 +27,20 @@ export function AuthProvider({ children }) {
       const { data: { session } } = await supabase.auth.getSession();
       if (cancelled) return;
       const next = session?.user ?? null;
-      setUser(next);
-      if (next) await syncMentorProfile(next);
+      setUser((prev) => {
+        // Avoid a re-render if the user object is identical.
+        if (prev?.id === next?.id) return prev;
+        return next;
+      });
+      if (next) void syncMentorProfile(next);
       if (!cancelled) setLoading(false);
     })();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const next = session?.user ?? null;
-      setUser(next);
+      setUser((prev) => (prev?.id === next?.id ? prev : next));
       if (next && (event === "SIGNED_IN" || event === "USER_UPDATED")) {
-        await syncMentorProfile(next);
+        void syncMentorProfile(next);
       }
     });
 

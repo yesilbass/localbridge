@@ -9,10 +9,27 @@ import ReviewModal from '../../components/ReviewModal.jsx';
 import { getMyReviewedSessionIds } from '../../api/reviews';
 import supabase from '../../api/supabase';
 
-function formatDateTime(iso) {
-  if (!iso) return 'Not scheduled';
-  const d = new Date(iso);
-  return `${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} · ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+function formatDateTime(iso, status) {
+  if (iso) {
+    const d = new Date(iso);
+    const date = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    const tz   = d.toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop();
+    return `${date} · ${time} ${tz}`;
+  }
+  if (status === 'pending')   return 'Time TBD · awaiting mentor';
+  if (status === 'accepted')  return 'Time syncing from Calendly';
+  if (status === 'cancelled') return 'Cancelled — no time';
+  if (status === 'declined')  return 'Declined — no time';
+  return 'Time TBD';
+}
+
+// Strip Bridge's internal markers from `session.message` so the user never
+// sees `[stripe_session:cs_test_...]` or `[calendly:free_booking]`.
+function cleanMessage(raw) {
+  if (!raw) return null;
+  const cleaned = String(raw).replace(/\[(?:stripe_session|calendly)[^\]]*\]\s*/gi, '').trim();
+  return cleaned || null;
 }
 
 const STATUS_STYLE = {
@@ -88,21 +105,24 @@ function SessionCard({ session, isMentor, mentor, onAccept, onDecline, onCancel,
             className="mt-1 inline-flex items-center gap-1 text-[12px] tabular-nums"
             style={{ color: 'var(--bridge-text-secondary)' }}
           >
-            <Clock className="h-3.5 w-3.5" aria-hidden /> {formatDateTime(session.scheduled_date)}
+            <Clock className="h-3.5 w-3.5" aria-hidden /> {formatDateTime(session.scheduled_date, status)}
           </p>
-          {session.message && (
-            <p
-              className="mt-2 line-clamp-2 text-[12px]"
-              style={{ color: 'var(--bridge-text-secondary)' }}
-            >
-              “{session.message}”
-            </p>
-          )}
+          {(() => {
+            const msg = cleanMessage(session.message);
+            return msg ? (
+              <p
+                className="mt-2 line-clamp-2 text-[12px]"
+                style={{ color: 'var(--bridge-text-secondary)' }}
+              >
+                “{msg}”
+              </p>
+            ) : null;
+          })()}
         </div>
       </div>
 
       <div className="flex shrink-0 flex-wrap items-center gap-2">
-        {session.video_room_url && (status === 'accepted' || status === 'completed') && (
+        {session.video_room_url && status === 'accepted' && (
           <Link
             to={typeof session.video_room_url === 'string' && session.video_room_url.startsWith('/') ? session.video_room_url : `/session/${session.id}/video`}
             className="bridge-focus inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-bold"

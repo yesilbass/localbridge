@@ -245,10 +245,14 @@ export default function DashboardPage() {
   const hasBothRoles = false;
   const { active: activeRole, set: setActiveRole } = useActiveRole(role || 'mentee');
 
-  if (isLoading || checking) {
+  // Show the full-page spinner only when we genuinely have no idea who the
+  // user is (cold visit, no cached session). If `user` is already hydrated
+  // from localStorage, render the dashboard shell immediately and let the
+  // mentor onboarding check resolve in the background.
+  if (!user && isLoading) {
     return <LoadingSpinner label="Loading…" className="min-h-screen" size="lg" />;
   }
-  if (!user) return <Navigate to="/login" replace />;
+  if (!isLoading && !user) return <Navigate to="/login" replace />;
   if (role === 'mentor' && !onboardingComplete) return <Navigate to="/onboarding" replace />;
 
   return (

@@ -1,21 +1,49 @@
 import { Link } from 'react-router-dom';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight, Video, ExternalLink } from 'lucide-react';
 import { useUpcomingSessions } from './dashboardHooks.js';
 import EmptyState from './EmptyState.jsx';
 
+const SESSION_TYPE_LABEL = {
+  career_advice: 'Career advice',
+  mock_interview: 'Mock interview',
+  resume_review: 'Resume review',
+  technical: 'Technical',
+  general: 'Mentorship',
+};
+
+const STATUS_META = {
+  pending:  { label: 'Awaiting mentor', color: 'var(--color-warning)' },
+  accepted: { label: 'Confirmed',       color: 'var(--color-success)' },
+};
+
+function StatusChip({ status }) {
+  const meta = STATUS_META[status] || STATUS_META.pending;
+  return (
+    <span
+      className="inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em]"
+      style={{
+        backgroundColor: `color-mix(in srgb, ${meta.color} 12%, transparent)`,
+        color: meta.color,
+      }}
+    >
+      {meta.label}
+    </span>
+  );
+}
+
 function formatCountdownChip(scheduled) {
-  if (!scheduled) return '';
+  if (!scheduled) return null;
   const now = Date.now();
   const t = new Date(scheduled).getTime();
   const delta = t - now;
-  if (delta <= 0) return 'Now';
+  if (delta <= 0 && delta > -60 * 60 * 1000) return 'Now';
   const mins = Math.floor(delta / 60_000);
   if (mins < 60) return `in ${mins}m`;
   const hours = Math.floor(mins / 60);
   if (hours < 24) {
     const today = new Date();
     const same = new Date(scheduled).toDateString() === today.toDateString();
-    if (same) return `Today, ${new Date(scheduled).toLocaleTimeString('en-US', { hour: 'numeric' })}`;
+    if (same) return 'Today';
     return `in ${hours}h`;
   }
   const days = Math.floor(hours / 24);
@@ -23,46 +51,100 @@ function formatCountdownChip(scheduled) {
   return `in ${days}d`;
 }
 
+function getInitials(name = '') {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((s) => s[0]?.toUpperCase()).join('') || '?';
+}
+
 function Row({ session, isFirst }) {
-  const initials = (session.mentee_name || '?').split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase()).join('');
+  const status = String(session.status || '').toLowerCase();
+  const counterpartName = session.mentee_name || 'Mentor';
+  const initials = getInitials(counterpartName);
   const date = session.scheduled_date ? new Date(session.scheduled_date) : null;
+  const dayLabel  = date ? date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'Time TBD';
+  const timeLabel = date ? date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'Mentee picks slot';
+  const tz        = date ? date.toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop() : '';
+  const typeLabel = SESSION_TYPE_LABEL[session.session_type] ?? null;
+  const countdown = formatCountdownChip(session.scheduled_date);
+
+  const canJoin = status === 'accepted'
+    && date
+    && date.getTime() - Date.now() <= 5 * 60 * 1000
+    && date.getTime() - Date.now() > -30 * 60 * 1000
+    && session.video_room_url;
+
+  const joinHref = typeof session.video_room_url === 'string' && session.video_room_url.startsWith('/')
+    ? session.video_room_url
+    : (session.video_room_url ? `/session/${session.id}/video` : null);
+
   return (
     <li
-      className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-[var(--bridge-surface-muted)]"
+      className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 transition-colors hover:bg-[var(--bridge-surface-muted)]"
       style={{ borderTop: isFirst ? 'none' : '1px solid var(--bridge-border)' }}
     >
       <div
         aria-hidden
-        className="bridge-photo grid h-10 w-10 shrink-0 place-items-center rounded-full text-[11px] font-black"
+        className="bridge-photo grid h-11 w-11 shrink-0 place-items-center rounded-full text-[12px] font-black"
         style={{ color: 'var(--bridge-text-secondary)' }}
       >
         {initials}
       </div>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span className="text-[14px] font-bold" style={{ color: 'var(--bridge-text)' }}>
-          {session.mentee_name}
-        </span>
-        <span className="truncate text-[12px]" style={{ color: 'var(--bridge-text-muted)' }}>
-          {[date?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), date?.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })].filter(Boolean).join(' · ')}
+
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="truncate text-[14px] font-bold" style={{ color: 'var(--bridge-text)' }}>
+            {counterpartName}
+          </span>
+          {typeLabel && (
+            <span
+              className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em]"
+              style={{
+                backgroundColor: 'var(--bridge-surface-muted)',
+                color: 'var(--bridge-text-secondary)',
+              }}
+            >
+              {typeLabel}
+            </span>
+          )}
+          <StatusChip status={status} />
+        </div>
+        <span className="truncate text-[12px] tabular-nums" style={{ color: 'var(--bridge-text-secondary)' }}>
+          {date ? `${dayLabel} · ${timeLabel} ${tz}` : dayLabel}
         </span>
       </div>
-      <span
-        className="shrink-0 text-[11px] font-bold tabular-nums"
-        style={{ color: 'var(--bridge-text-secondary)' }}
-      >
-        {formatCountdownChip(session.scheduled_date)}
-      </span>
-      <Link
-        to={
-          typeof session.video_room_url === 'string' && session.video_room_url.startsWith('/')
-            ? session.video_room_url
-            : (session.video_room_url ? `/session/${session.id}/video` : '/dashboard/sessions')
-        }
-        className="bridge-focus shrink-0 rounded-lg px-3 py-1.5 text-[12px] font-bold"
-        style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
-      >
-        Open
-      </Link>
+
+      {countdown && (
+        <span
+          className="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums"
+          style={{
+            backgroundColor: 'var(--bridge-surface-muted)',
+            color: 'var(--bridge-text-secondary)',
+          }}
+        >
+          {countdown}
+        </span>
+      )}
+
+      {canJoin && joinHref ? (
+        <Link
+          to={joinHref}
+          className="bridge-focus inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-bold"
+          style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
+        >
+          <Video className="h-3.5 w-3.5" aria-hidden /> Join
+        </Link>
+      ) : (
+        <Link
+          to="/dashboard/sessions"
+          className="bridge-focus inline-flex shrink-0 items-center gap-1 rounded-lg px-3 py-1.5 text-[12px] font-bold"
+          style={{
+            backgroundColor: 'var(--bridge-surface-muted)',
+            color: 'var(--bridge-text-secondary)',
+            boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+          }}
+        >
+          Details <ExternalLink className="h-3 w-3" aria-hidden />
+        </Link>
+      )}
     </li>
   );
 }

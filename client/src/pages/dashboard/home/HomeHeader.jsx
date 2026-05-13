@@ -79,13 +79,19 @@ export default function HomeHeader({ activeRole }) {
   const greeting = getGreeting(mountDate.getHours());
 
   let subline;
-  if (session) {
+  // Only compute live/upcoming subline when the session has an actual scheduled
+  // time. Otherwise `new Date(null)` resolves to the Unix epoch and the math
+  // becomes nonsense — the famous "1969" bug.
+  if (session?.scheduledAt) {
     const delta = new Date(session.scheduledAt).getTime() - now;
     if (delta <= 0 && delta > -30 * 60 * 1000) {
       subline = 'You have a session live right now.';
     } else if (delta > 0 && delta <= 60 * 60 * 1000) {
       subline = `Your next session starts ${formatCountdown(session.scheduledAt, now)}.`;
     }
+  } else if (session && !isMentor) {
+    // Mentee booked but Calendly slot not yet picked.
+    subline = 'Your booking is waiting on a time. Check your email to schedule.';
   }
   if (!subline) {
     if (isMentor && !isAvailable) {

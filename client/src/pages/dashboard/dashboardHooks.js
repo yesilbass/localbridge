@@ -18,18 +18,59 @@ import { useAuth } from '../../context/useAuth.js';
 import { isMentorAccount } from '../../utils/accountRole';
 import { getMyFavorites } from '../../api/favorites';
 import { updateSessionStatus, acceptSession } from '../../api/sessions';
+import { resyncCalendlySession } from '../../api/stripe';
+
+// Sessions whose Calendly time we already tried to resync this page-load —
+// avoids hammering the API in a loop if the mentor's token is genuinely dead.
+const _calendlyResyncAttempted = new Set();
 
 const SIDEBAR_KEY = 'bridge.dashboard.sidebar';
 const ROLE_TAB_KEY = 'bridge.dashboard.activeRole';
 
-// Each subscription instance needs a unique channel name. Two components calling
-// the same hook (or React 18+ Strict Mode double-mounting) would otherwise collide
-// on `supabase.channel(name)` which returns the same instance and refuses
-// `.on()` after `.subscribe()` has been called.
+// Per-process counter for unique channel names — Strict Mode double-mounts
+// and re-subscribes would otherwise collide on `supabase.channel(name)`.
 let _channelSeq = 0;
-function nextChannelId(prefix, userId) {
-  _channelSeq += 1;
-  return `${prefix}:${userId}:${_channelSeq}`;
+
+// ─── Shared realtime fan-out ──────────────────────────────────────────────────
+// Previously every hook opened its own `postgres_changes` channel — 5+ open
+// websockets just for the dashboard home, all listening for the same events.
+// This module-level singleton consolidates them into one channel per (user,
+// table) pair and lets every hook subscribe via a tiny callback registry.
+const _realtimeBuses = new Map(); // key: `${userId}:${table}` → { channel, listeners:Set, lastFired }
+
+function getRealtimeBus(userId, table) {
+  if (!userId || !table) return null;
+  const key = `${userId}:${table}`;
+  let bus = _realtimeBuses.get(key);
+  if (bus) return bus;
+  bus = { channel: null, listeners: new Set(), lastFired: 0, debounceTimer: null };
+  bus.channel = supabase
+    .channel(`bridge-rt:${userId}:${table}:${++_channelSeq}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
+      // Coalesce bursts (e.g. a status update + audit row) into a single
+      // notification per 250ms window so listeners don't refetch 5 times.
+      if (bus.debounceTimer) clearTimeout(bus.debounceTimer);
+      bus.debounceTimer = setTimeout(() => {
+        bus.lastFired = Date.now();
+        bus.listeners.forEach((cb) => { try { cb(payload); } catch { /* ignore */ } });
+      }, 250);
+    })
+    .subscribe();
+  _realtimeBuses.set(key, bus);
+  return bus;
+}
+
+function subscribeRealtime(userId, table, cb) {
+  const bus = getRealtimeBus(userId, table);
+  if (!bus) return () => {};
+  bus.listeners.add(cb);
+  return () => {
+    bus.listeners.delete(cb);
+    if (bus.listeners.size === 0) {
+      try { supabase.removeChannel(bus.channel); } catch { /* ignore */ }
+      _realtimeBuses.delete(`${userId}:${table}`);
+    }
+  };
 }
 
 // ─── role ──────────────────────────────────────────────────────────────────────
@@ -115,11 +156,22 @@ function toNextSession(row, otherParty, asMentor) {
     scheduledAt: row.scheduled_date,
     status: row.status,
     sessionType: row.session_type,
-    topic: row.message ?? null,
+    topic: (() => {
+      const m = row.message ?? null;
+      if (!m) return null;
+      // Strip internal markers like "[stripe_session:cs_test_...]" or "[calendly:...]".
+      const cleaned = String(m).replace(/\[(?:stripe_session|calendly)[^\]]*\]\s*/gi, '').trim();
+      return cleaned || null;
+    })(),
     prepNotes: row.prep_notes ?? null,
     joinUrl: typeof row.video_room_url === 'string' && row.video_room_url.startsWith('/')
       ? row.video_room_url
       : (row.video_room_url ? `/session/${row.id}/video` : null),
+    rescheduleUrl: row.calendly_reschedule_url ?? null,
+    cancelUrl: row.calendly_cancel_url ?? null,
+    mentorId: row.mentor_id ?? null,
+    menteeId: row.mentee_id ?? null,
+    raw: row,
     asMentor,
     otherParty,
   };
@@ -141,6 +193,13 @@ export function useNextSession() {
       let row = null;
       let other = null;
 
+      // Pick the next session, including ones whose scheduled_date is still null
+      // (just booked, mentee hasn't picked the Calendly slot yet, or webhook missed).
+      const pickFirst = (rows) => {
+        const cutoff = Date.now() - 30 * 60 * 1000;
+        return (rows || []).find((r) => !r.scheduled_date || new Date(r.scheduled_date).getTime() >= cutoff) || null;
+      };
+
       if (isMentor) {
         const mpId = await fetchMentorProfileId(user.id);
         if (!mpId) { if (v === versionRef.current) setState({ session: null, isLoading: false, isError: false }); return; }
@@ -149,14 +208,13 @@ export function useNextSession() {
           .select('*')
           .eq('mentor_id', mpId)
           .in('status', ['pending', 'accepted'])
-          .gte('scheduled_date', nowIso)
-          .order('scheduled_date', { ascending: true })
-          .limit(1)
-          .maybeSingle();
-        row = data;
+          .order('scheduled_date', { ascending: true, nullsFirst: false })
+          .limit(10);
+        row = pickFirst(data);
         if (row) {
-          const names = await fetchUserNamesMap([row.mentee_id]);
-          other = { id: row.mentee_id, name: names[row.mentee_id] || row.mentee_name || 'Mentee', title: 'Mentee', company: '', avatarUrl: null };
+          const names = await fetchUserNamesMap([row.mentee_id].filter(Boolean));
+          // Mentee timezone isn't stored — leave null. Mentor sees their own local time.
+          other = { id: row.mentee_id, name: names[row.mentee_id] || row.mentee_name || 'Mentee', title: 'Mentee', company: '', avatarUrl: null, timezone: null };
         }
       } else {
         const { data } = await supabase
@@ -164,19 +222,25 @@ export function useNextSession() {
           .select('*')
           .eq('mentee_id', user.id)
           .in('status', ['pending', 'accepted'])
-          .gte('scheduled_date', nowIso)
-          .order('scheduled_date', { ascending: true })
-          .limit(1)
-          .maybeSingle();
-        row = data;
+          .order('scheduled_date', { ascending: true, nullsFirst: false })
+          .limit(10);
+        row = pickFirst(data);
         if (row?.mentor_id) {
           const { data: mp } = await supabase
-            .from('mentor_profiles').select('id, name, title, company, image_url')
+            .from('mentor_profiles').select('id, name, title, company, image_url, timezone')
             .eq('id', row.mentor_id).maybeSingle();
-          other = mp ? { id: mp.id, name: mp.name, title: mp.title, company: mp.company, avatarUrl: mp.image_url } : null;
+          other = mp ? { id: mp.id, name: mp.name, title: mp.title, company: mp.company, avatarUrl: mp.image_url, timezone: mp.timezone || null } : null;
         }
       }
       if (v === versionRef.current) setState({ session: toNextSession(row, other, isMentor), isLoading: false, isError: false });
+
+      // Self-heal: if the row references a Calendly event but `scheduled_date`
+      // never got written (token expired between booking and now), retry the
+      // sync once. Realtime will refresh the UI when the row updates.
+      if (row && !isMentor && row.calendly_event_uri && !row.scheduled_date && !_calendlyResyncAttempted.has(row.id)) {
+        _calendlyResyncAttempted.add(row.id);
+        void resyncCalendlySession(row.id).catch(() => { /* non-fatal */ });
+      }
     } catch (e) {
       console.error('useNextSession failed:', e);
       if (v === versionRef.current) setState({ session: null, isLoading: false, isError: true });
@@ -185,20 +249,14 @@ export function useNextSession() {
 
   useEffect(() => { load(); }, [load]);
 
-  // realtime: any change to sessions row affecting this user → re-fetch.
+  // realtime: shared bus reloads on any sessions change for this user.
   useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel(nextChannelId('dashboard-next-session', user.id))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, (payload) => {
-        const row = payload.new ?? payload.old;
-        if (!row) return;
-        if (row.mentee_id === user.id) load();
-        // mentor case: filter by mentor_profile_id is async; cheap to just reload.
-        if (isMentor) load();
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    if (!user) return undefined;
+    return subscribeRealtime(user.id, 'sessions', (payload) => {
+      const row = payload?.new ?? payload?.old;
+      if (!row) { load(); return; }
+      if (row.mentee_id === user.id || isMentor) load();
+    });
   }, [user, isMentor, load]);
 
   return { ...state, refetch: load };
@@ -236,7 +294,8 @@ export function useDashboardActivity({ limit = 12 } = {}) {
       const sessionsQuery = isMentor && mpId
         ? supabase.from('sessions').select('id, status, scheduled_date, created_at, mentor_id, mentee_id, message').eq('mentor_id', mpId).order('created_at', { ascending: false }).limit(20)
         : supabase.from('sessions').select('id, status, scheduled_date, created_at, mentor_id, mentee_id, message').eq('mentee_id', user.id).order('created_at', { ascending: false }).limit(20);
-      const { data: sessions = [] } = await sessionsQuery;
+      const { data: sessionsRaw } = await sessionsQuery;
+      const sessions = Array.isArray(sessionsRaw) ? sessionsRaw : [];
 
       // Look up other-party names lazily.
       let otherNameById = {};
@@ -245,7 +304,8 @@ export function useDashboardActivity({ limit = 12 } = {}) {
       } else if (!isMentor && sessions.length) {
         const ids = [...new Set(sessions.map((s) => s.mentor_id).filter(Boolean))];
         if (ids.length) {
-          const { data: mps = [] } = await supabase.from('mentor_profiles').select('id, name').in('id', ids);
+          const { data: mpsRaw } = await supabase.from('mentor_profiles').select('id, name').in('id', ids);
+          const mps = Array.isArray(mpsRaw) ? mpsRaw : [];
           otherNameById = Object.fromEntries(mps.map((m) => [m.id, m.name]));
         }
       }
@@ -263,10 +323,14 @@ export function useDashboardActivity({ limit = 12 } = {}) {
           payload: { sessionId: s.id },
         });
         if (s.status === 'completed') {
+          // Prefer `scheduled_date` (when the session actually happened); only
+          // fall back to created_at if no schedule exists. Don't fake a creation
+          // time as a completion time.
+          const completedAt = s.scheduled_date || s.updated_at || s.created_at;
           all.push({
             id: `s-done-${s.id}`,
             type: ACTIVITY_TYPES.session_completed,
-            timestamp: s.scheduled_date ?? s.created_at,
+            timestamp: completedAt,
             actorName, actorId, actorAvatarUrl: null,
             payload: { sessionId: s.id },
           });
@@ -275,9 +339,10 @@ export function useDashboardActivity({ limit = 12 } = {}) {
 
       // Reviews — received (mentor) or left (mentee).
       if (isMentor && mpId) {
-        const { data: revs = [] } = await supabase
+        const { data: revsRaw } = await supabase
           .from('reviews').select('id, rating, comment, created_at, reviewer_id, session_id')
           .eq('mentor_id', mpId).order('created_at', { ascending: false }).limit(10);
+        const revs = Array.isArray(revsRaw) ? revsRaw : [];
         const reviewerNames = await fetchUserNamesMap(revs.map((r) => r.reviewer_id));
         revs.forEach((r) => all.push({
           id: `rcv-${r.id}`,
@@ -288,12 +353,14 @@ export function useDashboardActivity({ limit = 12 } = {}) {
           payload: { rating: r.rating, comment: r.comment },
         }));
       } else {
-        const { data: revs = [] } = await supabase
+        const { data: revsRaw } = await supabase
           .from('reviews').select('id, rating, mentor_id, created_at')
           .eq('reviewer_id', user.id).order('created_at', { ascending: false }).limit(10);
+        const revs = Array.isArray(revsRaw) ? revsRaw : [];
         if (revs.length) {
           const ids = revs.map((r) => r.mentor_id);
-          const { data: mps = [] } = await supabase.from('mentor_profiles').select('id, name').in('id', ids);
+          const { data: mpsRaw } = await supabase.from('mentor_profiles').select('id, name').in('id', ids);
+          const mps = Array.isArray(mpsRaw) ? mpsRaw : [];
           const nameById = Object.fromEntries(mps.map((m) => [m.id, m.name]));
           revs.forEach((r) => all.push({
             id: `lft-${r.id}`,
@@ -308,12 +375,14 @@ export function useDashboardActivity({ limit = 12 } = {}) {
 
       // Favorites — saves (mentee only).
       if (!isMentor) {
-        const { data: favs = [] } = await supabase
+        const { data: favsRaw } = await supabase
           .from('favorites').select('id, mentor_id, created_at')
           .eq('user_id', user.id).order('created_at', { ascending: false }).limit(10);
+        const favs = Array.isArray(favsRaw) ? favsRaw : [];
         if (favs.length) {
           const ids = favs.map((f) => f.mentor_id);
-          const { data: mps = [] } = await supabase.from('mentor_profiles').select('id, name').in('id', ids);
+          const { data: mpsRaw } = await supabase.from('mentor_profiles').select('id, name').in('id', ids);
+          const mps = Array.isArray(mpsRaw) ? mpsRaw : [];
           const nameById = Object.fromEntries(mps.map((m) => [m.id, m.name]));
           favs.forEach((f) => all.push({
             id: `sav-${f.id}`,
@@ -338,16 +407,15 @@ export function useDashboardActivity({ limit = 12 } = {}) {
 
   useEffect(() => { load(); }, [load]);
 
-  // realtime: prepend on new INSERT in sessions/reviews/favorites for this user.
+  // realtime: piggy-back on the shared sessions/reviews/favorites buses.
   useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel(nextChannelId('dashboard-activity', user.id))
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sessions' }, () => load())
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, () => load())
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'favorites' }, () => load())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    if (!user) return undefined;
+    const off = [
+      subscribeRealtime(user.id, 'sessions',  () => load()),
+      subscribeRealtime(user.id, 'reviews',   () => load()),
+      subscribeRealtime(user.id, 'favorites', () => load()),
+    ];
+    return () => off.forEach((fn) => fn?.());
   }, [user, load]);
 
   const visible = items.slice(0, shown);
@@ -368,25 +436,22 @@ export function useSavedMentors({ limit = 6 } = {}) {
     if (!user) { setMentors([]); setLoading(false); return; }
     setLoading(true);
     try {
-      const { data: ids = [] } = await getMyFavorites();
+      const { data: idsRaw } = await getMyFavorites();
+      const ids = Array.isArray(idsRaw) ? idsRaw : [];
       if (!ids.length) { setMentors([]); return; }
-      const { data: rows = [] } = await supabase
+      const { data: rowsRaw } = await supabase
         .from('mentor_profiles')
         .select('id, name, title, company, image_url, rating, session_rate, total_sessions')
         .in('id', ids);
-      setMentors(rows);
+      setMentors(Array.isArray(rowsRaw) ? rowsRaw : []);
     } finally { setLoading(false); }
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel(nextChannelId('dashboard-favs', user.id))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'favorites' }, () => load())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    if (!user) return undefined;
+    return subscribeRealtime(user.id, 'favorites', () => load());
   }, [user, load]);
 
   const total = mentors.length;
@@ -439,18 +504,33 @@ export function useMentorRecommendations({ limit = 3 } = {}) {
         };
       } catch { /* ignore */ }
 
-      // Exclude already-saved.
-      const { data: favIds = [] } = await getMyFavorites();
-      const exclude = new Set(favIds);
+      // Exclude already-saved + the user's own mentor profile (mentors who
+      // also use the mentee experience shouldn't see themselves).
+      const { data: favIdsRaw } = await getMyFavorites();
+      const favIds = Array.isArray(favIdsRaw) ? favIdsRaw : [];
+      const exclude = new Set(favIds.map((id) => String(id).toLowerCase()));
+      try {
+        const ownMentorId = await fetchMentorProfileId(user.id);
+        if (ownMentorId) exclude.add(String(ownMentorId).toLowerCase());
+      } catch { /* non-fatal */ }
 
-      const { data: rows = [] } = await supabase
+      // Pull a generous slice ranked by rating; filter out unavailable mentors
+      // and legacy onboarding=false rows on the client. PostgREST chokes on
+      // some combinations of .or() + .neq() depending on column types, so we
+      // keep the server query simple and let JS do the trimming.
+      const { data: rowsRaw } = await supabase
         .from('mentor_profiles')
-        .select('id, name, title, company, industry, image_url, rating, session_rate, total_sessions, years_experience, expertise')
-        .or('onboarding_complete.is.null,onboarding_complete.eq.true')
+        .select('id, name, title, company, industry, image_url, rating, session_rate, total_sessions, years_experience, expertise, available, onboarding_complete')
         .order('rating', { ascending: false })
-        .limit(20);
+        .limit(40);
+      const rows = Array.isArray(rowsRaw) ? rowsRaw : [];
 
-      const filtered = rows.filter((r) => !exclude.has(String(r.id).toLowerCase()));
+      const filtered = rows.filter((r) => {
+        if (exclude.has(String(r.id).toLowerCase())) return false;
+        if (r.available === false) return false;
+        if (r.onboarding_complete === false) return false;
+        return true;
+      });
       const ranked = filtered.sort((a, b) => {
         const aMatch = ctx.targetIndustry && a.industry?.toLowerCase() === ctx.targetIndustry.toLowerCase() ? 1 : 0;
         const bMatch = ctx.targetIndustry && b.industry?.toLowerCase() === ctx.targetIndustry.toLowerCase() ? 1 : 0;
@@ -484,25 +564,26 @@ export function usePastSessions({ limit = 5 } = {}) {
       if (isMentor) {
         const mpId = await fetchMentorProfileId(user.id);
         if (!mpId) { setSessions([]); return; }
-        const { data = [] } = await supabase
+        const { data: dataRaw } = await supabase
           .from('sessions').select('*')
           .eq('mentor_id', mpId)
           .or(`status.eq.completed,scheduled_date.lt.${nowIso}`)
           .order('scheduled_date', { ascending: false }).limit(limit + 5);
-        rows = data;
+        rows = Array.isArray(dataRaw) ? dataRaw : [];
       } else {
-        const { data = [] } = await supabase
+        const { data: dataRaw } = await supabase
           .from('sessions').select('*')
           .eq('mentee_id', user.id)
           .or(`status.eq.completed,scheduled_date.lt.${nowIso}`)
           .order('scheduled_date', { ascending: false }).limit(limit + 5);
-        rows = data;
+        rows = Array.isArray(dataRaw) ? dataRaw : [];
       }
       // Enrich with mentor profile for mentee view.
       if (!isMentor && rows.length) {
         const ids = [...new Set(rows.map((r) => r.mentor_id).filter(Boolean))];
-        const { data: mps = [] } = await supabase.from('mentor_profiles')
+        const { data: mpsRaw } = await supabase.from('mentor_profiles')
           .select('id, name, title, company, image_url').in('id', ids);
+        const mps = Array.isArray(mpsRaw) ? mpsRaw : [];
         const byId = Object.fromEntries(mps.map((m) => [m.id, m]));
         rows = rows.map((r) => ({ ...r, _mentor: byId[r.mentor_id] }));
       }
@@ -511,6 +592,13 @@ export function usePastSessions({ limit = 5 } = {}) {
   }, [user, isMentor, limit]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Refresh past sessions when a session changes (e.g. status flips to
+  // completed during/after a video call).
+  useEffect(() => {
+    if (!user) return undefined;
+    return subscribeRealtime(user.id, 'sessions', () => load());
+  }, [user, load]);
 
   return {
     sessions: sessions.slice(0, limit),
@@ -539,38 +627,43 @@ export function useEarningsSummary() {
       if (!mpId) { setLoading(false); return; }
       const { data: profile } = await supabase
         .from('mentor_profiles').select('session_rate').eq('id', mpId).maybeSingle();
-      const rate = profile?.session_rate ?? 100;
+      // Real rate or zero — never silently fabricate a $100 default.
+      const rate = Number(profile?.session_rate) > 0 ? Number(profile.session_rate) : 0;
 
-      const { data: sessions = [] } = await supabase
+      const { data: sessionsRaw } = await supabase
         .from('sessions').select('id, status, scheduled_date, created_at')
         .eq('mentor_id', mpId);
+      const sessions = Array.isArray(sessionsRaw) ? sessionsRaw : [];
 
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const startOfLast = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const lifetimeSessions = sessions.filter((s) => s.status === 'completed' || s.status === 'accepted');
+      const startOfLast  = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const startOfNext  = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+      // Earned = actually completed sessions only. `accepted` is future revenue.
+      const earnedSessions  = sessions.filter((s) => s.status === 'completed');
+      const pendingSessions = sessions.filter((s) => s.status === 'accepted');
 
       const inRange = (s, start, end) => {
         const t = new Date(s.scheduled_date ?? s.created_at);
         return t >= start && t < end;
       };
 
-      const thisMonthCount = lifetimeSessions.filter((s) => inRange(s, startOfMonth, new Date(now.getFullYear(), now.getMonth() + 1, 1))).length;
-      const lastMonthCount = lifetimeSessions.filter((s) => inRange(s, startOfLast, startOfMonth)).length;
-      const lifetimeCount = lifetimeSessions.length;
+      const thisMonthCount = earnedSessions.filter((s) => inRange(s, startOfMonth, startOfNext)).length;
+      const lastMonthCount = earnedSessions.filter((s) => inRange(s, startOfLast, startOfMonth)).length;
+      const lifetimeCount  = earnedSessions.length;
 
-      const thisMonth = thisMonthCount * rate;
-      const lastMonth = lastMonthCount * rate;
-      const lifetime = lifetimeCount * rate;
-      const pendingPayout = sessions.filter((s) => s.status === 'accepted').length * rate;
+      const thisMonth     = thisMonthCount * rate;
+      const lastMonth     = lastMonthCount * rate;
+      const lifetime      = lifetimeCount * rate;
+      const pendingPayout = pendingSessions.length * rate;
       const avgPerSession = lifetimeCount > 0 ? Math.round(lifetime / lifetimeCount) : rate;
 
-      // 6-month sparkline.
       const monthlyHistory = [];
-      for (let i = 5; i >= 0; i--) {
+      for (let i = 5; i >= 0; i -= 1) {
         const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
-        const count = lifetimeSessions.filter((s) => inRange(s, start, end)).length;
+        const end   = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+        const count = earnedSessions.filter((s) => inRange(s, start, end)).length;
         monthlyHistory.push({
           month: start.toLocaleString('en-US', { month: 'short' }),
           total: count * rate,
@@ -581,9 +674,9 @@ export function useEarningsSummary() {
         ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100)
         : (thisMonth > 0 ? 100 : 0);
 
-      if (thisMonth > lastMonth && lastMonth > 0) {
-        setStreakLine('More than last month — keep the streak going.');
-      } else { setStreakLine(null); }
+      setStreakLine(thisMonth > lastMonth && lastMonth > 0
+        ? 'More than last month — keep the streak going.'
+        : null);
 
       setSummary({ thisMonth, lastMonth, pendingPayout, lifetime, avgPerSession, monthlyHistory, trendPct });
     } finally { setLoading(false); }
@@ -591,14 +684,10 @@ export function useEarningsSummary() {
 
   useEffect(() => { load(); }, [load]);
 
-  // realtime: any session change for this mentor → reload.
+  // realtime: shared bus.
   useEffect(() => {
-    if (!user || !isMentorAccount(user)) return;
-    const channel = supabase
-      .channel(nextChannelId('dashboard-earnings', user.id))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, () => load())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    if (!user || !isMentorAccount(user)) return undefined;
+    return subscribeRealtime(user.id, 'sessions', () => load());
   }, [user, load]);
 
   return { ...summary, streakLine, isLoading, refetch: load };
@@ -619,10 +708,11 @@ export function useMentorReviewsRecent({ limit = 5 } = {}) {
     try {
       const mpId = await fetchMentorProfileId(user.id);
       if (!mpId) { setLoading(false); return; }
-      const { data = [] } = await supabase
+      const { data: dataRaw } = await supabase
         .from('reviews').select('*')
         .eq('mentor_id', mpId)
         .order('created_at', { ascending: false }).limit(20);
+      const data = Array.isArray(dataRaw) ? dataRaw : [];
       const reviewerNames = await fetchUserNamesMap(data.map((r) => r.reviewer_id));
       const enriched = data.map((r) => ({
         ...r,
@@ -637,12 +727,8 @@ export function useMentorReviewsRecent({ limit = 5 } = {}) {
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    if (!user || !isMentorAccount(user)) return;
-    const channel = supabase
-      .channel(nextChannelId('dashboard-reviews', user.id))
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, () => load())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    if (!user || !isMentorAccount(user)) return undefined;
+    return subscribeRealtime(user.id, 'reviews', () => load());
   }, [user, load]);
 
   return { reviews: reviews.slice(0, limit), total, avgRating, isLoading, refetch: load };
@@ -670,10 +756,11 @@ export function useUpcomingSessions({ limit = 5 } = {}) {
       }
       // Include rows where scheduled_date is null (just booked, awaiting Calendly slot)
       // OR in the future. Filtering must happen client-side because Supabase OR on null+gte is awkward.
-      const { data = [] } = await query
+      const { data: dataRaw } = await query
         .in('status', ['pending', 'accepted'])
         .order('scheduled_date', { ascending: true, nullsFirst: false })
         .limit(limit + 10);
+      const data = Array.isArray(dataRaw) ? dataRaw : [];
       const now = Date.now();
       const upcoming = (data || []).filter((s) => !s.scheduled_date || new Date(s.scheduled_date).getTime() >= now - 60 * 60 * 1000);
 
@@ -684,10 +771,11 @@ export function useUpcomingSessions({ limit = 5 } = {}) {
         const mentorIds = [...new Set(upcoming.map((s) => s.mentor_id).filter(Boolean))];
         let mentorMap = {};
         if (mentorIds.length) {
-          const { data: mentors = [] } = await supabase
+          const { data: mentorsRaw } = await supabase
             .from('mentor_profiles').select('id, name')
             .in('id', mentorIds);
-          mentorMap = Object.fromEntries((mentors || []).map((m) => [m.id, m.name]));
+          const mentors = Array.isArray(mentorsRaw) ? mentorsRaw : [];
+          mentorMap = Object.fromEntries(mentors.map((m) => [m.id, m.name]));
         }
         setSessions(upcoming.map((s) => ({ ...s, mentee_name: mentorMap[s.mentor_id] || 'Mentor' })));
       }
@@ -697,12 +785,8 @@ export function useUpcomingSessions({ limit = 5 } = {}) {
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel(nextChannelId('dashboard-upcoming', user.id))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, () => load())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    if (!user) return undefined;
+    return subscribeRealtime(user.id, 'sessions', () => load());
   }, [user, load]);
 
   return { sessions: sessions.slice(0, limit), total: sessions.length, isLoading, refetch: load };
@@ -829,22 +913,30 @@ export function useDashboardSessions() {
         setMentorProfileId(profile.id);
         setCalendlyConnected(!!profile.calendly_connected);
 
-        const { data = [] } = await supabase
+        const { data: dataRaw } = await supabase
           .from('sessions').select('*')
           .eq('mentor_id', profile.id)
           .order('scheduled_date', { ascending: true });
+        const data = Array.isArray(dataRaw) ? dataRaw : [];
 
         const menteeIds = [...new Set(data.map((s) => s.mentee_id).filter(Boolean))];
         const names = await fetchUserNamesMap(menteeIds);
         setSessions(data.map((s) => ({ ...s, mentee_name: names[s.mentee_id] || 'Mentee' })));
       } else {
-        const { data = [] } = await supabase
+        const { data: dataRaw } = await supabase
           .from('sessions').select('*')
           .eq('mentee_id', user.id)
           .order('scheduled_date', { ascending: true });
+        const data = Array.isArray(dataRaw) ? dataRaw : [];
         const ids = [...new Set(data.map((s) => s.mentor_id).filter(Boolean))];
         if (ids.length) {
-          const { data: mps = [] } = await supabase.from('mentor_profiles').select('*').in('id', ids);
+          // Only the columns the views actually consume — avoids pulling
+          // bio/expertise/availability_schedule blobs the dashboard never reads.
+          const { data: mpsRaw } = await supabase
+            .from('mentor_profiles')
+            .select('id, name, email, title, company, image_url, session_rate, timezone')
+            .in('id', ids);
+          const mps = Array.isArray(mpsRaw) ? mpsRaw : [];
           setMentorMap(Object.fromEntries(mps.map((m) => [m.id, m])));
         } else { setMentorMap({}); }
         setSessions(data);
@@ -858,12 +950,8 @@ export function useDashboardSessions() {
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel(nextChannelId('dashboard-sessions', user.id))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, () => load())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    if (!user) return undefined;
+    return subscribeRealtime(user.id, 'sessions', () => load());
   }, [user, load]);
 
   const handleStatusUpdate = useCallback(async (sessionId, status) => {

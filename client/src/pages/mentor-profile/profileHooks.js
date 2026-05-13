@@ -193,7 +193,7 @@ export function normalizeMentor(raw, reviews = []) {
     })(),
     totalSessions: raw.total_sessions ?? 0,
     rate: raw.session_rate ?? null,
-    timezone: null,
+    timezone: raw.timezone ?? null,
   };
 }
 
