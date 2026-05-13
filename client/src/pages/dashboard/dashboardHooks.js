@@ -166,7 +166,8 @@ export function useNextSession() {
         row = pickFirst(data);
         if (row) {
           const names = await fetchUserNamesMap([row.mentee_id].filter(Boolean));
-          other = { id: row.mentee_id, name: names[row.mentee_id] || row.mentee_name || 'Mentee', title: 'Mentee', company: '', avatarUrl: null };
+          // Mentee timezone isn't stored — leave null. Mentor sees their own local time.
+          other = { id: row.mentee_id, name: names[row.mentee_id] || row.mentee_name || 'Mentee', title: 'Mentee', company: '', avatarUrl: null, timezone: null };
         }
       } else {
         const { data } = await supabase
@@ -179,9 +180,9 @@ export function useNextSession() {
         row = pickFirst(data);
         if (row?.mentor_id) {
           const { data: mp } = await supabase
-            .from('mentor_profiles').select('id, name, title, company, image_url')
+            .from('mentor_profiles').select('id, name, title, company, image_url, timezone')
             .eq('id', row.mentor_id).maybeSingle();
-          other = mp ? { id: mp.id, name: mp.name, title: mp.title, company: mp.company, avatarUrl: mp.image_url } : null;
+          other = mp ? { id: mp.id, name: mp.name, title: mp.title, company: mp.company, avatarUrl: mp.image_url, timezone: mp.timezone || null } : null;
         }
       }
       if (v === versionRef.current) setState({ session: toNextSession(row, other, isMentor), isLoading: false, isError: false });

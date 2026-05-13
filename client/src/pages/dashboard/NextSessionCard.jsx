@@ -5,6 +5,7 @@ import { useNextSession, useSavedMentors, useMentorRecommendations } from './das
 import ReviewModal from '../../components/ReviewModal.jsx';
 import CancellationModal from '../../components/CancellationModal.jsx';
 import { getMyReviewedSessionIds } from '../../api/reviews';
+import { getViewerTimezone, formatInZone, zonesAreEquivalent, shortZoneCity } from '../../utils/timezone';
 
 // ─── countdown helpers ────────────────────────────────────────────────────────
 
@@ -68,10 +69,14 @@ function ShellCard({ live, children }) {
 function ScheduledState({ session }) {
   const navigate = useNavigate();
   const now = useLiveCountdown(session.scheduledAt);
-  const phase = useMemo(() => formatCountdown(session.scheduledAt, now), [session.scheduledAt, now]);
+  const hasTime = !!session.scheduledAt;
+  const phase = useMemo(
+    () => (hasTime ? formatCountdown(session.scheduledAt, now) : 'awaiting'),
+    [session.scheduledAt, now, hasTime],
+  );
   const live = phase === 'live';
-  const delta = new Date(session.scheduledAt).getTime() - now;
-  const joinable = delta <= 5 * 60 * 1000 && delta > -30 * 60 * 1000;
+  const delta = hasTime ? new Date(session.scheduledAt).getTime() - now : Infinity;
+  const joinable = hasTime && delta <= 5 * 60 * 1000 && delta > -30 * 60 * 1000;
   const ended = phase === 'past';
 
   const [showReview, setShowReview] = useState(false);
@@ -90,10 +95,23 @@ function ScheduledState({ session }) {
     return () => { cancelled = true; };
   }, [session.id, session.asMentor]);
 
-  const date = new Date(session.scheduledAt);
-  const dayLine = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-  const timeLine = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  const tz = date.toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop();
+  const viewerTz = getViewerTimezone();
+  const otherTz = session.otherParty?.timezone || null;
+  const showDualTime = hasTime && otherTz && !zonesAreEquivalent(otherTz, viewerTz, new Date(session.scheduledAt));
+  const date = hasTime ? new Date(session.scheduledAt) : null;
+  const dayLine = date
+    ? new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: viewerTz }).format(date)
+    : 'Time TBD';
+  const timeLine = date
+    ? new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: viewerTz }).format(date)
+    : 'Awaiting slot';
+  const tz = date
+    ? new Intl.DateTimeFormat('en-US', { timeZone: viewerTz, timeZoneName: 'short' })
+        .formatToParts(date).find((p) => p.type === 'timeZoneName')?.value || ''
+    : '';
+  const otherTimeLabel = showDualTime
+    ? formatInZone(date, { timeZone: otherTz, withDate: false, withTz: true })
+    : null;
 
   const eyebrow = session.asMentor ? 'Your next session is with' : 'Your next session with';
   const initials = (session.otherParty?.name || 'Mentor')
@@ -102,6 +120,10 @@ function ScheduledState({ session }) {
   function onPrimary() {
     if (joinable && session.joinUrl) {
       navigate(session.joinUrl);
+      return;
+    }
+    if (!hasTime && !session.asMentor && session.rescheduleUrl) {
+      window.open(session.rescheduleUrl, '_blank', 'noreferrer');
       return;
     }
     if (ended) {
@@ -116,11 +138,12 @@ function ScheduledState({ session }) {
   let primaryLabel = 'Join session';
   if (live) primaryLabel = 'Join now';
   else if (ended) primaryLabel = session.asMentor ? 'View notes' : 'Add review';
+  else if (!hasTime) primaryLabel = session.asMentor ? 'Awaiting slot' : 'Pick your time';
 
   // Disable primary in the ended state when there's nothing left to do.
   const primaryDisabled = ended
     ? (session.asMentor ? false : alreadyReviewed || !session.mentorId)
-    : !joinable;
+    : (!hasTime ? session.asMentor : !joinable);
 
   return (
     <ShellCard live={live}>
@@ -177,8 +200,13 @@ function ScheduledState({ session }) {
             {dayLine}
           </span>
           <span className="truncate text-[15px] font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
-            {timeLine} {tz}
+            {timeLine} {tz} <span className="font-normal" style={{ color: 'var(--bridge-text-muted)' }}>(your time)</span>
           </span>
+          {otherTimeLabel && (
+            <span className="truncate text-[12.5px] tabular-nums" style={{ color: 'var(--bridge-text-secondary)' }}>
+              {otherTimeLabel} · {shortZoneCity(otherTz)} <span style={{ color: 'var(--bridge-text-muted)' }}>({session.asMentor ? 'mentee' : 'mentor'}'s time)</span>
+            </span>
+          )}
           {session.topic && (
             <>
               <span className="mt-3 text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--bridge-text-muted)' }}>
@@ -220,7 +248,13 @@ function ScheduledState({ session }) {
             className="font-display text-[28px] font-black leading-none tabular-nums tracking-[-0.025em] sm:text-[32px]"
             style={{ color: 'var(--bridge-text)' }}
           >
-            {live ? formatStartedAgo(session.scheduledAt, now) : phase === 'past' ? 'Recently ended' : phase}
+            {live
+              ? formatStartedAgo(session.scheduledAt, now)
+              : phase === 'past'
+                ? 'Recently ended'
+                : phase === 'awaiting'
+                  ? 'Awaiting slot'
+                  : phase}
           </span>
 
           {ended && session.asMentor === false && alreadyReviewed ? (
