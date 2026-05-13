@@ -95,6 +95,10 @@ function ScheduledState({ session }) {
     return () => { cancelled = true; };
   }, [session.id, session.asMentor]);
 
+  const status = String(session.status || '').toLowerCase();
+  const awaitingMentor = status === 'pending';
+  const timeTbd = !hasTime && !awaitingMentor && !ended;
+
   const viewerTz = getViewerTimezone();
   const otherTz = session.otherParty?.timezone || null;
   const showDualTime = hasTime && otherTz && !zonesAreEquivalent(otherTz, viewerTz, new Date(session.scheduledAt));
@@ -104,7 +108,7 @@ function ScheduledState({ session }) {
     : 'Time TBD';
   const timeLine = date
     ? new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: viewerTz }).format(date)
-    : 'Awaiting slot';
+    : (awaitingMentor ? 'Mentor will confirm' : 'Calendly slot pending');
   const tz = date
     ? new Intl.DateTimeFormat('en-US', { timeZone: viewerTz, timeZoneName: 'short' })
         .formatToParts(date).find((p) => p.type === 'timeZoneName')?.value || ''
@@ -117,12 +121,15 @@ function ScheduledState({ session }) {
   const initials = (session.otherParty?.name || 'Mentor')
     .split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase()).join('');
 
+  // (status / awaitingMentor / timeTbd hoisted above so the time-display
+  // helpers can use them.)
+
   function onPrimary() {
     if (joinable && session.joinUrl) {
       navigate(session.joinUrl);
       return;
     }
-    if (!hasTime && !session.asMentor && session.rescheduleUrl) {
+    if (timeTbd && session.rescheduleUrl) {
       window.open(session.rescheduleUrl, '_blank', 'noreferrer');
       return;
     }
@@ -138,12 +145,29 @@ function ScheduledState({ session }) {
   let primaryLabel = 'Join session';
   if (live) primaryLabel = 'Join now';
   else if (ended) primaryLabel = session.asMentor ? 'View notes' : 'Add review';
-  else if (!hasTime) primaryLabel = session.asMentor ? 'Awaiting slot' : 'Pick your time';
+  else if (awaitingMentor) primaryLabel = session.asMentor ? 'Review request' : 'Awaiting mentor';
+  else if (timeTbd) primaryLabel = session.rescheduleUrl ? 'Confirm time' : 'Time TBD';
 
-  // Disable primary in the ended state when there's nothing left to do.
+  function onSecondaryDetailClick() {
+    navigate('/dashboard/sessions');
+  }
+
+  // Awaiting mentor → mentor's primary jumps to sessions tab to accept;
+  // mentee's primary is informational and disabled.
+  function onPrimaryAwaiting() {
+    if (session.asMentor) navigate('/dashboard/sessions');
+  }
+
+  // Decide which onClick is wired in.
+  const handlePrimary = awaitingMentor ? onPrimaryAwaiting : onPrimary;
+
   const primaryDisabled = ended
     ? (session.asMentor ? false : alreadyReviewed || !session.mentorId)
-    : (!hasTime ? session.asMentor : !joinable);
+    : awaitingMentor
+      ? !session.asMentor // mentee can't act, mentor goes to sessions
+      : timeTbd
+        ? true // informational only — no action available
+        : !joinable;
 
   return (
     <ShellCard live={live}>
@@ -253,7 +277,7 @@ function ScheduledState({ session }) {
               : phase === 'past'
                 ? 'Recently ended'
                 : phase === 'awaiting'
-                  ? 'Awaiting slot'
+                  ? (awaitingMentor ? 'Awaiting mentor' : 'Time TBD')
                   : phase}
           </span>
 
@@ -271,9 +295,13 @@ function ScheduledState({ session }) {
           ) : (
             <button
               type="button"
-              onClick={onPrimary}
+              onClick={handlePrimary}
               disabled={primaryDisabled}
-              title={!joinable && !ended ? 'Available 5 minutes before start' : undefined}
+              title={
+                awaitingMentor
+                  ? (session.asMentor ? 'Open the sessions tab to accept or decline' : 'Your mentor will confirm this session shortly.')
+                  : (!joinable && !ended ? 'Available 5 minutes before start' : undefined)
+              }
               className={`bridge-focus rounded-xl px-5 py-2.5 text-[14px] font-bold transition-shadow ${
                 live ? 'bridge-cta-live' : ''
               }`}
@@ -288,7 +316,11 @@ function ScheduledState({ session }) {
             </button>
           )}
 
-          {!ended && (
+          {/* Reschedule + Cancel are only meaningful on a *confirmed* session
+              with a real time. Hide them while pending or while the time has
+              not been written back from Calendly — exposing Calendly URLs in
+              those states leads mentees into accidental rebooking. */}
+          {!ended && !awaitingMentor && !timeTbd && (
             <div className="mt-1 flex items-center gap-3 text-[12px]">
               {session.rescheduleUrl ? (
                 <a

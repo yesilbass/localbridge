@@ -5,20 +5,21 @@ import FeedbackModal from './FeedbackModal';
 class ErrorBoundaryInner extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null, stack: null };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
   }
 
   componentDidCatch(error, info) {
     console.error('[ErrorBoundary]', error, info?.componentStack);
+    this.setState({ stack: info?.componentStack || null });
   }
 
   render() {
     if (this.state.hasError) {
-      return this.props.renderFallback();
+      return this.props.renderFallback(this.state.error, this.state.stack);
     }
     return this.props.children;
   }
@@ -30,8 +31,23 @@ export default function ErrorBoundary({ children }) {
   return (
     <>
       <ErrorBoundaryInner
-        renderFallback={() => (
+        renderFallback={(err, stack) => (
           <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 py-20 text-center">
+            {/* Surface the actual error on screen so we don't have to ask the
+                user to open dev tools every time something crashes in prod. */}
+            {err ? (
+              <pre
+                className="mb-6 max-h-48 w-full max-w-2xl overflow-auto whitespace-pre-wrap rounded-lg p-3 text-left text-[11px] font-mono"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--color-error) 8%, transparent)',
+                  color: 'var(--color-error)',
+                  boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-error) 25%, transparent)',
+                }}
+              >
+                {String(err?.name ? `${err.name}: ` : '')}{String(err?.message || err)}
+                {stack ? `\n${stack.split('\n').slice(0, 4).join('\n')}` : ''}
+              </pre>
+            ) : null}
             <div
               className="mb-6 flex h-16 w-16 items-center justify-center rounded-full"
               style={{ background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)' }}

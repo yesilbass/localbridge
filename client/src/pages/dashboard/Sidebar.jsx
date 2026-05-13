@@ -40,7 +40,9 @@ function formatNextUp(scheduledAt, now) {
 function NextUpCard() {
   const { session } = useNextSession();
   const now = useLiveCountdown(session?.scheduledAt);
-  if (!session) return null;
+  // Hide when there is no session OR when the session has no concrete time
+  // (mentee just booked, Calendly slot not yet picked) — the 1969-epoch bug.
+  if (!session || !session.scheduledAt) return null;
   const delta = new Date(session.scheduledAt).getTime() - now;
   // Only show when within 24h.
   if (delta > 24 * 60 * 60 * 1000 || delta < -30 * 60 * 1000) return null;

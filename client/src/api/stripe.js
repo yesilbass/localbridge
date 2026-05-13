@@ -1,5 +1,18 @@
 import supabase from './supabase';
 
+// Re-trigger Calendly time sync on a session whose row already has the event
+// URI but no scheduled_date (mentor's token had expired during initial flow).
+export async function resyncCalendlySession(sessionId) {
+  const auth = await getAuthHeaders();
+  const res = await fetch('/api/booking-confirm-scheduled', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...auth },
+    body: JSON.stringify({ sessionId }),
+  });
+  const body = await res.json().catch(() => ({}));
+  return { ok: res.ok, ...body };
+}
+
 async function getAuthHeaders() {
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;

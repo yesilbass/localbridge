@@ -132,11 +132,27 @@ function CalendarSessionCard({ session, isMentor, mentorProfile, handleStatusUpd
               <span className="text-orange-500">{personName}</span>
             </p>
 
-            {session.message && (
-              <p className="text-[11px] text-[var(--bridge-text-muted)] italic line-clamp-2 leading-snug">
-                &ldquo;{session.message}&rdquo;
+            {session.scheduled_date && (
+              <p className="text-[11px] text-[var(--bridge-text-secondary)] tabular-nums">
+                {new Date(session.scheduled_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                {' · '}
+                {new Date(session.scheduled_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                {' '}
+                {new Date(session.scheduled_date).toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop()}
               </p>
             )}
+
+            {(() => {
+              const raw = session.message;
+              if (!raw) return null;
+              const cleaned = String(raw).replace(/\[(?:stripe_session|calendly)[^\]]*\]\s*/gi, '').trim();
+              if (!cleaned) return null;
+              return (
+                <p className="text-[11px] text-[var(--bridge-text-muted)] italic line-clamp-2 leading-snug">
+                  &ldquo;{cleaned}&rdquo;
+                </p>
+              );
+            })()}
           </div>
         </div>
 
