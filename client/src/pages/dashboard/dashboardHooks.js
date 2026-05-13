@@ -926,6 +926,19 @@ export function useDashboardSessions() {
           .order('scheduled_date', { ascending: true });
         const data = Array.isArray(dataRaw) ? dataRaw : [];
 
+        // Self-heal: any pending/accepted row missing scheduled_date with a
+        // Calendly URI on file gets a server-side resync. Realtime updates
+        // the UI when the row finally has a real time.
+        data.forEach((s) => {
+          const status = String(s.status || '').toLowerCase();
+          if ((status === 'pending' || status === 'accepted')
+            && s.calendly_event_uri && !s.scheduled_date
+            && !_calendlyResyncAttempted.has(s.id)) {
+            _calendlyResyncAttempted.add(s.id);
+            void resyncCalendlySession(s.id).catch(() => { /* non-fatal */ });
+          }
+        });
+
         const menteeIds = [...new Set(data.map((s) => s.mentee_id).filter(Boolean))];
         const names = await fetchUserNamesMap(menteeIds);
         setSessions(data.map((s) => ({ ...s, mentee_name: names[s.mentee_id] || 'Mentee' })));

@@ -239,8 +239,8 @@ export default function HomeNowStrip({ activeRole }) {
       ? new Date(pendingNeedsAction.scheduled_date)
       : null;
     const when = date
-      ? `${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} · ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`
-      : 'Time TBD';
+      ? `${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} · ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} ${date.toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop()}`
+      : (pendingNeedsAction.calendly_event_uri ? 'Time syncing…' : null);
     return (
       <StripShell
         severity="primary"
@@ -248,11 +248,14 @@ export default function HomeNowStrip({ activeRole }) {
         message={(
           <span>
             <span className="font-semibold" style={{ color: 'var(--bridge-text)' }}>
-              {pendingNeedsAction.mentee_name || 'A mentee'} requested a session.
-            </span>{' '}
-            <span className="tabular-nums" style={{ color: 'var(--bridge-text-secondary)' }}>
-              {when}.
+              {pendingNeedsAction.mentee_name || 'A mentee'} requested a session
+              {when ? ' for ' : '.'}
             </span>
+            {when ? (
+              <span className="tabular-nums" style={{ color: 'var(--bridge-text-secondary)' }}>
+                {when}.
+              </span>
+            ) : null}
           </span>
         )}
       >

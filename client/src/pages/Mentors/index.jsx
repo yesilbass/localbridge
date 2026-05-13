@@ -129,9 +129,11 @@ export default function Mentors() {
     let cancelled = false;
     setLoading(true); setError(null);
     void (async () => {
+      const includeUnverified = new URLSearchParams(window.location.search).get('include_unverified') === '1';
       const { data, error: fetchError, totalCount: count } = await getAllMentors({
         search: debouncedSearch, industry: activeIndustry, tier: activeTier,
         availableOnly, rateMin, rateMax, sortBy, page, pageSize: PAGE_SIZE,
+        includeUnverified,
       });
       if (cancelled) return;
       setLoading(false);

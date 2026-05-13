@@ -27,6 +27,9 @@ import calendlyEventTypeSummaryHandler from '../api/_lib/calendlyHandlers/event-
 import calendlySelectEventTypeHandler from '../api/_lib/calendlyHandlers/select-event-type.js';
 import calendlyWebhookHandler from '../api/calendly-webhook.js';
 import userNamesHandler from '../api/user-names.js';
+import verificationDispatcher from '../api/verification/[action].js';
+import adminReviewDispatcher from '../api/admin/review/[action].js';
+import cronVerificationRetryHandler from '../api/cron/verification-retry.js';
 
 const app = express();
 
@@ -74,6 +77,30 @@ app.post('/api/calendly-webhook', wrapApiHandler(calendlyWebhookHandler));
 
 // User names (admin client bypasses RLS for mentor dashboard mentee-name lookup)
 app.post('/api/user-names', wrapApiHandler(userNamesHandler));
+
+// Mentor verification & tiering — dispatcher routes /api/verification/<action>
+// to the same handler used by Vercel rewrites in production.
+function dispatchVerification(req, res, next) {
+  // Pull the trailing path segment as the action and forward to the handler.
+  const action = req.path.replace(/^\/api\/verification\//, '').replace(/\/$/, '');
+  req.query = { ...(req.query || {}), action };
+  Promise.resolve(verificationDispatcher(req, res)).catch(next);
+}
+app.all('/api/verification/:action', dispatchVerification);
+
+// Admin review queue — same pattern. Path is /api/admin/review-<action>
+// in production (single hyphen). Express path uses `:action` for clarity.
+function dispatchAdminReview(req, res, next) {
+  // /api/admin/review-list -> action 'list'; /api/admin/review-decide -> 'decide'
+  const m = req.path.match(/^\/api\/admin\/review-([a-z-]+)$/i);
+  const action = m?.[1] || '';
+  req.query = { ...(req.query || {}), action };
+  Promise.resolve(adminReviewDispatcher(req, res)).catch(next);
+}
+app.all(/^\/api\/admin\/review-[a-z-]+$/i, dispatchAdminReview);
+
+// Cron — same handler for local + Vercel.
+app.all('/api/cron/verification-retry', wrapApiHandler(cronVerificationRetryHandler));
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 // Google OAuth — must be at /auth/google so the redirect URI matches

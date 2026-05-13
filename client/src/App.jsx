@@ -39,6 +39,9 @@ import IntakeCall from './pages/IntakeCall';
 import MentorOnboarding from './pages/MentorOnboarding';
 import DevPortal from './pages/DevPortal/index.jsx';
 import BookingFinalize from './pages/booking/finalize.jsx';
+import VerifyMentorWizard from './pages/onboarding/mentor/verify/index.jsx';
+import SubmitReferencePage from './pages/refs/SubmitReference.jsx';
+import AdminVerification from './pages/admin/verification/index.jsx';
 
 function AppContent() {
   const location = useLocation();
@@ -84,6 +87,9 @@ function AppContent() {
           <Route path="/mentors/:id" element={<MentorProfile />} />
           <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="/onboarding" element={<MentorOnboarding />} />
+          <Route path="/onboarding/mentor/verify" element={<VerifyMentorWizard />} />
+          <Route path="/refs/:token" element={<SubmitReferencePage />} />
+          <Route path="/admin/verification" element={<AdminVerification />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/session/:sessionId/video" element={<VideoCall />} />
