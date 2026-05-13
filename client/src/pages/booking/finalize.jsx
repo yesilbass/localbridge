@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
-import { finalizeCheckout } from '../../api/stripe';
+import { finalizeCheckout, confirmScheduledBooking } from '../../api/stripe';
 import CalendlyInlineWidget from '../../components/CalendlyInlineWidget';
 
 export default function BookingFinalizePage() {
@@ -106,7 +106,14 @@ export default function BookingFinalizePage() {
               prefill={prefill}
               utm={utm}
               minHeight={760}
-              onScheduled={() => navigate('/dashboard/sessions?booked=1')}
+              onScheduled={async (payload) => {
+                const eventUri = payload?.event?.uri;
+                const inviteeUri = payload?.invitee?.uri;
+                if (sessionId && (eventUri || inviteeUri)) {
+                  await confirmScheduledBooking({ stripeSessionId: sessionId, eventUri, inviteeUri });
+                }
+                navigate('/dashboard/sessions?booked=1');
+              }}
             />
           )}
         </div>

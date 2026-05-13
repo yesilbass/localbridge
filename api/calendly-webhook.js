@@ -70,7 +70,7 @@ async function handleInviteeCreated(payload) {
       await supabase
         .from('sessions')
         .update({
-          status: 'scheduled',
+          status: 'accepted',
           scheduled_date: scheduledAt,
           calendly_event_uri: calendlyEventUri,
           calendly_invitee_uri: calendlyInviteeUri,
@@ -92,9 +92,8 @@ async function handleInviteeCreated(payload) {
     mentor_id: mentor.id,
     mentee_id: null,
     mentee_name: invitee?.name || null,
-    mentee_email: invitee?.email || null,
     session_type: 'career_advice',
-    status: 'scheduled',
+    status: 'accepted',
     scheduled_date: scheduledAt,
     calendly_event_uri: calendlyEventUri,
     calendly_invitee_uri: calendlyInviteeUri,
@@ -113,7 +112,7 @@ async function handleInviteeCanceled(payload) {
   await supabase
     .from('sessions')
     .update({
-      status: 'canceled',
+      status: 'cancelled',
       message: cancellation?.reason ? `[calendly:canceled] ${String(cancellation.reason).slice(0, 240)}` : '[calendly:canceled]',
     })
     .eq('calendly_invitee_uri', calendlyInviteeUri);

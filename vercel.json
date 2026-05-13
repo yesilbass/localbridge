@@ -18,6 +18,8 @@
     { "source": "/api/ai-proxy", "destination": "/api/ai-proxy.js" },
     { "source": "/api/cancel-session", "destination": "/api/cancel-session.js" },
     { "source": "/api/user-names", "destination": "/api/user-names.js" },
+    { "source": "/api/mentor-room-slug", "destination": "/api/mentor-room-slug.js" },
+    { "source": "/api/booking-confirm-scheduled", "destination": "/api/booking-confirm-scheduled.js" },
     { "source": "/api/(.*)", "destination": "/api/server.js" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],

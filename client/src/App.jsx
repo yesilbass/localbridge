@@ -34,6 +34,7 @@ import Cookies from './pages/footer/Cookies.jsx';
 import FeedbackFAB from './components/FeedbackFAB';
 import ErrorBoundary from './components/ErrorBoundary';
 import VideoCall from './pages/VideoCall';
+import MeetLobby from './pages/MeetLobby';
 import IntakeCall from './pages/IntakeCall';
 import MentorOnboarding from './pages/MentorOnboarding';
 import DevPortal from './pages/DevPortal/index.jsx';
@@ -41,7 +42,7 @@ import BookingFinalize from './pages/booking/finalize.jsx';
 
 function AppContent() {
   const location = useLocation();
-  const isVideoCall = location.pathname.includes('/video');
+  const isVideoCall = location.pathname.includes('/video') || location.pathname.startsWith('/meet/');
   const isLanding = location.pathname === '/';
   const isDashboard = location.pathname.startsWith('/dashboard');
   const hideFooter =
@@ -86,6 +87,7 @@ function AppContent() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/session/:sessionId/video" element={<VideoCall />} />
+          <Route path="/meet/:slug" element={<MeetLobby />} />
           <Route path="/intake/:sessionId" element={<IntakeCall />} />
           <Route path="/booking/finalize" element={<BookingFinalize />} />
           <Route path="/pricing" element={<Pricing />} />
@@ -106,7 +108,7 @@ function AppContent() {
         </Routes>
         </ErrorBoundary>
       </div>
-      {!location.pathname.includes('/video') && <FeedbackFAB />}
+      {!isVideoCall && <FeedbackFAB />}
       {!hideFooter && <Footer />}
       <PaletteDevBadge />
     </div>
