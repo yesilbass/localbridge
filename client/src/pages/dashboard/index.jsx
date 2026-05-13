@@ -27,18 +27,33 @@ import RecommendationsBlock from './RecommendationsBlock.jsx';
 import UpcomingSessionsBlock from './UpcomingSessionsBlock.jsx';
 import ProfileHealthCard from './ProfileHealthCard.jsx';
 import { useProfileHealth } from './dashboardHooks.js';
+import VerificationBanner from './VerificationBanner.jsx';
+import TierExplainer from './TierExplainer.jsx';
+import { useVerificationStatus } from './useVerificationStatus.js';
 
 // ─── home content ─────────────────────────────────────────────────────────
 
 function MentorHome({ activeRole }) {
   const { score, isLoading: healthLoading } = useProfileHealth();
   const showHealth = !healthLoading && score < 100;
+  const verification = useVerificationStatus();
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
       <HomeHeader activeRole={activeRole} />
+      {verification.profileId ? (
+        <VerificationBanner status={verification.status} score={verification.score} />
+      ) : null}
       <HomeNowStrip activeRole={activeRole} />
       <NextSessionCard activeRole={activeRole} />
       <HomeAtAGlance activeRole={activeRole} />
+      {verification.profileId ? (
+        <TierExplainer
+          score={verification.score}
+          tier={verification.tier}
+          components={verification.components}
+          status={verification.status}
+        />
+      ) : null}
       <UpcomingSessionsBlock />
       {showHealth ? <ProfileHealthCard /> : null}
     </div>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import MentorAvatar from '../../components/MentorAvatar';
 import { focusRing } from '../../ui';
 import { tierBadge } from './constants';
+import TierBadge from '../onboarding/mentor/verify/components/TierBadge.jsx';
 
 export function StarRating({ rating }) {
   const uid = useId().replace(/:/g, '');
@@ -116,6 +117,9 @@ export default function MentorCard({ mentor, isFavorite, onToggleFavorite, user,
         <div className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/55 px-3 py-2">
           <StarRating rating={mentor.rating} />
           <div className="flex items-center gap-1.5">
+            {mentor.verification_tier && mentor.verification_tier !== 'bronze' ? (
+              <TierBadge tier={mentor.verification_tier} size="sm" showLabel={false} />
+            ) : null}
             {mentor.tier && (
               <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tierBadge(mentor.tier)}`}>
                 {mentor.tier}

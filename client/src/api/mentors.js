@@ -21,7 +21,7 @@ export async function getMentorById(mentorProfileId) {
   };
 }
 
-export async function getAllMentors({ search = '', industry = '', tier = '', availableOnly = false, rateMin = '', rateMax = '', sortBy = 'rating', page = 0, pageSize = 12 } = {}) {
+export async function getAllMentors({ search = '', industry = '', tier = '', availableOnly = false, rateMin = '', rateMax = '', sortBy = 'rating', page = 0, pageSize = 12, includeUnverified = false } = {}) {
   const sortColumn = sortBy === 'experience' ? 'years_experience' : sortBy === 'sessions' ? 'total_sessions' : 'rating';
 
   let query = supabase
@@ -30,6 +30,16 @@ export async function getAllMentors({ search = '', industry = '', tier = '', ava
     // Seeded/demo mentors have onboarding_complete = NULL — keep them visible.
     // Hide only mentors who started real onboarding but didn't finish (false).
     .or('onboarding_complete.is.null,onboarding_complete.eq.true');
+
+  // Hide unverified mentors by default. Backfilled rows from the existing
+  // catalog were promoted to 'verified' in the migration, so this never hides
+  // legitimate seed mentors. Bronze-tier (verification_score < 40) are also
+  // hidden by default — they only appear with ?include_unverified=1.
+  if (!includeUnverified) {
+    query = query
+      .or('verification_status.is.null,verification_status.eq.verified')
+      .or('verification_tier.is.null,verification_tier.neq.bronze');
+  }
 
   if (search) {
     query = query.or(`name.ilike.%${search}%,title.ilike.%${search}%,company.ilike.%${search}%`);
@@ -59,10 +69,16 @@ export async function getAllMentors({ search = '', industry = '', tier = '', ava
   return { data: data ?? [], error: null, totalCount: count ?? 0 };
 }
 
-export async function getFeaturedMentors() {
-  const { data, error } = await supabase
-    .from("mentor_profiles")
-    .select("*")
+export async function getFeaturedMentors({ includeUnverified = false } = {}) {
+  let query = supabase.from('mentor_profiles').select('*');
+  if (!includeUnverified) {
+    query = query
+      .or('verification_status.is.null,verification_status.eq.verified')
+      .or('verification_tier.is.null,verification_tier.neq.bronze');
+  }
+  const { data, error } = await query
+    .order('verification_tier', { ascending: false }) // platinum/gold first
+    .order('rating', { ascending: false })
     .limit(6);
   if (error) throw error;
   return data || [];
