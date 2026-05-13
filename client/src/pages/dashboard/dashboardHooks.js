@@ -120,6 +120,11 @@ function toNextSession(row, otherParty, asMentor) {
     joinUrl: typeof row.video_room_url === 'string' && row.video_room_url.startsWith('/')
       ? row.video_room_url
       : (row.video_room_url ? `/session/${row.id}/video` : null),
+    rescheduleUrl: row.calendly_reschedule_url ?? null,
+    cancelUrl: row.calendly_cancel_url ?? null,
+    mentorId: row.mentor_id ?? null,
+    menteeId: row.mentee_id ?? null,
+    raw: row,
     asMentor,
     otherParty,
   };
@@ -141,6 +146,13 @@ export function useNextSession() {
       let row = null;
       let other = null;
 
+      // Pick the next session, including ones whose scheduled_date is still null
+      // (just booked, mentee hasn't picked the Calendly slot yet, or webhook missed).
+      const pickFirst = (rows) => {
+        const cutoff = Date.now() - 30 * 60 * 1000;
+        return (rows || []).find((r) => !r.scheduled_date || new Date(r.scheduled_date).getTime() >= cutoff) || null;
+      };
+
       if (isMentor) {
         const mpId = await fetchMentorProfileId(user.id);
         if (!mpId) { if (v === versionRef.current) setState({ session: null, isLoading: false, isError: false }); return; }
@@ -149,13 +161,11 @@ export function useNextSession() {
           .select('*')
           .eq('mentor_id', mpId)
           .in('status', ['pending', 'accepted'])
-          .gte('scheduled_date', nowIso)
-          .order('scheduled_date', { ascending: true })
-          .limit(1)
-          .maybeSingle();
-        row = data;
+          .order('scheduled_date', { ascending: true, nullsFirst: false })
+          .limit(10);
+        row = pickFirst(data);
         if (row) {
-          const names = await fetchUserNamesMap([row.mentee_id]);
+          const names = await fetchUserNamesMap([row.mentee_id].filter(Boolean));
           other = { id: row.mentee_id, name: names[row.mentee_id] || row.mentee_name || 'Mentee', title: 'Mentee', company: '', avatarUrl: null };
         }
       } else {
@@ -164,11 +174,9 @@ export function useNextSession() {
           .select('*')
           .eq('mentee_id', user.id)
           .in('status', ['pending', 'accepted'])
-          .gte('scheduled_date', nowIso)
-          .order('scheduled_date', { ascending: true })
-          .limit(1)
-          .maybeSingle();
-        row = data;
+          .order('scheduled_date', { ascending: true, nullsFirst: false })
+          .limit(10);
+        row = pickFirst(data);
         if (row?.mentor_id) {
           const { data: mp } = await supabase
             .from('mentor_profiles').select('id, name, title, company, image_url')

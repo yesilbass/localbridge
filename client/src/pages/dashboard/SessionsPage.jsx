@@ -102,7 +102,7 @@ function SessionCard({ session, isMentor, mentor, onAccept, onDecline, onCancel,
       </div>
 
       <div className="flex shrink-0 flex-wrap items-center gap-2">
-        {session.video_room_url && (status === 'accepted' || status === 'completed') && (
+        {session.video_room_url && status === 'accepted' && (
           <Link
             to={typeof session.video_room_url === 'string' && session.video_room_url.startsWith('/') ? session.video_room_url : `/session/${session.id}/video`}
             className="bridge-focus inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-bold"

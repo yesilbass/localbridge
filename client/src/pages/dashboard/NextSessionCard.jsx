@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useNextSession, useSavedMentors, useMentorRecommendations } from './dashboardHooks.js';
+import ReviewModal from '../../components/ReviewModal.jsx';
+import CancellationModal from '../../components/CancellationModal.jsx';
+import { getMyReviewedSessionIds } from '../../api/reviews';
 
 // ─── countdown helpers ────────────────────────────────────────────────────────
 
@@ -69,6 +72,23 @@ function ScheduledState({ session }) {
   const live = phase === 'live';
   const delta = new Date(session.scheduledAt).getTime() - now;
   const joinable = delta <= 5 * 60 * 1000 && delta > -30 * 60 * 1000;
+  const ended = phase === 'past';
+
+  const [showReview, setShowReview] = useState(false);
+  const [showCancel, setShowCancel] = useState(false);
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+
+  // Hide "Add review" once the mentee has submitted one for this session.
+  useEffect(() => {
+    if (session.asMentor) return;
+    let cancelled = false;
+    getMyReviewedSessionIds().then(({ data }) => {
+      if (cancelled || !data) return;
+      const ids = data instanceof Set ? data : new Set(data);
+      if (ids.has(session.id)) setAlreadyReviewed(true);
+    });
+    return () => { cancelled = true; };
+  }, [session.id, session.asMentor]);
 
   const date = new Date(session.scheduledAt);
   const dayLine = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
@@ -82,14 +102,25 @@ function ScheduledState({ session }) {
   function onPrimary() {
     if (joinable && session.joinUrl) {
       navigate(session.joinUrl);
-    } else if (delta <= -30 * 60 * 1000) {
-      navigate(session.asMentor ? '/dashboard/sessions' : '/dashboard/sessions');
+      return;
+    }
+    if (ended) {
+      if (session.asMentor) {
+        navigate('/dashboard/sessions');
+      } else if (!alreadyReviewed && session.mentorId) {
+        setShowReview(true);
+      }
     }
   }
 
   let primaryLabel = 'Join session';
   if (live) primaryLabel = 'Join now';
-  else if (delta <= -30 * 60 * 1000) primaryLabel = session.asMentor ? 'View notes' : 'Add review';
+  else if (ended) primaryLabel = session.asMentor ? 'View notes' : 'Add review';
+
+  // Disable primary in the ended state when there's nothing left to do.
+  const primaryDisabled = ended
+    ? (session.asMentor ? false : alreadyReviewed || !session.mentorId)
+    : !joinable;
 
   return (
     <ShellCard live={live}>
@@ -192,43 +223,86 @@ function ScheduledState({ session }) {
             {live ? formatStartedAgo(session.scheduledAt, now) : phase === 'past' ? 'Recently ended' : phase}
           </span>
 
-          <button
-            type="button"
-            onClick={onPrimary}
-            disabled={!joinable && phase !== 'past'}
-            title={!joinable && phase !== 'past' ? 'Available 5 minutes before start' : undefined}
-            className={`bridge-focus rounded-xl px-5 py-2.5 text-[14px] font-bold transition-shadow ${
-              live ? 'bridge-cta-live' : ''
-            }`}
-            style={{
-              backgroundColor: 'var(--color-primary)',
-              color: '#fff',
-              opacity: !joinable && phase !== 'past' ? 0.55 : 1,
-              cursor: !joinable && phase !== 'past' ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {primaryLabel}
-          </button>
+          {ended && session.asMentor === false && alreadyReviewed ? (
+            <span
+              className="rounded-xl px-5 py-2.5 text-[14px] font-bold"
+              style={{
+                backgroundColor: 'var(--bridge-surface-muted)',
+                color: 'var(--bridge-text-muted)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              }}
+            >
+              Review submitted
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={onPrimary}
+              disabled={primaryDisabled}
+              title={!joinable && !ended ? 'Available 5 minutes before start' : undefined}
+              className={`bridge-focus rounded-xl px-5 py-2.5 text-[14px] font-bold transition-shadow ${
+                live ? 'bridge-cta-live' : ''
+              }`}
+              style={{
+                backgroundColor: 'var(--color-primary)',
+                color: '#fff',
+                opacity: primaryDisabled ? 0.55 : 1,
+                cursor: primaryDisabled ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {primaryLabel}
+            </button>
+          )}
 
-          <div className="mt-1 flex items-center gap-3 text-[12px]">
-            <Link
-              to="/dashboard/sessions"
-              className="bridge-focus rounded-md transition-colors"
-              style={{ color: 'var(--bridge-text-muted)' }}
-            >
-              Reschedule
-            </Link>
-            <span aria-hidden style={{ color: 'var(--bridge-text-faint)' }}>•</span>
-            <Link
-              to="/dashboard/sessions"
-              className="bridge-focus rounded-md transition-colors"
-              style={{ color: 'var(--bridge-text-muted)' }}
-            >
-              Cancel
-            </Link>
-          </div>
+          {!ended && (
+            <div className="mt-1 flex items-center gap-3 text-[12px]">
+              {session.rescheduleUrl ? (
+                <a
+                  href={session.rescheduleUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bridge-focus rounded-md transition-colors hover:text-[var(--bridge-text)]"
+                  style={{ color: 'var(--bridge-text-muted)' }}
+                >
+                  Reschedule
+                </a>
+              ) : null}
+              {session.rescheduleUrl && !session.asMentor ? (
+                <span aria-hidden style={{ color: 'var(--bridge-text-faint)' }}>•</span>
+              ) : null}
+              {!session.asMentor ? (
+                <button
+                  type="button"
+                  onClick={() => setShowCancel(true)}
+                  className="bridge-focus rounded-md transition-colors hover:text-[var(--bridge-text)]"
+                  style={{ color: 'var(--bridge-text-muted)' }}
+                >
+                  Cancel
+                </button>
+              ) : null}
+            </div>
+          )}
         </div>
       </div>
+
+      {showReview && session.mentorId && (
+        <ReviewModal
+          sessionId={session.id}
+          mentorId={session.mentorId}
+          mentorName={session.otherParty?.name || 'your mentor'}
+          onClose={() => setShowReview(false)}
+          onSubmitted={() => { setAlreadyReviewed(true); setShowReview(false); }}
+        />
+      )}
+
+      {showCancel && (
+        <CancellationModal
+          session={session.raw}
+          isMentor={!!session.asMentor}
+          onClose={() => setShowCancel(false)}
+          onSubmitted={() => setShowCancel(false)}
+        />
+      )}
 
       {/* live-pulse keyframe */}
       <style>{`
