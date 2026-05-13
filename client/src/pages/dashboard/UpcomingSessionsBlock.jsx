@@ -53,7 +53,11 @@ function Row({ session, isFirst }) {
         {formatCountdownChip(session.scheduled_date)}
       </span>
       <Link
-        to={session.video_room_url ? `/session/${session.id}/video` : '/dashboard/sessions'}
+        to={
+          typeof session.video_room_url === 'string' && session.video_room_url.startsWith('/')
+            ? session.video_room_url
+            : (session.video_room_url ? `/session/${session.id}/video` : '/dashboard/sessions')
+        }
         className="bridge-focus shrink-0 rounded-lg px-3 py-1.5 text-[12px] font-bold"
         style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
       >

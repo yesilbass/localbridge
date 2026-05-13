@@ -45,12 +45,37 @@ function validateBookingMetadata(meta) {
 async function requirePublishedMentor(supabaseClient, mentorId) {
   const { data, error } = await supabaseClient
     .from('mentor_profiles')
-    .select('id, name, onboarding_complete, available, calendly_connected, calendly_event_type_uri, calendly_scheduling_url')
+    .select('id, name, onboarding_complete, available, calendly_connected, calendly_event_type_uri, calendly_scheduling_url, room_slug')
     .eq('id', mentorId)
     .maybeSingle();
   if (error) throw error;
   if (!data || data.available === false || data.onboarding_complete === false) return null;
   return data;
+}
+
+async function ensureRoomSlug(supabaseClient, mentor) {
+  if (mentor.room_slug) return mentor.room_slug;
+  // Inline generator (mirrors api/mentor-room-slug.js).
+  const alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    let slug = '';
+    for (let i = 0; i < 12; i += 1) slug += alphabet[Math.floor(Math.random() * alphabet.length)];
+    const { data, error } = await supabaseClient
+      .from('mentor_profiles')
+      .update({ room_slug: slug })
+      .eq('id', mentor.id)
+      .is('room_slug', null)
+      .select('room_slug')
+      .maybeSingle();
+    if (!error && data?.room_slug) return data.room_slug;
+    const { data: refreshed } = await supabaseClient
+      .from('mentor_profiles')
+      .select('room_slug')
+      .eq('id', mentor.id)
+      .maybeSingle();
+    if (refreshed?.room_slug) return refreshed.room_slug;
+  }
+  return null;
 }
 
 async function syncSubscription({ supabaseClient, meta, checkoutSession }) {
@@ -148,6 +173,8 @@ async function syncPaidBooking({ supabaseClient, meta, checkoutSession, mintLink
     const marker = `[stripe_session:${checkoutSession.id}]`;
     const userMessage = (meta.message || '').trim();
     const fullMessage = userMessage ? `${marker}\n\n${userMessage}` : marker;
+    const slug = await ensureRoomSlug(supabaseClient, mentor);
+    const videoRoomUrl = slug ? `/meet/${slug}` : null;
     const { data: inserted, error } = await supabaseClient
       .from('sessions')
       .insert({
@@ -160,6 +187,7 @@ async function syncPaidBooking({ supabaseClient, meta, checkoutSession, mintLink
         mentee_name: sanitizeMenteeName(meta.menteeName),
         stripe_session_id: checkoutSession.id,
         calendly_scheduling_link: schedulingUrl,
+        video_room_url: videoRoomUrl,
       })
       .select('id')
       .maybeSingle();

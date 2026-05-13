@@ -117,7 +117,9 @@ function toNextSession(row, otherParty, asMentor) {
     sessionType: row.session_type,
     topic: row.message ?? null,
     prepNotes: row.prep_notes ?? null,
-    joinUrl: row.video_room_url ? `/session/${row.id}/video` : null,
+    joinUrl: typeof row.video_room_url === 'string' && row.video_room_url.startsWith('/')
+      ? row.video_room_url
+      : (row.video_room_url ? `/session/${row.id}/video` : null),
     asMentor,
     otherParty,
   };

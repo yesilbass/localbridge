@@ -79,7 +79,10 @@ export default function MeetLobby() {
         .eq('room_slug', slug)
         .maybeSingle();
       if (cancelled) return;
-      if (error) { setLoadError('Could not load this meeting room.'); setPageLoading(false); return; }
+      if (error) {
+        console.error('[meet] mentor lookup failed', error);
+        setLoadError('Could not load this meeting room.'); setPageLoading(false); return;
+      }
       if (!data) { setLoadError('This meeting room does not exist.'); setPageLoading(false); return; }
       setMentor(data);
     })();
@@ -91,7 +94,9 @@ export default function MeetLobby() {
     if (authLoading) return;
     if (!mentor) return;
     if (!user) {
-      navigate(`/login?redirect=${encodeURIComponent(`/meet/${slug}`)}`, { replace: true });
+      setLoadError('Please sign in to enter this meeting.');
+      setPageLoading(false);
+      setTimeout(() => navigate(`/login?redirect=${encodeURIComponent(`/meet/${slug}`)}`, { replace: true }), 600);
       return;
     }
 

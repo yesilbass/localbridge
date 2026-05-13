@@ -145,7 +145,7 @@ function CalendarSessionCard({ session, isMentor, mentorProfile, handleStatusUpd
           <div className="flex flex-wrap gap-2 pt-0.5">
             {canJoin && (
               <button type="button"
-                onClick={() => navigate(`/session/${session.id}/video`)}
+                onClick={() => navigate(typeof session.video_room_url === 'string' && session.video_room_url.startsWith('/') ? session.video_room_url : `/session/${session.id}/video`)}
                 className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-emerald-400 transition shadow-sm">
                 <Video className="h-3 w-3" />
                 Join Call
