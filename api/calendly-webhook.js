@@ -70,7 +70,8 @@ async function handleInviteeCreated(payload) {
       await supabase
         .from('sessions')
         .update({
-          status: 'accepted',
+          // Keep 'pending' so the mentor must explicitly accept or decline.
+          status: 'pending',
           scheduled_date: scheduledAt,
           calendly_event_uri: calendlyEventUri,
           calendly_invitee_uri: calendlyInviteeUri,
@@ -93,7 +94,8 @@ async function handleInviteeCreated(payload) {
     mentee_id: null,
     mentee_name: invitee?.name || null,
     session_type: 'career_advice',
-    status: 'accepted',
+    // Orphan rows (no matching paid Bridge session) still need mentor approval.
+    status: 'pending',
     scheduled_date: scheduledAt,
     calendly_event_uri: calendlyEventUri,
     calendly_invitee_uri: calendlyInviteeUri,

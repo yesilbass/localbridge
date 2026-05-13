@@ -467,17 +467,22 @@ function MentorMenteeReviewModal({ session, menteeId, onDone }) {
   async function submit() {
     if (!rating) return;
     setSaving(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      await supabase.from('mentee_reviews').insert({
-        session_id:         session.id,
-        mentor_reviewer_id: user?.id,
-        mentee_id:          menteeId,
-        rating,
-        notes: notes.trim() || null,
-      });
-    } catch { /* non-fatal */ }
-    finally { setSaving(false); onDone(); }
+    // Close the modal immediately so the mentor never sees "Saving…" hang
+    // if Supabase or RLS misbehaves. Fire-and-forget the insert.
+    const payload = {
+      session_id: session.id,
+      mentee_id:  menteeId,
+      rating,
+      notes: notes.trim() || null,
+    };
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.id) payload.mentor_reviewer_id = user.id;
+        await supabase.from('mentee_reviews').insert(payload);
+      } catch { /* non-fatal */ }
+    })();
+    onDone();
   }
 
   return (
@@ -1308,9 +1313,10 @@ export default function VideoCall() {
         <MentorMenteeReviewModal
           session={session}
           menteeId={session?.mentee_id}
-          onDone={async () => {
-            try { await updateSessionStatus(session.id, 'completed'); } catch { /* non-fatal */ }
+          onDone={() => {
             setShowMenteeReview(false);
+            // Fire-and-forget so the mentor isn't held up if RLS rejects the update.
+            void updateSessionStatus(session.id, 'completed').catch(() => {});
             navigate('/dashboard');
           }}
         />

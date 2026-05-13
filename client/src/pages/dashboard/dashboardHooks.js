@@ -648,7 +648,7 @@ export function useMentorReviewsRecent({ limit = 5 } = {}) {
   return { reviews: reviews.slice(0, limit), total, avgRating, isLoading, refetch: load };
 }
 
-// ─── useUpcomingSessions (mentor) ─────────────────────────────────────────────
+// ─── useUpcomingSessions (mentor + mentee) ────────────────────────────────────
 
 export function useUpcomingSessions({ limit = 5 } = {}) {
   const { user } = useAuth();
@@ -656,28 +656,48 @@ export function useUpcomingSessions({ limit = 5 } = {}) {
   const [isLoading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
-    if (!user || !isMentorAccount(user)) { setLoading(false); return; }
+    if (!user) { setLoading(false); return; }
     setLoading(true);
     try {
-      const mpId = await fetchMentorProfileId(user.id);
-      if (!mpId) { setSessions([]); return; }
-      const nowIso = new Date().toISOString();
-      const { data = [] } = await supabase
-        .from('sessions').select('*')
-        .eq('mentor_id', mpId)
+      const isMentor = isMentorAccount(user);
+      let query = supabase.from('sessions').select('*');
+      if (isMentor) {
+        const mpId = await fetchMentorProfileId(user.id);
+        if (!mpId) { setSessions([]); return; }
+        query = query.eq('mentor_id', mpId);
+      } else {
+        query = query.eq('mentee_id', user.id);
+      }
+      // Include rows where scheduled_date is null (just booked, awaiting Calendly slot)
+      // OR in the future. Filtering must happen client-side because Supabase OR on null+gte is awkward.
+      const { data = [] } = await query
         .in('status', ['pending', 'accepted'])
-        .gte('scheduled_date', nowIso)
-        .order('scheduled_date', { ascending: true })
-        .limit(limit + 3);
-      const names = await fetchUserNamesMap(data.map((s) => s.mentee_id));
-      setSessions(data.map((s) => ({ ...s, mentee_name: names[s.mentee_id] || s.mentee_name || 'Mentee' })));
+        .order('scheduled_date', { ascending: true, nullsFirst: false })
+        .limit(limit + 10);
+      const now = Date.now();
+      const upcoming = (data || []).filter((s) => !s.scheduled_date || new Date(s.scheduled_date).getTime() >= now - 60 * 60 * 1000);
+
+      if (isMentor) {
+        const names = await fetchUserNamesMap(upcoming.map((s) => s.mentee_id).filter(Boolean));
+        setSessions(upcoming.map((s) => ({ ...s, mentee_name: names[s.mentee_id] || s.mentee_name || 'Mentee' })));
+      } else {
+        const mentorIds = [...new Set(upcoming.map((s) => s.mentor_id).filter(Boolean))];
+        let mentorMap = {};
+        if (mentorIds.length) {
+          const { data: mentors = [] } = await supabase
+            .from('mentor_profiles').select('id, name')
+            .in('id', mentorIds);
+          mentorMap = Object.fromEntries((mentors || []).map((m) => [m.id, m.name]));
+        }
+        setSessions(upcoming.map((s) => ({ ...s, mentee_name: mentorMap[s.mentor_id] || 'Mentor' })));
+      }
     } finally { setLoading(false); }
   }, [user, limit]);
 
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    if (!user || !isMentorAccount(user)) return;
+    if (!user) return;
     const channel = supabase
       .channel(nextChannelId('dashboard-upcoming', user.id))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, () => load())

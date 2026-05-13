@@ -61,7 +61,8 @@ export default async function handler(req, res) {
     const { error: updateError } = await supabase
       .from('sessions')
       .update({
-        status: 'accepted',
+        // Stay 'pending' so the mentor must explicitly accept or decline.
+        status: 'pending',
         scheduled_date: scheduledAt,
         calendly_event_uri: resolvedEventUri,
         calendly_invitee_uri: inviteeUri || null,

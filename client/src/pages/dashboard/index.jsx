@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Navigate, Routes, Route } from 'react-router-dom';
+import { Navigate, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner.jsx';
 import OnboardingModal from '../../components/OnboardingModal.jsx';
 import CalendarSuccessToast from '../../components/CalendarSuccessToast.jsx';
+import ReviewModal from '../../components/ReviewModal.jsx';
 import supabase from '../../api/supabase';
 import { useDashboardRole, useActiveRole } from './dashboardHooks.js';
 import DashboardShell from './DashboardShell.jsx';
@@ -51,6 +52,7 @@ function MenteeHome({ activeRole }) {
       <HomeNowStrip activeRole={activeRole} />
       <NextSessionCard activeRole={activeRole} />
       <HomeAtAGlance activeRole={activeRole} />
+      <UpcomingSessionsBlock />
       <RecommendationsBlock limit={2} />
       <HomeSpending />
     </div>
@@ -202,6 +204,21 @@ export default function DashboardPage() {
   const [onboardingComplete, setOnboardingComplete] = useState(true);
   const [checking, setChecking] = useState(role === 'mentor');
   const [errored, setErrored] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [postCallReview, setPostCallReview] = useState(null);
+
+  // Mentee post-call review trigger: VideoCall navigates here with state.reviewSession.
+  useEffect(() => {
+    const rs = location.state?.reviewSession;
+    if (!rs || !rs.sessionId || !rs.mentorId) return;
+    setPostCallReview({
+      sessionId: rs.sessionId,
+      mentorId: rs.mentorId,
+      mentorName: rs.mentorName || 'your mentor',
+    });
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.state, location.pathname, navigate]);
 
   useEffect(() => {
     let cancelled = false;
@@ -259,6 +276,15 @@ export default function DashboardPage() {
       )}
       <OnboardingModal />
       <CalendarSuccessToast />
+      {postCallReview && (
+        <ReviewModal
+          sessionId={postCallReview.sessionId}
+          mentorId={postCallReview.mentorId}
+          mentorName={postCallReview.mentorName}
+          onClose={() => setPostCallReview(null)}
+          onSubmitted={() => setPostCallReview(null)}
+        />
+      )}
     </DashboardShell>
   );
 }

@@ -43,11 +43,22 @@ function validateBookingMetadata(meta) {
 }
 
 async function requirePublishedMentor(supabaseClient, mentorId) {
-  const { data, error } = await supabaseClient
+  // Try with room_slug; if the column is missing (pre-migration), fall back.
+  let { data, error } = await supabaseClient
     .from('mentor_profiles')
     .select('id, name, onboarding_complete, available, calendly_connected, calendly_event_type_uri, calendly_scheduling_url, room_slug')
     .eq('id', mentorId)
     .maybeSingle();
+  if (error && error.code === '42703') {
+    console.warn('[finalize-checkout] room_slug column missing — run migration 20261113000000');
+    const fallback = await supabaseClient
+      .from('mentor_profiles')
+      .select('id, name, onboarding_complete, available, calendly_connected, calendly_event_type_uri, calendly_scheduling_url')
+      .eq('id', mentorId)
+      .maybeSingle();
+    data = fallback.data;
+    error = fallback.error;
+  }
   if (error) throw error;
   if (!data || data.available === false || data.onboarding_complete === false) return null;
   return data;
@@ -67,12 +78,15 @@ async function ensureRoomSlug(supabaseClient, mentor) {
       .is('room_slug', null)
       .select('room_slug')
       .maybeSingle();
+    // Pre-migration safety: bail out cleanly if the column doesn't exist yet.
+    if (error && error.code === '42703') return null;
     if (!error && data?.room_slug) return data.room_slug;
-    const { data: refreshed } = await supabaseClient
+    const { data: refreshed, error: readError } = await supabaseClient
       .from('mentor_profiles')
       .select('room_slug')
       .eq('id', mentor.id)
       .maybeSingle();
+    if (readError && readError.code === '42703') return null;
     if (refreshed?.room_slug) return refreshed.room_slug;
   }
   return null;
@@ -173,27 +187,42 @@ async function syncPaidBooking({ supabaseClient, meta, checkoutSession, mintLink
     const marker = `[stripe_session:${checkoutSession.id}]`;
     const userMessage = (meta.message || '').trim();
     const fullMessage = userMessage ? `${marker}\n\n${userMessage}` : marker;
-    const slug = await ensureRoomSlug(supabaseClient, mentor);
+    let slug = null;
+    try {
+      slug = await ensureRoomSlug(supabaseClient, mentor);
+    } catch (err) {
+      // Never block a paid booking on slug failure. Mentor card will lazy-fill later.
+      console.warn('[finalize-checkout] ensureRoomSlug failed (non-fatal)', { message: err?.message });
+    }
     const videoRoomUrl = slug ? `/meet/${slug}` : null;
+    const insertPayload = {
+      mentee_id: meta.userId,
+      mentor_id: meta.mentorId,
+      session_type: meta.sessionTypeKey,
+      status: 'pending',
+      scheduled_date: null,
+      message: fullMessage,
+      mentee_name: sanitizeMenteeName(meta.menteeName),
+      stripe_session_id: checkoutSession.id,
+      calendly_scheduling_link: schedulingUrl,
+      video_room_url: videoRoomUrl,
+    };
     const { data: inserted, error } = await supabaseClient
       .from('sessions')
-      .insert({
-        mentee_id: meta.userId,
-        mentor_id: meta.mentorId,
-        session_type: meta.sessionTypeKey,
-        status: 'pending',
-        scheduled_date: null,
-        message: fullMessage,
-        mentee_name: sanitizeMenteeName(meta.menteeName),
-        stripe_session_id: checkoutSession.id,
-        calendly_scheduling_link: schedulingUrl,
-        video_room_url: videoRoomUrl,
-      })
+      .insert(insertPayload)
       .select('id')
       .maybeSingle();
     if (error) {
-      console.error('[finalize-checkout] session insert failed', { message: error.message });
-      return { ok: false, status: 500, error: 'Could not store session.' };
+      console.error('[finalize-checkout] session insert failed', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        payloadKeys: Object.keys(insertPayload),
+      });
+      // Surface SQL error code/message in the response so we can diagnose in prod.
+      const detail = error.code ? `${error.code}: ${error.message}` : error.message;
+      return { ok: false, status: 500, error: `Could not store session — ${detail}` };
     }
     bridgeSessionId = inserted?.id ?? null;
   }
