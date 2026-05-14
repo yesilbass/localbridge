@@ -67,18 +67,19 @@ app.get('/api/calendly-event-type-summary', wrapApiHandler(calendlyEventTypeSumm
 app.post('/api/calendly-select-event-type', wrapApiHandler(calendlySelectEventTypeHandler));
 app.post('/api/calendly-webhook', wrapApiHandler(calendlyWebhookHandler));
 
-// Utils dispatcher — user-names, mentor-room-slug, verification-retry
-function dispatchUtils(req, res, next) {
-  const action = req.path.replace(/^\/api\//, '').replace(/\/$/, '');
-  req.query = { ...(req.query || {}), action };
-  Promise.resolve(utilsDispatcher(req, res)).catch(next);
+// Utils dispatcher — user-names, mentor-room-slug, verification-retry, checkr-webhook
+// Note: utils handler has bodyParser:false — Express already buffered req.body as JSON,
+// so we re-attach it as a buffer so the handler's readRawBody falls through to the stream.
+function dispatchUtils(action) {
+  return (req, res, next) => {
+    req.query = { ...(req.query || {}), action };
+    Promise.resolve(utilsDispatcher(req, res)).catch(next);
+  };
 }
-app.all('/api/user-names', dispatchUtils);
-app.all('/api/mentor-room-slug', dispatchUtils);
-app.all('/api/cron/verification-retry', (req, res, next) => {
-  req.query = { ...(req.query || {}), action: 'verification-retry' };
-  Promise.resolve(utilsDispatcher(req, res)).catch(next);
-});
+app.all('/api/user-names', dispatchUtils('user-names'));
+app.all('/api/mentor-room-slug', dispatchUtils('mentor-room-slug'));
+app.all('/api/cron/verification-retry', dispatchUtils('verification-retry'));
+app.post('/api/checkr-webhook', express.raw({ type: '*/*' }), dispatchUtils('checkr-webhook'));
 
 // Mentor verification & tiering — dispatcher routes /api/verification/<action>
 // to the same handler used by Vercel rewrites in production.

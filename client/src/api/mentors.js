@@ -31,10 +31,10 @@ export async function getAllMentors({ search = '', industry = '', tier = '', ava
     // Hide only mentors who started real onboarding but didn't finish (false).
     .or('onboarding_complete.is.null,onboarding_complete.eq.true');
 
-  // Hide unverified mentors by default. Backfilled rows from the existing
-  // catalog were promoted to 'verified' in the migration, so this never hides
-  // legitimate seed mentors. Bronze-tier (verification_score < 40) are also
-  // hidden by default — they only appear with ?include_unverified=1.
+  // Only show active mentors. Seeded/demo mentors have mentor_status NULL
+  // (pre-migration rows) and are kept visible; new mentors must be approved.
+  query = query.or('mentor_status.is.null,mentor_status.eq.active');
+
   if (!includeUnverified) {
     query = query
       .or('verification_status.is.null,verification_status.eq.verified')
@@ -70,7 +70,8 @@ export async function getAllMentors({ search = '', industry = '', tier = '', ava
 }
 
 export async function getFeaturedMentors({ includeUnverified = false } = {}) {
-  let query = supabase.from('mentor_profiles').select('*');
+  let query = supabase.from('mentor_profiles').select('*')
+    .or('mentor_status.is.null,mentor_status.eq.active');
   if (!includeUnverified) {
     query = query
       .or('verification_status.is.null,verification_status.eq.verified')

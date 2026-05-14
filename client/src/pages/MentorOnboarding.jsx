@@ -535,9 +535,8 @@ export default function MentorOnboarding() {
     go(to);
   }
 
-  /* ── Save to Supabase ── */
+  /* ── Save to Supabase + submit application ── */
   async function handlePublish() {
-    console.log('[handlePublish] profileId:', profileId, 'form:', form);
     setSaving(true);
     setError('');
     try {
@@ -560,6 +559,19 @@ export default function MentorOnboarding() {
         onboarding_complete: true,
       };
       await updateMentorProfile(profileId, payload);
+
+      // Trigger Checkr background check and set mentor_status = 'pending'.
+      const serverUrl = import.meta.env.VITE_SERVER_URL ?? '';
+      const { data: { session } } = await (await import('../api/supabase')).default.auth.getSession();
+      await fetch(`${serverUrl}/api/verification/apply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({}),
+      }).catch(() => {}); // non-blocking — dashboard shows pending state regardless
+
       navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message ?? 'Failed to save. Please try again.');

@@ -3,17 +3,111 @@ import { verifyAuthUser } from '../_lib/auth.js';
 import { applyCors } from '../_lib/allowedOrigins.js';
 import { applySecurityHeaders, jsonError } from '../_lib/security.js';
 import { finalizeRun, recomputeRun } from '../_lib/verification/orchestrator.js';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, createHmac } from 'node:crypto';
+
+// bodyParser disabled so the Checkr webhook can read raw body for HMAC.
+// All other actions re-parse the body themselves below.
+export const config = { api: { bodyParser: false } };
+
+async function readRawBody(req) {
+  if (Buffer.isBuffer(req.body)) return req.body;
+  if (typeof req.body === 'string') return Buffer.from(req.body, 'utf8');
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', (c) => chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
 
 export default async function handler(req, res) {
+  const rawBody = await readRawBody(req);
   const action = String(req.query?.action ?? '').toLowerCase();
+
+  if (action === 'checkr-webhook') return handleCheckrWebhook(req, res, rawBody);
+
+  // Re-attach parsed body for all other actions
+  try { req.body = JSON.parse(rawBody.toString('utf8')); } catch { req.body = {}; }
+
   if (action === 'user-names') return handleUserNames(req, res);
   if (action === 'mentor-room-slug') return handleMentorRoomSlug(req, res);
   if (action === 'verification-retry') return handleVerificationRetry(req, res);
   return jsonError(res, 404, 'Unknown util action');
 }
 
-// ── user-names ──────────────────────────────────────────────────────────────
+// ── checkr-webhook ───────────────────────────────────────────────────────────
+
+function verifyCheckrHmac(rawBody, signature, secret) {
+  if (!signature || !secret) return false;
+  const expected = 'v1=' + createHmac('sha256', secret).update(rawBody).digest('hex');
+  return signature === expected;
+}
+
+async function handleCheckrWebhook(req, res, rawBody) {
+  applySecurityHeaders(res);
+  if (req.method !== 'POST') return jsonError(res, 405, 'Method not allowed');
+
+  const signature = req.headers['x-checkr-signature'];
+  const secret = process.env.CHECKR_WEBHOOK_SECRET;
+
+  if (secret && !verifyCheckrHmac(rawBody, signature, secret)) {
+    return jsonError(res, 401, 'Invalid signature');
+  }
+
+  let body;
+  try { body = JSON.parse(rawBody.toString('utf8')); } catch {
+    return jsonError(res, 400, 'Invalid JSON');
+  }
+
+  const { type, data } = body || {};
+
+  if (type === 'report.completed') {
+    const report = data?.object ?? {};
+    const reportId = report?.id;
+    const result = report?.result; // 'clear' | 'consider' | 'suspended'
+
+    if (!reportId) return res.json({ ok: true });
+
+    const { data: profile } = await supabase
+      .from('mentor_profiles')
+      .select('id, mentor_status')
+      .eq('checkr_report_id', reportId)
+      .maybeSingle();
+
+    if (!profile) return res.json({ ok: true, ignored: true });
+
+    if (result === 'clear' || result === 'consider') {
+      await supabase.from('mentor_profiles').update({
+        mentor_status: 'under_review',
+        checkr_status: result,
+      }).eq('id', profile.id);
+
+      const { data: existing } = await supabase
+        .from('mentor_applications_queue')
+        .select('id')
+        .eq('mentor_profile_id', profile.id)
+        .is('decision', null)
+        .maybeSingle();
+
+      if (!existing) {
+        await supabase.from('mentor_applications_queue').insert({
+          mentor_profile_id: profile.id,
+          checkr_report_id: reportId,
+          checkr_result: result,
+        });
+      }
+    } else if (result === 'suspended') {
+      await supabase.from('mentor_profiles').update({
+        mentor_status: 'rejected',
+        checkr_status: 'suspended',
+      }).eq('id', profile.id);
+    }
+  }
+
+  return res.json({ ok: true });
+}
+
+// ── user-names ───────────────────────────────────────────────────────────────
 
 async function handleUserNames(req, res) {
   applyCors(req, res, 'POST, OPTIONS');
@@ -23,7 +117,7 @@ async function handleUserNames(req, res) {
   const { user, error: authErr } = await verifyAuthUser(req);
   if (authErr || !user) return jsonError(res, 401, 'Unauthorized');
 
-  const body = typeof req.body === 'string' ? safeJson(req.body) : req.body || {};
+  const body = req.body || {};
   const userIds = Array.isArray(body.userIds)
     ? [...new Set(body.userIds.filter((id) => typeof id === 'string' && id.length > 0))]
     : [];
@@ -52,10 +146,6 @@ async function handleUserNames(req, res) {
   }));
 
   return res.status(200).json(nameMap);
-}
-
-function safeJson(s) {
-  try { return JSON.parse(s); } catch { return {}; }
 }
 
 // ── mentor-room-slug ─────────────────────────────────────────────────────────

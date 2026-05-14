@@ -35,9 +35,13 @@ export default async function handler(req, res) {
   applyCors(req, res, 'POST, GET, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(204).end();
 
-  if (isOff()) return jsonError(res, 503, 'Verification system is disabled (BRIDGE_VERIFICATION_MODE=off).');
-
   const action = String(req.query?.action || '').toLowerCase();
+
+  // Checkr-based application flow — not gated by BRIDGE_VERIFICATION_MODE.
+  if (action === 'apply')              return handleApply(req, res);
+  if (action === 'application-status') return handleApplicationStatus(req, res);
+
+  if (isOff()) return jsonError(res, 503, 'Verification system is disabled (BRIDGE_VERIFICATION_MODE=off).');
 
   switch (action) {
     case 'start':                       return handleStart(req, res);
@@ -54,6 +58,85 @@ export default async function handler(req, res) {
     case 'finalize':                    return handleFinalize(req, res);
     default:                            return jsonError(res, 404, `Unknown verification action: ${action || '(empty)'}`);
   }
+}
+
+// ─── apply ────────────────────────────────────────────────────────────────────
+
+async function handleApply(req, res) {
+  if (req.method !== 'POST') return jsonError(res, 405, 'Method not allowed');
+  const { user, error: authErr } = await verifyAuthUser(req);
+  if (!user) return jsonError(res, 401, authErr || 'Unauthorized');
+
+  const { profile, error: pErr } = await fetchOwnMentorProfile(user.id);
+  if (pErr || !profile) return jsonError(res, 404, 'No mentor profile. Complete onboarding first.');
+
+  if (['under_review', 'active'].includes(profile.mentor_status)) {
+    return res.json({ ok: true, alreadyApplied: true, mentorStatus: profile.mentor_status });
+  }
+
+  const apiKey = process.env.CHECKR_API_KEY;
+  let candidateId = null;
+  let reportId = null;
+
+  if (apiKey) {
+    try {
+      const auth = Buffer.from(`${apiKey}:`).toString('base64');
+      const parts = (profile.name || '').trim().split(/\s+/);
+      const firstName = parts[0] || 'Unknown';
+      const lastName = parts.slice(1).join(' ') || 'Unknown';
+
+      const candRes = await fetch('https://api.checkr.com/v1/candidates', {
+        method: 'POST',
+        headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ first_name: firstName, last_name: lastName, email: profile.email }),
+      });
+      const cand = await candRes.json();
+      candidateId = cand?.id ?? null;
+
+      if (candidateId) {
+        const rptRes = await fetch('https://api.checkr.com/v1/reports', {
+          method: 'POST',
+          headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ package: 'tasker_standard', candidate_id: candidateId }),
+        });
+        const rpt = await rptRes.json();
+        reportId = rpt?.id ?? null;
+      }
+    } catch (err) {
+      console.error('[apply] Checkr error:', err?.message);
+    }
+  }
+
+  await supabase.from('mentor_profiles').update({
+    mentor_status: 'pending',
+    checkr_candidate_id: candidateId,
+    checkr_report_id: reportId,
+    checkr_status: 'pending',
+    application_submitted_at: new Date().toISOString(),
+  }).eq('id', profile.id);
+
+  return res.json({ ok: true, reportId });
+}
+
+// ─── application-status ───────────────────────────────────────────────────────
+
+async function handleApplicationStatus(req, res) {
+  if (req.method !== 'GET') return jsonError(res, 405, 'Method not allowed');
+  const { user, error: authErr } = await verifyAuthUser(req);
+  if (!user) return jsonError(res, 401, authErr || 'Unauthorized');
+
+  const { data: profile } = await supabase
+    .from('mentor_profiles')
+    .select('mentor_status, checkr_status, application_submitted_at')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  return res.json({
+    ok: true,
+    mentorStatus: profile?.mentor_status ?? 'pending',
+    checkrStatus: profile?.checkr_status ?? null,
+    submittedAt: profile?.application_submitted_at ?? null,
+  });
 }
 
 // ─── start ───────────────────────────────────────────────────────────────────

@@ -3,12 +3,13 @@ import { devLogout } from './devAuth.js';
 import {
   LayoutDashboard, Users, CalendarDays, Star,
   ClipboardList, CalendarPlus, LogOut, ChevronRight,
-  Terminal, Bell, AlertTriangle,
+  Terminal, Bell, AlertTriangle, ShieldCheck,
 } from 'lucide-react';
 
 const NAV = [
   { id: 'overview',      label: 'Overview',      icon: LayoutDashboard },
   { id: 'mentors',       label: 'Mentors',        icon: Users           },
+  { id: 'mentor-queue',  label: 'Mentor Queue',   icon: ShieldCheck     },
   { id: 'sessions',      label: 'Sessions',       icon: CalendarDays    },
   { id: 'reviews',       label: 'Reviews',        icon: Star            },
   { id: 'users',         label: 'Users',          icon: ClipboardList   },

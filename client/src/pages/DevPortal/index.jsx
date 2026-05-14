@@ -9,6 +9,7 @@ import DevReviews from './DevReviews.jsx';
 import DevUsers from './DevUsers.jsx';
 import DevSchedule from './DevSchedule.jsx';
 import DevCancellations from './DevCancellations.jsx';
+import DevMentorQueue from './DevMentorQueue.jsx';
 
 export default function DevPortal() {
   const [authed, setAuthed] = useState(isDevAuthed);
@@ -21,6 +22,7 @@ export default function DevPortal() {
   const CONTENT = {
     overview:      <DevOverview />,
     mentors:       <DevMentors />,
+    'mentor-queue': <DevMentorQueue />,
     sessions:      <DevSessions />,
     reviews:       <DevReviews />,
     users:         <DevUsers />,

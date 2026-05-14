@@ -28,6 +28,7 @@ import UpcomingSessionsBlock from './UpcomingSessionsBlock.jsx';
 import ProfileHealthCard from './ProfileHealthCard.jsx';
 import { useProfileHealth } from './dashboardHooks.js';
 import VerificationBanner from './VerificationBanner.jsx';
+import MentorApplicationPending from '../../components/MentorApplicationPending.jsx';
 import TierExplainer from './TierExplainer.jsx';
 import { useVerificationStatus } from './useVerificationStatus.js';
 
@@ -217,6 +218,7 @@ function DashboardError({ onRetry }) {
 export default function DashboardPage() {
   const { role, isLoading, user } = useDashboardRole();
   const [onboardingComplete, setOnboardingComplete] = useState(true);
+  const [mentorStatus, setMentorStatus] = useState('active');
   const [checking, setChecking] = useState(role === 'mentor');
   const [errored, setErrored] = useState(false);
   const location = useLocation();
@@ -243,11 +245,12 @@ export default function DashboardPage() {
       try {
         const { data } = await supabase
           .from('mentor_profiles')
-          .select('onboarding_complete')
+          .select('onboarding_complete, mentor_status')
           .eq('user_id', user.id)
           .maybeSingle();
         if (cancelled) return;
         setOnboardingComplete(data?.onboarding_complete ?? false);
+        setMentorStatus(data?.mentor_status ?? 'active');
       } catch {
         if (!cancelled) setErrored(true);
       } finally {
@@ -269,6 +272,7 @@ export default function DashboardPage() {
   }
   if (!isLoading && !user) return <Navigate to="/login" replace />;
   if (role === 'mentor' && !onboardingComplete) return <Navigate to="/onboarding" replace />;
+  if (role === 'mentor' && mentorStatus !== 'active') return <MentorApplicationPending status={mentorStatus} />;
 
   return (
     <DashboardShell

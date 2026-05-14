@@ -416,4 +416,125 @@ router.post('/schedule-meeting', async (req, res) => {
   }
 });
 
+// ── Mentor Application Queue ──────────────────────────────────────────────────
+
+router.get('/mentor-queue', async (req, res) => {
+  try {
+    const sb = admin();
+    const status = String(req.query.status || 'pending');
+
+    let query = sb
+      .from('mentor_applications_queue')
+      .select(`
+        id, checkr_result, decision, decision_notes, decided_at, created_at,
+        mentor_profile_id,
+        mentor_profiles (
+          id, name, email, title, company, industry, bio,
+          years_experience, expertise, linkedin_url, image_url,
+          mentor_status, checkr_status, checkr_report_id, application_submitted_at
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (status === 'pending') query = query.is('decision', null);
+    else if (status !== 'all') query = query.eq('decision', status);
+
+    const { data, error } = await query.limit(200);
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json({ ok: true, items: data || [] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/mentor-queue/pending-profiles', async (_req, res) => {
+  try {
+    const sb = admin();
+    const { data, error } = await sb
+      .from('mentor_profiles')
+      .select('id, name, email, title, company, linkedin_url, mentor_status, checkr_report_id, checkr_status, application_submitted_at, image_url, expertise, years_experience')
+      .eq('mentor_status', 'pending')
+      .order('application_submitted_at', { ascending: false });
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json({ ok: true, items: data || [] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/mentor-queue/decide', async (req, res) => {
+  try {
+    const sb = admin();
+    const { queueId, decision, notes } = req.body || {};
+
+    if (!queueId || !['approve', 'reject'].includes(decision)) {
+      return res.status(400).json({ error: 'Invalid request' });
+    }
+
+    const { data: item, error: fetchErr } = await sb
+      .from('mentor_applications_queue')
+      .select('id, mentor_profile_id, decision')
+      .eq('id', queueId)
+      .maybeSingle();
+
+    if (fetchErr || !item) return res.status(404).json({ error: 'Not found' });
+    if (item.decision) return res.status(409).json({ error: 'Already decided' });
+
+    await sb.from('mentor_applications_queue').update({
+      decision,
+      decision_notes: notes || null,
+      decided_at: new Date().toISOString(),
+    }).eq('id', queueId);
+
+    await sb.from('mentor_profiles').update({
+      mentor_status: decision === 'approve' ? 'active' : 'rejected',
+      ...(decision === 'approve' ? { available: true } : {}),
+    }).eq('id', item.mentor_profile_id);
+
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/mentor-queue/simulate-clear', async (req, res) => {
+  try {
+    const sb = admin();
+    const { mentorProfileId } = req.body || {};
+    if (!mentorProfileId) return res.status(400).json({ error: 'Missing mentorProfileId' });
+
+    const { data: profile, error: pErr } = await sb
+      .from('mentor_profiles')
+      .select('id, checkr_report_id, mentor_status')
+      .eq('id', mentorProfileId)
+      .maybeSingle();
+
+    if (pErr || !profile) return res.status(404).json({ error: 'Profile not found' });
+
+    await sb.from('mentor_profiles').update({
+      mentor_status: 'under_review',
+      checkr_status: 'clear',
+    }).eq('id', mentorProfileId);
+
+    const { data: existing } = await sb
+      .from('mentor_applications_queue')
+      .select('id')
+      .eq('mentor_profile_id', mentorProfileId)
+      .is('decision', null)
+      .maybeSingle();
+
+    if (!existing) {
+      await sb.from('mentor_applications_queue').insert({
+        mentor_profile_id: mentorProfileId,
+        checkr_report_id: profile.checkr_report_id || null,
+        checkr_result: 'clear',
+      });
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
