@@ -204,7 +204,7 @@ function ApplicationRow({ item, onDecide, onSimulateClear, isPending = false }) 
 }
 
 export default function DevMentorQueue() {
-  const [tab, setTab] = useState('ready'); // 'awaiting' | 'ready' | 'decided'
+  const [tab, setTab] = useState('awaiting'); // 'awaiting' | 'ready' | 'decided'
   const [readyItems, setReadyItems] = useState([]);
   const [awaitingItems, setAwaitingItems] = useState([]);
   const [decidedItems, setDecidedItems] = useState([]);
