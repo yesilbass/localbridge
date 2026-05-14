@@ -76,7 +76,7 @@ router.get('/mentors', async (req, res) => {
 
     let query = sb
       .from('mentor_profiles')
-      .select('id, user_id, name, email, title, company, industry, bio, years_experience, expertise, rating, total_sessions, available, image_url, linkedin_url, created_at, google_refresh_token')
+      .select('id, user_id, name, email, title, company, industry, bio, years_experience, expertise, rating, total_sessions, available, image_url, linkedin_url, created_at, mentor_status')
       .order('created_at', { ascending: false });
 
     if (search) {
@@ -89,11 +89,7 @@ router.get('/mentors', async (req, res) => {
     const { data, error } = await query;
     if (error) throw error;
 
-    // Mask refresh token
-    const masked = (data || []).map(m => ({
-      ...m,
-      google_refresh_token: m.google_refresh_token ? '••••••••••••' : null,
-    }));
+    const masked = data || [];
 
     res.json(masked);
   } catch (err) {
