@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { devFetch } from './devAuth.js';
 import {
   CheckCircle, XCircle, Clock, ShieldCheck, RefreshCw,
-  ExternalLink, ChevronDown, ChevronUp, Zap, User,
+  ExternalLink, ChevronDown, ChevronUp, Zap, User, CreditCard, Camera, Bot,
 } from 'lucide-react';
 
 const STATUS_COLORS = {
@@ -24,7 +24,7 @@ function Badge({ value }) {
   );
 }
 
-function ApplicationRow({ item, onDecide, onSimulateClear, isPending = false }) {
+function ApplicationRow({ item, onDecide, onSimulateClear, onAutoVerify, isPending = false }) {
   const [expanded, setExpanded] = useState(false);
   const [deciding, setDeciding] = useState(false);
   const [notes, setNotes] = useState('');
@@ -39,6 +39,12 @@ function ApplicationRow({ item, onDecide, onSimulateClear, isPending = false }) 
   async function simulateClear() {
     setDeciding(true);
     await onSimulateClear(profile.id);
+    setDeciding(false);
+  }
+
+  async function autoVerify() {
+    setDeciding(true);
+    await onAutoVerify(profile.id);
     setDeciding(false);
   }
 
@@ -67,12 +73,20 @@ function ApplicationRow({ item, onDecide, onSimulateClear, isPending = false }) 
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {item.verification_score != null && (
+            <span
+              className="text-[10px] font-black tabular-nums"
+              style={{ color: item.verification_score >= 75 ? '#22c55e' : item.verification_score >= 50 ? '#f59e0b' : '#ef4444' }}
+            >
+              {item.verification_score}/100
+            </span>
+          )}
           {item.decided_at ? (
             <span className={`text-[10px] font-black uppercase tracking-wider ${item.decision === 'approve' ? 'text-emerald-400' : 'text-red-400'}`}>
               {item.decision === 'approve' ? '✓ Approved' : '✗ Rejected'}
             </span>
           ) : isPending ? (
-            <span className="text-[10px] font-semibold text-amber-400">Awaiting Checkr</span>
+            <span className="text-[10px] font-semibold text-amber-400">Awaiting review</span>
           ) : null}
           <button
             onClick={() => setExpanded(e => !e)}
@@ -110,18 +124,30 @@ function ApplicationRow({ item, onDecide, onSimulateClear, isPending = false }) 
             </div>
           </div>
 
-          {/* LinkedIn */}
-          {profile.linkedin_url && (
-            <a
-              href={profile.linkedin_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-xl bg-white/4 px-3 py-2.5 text-xs font-semibold text-sky-400 hover:bg-white/6 transition-colors"
-            >
+          {/* Social verification */}
+          {profile.verification_data?.socialVerified ? (
+            <div className="flex items-center gap-2 rounded-xl bg-emerald-500/8 border border-emerald-500/20 px-3 py-2.5 text-xs">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+              <span className="text-emerald-400 font-semibold capitalize">{profile.verification_data.socialVerified.provider} verified</span>
+              <span className="text-stone-400">· @{profile.verification_data.socialVerified.username}</span>
+              {profile.linkedin_url && (
+                <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="ml-auto text-sky-400 hover:text-sky-300">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              )}
+            </div>
+          ) : profile.verification_data?.socialSkipped ? (
+            <div className="flex items-center gap-2 rounded-xl bg-white/3 px-3 py-2.5 text-xs text-stone-500">
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+              No social network connected (skipped)
+            </div>
+          ) : profile.linkedin_url ? (
+            <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-xl bg-white/4 px-3 py-2.5 text-xs font-semibold text-sky-400 hover:bg-white/6 transition-colors">
               <ExternalLink className="h-3.5 w-3.5 shrink-0" />
               {profile.linkedin_url}
             </a>
-          )}
+          ) : null}
 
           {/* Expertise tags */}
           {Array.isArray(profile.expertise) && profile.expertise.length > 0 && (
@@ -137,6 +163,34 @@ function ApplicationRow({ item, onDecide, onSimulateClear, isPending = false }) 
           {/* Bio */}
           {profile.bio && (
             <p className="text-xs text-stone-500 leading-relaxed line-clamp-3">{profile.bio}</p>
+          )}
+
+          {/* Verification data */}
+          {profile.verification_data && (Object.keys(profile.verification_data).length > 0) && (
+            <div className="rounded-xl bg-white/3 px-3 py-2.5 space-y-2 text-xs">
+              <p className="text-stone-500 font-semibold uppercase tracking-wider text-[9px]">Identity verification</p>
+              {profile.verification_data.govIdNumber && (
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-3 w-3 text-stone-500 shrink-0" />
+                  <span className="text-stone-500">Gov ID:</span>
+                  <span className="font-mono text-stone-300">{profile.verification_data.govIdNumber}</span>
+                </div>
+              )}
+              {profile.verification_data.govIdFileName && (
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-3 w-3 text-stone-500 shrink-0" />
+                  <span className="text-stone-500">ID photo:</span>
+                  <span className="text-stone-300">{profile.verification_data.govIdFileName}</span>
+                </div>
+              )}
+              {profile.verification_data.faceFileName && (
+                <div className="flex items-center gap-2">
+                  <Camera className="h-3 w-3 text-stone-500 shrink-0" />
+                  <span className="text-stone-500">Selfie:</span>
+                  <span className="text-stone-300">{profile.verification_data.faceFileName}</span>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Checkr info */}
@@ -155,16 +209,59 @@ function ApplicationRow({ item, onDecide, onSimulateClear, isPending = false }) 
             </div>
           )}
 
-          {/* Dev: simulate Checkr clear */}
+          {/* Verification score breakdown */}
+          {(item.verification_score != null || item.verification_breakdown) && (
+            <div className="rounded-xl bg-white/3 px-3 py-2.5 space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <p className="text-stone-500 font-semibold uppercase tracking-wider text-[9px]">Algo verification score</p>
+                <span className={`text-xs font-black ${item.verification_score >= 75 ? 'text-emerald-400' : item.verification_score >= 50 ? 'text-amber-400' : 'text-red-400'}`}>
+                  {item.verification_score ?? '—'}/100
+                  {item.auto_decision === 'auto_approved' && ' · Auto-approved'}
+                  {item.auto_decision === 'flagged_review' && ' · Flagged for review'}
+                  {item.auto_decision === 'auto_rejected' && ' · Auto-rejected'}
+                </span>
+              </div>
+              {item.verification_breakdown && (
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
+                  {Object.entries(item.verification_breakdown).map(([k, v]) => (
+                    <div key={k} className="flex items-center justify-between gap-1">
+                      <span className="text-stone-600 truncate">{k.replace(/([A-Z])/g, ' $1').toLowerCase()}</span>
+                      <span className={v > 0 ? 'text-emerald-400 font-bold' : 'text-stone-700'}>+{v}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Motivation essay */}
+          {profile.verification_data?.motivationEssay && (
+            <div className="rounded-xl bg-white/3 px-3 py-2.5 space-y-1 text-xs">
+              <p className="text-stone-500 font-semibold uppercase tracking-wider text-[9px]">Why Bridge?</p>
+              <p className="text-stone-400 leading-relaxed line-clamp-4">{profile.verification_data.motivationEssay}</p>
+            </div>
+          )}
+
+          {/* Dev: auto-verify + simulate Checkr clear */}
           {isPending && (
-            <button
-              onClick={simulateClear}
-              disabled={deciding}
-              className="w-full flex items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/8 py-2.5 text-xs font-bold text-amber-400 hover:bg-amber-500/15 transition-colors disabled:opacity-50"
-            >
-              <Zap className="h-3.5 w-3.5" />
-              {deciding ? 'Simulating…' : 'Simulate Checkr Clear (dev)'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={autoVerify}
+                disabled={deciding}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-500/8 py-2.5 text-xs font-bold text-indigo-400 hover:bg-indigo-500/15 transition-colors disabled:opacity-50"
+              >
+                <Bot className="h-3.5 w-3.5" />
+                {deciding ? 'Running…' : 'Auto-verify (dev)'}
+              </button>
+              <button
+                onClick={simulateClear}
+                disabled={deciding}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/8 py-2.5 text-xs font-bold text-amber-400 hover:bg-amber-500/15 transition-colors disabled:opacity-50"
+              >
+                <Zap className="h-3.5 w-3.5" />
+                {deciding ? 'Simulating…' : 'Manual → review'}
+              </button>
+            </div>
           )}
 
           {/* Approve / Reject */}
@@ -235,6 +332,14 @@ export default function DevMentorQueue() {
 
   async function handleSimulateClear(mentorProfileId) {
     await devFetch('/mentor-queue/simulate-clear', {
+      method: 'POST',
+      body: JSON.stringify({ mentorProfileId }),
+    });
+    await loadAll();
+  }
+
+  async function handleAutoVerify(mentorProfileId) {
+    await devFetch('/mentor-queue/auto-verify', {
       method: 'POST',
       body: JSON.stringify({ mentorProfileId }),
     });
@@ -319,6 +424,7 @@ export default function DevMentorQueue() {
               isPending={tab === 'awaiting'}
               onDecide={handleDecide}
               onSimulateClear={handleSimulateClear}
+              onAutoVerify={handleAutoVerify}
             />
           ))}
         </div>

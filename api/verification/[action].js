@@ -107,12 +107,21 @@ async function handleApply(req, res) {
     }
   }
 
+  let bodyData = {};
+  try {
+    const raw = req.body;
+    bodyData = typeof raw === 'string' ? JSON.parse(raw)
+      : Buffer.isBuffer(raw) ? JSON.parse(raw.toString('utf8'))
+      : (raw || {});
+  } catch {}
+
   await supabase.from('mentor_profiles').update({
     mentor_status: 'pending',
     checkr_candidate_id: candidateId,
     checkr_report_id: reportId,
     checkr_status: 'pending',
     application_submitted_at: new Date().toISOString(),
+    verification_data: bodyData.verificationData || null,
   }).eq('id', profile.id);
 
   return res.json({ ok: true, reportId });

@@ -1,4 +1,5 @@
-import { Clock, ShieldCheck, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
+import { Clock, ShieldCheck, CheckCircle2, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const CONFIG = {
   pending: {
@@ -49,6 +50,7 @@ export default function MentorApplicationPending({ status = 'pending' }) {
   const cfg = CONFIG[status] || CONFIG.pending;
   const Icon = cfg.icon;
   const isRejected = status === 'rejected' || status === 'suspended';
+  const navigate = useNavigate();
 
   return (
     <div
@@ -154,8 +156,25 @@ export default function MentorApplicationPending({ status = 'pending' }) {
             </div>
           )}
 
+          {/* Re-apply for rejected */}
+          {status === 'rejected' && (
+            <div className="mt-6">
+              <button
+                onClick={() => navigate('/onboarding/mentor')}
+                className="w-full flex items-center justify-center gap-2 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-6 py-3 text-sm font-semibold transition hover:bg-[var(--bridge-border)]"
+                style={{ color: 'var(--bridge-text-secondary)' }}
+              >
+                <RefreshCw className="h-4 w-4" />
+                Update application &amp; re-apply
+              </button>
+              <p className="mt-2 text-center text-xs" style={{ color: 'var(--bridge-text-faint)' }}>
+                Improve your verification score by adding work experience, education, a stronger LinkedIn URL, and a more detailed motivation essay.
+              </p>
+            </div>
+          )}
+
           {/* Support link */}
-          <div className="mt-8 border-t pt-6" style={{ borderColor: 'var(--bridge-border)' }}>
+          <div className="mt-6 border-t pt-5" style={{ borderColor: 'var(--bridge-border)' }}>
             <p className="text-center text-xs" style={{ color: 'var(--bridge-text-faint)' }}>
               Questions?{' '}
               <a
