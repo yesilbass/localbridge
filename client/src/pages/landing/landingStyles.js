@@ -3,7 +3,7 @@ export const LANDING_CSS = `
        (StatsBento → FinalCta) until they scroll near. Hero / BrandStrip /
        MentorMarquee are left alone because they're often partially visible
        on tall screens and their layout feeds into ScrollTrigger refs. */
-  .landing-root > section:nth-of-type(n+4){
+  html.is-landing-route .landing-root > section:nth-of-type(n+4){
     content-visibility: auto;
     contain-intrinsic-size: auto 800px;
   }

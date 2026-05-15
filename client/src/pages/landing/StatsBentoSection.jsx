@@ -1,11 +1,13 @@
-const STATS = [
-  { value: '2,400+', label: 'Vetted mentors' },
-  { value: '4.9/5',  label: '1,200+ reviews' },
-  { value: '97%',    label: 'Would recommend' },
-  { value: '$2.1M+', label: 'Comp increases unlocked' },
-];
+import { useI18n } from '../../i18n';
 
 export default function StatsBentoSection() {
+  const { t } = useI18n();
+  const STATS = [
+    { value: '2,400+', label: t('landing.stats.vettedMentors', 'Vetted mentors') },
+    { value: '4.9/5',  label: t('landing.stats.reviews', '1,200+ reviews') },
+    { value: '97%',    label: t('landing.stats.recommend', 'Would recommend') },
+    { value: '$2.1M+', label: t('landing.stats.compIncrease', 'Comp increases unlocked') },
+  ];
   return (
     <section
       aria-labelledby="stats-heading"
@@ -22,7 +24,7 @@ export default function StatsBentoSection() {
           className="text-center text-[10px] font-black uppercase"
           style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.32em' }}
         >
-          By the numbers
+          {t('landing.stats.heading', 'By the numbers')}
         </p>
       </div>
       <div

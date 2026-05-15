@@ -1,14 +1,15 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, ShieldCheck, CreditCard, Unlock, Sparkles } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
-
-const GUARANTEES = [
-  { Icon: CreditCard,  label: 'No credit card',           sub: 'Sign up free · pay per session' },
-  { Icon: ShieldCheck, label: 'First session guaranteed', sub: "Full refund if it isn't a fit"   },
-  { Icon: Unlock,      label: 'Cancel any time',          sub: 'No subscriptions, ever'          },
-];
+import { useI18n } from '../../i18n';
 
 export default function FinalCtaSection({ user }) {
+  const { t } = useI18n();
+  const GUARANTEES = [
+    { Icon: CreditCard,  label: t('landing.cta.noCard', 'No credit card'),           sub: t('landing.cta.noCardSub', 'Sign up free · pay per session') },
+    { Icon: ShieldCheck, label: t('landing.cta.firstSession', 'First session guaranteed'), sub: t('landing.cta.firstSessionSub', "Full refund if it isn't a fit") },
+    { Icon: Unlock,      label: t('landing.cta.cancelAnytime', 'Cancel any time'),   sub: t('landing.cta.cancelAnytimeSub', 'No subscriptions, ever') },
+  ];
   return (
     <section
       id="final"
@@ -48,7 +49,7 @@ export default function FinalCtaSection({ user }) {
             }}
           >
             <Sparkles className="h-3 w-3" />
-            Ready to get unstuck?
+            {t('landing.cta.badge', 'Ready to get unstuck?')}
           </div>
 
           <h2
@@ -56,12 +57,12 @@ export default function FinalCtaSection({ user }) {
             className="font-display font-black leading-[1.04] tracking-[-0.04em]"
             style={{ fontSize: 'clamp(2rem, 5vw, 3.75rem)', color: 'var(--bridge-text)' }}
           >
-            One conversation<br />
+            {t('landing.cta.heading1', 'One conversation')}<br />
             <span
               className="bg-clip-text text-transparent"
               style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)' }}
             >
-              changes everything.
+              {t('landing.cta.heading2', 'changes everything.')}
             </span>
           </h2>
 
@@ -73,7 +74,7 @@ export default function FinalCtaSection({ user }) {
               lineHeight: 1.55,
             }}
           >
-            Stop spinning. Book a session with someone who&rsquo;s walked the exact path you&rsquo;re on — and made it through.
+            {t('landing.cta.subCopy', "Stop spinning. Book a session with someone who's walked the exact path you're on — and made it through.")}
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-3.5 sm:flex-row">
@@ -88,7 +89,7 @@ export default function FinalCtaSection({ user }) {
             >
               <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
               <span className="relative z-10 flex items-center gap-2">
-                Get matched
+                {t('landing.cta.getMatched', 'Get matched')}
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
               </span>
             </Link>

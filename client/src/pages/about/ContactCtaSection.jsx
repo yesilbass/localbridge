@@ -1,9 +1,15 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import RevealOnScroll from '../landing/RevealOnScroll';
+import { mailtoHref } from '../../config/contact';
 import { EASE, DUR_SHORT } from '../landing/landingHooks';
+import { ABOUT_CONTACT_SECTION_PAD } from './aboutData';
 
 const PRIMARY_BASE_BG = 'var(--color-primary)';
+
+const foundersMailHref = mailtoHref({
+  subject: 'Hello — from the Bridge About page',
+});
 
 const primaryEnter = (e) => {
   e.currentTarget.style.transform = 'translateY(-1px)';
@@ -29,12 +35,11 @@ export default function ContactCtaSection() {
     <section
       id="about-final"
       aria-labelledby="about-final-heading"
-      className="py-24 lg:py-28"
+      className={ABOUT_CONTACT_SECTION_PAD}
       style={{
         background:
           'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 12%, var(--bridge-canvas)) 0%, color-mix(in srgb, var(--lp-grad-mid, var(--color-primary-hover)) 14%, var(--bridge-canvas)) 55%, color-mix(in srgb, var(--color-primary) 18%, var(--bridge-canvas)) 100%)',
-        borderTop:
-          '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+        borderTop: '1px solid var(--bridge-border-strong)',
       }}
     >
       <div className="mx-auto max-w-4xl px-5 sm:px-8 text-center">
@@ -91,13 +96,13 @@ export default function ContactCtaSection() {
                 lineHeight: 1.4,
               }}
             >
-              An hour with the team is one click away.
+              No calendar link yet — send a note and a founder will reply.
             </p>
           </div>
 
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="mailto:founders@bridge.app"
+              href={foundersMailHref}
               className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-[14px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{
                 backgroundColor: PRIMARY_BASE_BG,

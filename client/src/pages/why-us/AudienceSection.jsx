@@ -1,14 +1,20 @@
 import { Check, X } from 'lucide-react';
 import RevealOnScroll from '../landing/RevealOnScroll';
-import { AUDIENCE_FOR, AUDIENCE_NOT_FOR } from './whyUsData';
+import {
+  AUDIENCE_FOR,
+  AUDIENCE_NOT_FOR,
+  WHY_US_SECTION_PAD,
+} from './whyUsData';
 
 export default function AudienceSection() {
   return (
     <section
       id="audience"
       aria-labelledby="audience-heading"
-      className="py-24 lg:py-32"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
+      className={WHY_US_SECTION_PAD}
+      style={{
+        backgroundColor: 'var(--bridge-canvas)',
+      }}
     >
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -53,7 +59,7 @@ export default function AudienceSection() {
         </RevealOnScroll>
 
         <RevealOnScroll>
-          <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="mt-10 sm:mt-12 grid grid-cols-1 lg:grid-cols-2 gap-5">
             {/* For */}
             <article
               className="rounded-3xl p-7 sm:p-8 flex flex-col gap-5 h-full"

@@ -1,7 +1,8 @@
 import { Linkedin, Github, Mail } from 'lucide-react';
 import RevealOnScroll from '../landing/RevealOnScroll';
+import { mailtoHref } from '../../config/contact';
 import { EASE, DUR_SHORT } from '../landing/landingHooks';
-import { TEAM_FEATURED, TEAM_SMALL } from './aboutData';
+import { ABOUT_SECTION_PAD, TEAM_FEATURED, TEAM_SMALL } from './aboutData';
 
 const SOCIAL_RESET = (e) => {
   e.currentTarget.style.color = 'var(--bridge-text-secondary)';
@@ -38,10 +39,9 @@ export default function TeamSection() {
     <section
       id="team"
       aria-labelledby="team-heading"
-      className="py-24 lg:py-32"
+      className={ABOUT_SECTION_PAD}
       style={{
         backgroundColor: 'var(--bridge-canvas)',
-        borderTop: '1px solid var(--bridge-border)',
       }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
@@ -86,7 +86,7 @@ export default function TeamSection() {
           </p>
         </RevealOnScroll>
 
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 lg:grid-rows-2 lg:auto-rows-fr gap-4 sm:gap-5">
+        <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-12 sm:grid-cols-2 sm:gap-5 lg:grid-cols-12 lg:grid-rows-2 lg:auto-rows-fr">
           <RevealOnScroll className="sm:col-span-2 lg:col-span-6 lg:row-span-2 h-full">
             <FeaturedCard m={TEAM_FEATURED} />
           </RevealOnScroll>
@@ -192,7 +192,7 @@ function FeaturedCard({ m }) {
         >
           {m.bio}
         </p>
-        <SocialRow name={m.name} size="md" />
+        <SocialRow member={m} size="md" />
       </div>
     </article>
   );
@@ -224,34 +224,62 @@ function SmallCard({ m }) {
         >
           {m.role} &middot; {m.focus}
         </p>
-        <SocialRow name={m.name} size="sm" />
+        <SocialRow member={m} size="sm" />
       </div>
     </article>
   );
 }
 
-function SocialRow({ name, size }) {
-  const wrapperClass = size === 'md' ? 'mt-6 flex items-center gap-3' : 'mt-2 flex items-center gap-2';
+function SocialRow({ member, size }) {
+  const wrapperClass =
+    size === 'md'
+      ? 'mt-6 flex flex-wrap items-center gap-3'
+      : 'mt-2 flex flex-wrap items-center gap-2';
+  const mailHref = mailtoHref({
+    subject: `Bridge — note for ${member.name}`,
+  });
+
   return (
     <div className={wrapperClass}>
-      <SocialButton size={size} aria-label={`${name} on LinkedIn`}>
-        <Linkedin className={size === 'md' ? 'h-4 w-4' : 'h-3 w-3'} aria-hidden="true" />
-      </SocialButton>
-      <SocialButton size={size} aria-label={`${name} on GitHub`}>
-        <Github className={size === 'md' ? 'h-4 w-4' : 'h-3 w-3'} aria-hidden="true" />
-      </SocialButton>
-      <SocialButton size={size} aria-label={`Email ${name}`}>
+      {member.linkedinUrl ? (
+        <SocialLink
+          href={member.linkedinUrl}
+          external
+          size={size}
+          aria-label={`${member.name} on LinkedIn (opens in a new tab)`}
+        >
+          <Linkedin className={size === 'md' ? 'h-4 w-4' : 'h-3 w-3'} aria-hidden="true" />
+        </SocialLink>
+      ) : null}
+      {member.githubUrl ? (
+        <SocialLink
+          href={member.githubUrl}
+          external
+          size={size}
+          aria-label={`${member.name} on GitHub (opens in a new tab)`}
+        >
+          <Github className={size === 'md' ? 'h-4 w-4' : 'h-3 w-3'} aria-hidden="true" />
+        </SocialLink>
+      ) : null}
+      <SocialLink
+        href={mailHref}
+        size={size}
+        aria-label={`Email ${member.name}`}
+      >
         <Mail className={size === 'md' ? 'h-4 w-4' : 'h-3 w-3'} aria-hidden="true" />
-      </SocialButton>
+      </SocialLink>
     </div>
   );
 }
 
-function SocialButton({ size, children, ...rest }) {
+function SocialLink({ href, external, size, children, ...rest }) {
   const dim = size === 'md' ? 'h-9 w-9' : 'h-7 w-7';
   return (
     <a
-      href="#"
+      href={href}
+      {...(external
+        ? { target: '_blank', rel: 'noopener noreferrer' }
+        : {})}
       className={`${dim} rounded-full inline-flex items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2`}
       style={{
         backgroundColor: 'var(--bridge-surface-muted)',

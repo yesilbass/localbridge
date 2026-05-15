@@ -423,12 +423,24 @@ function computeTierAndRate(profile, _verificationData, verificationScore) {
   const education = Array.isArray(profile.education) ? profile.education : [];
   const score = verificationScore || 0;
 
-  // Education bonus — matches the same regex used in the verification score
+  // Education bonus — degree_level dropdown takes precedence over degree text regex
   let eduBonus = 0;
-  const degrees = education.map((e) => (e.degree || '').toLowerCase());
-  if (degrees.some((d) => /phd|doctorate|d\.?sc|j\.?d|\bmd\b|dba|d\.?phil/i.test(d))) eduBonus = 50;
-  else if (degrees.some((d) => /master|mba|msc|meng|m\.s\b|m\.a\b|llm/i.test(d))) eduBonus = 25;
-  else if (degrees.some((d) => /bachelor|b\.s\b|b\.a\b|b\.e\b|b\.tech|bsc\b|beng/i.test(d))) eduBonus = 10;
+  const topLevel = education.reduce((best, e) => {
+    const lvl = e.degree_level;
+    if (lvl === 'phd')       return Math.max(best, 4);
+    if (lvl === 'masters')   return Math.max(best, 3);
+    if (lvl === 'bachelors') return Math.max(best, 2);
+    if (lvl === 'associate') return Math.max(best, 1);
+    // Fallback to degree text regex for entries without degree_level
+    const d = (e.degree || '').toLowerCase();
+    if (/phd|doctorate|d\.?sc|j\.?d|\bmd\b|dba|d\.?phil/i.test(d)) return Math.max(best, 4);
+    if (/master|mba|msc|meng|m\.s\b|m\.a\b|llm/i.test(d))          return Math.max(best, 3);
+    if (/bachelor|b\.s\b|b\.a\b|b\.e\b|b\.tech|bsc\b|beng/i.test(d)) return Math.max(best, 2);
+    return best;
+  }, 0);
+  if (topLevel >= 4) eduBonus = 50;
+  else if (topLevel === 3) eduBonus = 25;
+  else if (topLevel === 2) eduBonus = 10;
 
   // Experience bonus
   const expBonus = yrs >= 15 ? 90 : yrs >= 10 ? 65 : yrs >= 6 ? 40 : yrs >= 3 ? 20 : 0;
@@ -619,7 +631,8 @@ router.post('/mentor-queue/auto-verify', async (req, res) => {
     const expertise = Array.isArray(profile.expertise) ? profile.expertise : [];
     const essay = vd.motivationEssay || '';
     const essayWords = essay.trim().split(/\s+/).filter(Boolean).length;
-    const socialVerified = vd.socialVerified || null; // { provider: 'linkedin'|'github', username, displayName }
+    // socialVerified is set by the app-2 Continue handler from the LinkedIn URL; linkedinUrl is the raw field
+    const socialVerified = vd.socialVerified || (vd.linkedinUrl ? { provider: 'linkedin', username: vd.linkedinUrl } : null);
 
     // Work history year consistency: sum covered years from entries and compare to claimed
     const CURRENT_YR = new Date().getFullYear();
@@ -644,14 +657,22 @@ router.post('/mentor-queue/auto-verify', async (req, res) => {
 
     const essayQuality = await scoreEssayWithOpenAI(essay); // 0–12 from OpenAI, scaled to 15 below
 
-    // Education level — read the degree string from each entry
+    // Education level — degree_level dropdown is authoritative; fall back to degree text regex
     let eduLevelPts = 0;
     if (eduValid && education.length > 0) {
-      const degrees = education.map((e) => (e.degree || '').toLowerCase());
-      if (degrees.some((d) => /phd|doctorate|d\.?sc|j\.?d|\bmd\b|dba|d\.?phil/i.test(d))) eduLevelPts = 25;
-      else if (degrees.some((d) => /master|mba|msc|meng|m\.s\b|m\.a\b|llm/i.test(d))) eduLevelPts = 20;
-      else if (degrees.some((d) => /bachelor|b\.s\b|b\.a\b|b\.e\b|b\.tech|bsc\b|beng/i.test(d))) eduLevelPts = 13;
-      else eduLevelPts = 6; // associate, certificate, bootcamp, or other valid entry
+      const topLvl = education.reduce((best, e) => {
+        const lvl = e.degree_level;
+        if (lvl === 'phd')       return Math.max(best, 4);
+        if (lvl === 'masters')   return Math.max(best, 3);
+        if (lvl === 'bachelors') return Math.max(best, 2);
+        if (lvl === 'associate') return Math.max(best, 1);
+        const d = (e.degree || '').toLowerCase();
+        if (/phd|doctorate|d\.?sc|j\.?d|\bmd\b|dba|d\.?phil/i.test(d)) return Math.max(best, 4);
+        if (/master|mba|msc|meng|m\.s\b|m\.a\b|llm/i.test(d))          return Math.max(best, 3);
+        if (/bachelor|b\.s\b|b\.a\b|b\.e\b|b\.tech|bsc\b|beng/i.test(d)) return Math.max(best, 2);
+        return Math.max(best, 1); // certificate, bootcamp, or other valid entry
+      }, 0);
+      eduLevelPts = topLvl >= 4 ? 25 : topLvl === 3 ? 20 : topLvl === 2 ? 13 : 6;
     }
 
     // Base scoring — max 100 achievable without social verification.
@@ -700,9 +721,11 @@ router.post('/mentor-queue/auto-verify', async (req, res) => {
       mentor_status: newStatus,
       checkr_status: 'clear',
       ...(newStatus === 'active' ? { available: true, tier, session_rate } : {}),
-      ...(socialVerified?.provider === 'linkedin' && !profile.linkedin_url
-        ? { linkedin_url: `https://linkedin.com/in/${socialVerified.username}` }
-        : {}),
+      ...(vd.linkedinUrl && !profile.linkedin_url
+        ? { linkedin_url: vd.linkedinUrl }
+        : socialVerified?.provider === 'linkedin' && !profile.linkedin_url
+          ? { linkedin_url: socialVerified.username }
+          : {}),
     }).eq('id', mentorProfileId);
 
     if (profileErr) return res.status(500).json({ error: profileErr.message });

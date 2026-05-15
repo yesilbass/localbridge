@@ -1,5 +1,12 @@
 // Static content for the About page. No JSX, no hooks — pure data.
 
+/** Shared vertical rhythm — tighter on small screens (aligned with /why-us). */
+export const ABOUT_SECTION_PAD =
+  'py-16 sm:py-20 md:py-24 lg:py-32';
+
+export const ABOUT_CONTACT_SECTION_PAD =
+  'py-16 sm:py-20 md:py-24 lg:py-28';
+
 export const PRINCIPLES = [
   {
     number: '01',
@@ -34,10 +41,11 @@ export const PRINCIPLES = [
 export const TIMELINE_ENTRIES = [
   {
     date: 'Jan 2026',
-    live: false,
+    live: true,
     title: 'First conversation.',
     body:
       'Five operators, one shared frustration. We spent a weekend sketching what we wished had existed when we were stuck.',
+    cta: { label: 'Join the waitlist', to: '/register' },
   },
   {
     date: 'Mar 2026',
@@ -55,10 +63,10 @@ export const TIMELINE_ENTRIES = [
   },
   {
     date: 'May 2026',
-    live: true,
+    live: false,
     title: 'Public launch.',
     body:
-      'Bridge opens to operators across product, engineering, design, and founder roles. 2,400+ mentors live on day one.',
+      'Opening to operators across product, engineering, design, and founder roles. Every mentor hand-vetted before they go live.',
   },
   {
     date: 'Q3 2026',
@@ -77,6 +85,8 @@ export const TEAM_FEATURED = {
   focus: 'Product & engineering',
   bio:
     'Muaz leads product and engineering at Bridge. Before Bridge, he shipped consumer and developer tools at early-stage startups and contributed to open-source projects used by thousands of teams.',
+  linkedinUrl: null,
+  githubUrl: null,
 };
 
 export const TEAM_SMALL = [
@@ -85,23 +95,31 @@ export const TEAM_SMALL = [
     initials: 'AY',
     role: 'Co-founder',
     focus: 'Growth & partnerships',
+    linkedinUrl: null,
+    githubUrl: null,
   },
   {
     name: 'Aayush Patel',
     initials: 'AP',
     role: 'Co-founder',
     focus: 'Pricing',
+    linkedinUrl: null,
+    githubUrl: null,
   },
   {
     name: 'Omar Aydah',
     initials: 'OA',
     role: 'Co-founder',
     focus: 'Mentor experience',
+    linkedinUrl: null,
+    githubUrl: null,
   },
   {
     name: 'Irshad Muse',
     initials: 'IM',
     role: 'Co-founder',
     focus: 'Community & ops',
+    linkedinUrl: null,
+    githubUrl: null,
   },
 ];

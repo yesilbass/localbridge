@@ -1,5 +1,6 @@
 import { OUTCOMES } from './landingData';
 import RevealOnScroll from './RevealOnScroll';
+import { useI18n } from '../../i18n';
 
 const TONE_GRADIENTS = {
   amber:   'linear-gradient(135deg,#4F46E5,#818CF8)',
@@ -13,6 +14,7 @@ function initialsOf(name) {
 }
 
 export default function OutcomesSection() {
+  const { t } = useI18n();
   const list = OUTCOMES.slice(0, 3);
   const [featured, ...rest] = list;
 
@@ -39,9 +41,9 @@ export default function OutcomesSection() {
               fontFeatureSettings: '"kern" 1, "ss01" 1',
             }}
           >
-            People who got
+            {t('landing.outcomes.heading1', 'People who got')}
             <br />
-            <span style={{ color: 'var(--color-primary)' }}>unstuck.</span>
+            <span style={{ color: 'var(--color-primary)' }}>{t('landing.outcomes.heading2', 'unstuck.')}</span>
           </h2>
           <p
             className="mt-6 max-w-xl"
@@ -51,7 +53,7 @@ export default function OutcomesSection() {
               lineHeight: 1.55,
             }}
           >
-            Real outcomes from people who booked the session. We use first-name and role only.
+            {t('landing.outcomes.subCopy', 'Real outcomes from people who booked the session. We use first-name and role only.')}
           </p>
         </RevealOnScroll>
 

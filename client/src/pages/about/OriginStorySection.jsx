@@ -1,14 +1,16 @@
 import RevealOnScroll from '../landing/RevealOnScroll';
+import { ABOUT_SECTION_PAD } from './aboutData';
 
 export default function OriginStorySection() {
   return (
     <section
       id="origin"
       aria-labelledby="origin-heading"
-      className="py-24 lg:py-32"
+      className={ABOUT_SECTION_PAD}
       style={{
         backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border)',
+        borderTop: '1px solid var(--bridge-border-strong)',
+        borderBottom: '1px solid var(--bridge-border-strong)',
       }}
     >
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
@@ -42,7 +44,7 @@ export default function OriginStorySection() {
           </h2>
         </RevealOnScroll>
 
-        <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="mt-10 grid grid-cols-1 gap-10 sm:mt-12 lg:grid-cols-12">
           <RevealOnScroll className="lg:col-span-7">
             <div
               className="flex flex-col gap-5"

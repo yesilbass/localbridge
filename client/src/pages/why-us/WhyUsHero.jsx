@@ -41,7 +41,7 @@ export default function WhyUsHero() {
     <section
       id="hero"
       aria-labelledby="hero-heading"
-      className="relative flex min-h-[80vh] items-start pt-24 lg:pt-28 pb-20"
+      className="relative flex min-h-0 items-start pb-14 pt-24 sm:min-h-[68vh] sm:pb-20 lg:min-h-[78vh] lg:pt-28 lg:pb-20"
       style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="relative z-10 mx-auto w-full max-w-6xl px-5 sm:px-8">
@@ -196,7 +196,7 @@ export default function WhyUsHero() {
             className="lg:col-span-5"
           >
             <div
-              className="rounded-3xl p-7 lg:p-8 flex flex-col gap-5 min-h-[400px] sm:min-h-[440px] lg:min-h-[480px]"
+              className="flex min-h-[min(22rem,52vh)] flex-col gap-5 rounded-3xl p-7 sm:min-h-[360px] sm:p-7 lg:min-h-[460px] lg:p-8"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
                 boxShadow:

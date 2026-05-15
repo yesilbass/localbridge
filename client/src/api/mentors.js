@@ -35,11 +35,8 @@ export async function getAllMentors({ search = '', industry = '', tier = '', ava
   // (pre-migration rows) and are kept visible; new mentors must be approved.
   query = query.or('mentor_status.is.null,mentor_status.eq.active');
 
-  if (!includeUnverified) {
-    query = query
-      .or('verification_status.is.null,verification_status.eq.verified')
-      .or('verification_tier.is.null,verification_tier.neq.bronze');
-  }
+  // verification_status/verification_tier are legacy columns from the old system.
+  // New mentors are gated solely by mentor_status (already filtered above).
 
   if (search) {
     query = query.or(`name.ilike.%${search}%,title.ilike.%${search}%,company.ilike.%${search}%`);
@@ -69,16 +66,10 @@ export async function getAllMentors({ search = '', industry = '', tier = '', ava
   return { data: data ?? [], error: null, totalCount: count ?? 0 };
 }
 
-export async function getFeaturedMentors({ includeUnverified = false } = {}) {
-  let query = supabase.from('mentor_profiles').select('*')
-    .or('mentor_status.is.null,mentor_status.eq.active');
-  if (!includeUnverified) {
-    query = query
-      .or('verification_status.is.null,verification_status.eq.verified')
-      .or('verification_tier.is.null,verification_tier.neq.bronze');
-  }
-  const { data, error } = await query
-    .order('verification_tier', { ascending: false }) // platinum/gold first
+export async function getFeaturedMentors() {
+  const { data, error } = await supabase.from('mentor_profiles').select('*')
+    .or('mentor_status.is.null,mentor_status.eq.active')
+    .or('onboarding_complete.is.null,onboarding_complete.eq.true')
     .order('rating', { ascending: false })
     .limit(6);
   if (error) throw error;

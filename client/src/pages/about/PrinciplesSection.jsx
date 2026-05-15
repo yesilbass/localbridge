@@ -1,12 +1,12 @@
 import RevealOnScroll from '../landing/RevealOnScroll';
-import { PRINCIPLES } from './aboutData';
+import { ABOUT_SECTION_PAD, PRINCIPLES } from './aboutData';
 
 export default function PrinciplesSection() {
   return (
     <section
       id="principles"
       aria-labelledby="principles-heading"
-      className="py-24 lg:py-32"
+      className={ABOUT_SECTION_PAD}
       style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
@@ -51,11 +51,11 @@ export default function PrinciplesSection() {
           </p>
         </RevealOnScroll>
 
-        <div className="mt-14 flex flex-col">
+        <div className="mt-10 flex flex-col sm:mt-14">
           {PRINCIPLES.map((p, i) => (
             <RevealOnScroll key={p.number}>
               <div
-                className="grid grid-cols-[64px_1fr] sm:grid-cols-[88px_1fr] gap-6 sm:gap-10 py-10 sm:py-12"
+                className="grid grid-cols-[64px_1fr] gap-6 py-8 sm:grid-cols-[88px_1fr] sm:gap-10 sm:py-10 lg:py-12"
                 style={
                   i > 0
                     ? { borderTop: '1px solid var(--bridge-border)' }

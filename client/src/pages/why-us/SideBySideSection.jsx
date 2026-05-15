@@ -7,7 +7,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import RevealOnScroll from '../landing/RevealOnScroll';
-import { ALTERNATIVES } from './whyUsData';
+import { ALTERNATIVES, WHY_US_SECTION_PAD } from './whyUsData';
 
 const ICON_MAP = {
   MessageCircle,
@@ -20,7 +20,7 @@ export default function SideBySideSection() {
     <section
       id="vs"
       aria-labelledby="vs-heading"
-      className="py-24 lg:py-32"
+      className={WHY_US_SECTION_PAD}
       style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
@@ -57,7 +57,7 @@ export default function SideBySideSection() {
 
         <RevealOnScroll>
           <div
-            className="mt-12 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] rounded-3xl overflow-hidden"
+            className="mt-10 sm:mt-12 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] rounded-3xl overflow-hidden"
             style={{
               backgroundColor: 'var(--bridge-surface)',
               boxShadow:

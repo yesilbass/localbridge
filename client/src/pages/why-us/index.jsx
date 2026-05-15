@@ -1,4 +1,5 @@
-import { useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { LANDING_CSS } from '../landing/landingStyles';
 import { buildLandingPaletteCSS } from '../landing/landingPalette';
 import WhyUsHero from './WhyUsHero';
@@ -11,11 +12,25 @@ import AudienceSection from './AudienceSection';
 import WhyUsFinalCtaSection from './WhyUsFinalCtaSection';
 
 export default function WhyUs() {
+  const location = useLocation();
+
   useLayoutEffect(() => {
     document.documentElement.classList.add('is-whyus-route');
     return () =>
       document.documentElement.classList.remove('is-whyus-route');
   }, []);
+
+  useEffect(() => {
+    if (location.hash !== '#receipts') return;
+    const id = location.hash.slice(1);
+    const run = () => {
+      document.getElementById(id)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(run));
+  }, [location.pathname, location.hash]);
 
   return (
     <main

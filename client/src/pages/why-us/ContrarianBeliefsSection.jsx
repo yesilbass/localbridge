@@ -1,16 +1,16 @@
 import RevealOnScroll from '../landing/RevealOnScroll';
-import { BELIEFS } from './whyUsData';
+import { BELIEFS, WHY_US_SECTION_PAD } from './whyUsData';
 
 export default function ContrarianBeliefsSection() {
   return (
     <section
       id="beliefs"
       aria-labelledby="beliefs-heading"
-      className="py-24 lg:py-32"
+      className={WHY_US_SECTION_PAD}
       style={{
         backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border)',
-        borderBottom: '1px solid var(--bridge-border)',
+        borderTop: '1px solid var(--bridge-border-strong)',
+        borderBottom: '1px solid var(--bridge-border-strong)',
       }}
     >
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
@@ -55,11 +55,11 @@ export default function ContrarianBeliefsSection() {
           </p>
         </RevealOnScroll>
 
-        <div className="mt-14">
+        <div className="mt-10 sm:mt-14">
           {BELIEFS.map((b, i) => (
             <RevealOnScroll key={i}>
               <div
-                className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-8 lg:gap-12 items-stretch py-12"
+                className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-8 lg:gap-12 items-stretch py-8 sm:py-10 lg:py-12"
                 style={
                   i > 0
                     ? { borderTop: '1px solid var(--bridge-border)' }

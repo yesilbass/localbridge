@@ -1,28 +1,29 @@
 import { MessageCircle, Calendar, BookOpen, ArrowRight } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
-
-const ALTERNATIVES = [
-  {
-    Icon: MessageCircle,
-    label: 'LinkedIn cold DMs',
-    problem: 'Two replies out of fifty, three weeks later.',
-    tag: 'Slow + low signal',
-  },
-  {
-    Icon: Calendar,
-    label: 'Six-month coaching packages',
-    problem: '$1,200 commitment for a relationship that may not fit.',
-    tag: 'Expensive + over-committed',
-  },
-  {
-    Icon: BookOpen,
-    label: 'Career courses and content',
-    problem: 'Generic advice. No one who has done your exact job.',
-    tag: 'Impersonal + abstract',
-  },
-];
+import { useI18n } from '../../i18n';
 
 export default function ComparisonSection() {
+  const { t } = useI18n();
+  const ALTERNATIVES = [
+    {
+      Icon: MessageCircle,
+      label: t('landing.comparison.alt1.label', 'LinkedIn cold DMs'),
+      problem: t('landing.comparison.alt1.problem', 'Two replies out of fifty, three weeks later.'),
+      tag: t('landing.comparison.alt1.tag', 'Slow + low signal'),
+    },
+    {
+      Icon: Calendar,
+      label: t('landing.comparison.alt2.label', 'Six-month coaching packages'),
+      problem: t('landing.comparison.alt2.problem', '$1,200 commitment for a relationship that may not fit.'),
+      tag: t('landing.comparison.alt2.tag', 'Expensive + over-committed'),
+    },
+    {
+      Icon: BookOpen,
+      label: t('landing.comparison.alt3.label', 'Career courses and content'),
+      problem: t('landing.comparison.alt3.problem', 'Generic advice. No one who has done your exact job.'),
+      tag: t('landing.comparison.alt3.tag', 'Impersonal + abstract'),
+    },
+  ];
   return (
     <section
       id="comparison"
@@ -39,7 +40,7 @@ export default function ComparisonSection() {
             className="text-[10px] font-black uppercase"
             style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.32em' }}
           >
-            Why not just DM on LinkedIn?
+            {t('landing.comparison.eyebrow', 'Why not just DM on LinkedIn?')}
           </p>
           <h2
             id="comparison-heading"
@@ -52,9 +53,9 @@ export default function ComparisonSection() {
               fontFeatureSettings: '"kern" 1, "ss01" 1',
             }}
           >
-            What you tried
+            {t('landing.comparison.heading1', 'What you tried')}
             <br />
-            <span style={{ color: 'var(--color-primary)' }}>before Bridge.</span>
+            <span style={{ color: 'var(--color-primary)' }}>{t('landing.comparison.heading2', 'before Bridge.')}</span>
           </h2>
           <p
             className="mt-6"
@@ -64,7 +65,7 @@ export default function ComparisonSection() {
               lineHeight: 1.55,
             }}
           >
-            Three ways people try to fix their career. Each one wastes more time than it saves.
+            {t('landing.comparison.subCopy', 'Three ways people try to fix their career. Each one wastes more time than it saves.')}
           </p>
         </RevealOnScroll>
 
@@ -123,7 +124,7 @@ export default function ComparisonSection() {
                 className="text-[11px] font-black uppercase"
                 style={{ color: 'var(--bridge-text-secondary)', letterSpacing: '0.36em' }}
               >
-                Instead
+                {t('landing.comparison.instead', 'Instead')}
               </span>
               <div className="flex-1 h-px" style={{ backgroundColor: 'var(--bridge-border-strong)' }} />
             </div>
@@ -156,13 +157,13 @@ export default function ComparisonSection() {
                     letterSpacing: '-0.01em',
                   }}
                 >
-                  Bridge: one session, the right person.
+                  {t('landing.comparison.bridge.headline', 'Bridge: one session, the right person.')}
                 </p>
                 <p
                   className="text-[13px] mt-1"
                   style={{ color: 'var(--bridge-text-secondary)' }}
                 >
-                  Booked in seconds. $60 average. No subscriptions. No DMs.
+                  {t('landing.comparison.bridge.sub', 'Booked in seconds. $60 average. No subscriptions. No DMs.')}
                 </p>
               </div>
               <p
@@ -172,7 +173,7 @@ export default function ComparisonSection() {
                   letterSpacing: '0.18em',
                 }}
               >
-                Direct + decisive
+                {t('landing.comparison.bridge.tag', 'Direct + decisive')}
               </p>
             </div>
           </div>

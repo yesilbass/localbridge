@@ -28,7 +28,7 @@ export default function AboutHero() {
     <section
       id="about-hero"
       aria-labelledby="about-hero-heading"
-      className="relative flex items-start min-h-[78vh] pt-24 lg:pt-28 pb-20"
+      className="relative flex min-h-0 items-start pb-14 pt-24 sm:min-h-[68vh] sm:pb-20 lg:min-h-[72vh] lg:pb-20 lg:pt-28"
       style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="relative z-10 mx-auto w-full max-w-6xl px-5 sm:px-8">
@@ -139,7 +139,7 @@ export default function AboutHero() {
             className="lg:col-span-5"
           >
             <div
-              className="rounded-3xl p-7 flex flex-col gap-5 min-h-[360px] sm:min-h-[400px] lg:min-h-[460px]"
+              className="flex min-h-[min(20rem,50vh)] flex-col gap-5 rounded-3xl p-7 sm:min-h-[340px] lg:min-h-[440px]"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
                 boxShadow:

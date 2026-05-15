@@ -14,6 +14,7 @@ import CalendlyInlineWidget from '../../components/CalendlyInlineWidget';
 import { AuroraBg, KineticNumber } from '../dashboard/dashboardCinematic.jsx';
 import supabase from '../../api/supabase';
 import { ArrowLeft, BadgeCheck, Heart, Share } from 'lucide-react';
+import TierBadge from '../onboarding/mentor/verify/components/TierBadge';
 
 import {
   useFavoriteMentor,
@@ -149,8 +150,11 @@ function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare,
                   style={{ fontSize: '11px', letterSpacing: '0.16em', background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)', color: 'var(--color-primary)' }}
                 >
                   <BadgeCheck className="h-3.5 w-3.5" aria-hidden />
-                  Verified
+                  Bridge Verified
                 </span>
+              )}
+              {mentor.tier && (
+                <TierBadge tier={mentor.tier} size="sm" />
               )}
               {joinedLabel && <span>On Bridge since {joinedLabel}</span>}
             </div>
@@ -250,6 +254,9 @@ function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare,
                 </div>
                 <p className="mt-1" style={{ fontSize: '12px', color: 'var(--bridge-text-muted)' }}>
                   60 min · Video call · Notes follow-up
+                </p>
+                <p className="mt-0.5" style={{ fontSize: '11px', color: 'var(--bridge-text-faint)' }}>
+                  Rate assigned by Bridge algorithm
                 </p>
               </div>
             )}

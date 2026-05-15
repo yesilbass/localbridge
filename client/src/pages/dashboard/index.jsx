@@ -260,16 +260,16 @@ export default function DashboardPage() {
   if (role === 'mentor' && checking) {
     return <LoadingSpinner label="Loading…" className="min-h-screen" size="lg" />;
   }
-  // In-flight application (pending/under_review/suspended) — always show waiting screen
-  if (role === 'mentor' && mentorStatus && mentorStatus !== 'active' && mentorStatus !== 'rejected') {
+  // In-flight or suspended — show waiting screen; "Edit my application" button navigates to onboarding
+  if (role === 'mentor' && (mentorStatus === 'pending' || mentorStatus === 'under_review' || mentorStatus === 'suspended')) {
     return <MentorApplicationPending status={mentorStatus} />;
   }
   // Rejected — show pending screen with re-apply button
-  if (role === 'mentor' && mentorStatus === 'rejected' && onboardingComplete) {
+  if (role === 'mentor' && mentorStatus === 'rejected') {
     return <MentorApplicationPending status="rejected" />;
   }
-  // No application yet, or rejected before completing — go to onboarding (verification)
-  if (role === 'mentor' && !onboardingComplete && mentorStatus !== 'active') {
+  // No application yet (mentor_status null) — go to onboarding to apply
+  if (role === 'mentor' && !mentorStatus && !onboardingComplete) {
     return <Navigate to="/onboarding/mentor" replace />;
   }
   // Approved but profile not yet completed — go to onboarding (profile completion phase)

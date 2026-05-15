@@ -14,6 +14,7 @@ import MentorCard, { MentorGridSkeleton } from './MentorCard';
 import { AiMatchCard, AiHonorableCard } from './AiMatchCards';
 import MentorTiersModal from './MentorTiersModal';
 import { AuroraBg } from '../dashboard/dashboardCinematic.jsx';
+import { useContent } from '../../content';
 
 function FetchErrorBanner({ message, onRetry }) {
   return (
@@ -50,6 +51,7 @@ function FetchErrorBanner({ message, onRetry }) {
 
 export default function Mentors() {
   const { user } = useAuth();
+  const { s } = useContent();
   const navigate  = useNavigate();
   const location  = useLocation();
   const asMentor  = user ? isMentorAccount(user) : false;
@@ -251,32 +253,36 @@ export default function Mentors() {
     <main role="main" className="relative isolate min-h-screen overflow-x-hidden" style={{ backgroundColor: 'var(--bridge-canvas)' }}>
       <AuroraBg />
 
+      {/* Navbar-integrated hero glows — fixed position so they bleed up behind the transparent navbar */}
+      {!aiMode && (
+        <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[420px]">
+          <div
+            className="absolute -left-[8%] -top-[20%] h-[100%] w-[55%] rounded-full blur-[120px]"
+            style={{
+              background:
+                'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 28%, transparent) 0%, transparent 70%)',
+              opacity: 0.30,
+            }}
+          />
+          <div
+            className="absolute -right-[10%] -top-[10%] h-[80%] w-[40%] rounded-full blur-[120px]"
+            style={{
+              background:
+                'radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 32%, transparent) 0%, transparent 70%)',
+              opacity: 0.18,
+            }}
+          />
+        </div>
+      )}
+
       {/* Hero — directory-page header: confident, compact, anchored to context.
           Mentors are the protagonist; the hero exists to frame them, not eclipse them. */}
       {!aiMode && (
         <section
           aria-labelledby="mentors-heading"
-          className="relative overflow-hidden px-5 pt-12 pb-6 sm:px-8 lg:pt-14 lg:pb-8"
+          className="relative px-5 pt-28 pb-6 sm:px-8 lg:pt-32 lg:pb-8"
         >
-          {/* Subtle accent glow — sits behind the headline, fades into the grid below */}
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div
-              className="absolute -left-[8%] top-[-30%] h-[100%] w-[55%] rounded-full blur-[100px]"
-              style={{
-                background:
-                  'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 30%, transparent) 0%, transparent 70%)',
-                opacity: 0.32,
-              }}
-            />
-            <div
-              className="absolute -right-[10%] top-[-20%] h-[80%] w-[40%] rounded-full blur-[110px]"
-              style={{
-                background:
-                  'radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 36%, transparent) 0%, transparent 70%)',
-                opacity: 0.20,
-              }}
-            />
-          </div>
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" />
 
           <div className="relative mx-auto max-w-7xl">
             <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
@@ -301,7 +307,7 @@ export default function Mentors() {
                   <span style={{ color: 'var(--bridge-text-muted)' }}>
                     {totalCount > 0
                       ? `${totalCount.toLocaleString()} mentors live · updated in real-time`
-                      : 'Browse the Bridge mentor directory'}
+                      : s.mentors.heroEyebrowBrowse}
                   </span>
                 </div>
 
@@ -317,7 +323,7 @@ export default function Mentors() {
                     fontFeatureSettings: '"kern" 1, "ss01" 1',
                   }}
                 >
-                  Find the mentor who's{' '}
+                  {s.mentors.heroHeading1}{' '}
                   <span
                     className="bg-clip-text text-transparent"
                     style={{
@@ -325,7 +331,7 @@ export default function Mentors() {
                         'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)',
                     }}
                   >
-                    already done it
+                    {s.mentors.heroHeading2}
                   </span>
                   .
                 </h1>
@@ -335,7 +341,7 @@ export default function Mentors() {
                   className="mt-2 max-w-xl text-[14px] sm:text-[15px]"
                   style={{ color: 'var(--bridge-text-muted)', lineHeight: 1.55 }}
                 >
-                  Vetted founders, executives, and specialists. Search, filter, book in 60 seconds.
+                  {s.mentors.heroSubCopy}
                 </p>
               </div>
 
@@ -356,7 +362,7 @@ export default function Mentors() {
                     >
                       <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
                       <svg className="relative z-10 h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
-                      <span className="relative z-10">AI match</span>
+                      <span className="relative z-10">{s.mentors.aiMatch}</span>
                     </button>
                   )}
                   {!asMentor && remainingUses === 0 && (
@@ -368,7 +374,7 @@ export default function Mentors() {
                       }}
                     >
                       <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
-                      AI matching used up
+                      {s.mentors.aiMatchUsedUp}
                     </span>
                   )}
                   <button
@@ -389,7 +395,7 @@ export default function Mentors() {
                       e.currentTarget.style.color = 'var(--bridge-text-secondary)';
                     }}
                   >
-                    Compare tiers
+                    {s.mentors.compareTiers}
                   </button>
                 </div>
 
@@ -448,7 +454,7 @@ export default function Mentors() {
               </svg>
               <input
                 type="text"
-                placeholder="Search by name, role, company…"
+                placeholder={s.mentors.searchPlaceholder}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 className="h-10 w-full rounded-xl py-0 pl-9 pr-8 text-[13px] font-medium transition focus:outline-none"
@@ -1013,8 +1019,8 @@ export default function Mentors() {
             >
               <svg className="h-6 w-6" style={{ color: 'var(--color-primary)' }} fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.35-4.35" strokeLinecap="round" /></svg>
             </div>
-            <p className="relative mt-5 font-display text-2xl font-black tracking-tight" style={{ color: 'var(--bridge-text)' }}>Nobody fits that combo</p>
-            <p className="relative mt-2 max-w-sm text-[13px] leading-relaxed" style={{ color: 'var(--bridge-text-muted)' }}>Try loosening a filter or using a different keyword.</p>
+            <p className="relative mt-5 font-display text-2xl font-black tracking-tight" style={{ color: 'var(--bridge-text)' }}>{s.mentors.noResultsHeading}</p>
+            <p className="relative mt-2 max-w-sm text-[13px] leading-relaxed" style={{ color: 'var(--bridge-text-muted)' }}>{s.mentors.noResultsSub}</p>
             <button
               type="button"
               onClick={resetFilters}
@@ -1025,7 +1031,7 @@ export default function Mentors() {
                 boxShadow: '0 14px 32px -12px color-mix(in srgb, var(--color-primary) 55%, transparent)',
               }}
             >
-              Reset filters
+              {s.mentors.noResultsReset}
             </button>
           </div>
         ) : null}

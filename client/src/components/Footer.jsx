@@ -4,6 +4,7 @@ import { Mail, MapPin, Phone, Sun, Moon, Monitor } from 'lucide-react';
 import { COMPANY_EMAIL, mailtoHref } from '../config/contact';
 import { applyAppearance, APPEARANCE_STORAGE_KEY } from '../utils/appearance';
 import { useI18n } from '../i18n';
+import { useContent } from '../content';
 
 const linkClass =
   'text-sm text-white transition-colors duration-200 hover:text-orange-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded-sm';
@@ -24,6 +25,7 @@ function useCurrentTheme() {
 
 export default function Footer() {
   const { t } = useI18n();
+  const { isTranslating } = useContent();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [theme, setThemeState] = useCurrentTheme();

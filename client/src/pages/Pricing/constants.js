@@ -1,5 +1,13 @@
 export const ANNUAL_DISCOUNT = 0.2;
 
+export const STUDENT_DISCOUNT = 0.5;
+export const STUDENT_EMAIL_DOMAINS = ['.edu'];
+export function isStudentEmail(email) {
+  if (!email) return false;
+  const domain = (email.split('@')[1] ?? '').toLowerCase();
+  return STUDENT_EMAIL_DOMAINS.some((d) => domain.endsWith(d));
+}
+
 // Four mentor tiers assigned algorithmically by Bridge.
 // Boundaries match server/routes/dev.js → computeTierAndRate().
 //
