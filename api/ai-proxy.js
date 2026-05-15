@@ -22,6 +22,7 @@ const LIMITS = {
   mentor_match: { max: 3, window: 'lifetime' },
   claude_chat: { max: 20, window: 'day' },
   intake_summary: { max: 10, window: 'day' },
+  onboarding_ai: { max: 20, window: 'day' },
 };
 
 const textUnderLimit = (label) =>
@@ -85,6 +86,7 @@ const intakeSummarySchema = z.object({
 
 const requestSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('claude_chat'), payload: claudeChatSchema }),
+  z.object({ action: z.literal('onboarding_ai'), payload: claudeChatSchema }),
   z.object({ action: z.literal('mentor_match'), payload: mentorMatchSchema }),
   z.object({ action: z.literal('resume_review'), payload: resumeReviewSchema }),
   z.object({ action: z.literal('intake_summary'), payload: intakeSummarySchema }),
@@ -442,8 +444,22 @@ async function runIntakeSummary({ sessionType, transcript }) {
   });
 }
 
+async function runOnboardingAI({ systemPrompt, prompt, maxTokens = 2000, json }) {
+  const rawText = await callOpenAIChat({
+    model: 'gpt-4o-mini',
+    maxTokens,
+    messages: [
+      ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+      { role: 'user', content: prompt },
+    ],
+    responseFormat: json ? { type: 'json_object' } : undefined,
+  });
+  return json ? parseJsonResponse(rawText, 'onboarding_ai') : rawText;
+}
+
 async function runAction(action, payload) {
   if (action === 'claude_chat') return callClaude(payload);
+  if (action === 'onboarding_ai') return runOnboardingAI(payload);
   if (action === 'mentor_match') return runMentorMatch(payload);
   if (action === 'resume_review') return runResumeReview(payload);
   if (action === 'intake_summary') return runIntakeSummary(payload);
