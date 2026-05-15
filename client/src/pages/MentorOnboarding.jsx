@@ -33,9 +33,10 @@ const focusRing =
 
 function tierBadgeClasses(tier) {
   switch (tier) {
-    case 'rising': return 'bg-emerald-50 text-emerald-800 border border-emerald-200/80';
-    case 'elite':  return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm';
-    default:       return 'bg-stone-100 text-stone-600';
+    case 'professional': return 'bg-emerald-50 text-emerald-800 border border-emerald-200/80';
+    case 'senior':       return 'bg-sky-50 text-sky-800 border border-sky-200/80';
+    case 'elite':        return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm';
+    default:             return 'bg-stone-100 text-stone-600'; // verified
   }
 }
 
@@ -1014,7 +1015,7 @@ export default function MentorOnboarding() {
                 <div className="h-8 w-px bg-[var(--bridge-border)]" />
                 <div>
                   <p className="text-[11px] text-[var(--bridge-text-muted)]">Tier</p>
-                  <p className="text-sm font-bold capitalize" style={{ color: assignedTier === 'elite' ? '#d97706' : assignedTier === 'rising' ? '#059669' : 'var(--bridge-text-secondary)' }}>
+                  <p className="text-sm font-bold capitalize" style={{ color: assignedTier === 'elite' ? '#d97706' : assignedTier === 'senior' ? '#0284c7' : assignedTier === 'professional' ? '#059669' : 'var(--bridge-text-secondary)' }}>
                     {assignedTier ?? '—'}
                   </p>
                 </div>
