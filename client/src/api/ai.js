@@ -51,7 +51,7 @@ export async function extractResumeData(resumeText) {
 Resume text:
 ${resumeText.slice(0, 8000)}`;
 
-  return callAIProxy('claude_chat', {
+  return callAIProxy('onboarding_ai', {
     systemPrompt: system,
     prompt,
     maxTokens: 2000,
@@ -74,7 +74,7 @@ Keep all other fields exactly as provided. The bio should be warm, specific, and
 Raw data:
 ${JSON.stringify(rawData, null, 2)}`;
 
-  return callAIProxy('claude_chat', {
+  return callAIProxy('onboarding_ai', {
     systemPrompt: system,
     prompt,
     maxTokens: 2000,
