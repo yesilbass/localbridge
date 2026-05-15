@@ -87,6 +87,7 @@ function AppContent() {
           <Route path="/mentors/:id" element={<MentorProfile />} />
           <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="/onboarding" element={<MentorOnboarding />} />
+          <Route path="/onboarding/mentor" element={<MentorOnboarding />} />
           <Route path="/onboarding/mentor/verify" element={<VerifyMentorWizard />} />
           <Route path="/refs/:token" element={<SubmitReferencePage />} />
           <Route path="/admin/verification" element={<AdminVerification />} />
@@ -111,6 +112,7 @@ function AppContent() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/cookies" element={<Cookies />} />
           <Route path="/onboarding" element={<MentorOnboarding />} />
+          <Route path="/onboarding/mentor" element={<MentorOnboarding />} />
         </Routes>
         </ErrorBoundary>
       </div>

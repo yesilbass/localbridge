@@ -68,6 +68,9 @@ function ApplicationRow({ item, onDecide, onSimulateClear, onAutoVerify, isPendi
             <p className="text-sm font-bold text-white truncate">{profile.name}</p>
             {item.checkr_result && <Badge value={item.checkr_result} />}
             {isPending && !item.checkr_result && <Badge value="pending" />}
+            {profile.tier_dispute && (
+              <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-400">Dispute</span>
+            )}
           </div>
           <p className="text-[11px] text-stone-500 truncate">{profile.title} · {profile.company}</p>
         </div>
@@ -123,6 +126,33 @@ function ApplicationRow({ item, onDecide, onSimulateClear, onAutoVerify, isPendi
               </p>
             </div>
           </div>
+
+          {/* Assigned tier & rate */}
+          {(profile.tier || profile.session_rate != null) && (
+            <div className="flex items-center gap-4 rounded-xl bg-white/3 px-3 py-2.5 text-xs">
+              <span className="text-stone-500">Assigned rate:</span>
+              <span className="font-black text-white">${profile.session_rate ?? '—'}/hr</span>
+              <span className="text-stone-500">Tier:</span>
+              <span className={`font-bold capitalize ${profile.tier === 'elite' ? 'text-amber-400' : profile.tier === 'rising' ? 'text-emerald-400' : 'text-stone-400'}`}>
+                {profile.tier ?? '—'}
+              </span>
+            </div>
+          )}
+
+          {/* Tier/rate dispute */}
+          {profile.tier_dispute && (
+            <div className="rounded-xl bg-red-500/8 border border-red-500/20 px-3 py-2.5 text-xs space-y-1">
+              <p className="text-red-400 font-bold uppercase tracking-wider text-[9px]">⚠ Tier/rate dispute open</p>
+              <p className="text-stone-300">Reason: {profile.tier_dispute.reason?.replace(/_/g, ' ')}</p>
+              {profile.tier_dispute.preferred_rate && (
+                <p className="text-stone-400">Requested: ${profile.tier_dispute.preferred_rate}/hr</p>
+              )}
+              {profile.tier_dispute.notes && (
+                <p className="text-stone-400 italic">"{profile.tier_dispute.notes}"</p>
+              )}
+              <p className="text-stone-600">{profile.tier_dispute.submitted_at ? new Date(profile.tier_dispute.submitted_at).toLocaleDateString() : ''}</p>
+            </div>
+          )}
 
           {/* Social verification */}
           {profile.verification_data?.socialVerified ? (
@@ -323,26 +353,37 @@ export default function DevMentorQueue() {
   useEffect(() => { loadAll(); }, [loadAll]);
 
   async function handleDecide(queueId, decision, notes) {
-    await devFetch('/mentor-queue/decide', {
+    const r = await devFetch('/mentor-queue/decide', {
       method: 'POST',
       body: JSON.stringify({ queueId, decision, notes }),
     });
+    const json = await r.json().catch(() => ({}));
+    if (!r.ok) { alert(`Error: ${json.error || r.status}`); return; }
+    setTab('decided');
     await loadAll();
   }
 
   async function handleSimulateClear(mentorProfileId) {
-    await devFetch('/mentor-queue/simulate-clear', {
+    const r = await devFetch('/mentor-queue/simulate-clear', {
       method: 'POST',
       body: JSON.stringify({ mentorProfileId }),
     });
+    const json = await r.json().catch(() => ({}));
+    if (!r.ok) { alert(`Error: ${json.error || r.status}`); return; }
+    setTab('ready');
     await loadAll();
   }
 
   async function handleAutoVerify(mentorProfileId) {
-    await devFetch('/mentor-queue/auto-verify', {
+    const r = await devFetch('/mentor-queue/auto-verify', {
       method: 'POST',
       body: JSON.stringify({ mentorProfileId }),
     });
+    const json = await r.json().catch(() => ({}));
+    if (!r.ok) { alert(`Error: ${json.error || r.status}`); return; }
+    // Switch to the tab where the result landed
+    if (json.autoDecision === 'flagged_review') setTab('ready');
+    else if (json.autoDecision) setTab('decided');
     await loadAll();
   }
 

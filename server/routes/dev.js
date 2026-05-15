@@ -413,15 +413,40 @@ router.post('/schedule-meeting', async (req, res) => {
 });
 
 // ── Tier algorithm ────────────────────────────────────────────────────────────
-function computeTier(profile) {
+// Returns { tier, session_rate } computed from verified profile data.
+// Rate is algorithm-assigned; mentors cannot manually set it.
+function computeTierAndRate(profile, verificationData, verificationScore) {
   const yrs = profile.years_experience || 0;
-  const rating = parseFloat(profile.rating) || 0;
-  const sessions = profile.total_sessions || 0;
-  const hasLinkedin = !!profile.linkedin_url;
-  const expertiseCount = Array.isArray(profile.expertise) ? profile.expertise.length : 0;
-  if (yrs >= 8 && hasLinkedin && expertiseCount >= 3 && (sessions >= 5 || rating >= 4.5)) return 'elite';
-  if (yrs >= 3 && hasLinkedin && expertiseCount >= 2) return 'rising';
-  return 'bronze';
+  const expertise = Array.isArray(profile.expertise) ? profile.expertise : [];
+  const education = Array.isArray(verificationData?.education) ? verificationData.education : [];
+  const score = verificationScore || 0;
+
+  // Education bonus
+  let eduBonus = 0;
+  const degrees = education.map((e) => (e.degree || '').toLowerCase());
+  if (degrees.some((d) => /phd|doctorate|d\.?sc|j\.?d|\bmd\b|dba|d\.?phil/i.test(d))) eduBonus = 50;
+  else if (degrees.some((d) => /master|mba|msc|meng|m\.s\b|m\.a\b|llm/i.test(d))) eduBonus = 25;
+  else if (degrees.some((d) => /bachelor|b\.s\b|b\.a\b|b\.e\b|b\.tech|bsc\b|beng/i.test(d))) eduBonus = 10;
+
+  // Experience bonus
+  const expBonus = yrs >= 15 ? 90 : yrs >= 10 ? 65 : yrs >= 6 ? 40 : yrs >= 3 ? 20 : 0;
+
+  // Verification score bonus
+  const scoreBonus = score >= 85 ? 15 : score >= 75 ? 10 : score >= 60 ? 5 : 0;
+
+  const session_rate = 40 + expBonus + eduBonus + scoreBonus;
+
+  let tier;
+  if (session_rate >= 150 || (yrs >= 10 && expertise.length >= 3)) tier = 'elite';
+  else if (session_rate >= 80 || yrs >= 3) tier = 'rising';
+  else tier = 'bronze';
+
+  return { tier, session_rate };
+}
+
+// Legacy alias used where verificationData isn't available
+function computeTier(profile) {
+  return computeTierAndRate(profile, null, 0).tier;
 }
 
 // ── Mentor Application Queue ──────────────────────────────────────────────────
@@ -441,7 +466,7 @@ router.get('/mentor-queue', async (req, res) => {
           id, name, email, title, company, industry, bio,
           years_experience, expertise, linkedin_url, image_url,
           mentor_status, checkr_status, checkr_report_id, application_submitted_at,
-          verification_data
+          verification_data, tier, session_rate, tier_dispute
         )
       `)
       .order('created_at', { ascending: false });
@@ -499,14 +524,19 @@ router.post('/mentor-queue/decide', async (req, res) => {
     if (decision === 'approve') {
       const { data: profile } = await sb
         .from('mentor_profiles')
-        .select('years_experience, rating, total_sessions, linkedin_url, expertise')
+        .select('years_experience, rating, total_sessions, linkedin_url, expertise, verification_data')
         .eq('id', item.mentor_profile_id)
         .maybeSingle();
-      const tier = computeTier(profile || {});
+      const { tier, session_rate } = computeTierAndRate(
+        profile || {},
+        profile?.verification_data,
+        item.verification_score,
+      );
       await sb.from('mentor_profiles').update({
         mentor_status: 'active',
         available: true,
         tier,
+        session_rate,
       }).eq('id', item.mentor_profile_id);
     } else {
       await sb.from('mentor_profiles').update({
@@ -534,10 +564,12 @@ router.post('/mentor-queue/simulate-clear', async (req, res) => {
 
     if (pErr || !profile) return res.status(404).json({ error: 'Profile not found' });
 
-    await sb.from('mentor_profiles').update({
+    const { error: pUpdateErr } = await sb.from('mentor_profiles').update({
       mentor_status: 'under_review',
       checkr_status: 'clear',
     }).eq('id', mentorProfileId);
+
+    if (pUpdateErr) return res.status(500).json({ error: pUpdateErr.message });
 
     const { data: existing } = await sb
       .from('mentor_applications_queue')
@@ -547,11 +579,12 @@ router.post('/mentor-queue/simulate-clear', async (req, res) => {
       .maybeSingle();
 
     if (!existing) {
-      await sb.from('mentor_applications_queue').insert({
+      const { error: qErr } = await sb.from('mentor_applications_queue').insert({
         mentor_profile_id: mentorProfileId,
         checkr_report_id: profile.checkr_report_id || null,
         checkr_result: 'clear',
       });
+      if (qErr) return res.status(500).json({ error: `Queue error: ${qErr.message}` });
     }
 
     res.json({ ok: true });
@@ -636,21 +669,29 @@ router.post('/mentor-queue/auto-verify', async (req, res) => {
       newStatus = 'rejected';
     }
 
-    const tier = newStatus === 'active' ? computeTier(profile) : 'bronze';
+    const { tier, session_rate } = newStatus === 'active'
+      ? computeTierAndRate(profile, verificationData, score)
+      : { tier: 'bronze', session_rate: 40 };
 
-    await sb.from('mentor_profiles').update({
+    // Update mentor profile first
+    const { error: profileErr } = await sb.from('mentor_profiles').update({
       mentor_status: newStatus,
       checkr_status: 'clear',
-      ...(newStatus === 'active' ? { available: true, tier } : {}),
+      ...(newStatus === 'active' ? { available: true, tier, session_rate } : {}),
       ...(socialVerified?.provider === 'linkedin' && !profile.linkedin_url
         ? { linkedin_url: `https://linkedin.com/in/${socialVerified.username}` }
         : {}),
     }).eq('id', mentorProfileId);
 
+    if (profileErr) return res.status(500).json({ error: profileErr.message });
+
+    // Upsert queue row — find any existing row (decided or not)
     const { data: existing } = await sb
       .from('mentor_applications_queue')
       .select('id')
       .eq('mentor_profile_id', mentorProfileId)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     const queuePayload = {
@@ -664,14 +705,18 @@ router.post('/mentor-queue/auto-verify', async (req, res) => {
         decision: autoDecision === 'auto_approved' ? 'approve' : 'reject',
         decision_notes: `Auto-verified. Score: ${score}/100.`,
         decided_at: new Date().toISOString(),
-      } : {}),
+      } : {
+        decision: null,
+        decision_notes: null,
+        decided_at: null,
+      }),
     };
 
-    if (existing) {
-      await sb.from('mentor_applications_queue').update(queuePayload).eq('id', existing.id);
-    } else {
-      await sb.from('mentor_applications_queue').insert(queuePayload);
-    }
+    const { error: qErr } = existing
+      ? await sb.from('mentor_applications_queue').update(queuePayload).eq('id', existing.id)
+      : await sb.from('mentor_applications_queue').insert(queuePayload);
+
+    if (qErr) return res.status(500).json({ error: `Queue error: ${qErr.message}` });
 
     res.json({ ok: true, score, breakdown, autoDecision, newStatus });
   } catch (err) {
@@ -720,5 +765,32 @@ async function scoreEssayWithOpenAI(essay) {
   if (avgWordLen >= 5.5) q += 2; else if (avgWordLen >= 4.5) q += 1;
   return Math.min(q, 12);
 }
+
+// ── Tier/rate dispute submission (authenticated mentor) ───────────────────────
+router.post('/tier-dispute', async (req, res) => {
+  try {
+    const sb = admin();
+    const { mentorProfileId, reason, preferredRate, notes } = req.body || {};
+    if (!mentorProfileId || !reason) return res.status(400).json({ error: 'Missing required fields' });
+
+    const dispute = {
+      reason,
+      preferred_rate: preferredRate ? Number(preferredRate) : null,
+      notes: notes || null,
+      submitted_at: new Date().toISOString(),
+      status: 'open',
+    };
+
+    const { error } = await sb
+      .from('mentor_profiles')
+      .update({ tier_dispute: dispute })
+      .eq('id', mentorProfileId);
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 export default router;

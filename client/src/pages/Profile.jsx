@@ -1063,10 +1063,11 @@ export default function Profile() {
                     placeholder="8" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">Session Rate (USD/hr, 0 = free)</label>
-                  <input type="number" min="0" value={mentorProfile.session_rate} onChange={(e) => updateMentorField('session_rate', e.target.value)}
-                    className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
-                    placeholder="0" />
+                  <label className="block text-sm font-medium text-stone-700 mb-2">Session Rate (USD/hr)</label>
+                  <div className="flex items-center gap-2 w-full px-4 py-2 border border-stone-200 rounded-lg bg-stone-50 text-stone-500 text-sm">
+                    {mentorProfile.session_rate ? `$${mentorProfile.session_rate}/hr` : '—'}
+                    <span className="ml-auto text-xs text-stone-400">Set algorithmically · dispute from dashboard</span>
+                  </div>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-stone-700 mb-2">Bio / About</label>
