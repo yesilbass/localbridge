@@ -36,7 +36,7 @@ function tierBadgeClasses(tier) {
     case 'professional': return 'bg-emerald-50 text-emerald-800 border border-emerald-200/80';
     case 'senior':       return 'bg-sky-50 text-sky-800 border border-sky-200/80';
     case 'elite':        return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm';
-    default:             return 'bg-stone-100 text-stone-600'; // verified
+    default:             return 'bg-stone-100 text-stone-600'; // rising
   }
 }
 

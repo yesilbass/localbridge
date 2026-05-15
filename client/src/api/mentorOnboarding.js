@@ -33,7 +33,7 @@ export async function ensureMentorProfileForUser(user) {
           rating: 0,
           total_sessions: 0,
           available: true,
-          tier: "verified",
+          tier: "rising",
           image_url: meta.avatar_url ?? null,
           onboarding_complete: false,
         },
