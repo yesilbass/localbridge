@@ -178,7 +178,7 @@ export default function Profile() {
     linkedin_url: '',
     github_url: '',
     website_url: '',
-    tier: 'verified',
+    tier: 'rising',
     session_rate: 0,
   });
   const [mentorProfileId, setMentorProfileId] = useState(null);
@@ -265,7 +265,7 @@ export default function Profile() {
           linkedin_url: mentorRes.data.linkedin_url || '',
           github_url: mentorRes.data.github_url || '',
           website_url: mentorRes.data.website_url || '',
-          tier: mentorRes.data.tier || 'verified',
+          tier: mentorRes.data.tier || 'rising',
           session_rate: mentorRes.data.session_rate ?? 0,
         });
       }
@@ -342,7 +342,7 @@ export default function Profile() {
         linkedin_url: mentorProfile.linkedin_url || null,
         github_url: mentorProfile.github_url || null,
         website_url: mentorProfile.website_url || null,
-        tier: mentorProfile.tier || 'verified',
+        tier: mentorProfile.tier || 'rising',
         session_rate: Number(mentorProfile.session_rate) || 0,
       };
 

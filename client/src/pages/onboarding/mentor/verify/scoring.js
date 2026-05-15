@@ -14,23 +14,20 @@ export const COMPONENT_WEIGHTS = Object.freeze({
 });
 
 export const COMPONENTS = Object.freeze(Object.keys(COMPONENT_WEIGHTS));
-export const TIERS = Object.freeze(['verified', 'professional', 'senior', 'elite']);
+export const TIERS = Object.freeze(['rising', 'professional', 'senior', 'elite']);
 
-const TIER_FLOOR = Object.freeze({ verified: 0, professional: 50, senior: 70, elite: 88 });
+const TIER_FLOOR = Object.freeze({ rising: 0, professional: 50, senior: 70, elite: 88 });
 
 export function tierForScore(score) {
   const s = Number(score) || 0;
   if (s >= TIER_FLOOR.elite)        return 'elite';
   if (s >= TIER_FLOOR.senior)       return 'senior';
   if (s >= TIER_FLOOR.professional) return 'professional';
-  return 'verified';
+  return 'rising';
 }
 
 export function nextTier(tier) {
-  // normalise legacy DB values
-  const map = { bronze: 'verified', rising: 'professional', silver: 'professional', gold: 'senior', platinum: 'elite' };
-  const normalised = map[String(tier || '').toLowerCase()] ?? String(tier || '').toLowerCase();
-  const i = TIERS.indexOf(normalised);
+  const i = TIERS.indexOf(String(tier || '').toLowerCase());
   if (i < 0 || i >= TIERS.length - 1) return null;
   return TIERS[i + 1];
 }

@@ -445,7 +445,7 @@ function computeTierAndRate(profile, _verificationData, verificationScore) {
   if (session_rate >= 165 || (yrs >= 13 && expertise.length >= 3)) tier = 'elite';
   else if (session_rate >= 115 || yrs >= 7) tier = 'senior';
   else if (session_rate >= 75 || yrs >= 3) tier = 'professional';
-  else tier = 'verified';
+  else tier = 'rising';
 
   return { tier, session_rate };
 }
@@ -693,7 +693,7 @@ router.post('/mentor-queue/auto-verify', async (req, res) => {
 
     const { tier, session_rate } = newStatus === 'active'
       ? computeTierAndRate(profile, vd, score)
-      : { tier: 'verified', session_rate: 40 };
+      : { tier: 'rising', session_rate: 40 };
 
     // Update mentor profile first
     const { error: profileErr } = await sb.from('mentor_profiles').update({

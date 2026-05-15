@@ -3,27 +3,27 @@ export const ANNUAL_DISCOUNT = 0.2;
 // Four mentor tiers assigned algorithmically by Bridge.
 // Boundaries match server/routes/dev.js → computeTierAndRate().
 //
-//  Verified    $40–$74    0–2 yrs   any education
-//  Professional $75–$114  3–6 yrs   typically Bachelors
-//  Senior      $115–$164  7–12 yrs  typically Masters / MBA
-//  Elite       $165–$250+ 13+ yrs   advanced degree + senior score
+//  Rising       $40–$74    0–2 yrs   any education
+//  Professional $75–$114   3–6 yrs   typically Bachelors
+//  Senior       $115–$164  7–12 yrs  typically Masters / MBA
+//  Elite        $165–$250+ 13+ yrs   advanced degree + senior score
 //
 // Rates are not set by mentors — they are derived from education, years, and verification score.
 export const MENTOR_TIERS = [
   {
-    name: 'Verified',
+    name: 'Rising',
     rateRange: '$40 – $74',
     yearsRange: '0 – 2 years',
     highlight: 'Best for first-role seekers',
-    experienceDesc: 'Early-career professionals who have recently entered the workforce. Verified for identity and work history — practical, current knowledge of modern hiring.',
+    experienceDesc: 'Early-career professionals on their way up. Fully verified through Bridge — they have first-hand, current knowledge of modern hiring and what it actually takes to break in.',
     useCases: [
       'Resume and LinkedIn profile review',
       'Entry-level and new-grad interview prep',
       'Job search strategy and application targeting',
       'Navigating your first 90 days in a new role',
-      'Realistic expectations for competitive entry-level markets',
+      'Real expectations from someone who just navigated the same path',
     ],
-    whoTheyAre: 'Recent graduates and professionals in their first two years, fully identity-verified and background-checked through Bridge.',
+    whoTheyAre: 'Recent graduates and professionals in their first two years, identity-verified and background-checked through Bridge.',
     accent: 'slate',
     halo: 'rgba(100,116,139,0.22)',
     badgeClass: 'bg-slate-100 text-slate-700 dark:bg-slate-500/15 dark:text-slate-300',
@@ -120,7 +120,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'What is the difference between the four tiers?',
-    a: 'Verified mentors are 0–2 years into their careers. Professional mentors have 3–6 years with an established track record. Senior mentors have 7–12 years of experience and often hold advanced degrees. Elite mentors have 13+ years and have operated at the executive or specialist level. Each tier reflects verified credentials, not self-reported claims.',
+    a: 'Rising mentors are 0–2 years into their careers — current, practical knowledge of modern hiring. Professional mentors have 3–6 years with an established track record. Senior mentors have 7–12 years and often hold advanced degrees. Elite mentors have 13+ years and have operated at the executive or specialist level. Every tier is verified — the names reflect career depth, not quality.',
   },
   {
     q: 'Are mentor sessions included in my subscription?',
