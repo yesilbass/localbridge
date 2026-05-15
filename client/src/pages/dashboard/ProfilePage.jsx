@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Edit3 } from 'lucide-react';
+import { ExternalLink, Edit3, Flag } from 'lucide-react';
 import supabase from '../../api/supabase';
 import { useAuth } from '../../context/useAuth.js';
 import { isMentorAccount } from '../../utils/accountRole';
+import TierDisputeModal from '../../components/TierDisputeModal';
 
 function MentorPreviewCard({ profile }) {
   if (!profile) return null;
+  const [disputeOpen, setDisputeOpen] = useState(false);
   const initials = (profile.name || '?').split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase()).join('');
   return (
     <article
@@ -123,17 +125,26 @@ function MentorPreviewCard({ profile }) {
         >
           <Edit3 className="h-3.5 w-3.5" aria-hidden /> Edit profile
         </Link>
-        <Link
-          to="/onboarding"
+        <button
+          type="button"
+          onClick={() => setDisputeOpen(true)}
           className="bridge-focus inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-bold"
           style={{
             boxShadow: 'inset 0 0 0 1px var(--bridge-border-strong)',
             color: 'var(--bridge-text-secondary)',
           }}
         >
-          Re-run onboarding
-        </Link>
+          <Flag className="h-3 w-3" aria-hidden /> Dispute tier / rate
+        </button>
       </div>
+      {disputeOpen && (
+        <TierDisputeModal
+          profileId={profile.id}
+          currentRate={profile.session_rate}
+          currentTier={profile.tier}
+          onClose={() => setDisputeOpen(false)}
+        />
+      )}
     </article>
   );
 }

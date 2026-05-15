@@ -235,7 +235,7 @@ export default function DashboardPage() {
           .maybeSingle();
         if (cancelled) return;
         setOnboardingComplete(data?.onboarding_complete ?? false);
-        setMentorStatus(data?.mentor_status ?? 'active');
+        setMentorStatus(data?.mentor_status ?? null);
       } catch {
         if (!cancelled) setErrored(true);
       } finally {
@@ -256,8 +256,26 @@ export default function DashboardPage() {
     return <LoadingSpinner label="Loading…" className="min-h-screen" size="lg" />;
   }
   if (!isLoading && !user) return <Navigate to="/login" replace />;
-  if (role === 'mentor' && !onboardingComplete) return <Navigate to="/onboarding" replace />;
-  if (role === 'mentor' && mentorStatus !== 'active') return <MentorApplicationPending status={mentorStatus} />;
+  // Block render until the mentor status check resolves — prevents routing on stale defaults.
+  if (role === 'mentor' && checking) {
+    return <LoadingSpinner label="Loading…" className="min-h-screen" size="lg" />;
+  }
+  // In-flight application (pending/under_review/suspended) — always show waiting screen
+  if (role === 'mentor' && mentorStatus && mentorStatus !== 'active' && mentorStatus !== 'rejected') {
+    return <MentorApplicationPending status={mentorStatus} />;
+  }
+  // Rejected — show pending screen with re-apply button
+  if (role === 'mentor' && mentorStatus === 'rejected' && onboardingComplete) {
+    return <MentorApplicationPending status="rejected" />;
+  }
+  // No application yet, or rejected before completing — go to onboarding (verification)
+  if (role === 'mentor' && !onboardingComplete && mentorStatus !== 'active') {
+    return <Navigate to="/onboarding/mentor" replace />;
+  }
+  // Approved but profile not yet completed — go to onboarding (profile completion phase)
+  if (role === 'mentor' && mentorStatus === 'active' && !onboardingComplete) {
+    return <Navigate to="/onboarding/mentor" replace />;
+  }
 
   return (
     <DashboardShell
