@@ -415,13 +415,15 @@ router.post('/schedule-meeting', async (req, res) => {
 // ── Tier algorithm ────────────────────────────────────────────────────────────
 // Returns { tier, session_rate } computed from verified profile data.
 // Rate is algorithm-assigned; mentors cannot manually set it.
-function computeTierAndRate(profile, verificationData, verificationScore) {
+// education is read from mentor_profiles.education (direct column, set during application).
+function computeTierAndRate(profile, _verificationData, verificationScore) {
   const yrs = profile.years_experience || 0;
   const expertise = Array.isArray(profile.expertise) ? profile.expertise : [];
-  const education = Array.isArray(verificationData?.education) ? verificationData.education : [];
+  // Education is stored as mentor_profiles.education (saved from app-1 form)
+  const education = Array.isArray(profile.education) ? profile.education : [];
   const score = verificationScore || 0;
 
-  // Education bonus
+  // Education bonus — matches the same regex used in the verification score
   let eduBonus = 0;
   const degrees = education.map((e) => (e.degree || '').toLowerCase());
   if (degrees.some((d) => /phd|doctorate|d\.?sc|j\.?d|\bmd\b|dba|d\.?phil/i.test(d))) eduBonus = 50;
@@ -436,10 +438,14 @@ function computeTierAndRate(profile, verificationData, verificationScore) {
 
   const session_rate = 40 + expBonus + eduBonus + scoreBonus;
 
+  // Four tiers: verified → professional → senior → elite
+  // Rate thresholds are primary; years act as a floor so a 7-yr Bachelors
+  // isn't held back by missing the rate cutoff by a few dollars.
   let tier;
-  if (session_rate >= 150 || (yrs >= 10 && expertise.length >= 3)) tier = 'elite';
-  else if (session_rate >= 80 || yrs >= 3) tier = 'rising';
-  else tier = 'bronze';
+  if (session_rate >= 165 || (yrs >= 13 && expertise.length >= 3)) tier = 'elite';
+  else if (session_rate >= 115 || yrs >= 7) tier = 'senior';
+  else if (session_rate >= 75 || yrs >= 3) tier = 'professional';
+  else tier = 'verified';
 
   return { tier, session_rate };
 }
@@ -524,7 +530,7 @@ router.post('/mentor-queue/decide', async (req, res) => {
     if (decision === 'approve') {
       const { data: profile } = await sb
         .from('mentor_profiles')
-        .select('years_experience, rating, total_sessions, linkedin_url, expertise, verification_data')
+        .select('years_experience, rating, total_sessions, linkedin_url, expertise, education, verification_data')
         .eq('id', item.mentor_profile_id)
         .maybeSingle();
       const { tier, session_rate } = computeTierAndRate(
@@ -636,25 +642,41 @@ router.post('/mentor-queue/auto-verify', async (req, res) => {
       return e.school?.trim().length >= 2 && (!e.year || (yr >= 1950 && yr <= CURRENT_YR));
     });
 
-    const essayQuality = await scoreEssayWithOpenAI(essay);
+    const essayQuality = await scoreEssayWithOpenAI(essay); // 0–12 from OpenAI, scaled to 15 below
 
+    // Education level — read the degree string from each entry
+    let eduLevelPts = 0;
+    if (eduValid && education.length > 0) {
+      const degrees = education.map((e) => (e.degree || '').toLowerCase());
+      if (degrees.some((d) => /phd|doctorate|d\.?sc|j\.?d|\bmd\b|dba|d\.?phil/i.test(d))) eduLevelPts = 25;
+      else if (degrees.some((d) => /master|mba|msc|meng|m\.s\b|m\.a\b|llm/i.test(d))) eduLevelPts = 20;
+      else if (degrees.some((d) => /bachelor|b\.s\b|b\.a\b|b\.e\b|b\.tech|bsc\b|beng/i.test(d))) eduLevelPts = 13;
+      else eduLevelPts = 6; // associate, certificate, bootcamp, or other valid entry
+    }
+
+    // Base scoring — max 100 achievable without social verification.
+    // Social adds up to 10 bonus pts (score is capped at 100).
+    // Gov ID upload and selfie are mandatory gating requirements — not scored.
+    // Scoring covers what the algorithm can evaluate: education, work history, and the essay.
     const breakdown = {
-      govIdProvided:       vd.govIdNumber?.trim() ? 15 : 0,
-      govIdPhotoUploaded:  vd.govIdFileName?.trim() ? 8 : 0,
-      selfieUploaded:      vd.faceFileName?.trim() ? 5 : 0,
-      socialVerified:      socialVerified ? 15 : 0,
-      workExperience:      workExp.length >= 2 ? 12 : workExp.length >= 1 ? 8 : 0,
-      workYearsConsistent: yearsConsistent ? 8 : workYearsValid && workExp.length > 0 ? 3 : 0,
-      educationProvided:   eduValid && education.length >= 1 ? 8 : 0,
-      expertiseTags:       expertise.length >= 5 ? 5 : expertise.length >= 3 ? 3 : expertise.length >= 1 ? 1 : 0,
-      motivationLength:    essayWords >= 150 ? 12 : essayWords >= 100 ? 8 : essayWords >= 50 ? 4 : 0,
-      motivationQuality:   essayQuality, // 0–12 pts, OpenAI-scored or heuristic fallback
-      // Penalties
+      // Education: 25 pts max — PhD/JD/MD=25, Masters/MBA=20, Bachelors=13, other/cert=6
+      educationLevel:      eduLevelPts,
+      // Work history: 22 pts max for 2+ entries, 13 for 1
+      workExperience:      workExp.length >= 2 ? 22 : workExp.length >= 1 ? 13 : 0,
+      // Year math consistency: 13 pts if years add up, 6 if plausible
+      workYearsConsistent: yearsConsistent ? 13 : workYearsValid && workExp.length > 0 ? 6 : 0,
+      // Motivation essay length: 20 pts max for 150+ words
+      motivationLength:    essayWords >= 150 ? 20 : essayWords >= 100 ? 13 : essayWords >= 50 ? 7 : 0,
+      // Essay quality (OpenAI 0–12, scaled to 20): rewards substance and clarity
+      motivationQuality:   Math.round((essayQuality / 12) * 20),
+      // Social ownership proof is a bonus — skipping is not penalised
+      socialBonus:         socialVerified ? 10 : 0,
+      // Penalties for inconsistent or invalid data
       yearMismatchPenalty: yearsConsistent || workExp.length === 0 ? 0 : yearDelta > claimedYears * 0.6 ? -10 : -5,
       eduInvalidPenalty:   !eduValid && education.length > 0 ? -5 : 0,
     };
 
-    const score = Math.max(0, Object.values(breakdown).reduce((a, b) => a + b, 0));
+    const score = Math.min(100, Math.max(0, Object.values(breakdown).reduce((a, b) => a + b, 0)));
 
     let autoDecision;
     let newStatus;
@@ -670,8 +692,8 @@ router.post('/mentor-queue/auto-verify', async (req, res) => {
     }
 
     const { tier, session_rate } = newStatus === 'active'
-      ? computeTierAndRate(profile, verificationData, score)
-      : { tier: 'bronze', session_rate: 40 };
+      ? computeTierAndRate(profile, vd, score)
+      : { tier: 'verified', session_rate: 40 };
 
     // Update mentor profile first
     const { error: profileErr } = await sb.from('mentor_profiles').update({

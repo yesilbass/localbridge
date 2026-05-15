@@ -610,36 +610,53 @@ export default function Pricing() {
               </div>
             </Reveal>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-labelledby="mentor-tiers-heading">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4" aria-labelledby="mentor-tiers-heading">
               {MENTOR_TIERS.map((tier, idx) => (
-                <Reveal key={tier.name} delay={40 + idx * 60}>
-                    <div className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 shadow-bridge-tile transition-all duration-500 hover:-translate-y-1 ${tier.edgeClass} ${tier.bgClass}`}>
-                      <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-30 blur-3xl bd-aurora" style={{ background: `radial-gradient(circle, ${tier.halo} 0%, transparent 70%)` }} />
-                      <div aria-hidden className={`absolute inset-x-0 top-0 h-1 ${tier.accentBar} ${tier.isElite ? 'shadow-[0_0_14px_color-mix(in srgb, var(--color-primary) 60%, transparent)]' : ''}`} />
+                <Reveal key={tier.name} delay={40 + idx * 80}>
+                  <div className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border p-7 shadow-bridge-tile transition-all duration-500 hover:-translate-y-1 ${tier.edgeClass} ${tier.bgClass}`}>
+                    <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-52 w-52 rounded-full opacity-25 blur-3xl bd-aurora" style={{ background: `radial-gradient(circle, ${tier.halo} 0%, transparent 70%)` }} />
+                    <div aria-hidden className={`absolute inset-x-0 top-0 h-1 ${tier.accentBar} ${tier.isElite ? 'shadow-[0_0_14px_color-mix(in srgb,var(--color-primary)_60%,transparent)]' : ''}`} />
 
-                      <div className="relative flex flex-col gap-3">
+                    <div className="relative flex flex-col gap-3 flex-1">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
                         <span className={`bd-status-shine relative inline-flex w-fit items-center gap-1 self-start overflow-hidden rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${tier.badgeClass}`}>
                           {tier.name}
                         </span>
-                        <div className="flex items-baseline gap-2">
-                          <p className="font-display text-[2.1rem] font-black tabular-nums leading-none tracking-[-0.025em] text-[var(--bridge-text)]">{tier.rateRange}</p>
-                        </div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">typical rate per session</p>
-                        <div className="mt-1 flex items-baseline gap-2 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/70 px-3 py-2">
-                          <p className="font-display text-base font-black tabular-nums tracking-tight text-[var(--bridge-text)]">{tier.yearsRange}</p>
-                          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--bridge-text-muted)]">years of experience</p>
-                        </div>
-                        <p className="mt-2 text-sm leading-relaxed text-[var(--bridge-text-secondary)]">{tier.experienceDesc}</p>
-                        <ul className="mt-3 flex flex-col gap-2">
-                          {tier.useCases.map((uc) => (
-                            <li key={uc} className="flex items-start gap-2 text-[13px] text-[var(--bridge-text)]">
-                              <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/12 text-[10px] font-black text-emerald-600 ring-1 ring-emerald-500/25 dark:text-emerald-300" aria-hidden>✓</span>
-                              <span className="leading-snug">{uc}</span>
-                            </li>
-                          ))}
-                        </ul>
+                        {tier.highlight && (
+                          <span className="rounded-full border border-[var(--bridge-border)] px-2.5 py-0.5 text-[10px] font-semibold text-[var(--bridge-text-muted)]">
+                            {tier.highlight}
+                          </span>
+                        )}
                       </div>
+
+                      <div>
+                        <p className="font-display text-[2.4rem] font-black tabular-nums leading-none tracking-[-0.025em] text-[var(--bridge-text)]">{tier.rateRange}</p>
+                        <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--bridge-text-muted)]">per hour · algorithm-assigned</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/70 px-3 py-2">
+                        <p className="font-display text-sm font-black tabular-nums tracking-tight text-[var(--bridge-text)]">{tier.yearsRange}</p>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--bridge-text-muted)]">experience</p>
+                      </div>
+
+                      <p className="text-[13px] leading-relaxed text-[var(--bridge-text-secondary)]">{tier.experienceDesc}</p>
+
+                      <ul className="mt-2 flex flex-col gap-2 flex-1">
+                        {tier.useCases.map((uc) => (
+                          <li key={uc} className="flex items-start gap-2 text-[13px] text-[var(--bridge-text)]">
+                            <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/12 text-[9px] font-black text-emerald-600 ring-1 ring-emerald-500/25 dark:text-emerald-300" aria-hidden>✓</span>
+                            <span className="leading-snug">{uc}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {tier.whoTheyAre && (
+                        <p className="mt-4 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/60 px-3 py-2.5 text-[11px] leading-relaxed text-[var(--bridge-text-muted)]">
+                          {tier.whoTheyAre}
+                        </p>
+                      )}
                     </div>
+                  </div>
                 </Reveal>
               ))}
             </div>

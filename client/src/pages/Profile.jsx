@@ -178,7 +178,7 @@ export default function Profile() {
     linkedin_url: '',
     github_url: '',
     website_url: '',
-    tier: 'rising',
+    tier: 'verified',
     session_rate: 0,
   });
   const [mentorProfileId, setMentorProfileId] = useState(null);
@@ -265,7 +265,7 @@ export default function Profile() {
           linkedin_url: mentorRes.data.linkedin_url || '',
           github_url: mentorRes.data.github_url || '',
           website_url: mentorRes.data.website_url || '',
-          tier: mentorRes.data.tier || 'rising',
+          tier: mentorRes.data.tier || 'verified',
           session_rate: mentorRes.data.session_rate ?? 0,
         });
       }
@@ -342,7 +342,7 @@ export default function Profile() {
         linkedin_url: mentorProfile.linkedin_url || null,
         github_url: mentorProfile.github_url || null,
         website_url: mentorProfile.website_url || null,
-        tier: mentorProfile.tier || 'rising',
+        tier: mentorProfile.tier || 'verified',
         session_rate: Number(mentorProfile.session_rate) || 0,
       };
 
@@ -1086,13 +1086,10 @@ export default function Profile() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">Tier</label>
-                  <select value={mentorProfile.tier} onChange={(e) => updateMentorField('tier', e.target.value)}
-                    className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors">
-                    <option value="rising">Rising</option>
-                    <option value="established">Established</option>
-                    <option value="expert">Expert</option>
-                    <option value="elite">Elite</option>
-                  </select>
+                  <div className="flex items-center gap-2 w-full px-4 py-2 border border-stone-200 rounded-lg bg-stone-50 text-stone-500 text-sm capitalize">
+                    {mentorProfile.tier || 'verified'}
+                    <span className="ml-auto text-xs text-stone-400">Set algorithmically · dispute from dashboard</span>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">LinkedIn</label>
