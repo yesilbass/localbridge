@@ -1,7 +1,7 @@
 import { BadgeCheck, Eye, ShieldOff, Handshake } from 'lucide-react';
 import RevealOnScroll from '../landing/RevealOnScroll';
 import { EASE, DUR_SHORT } from '../landing/landingHooks';
-import { COMMITMENTS } from './whyUsData';
+import { COMMITMENTS, WHY_US_SECTION_PAD } from './whyUsData';
 
 const ICON_MAP = {
   BadgeCheck,
@@ -26,11 +26,11 @@ export default function CommitmentsSection() {
     <section
       id="commitments"
       aria-labelledby="commitments-heading"
-      className="py-24 lg:py-32"
+      className={WHY_US_SECTION_PAD}
       style={{
         backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border)',
-        borderBottom: '1px solid var(--bridge-border)',
+        borderTop: '1px solid var(--bridge-border-strong)',
+        borderBottom: '1px solid var(--bridge-border-strong)',
       }}
     >
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
@@ -65,7 +65,7 @@ export default function CommitmentsSection() {
           </p>
         </RevealOnScroll>
 
-        <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="mt-10 sm:mt-14 grid grid-cols-1 sm:grid-cols-2 gap-5">
           {COMMITMENTS.map((c) => {
             const Icon = ICON_MAP[c.iconName];
             return (

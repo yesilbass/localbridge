@@ -1,35 +1,34 @@
 import { Star } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
+import { useI18n } from '../../i18n';
 
 export default function ManifestoSection() {
+  const { t } = useI18n();
   const weekday = new Date().toLocaleDateString('en-US', { weekday: 'short' });
 
   const PRINCIPLES = [
     {
       number: '01',
-      title: "Only people who've done your job.",
-      body:
-        "Every mentor has lived the exact role you're targeting. We filter on outcome, not credentials.",
+      title: t('landing.manifesto.p1.title', “Only people who've done your job.”),
+      body: t('landing.manifesto.p1.body', “Every mentor has lived the exact role you're targeting. We filter on outcome, not credentials.”),
       visual: <P1Chips />,
     },
     {
       number: '02',
-      title: 'One hour, one price.',
-      body:
-        'No packages. No lock-ins. No “contact us for pricing.” Every rate on every profile, always.',
+      title: t('landing.manifesto.p2.title', 'One hour, one price.'),
+      body: t('landing.manifesto.p2.body', 'No packages. No lock-ins. No “contact us for pricing.” Every rate on every profile, always.'),
       visual: <P2Pricing />,
     },
     {
       number: '03',
-      title: 'Booked in the time it takes to make coffee.',
-      body:
-        'Calendar-native. Real-time availability. No “when are you free” email loops, no scheduling assistants, no waiting two weeks for a reply.',
+      title: t('landing.manifesto.p3.title', 'Booked in the time it takes to make coffee.'),
+      body: t('landing.manifesto.p3.body', 'Calendar-native. Real-time availability. No “when are you free” email loops, no scheduling assistants, no waiting two weeks for a reply.'),
       visual: <P3Calendar weekday={weekday} />,
     },
     {
       number: '04',
-      title: 'All reviews, unfiltered.',
-      body: 'Good and critical, side by side. No curation, no censoring, no removed posts.',
+      title: t('landing.manifesto.p4.title', 'All reviews, unfiltered.'),
+      body: t('landing.manifesto.p4.body', 'Good and critical, side by side. No curation, no censoring, no removed posts.'),
       visual: <P4Reviews />,
     },
   ];
@@ -47,7 +46,7 @@ export default function ManifestoSection() {
             className="text-[10px] font-black uppercase"
             style={{ color: 'var(--color-primary)', letterSpacing: '0.32em' }}
           >
-            What we built differently
+            {t('landing.manifesto.eyebrow', 'What we built differently')}
           </p>
           <h2
             id="manifesto-heading"
@@ -60,7 +59,7 @@ export default function ManifestoSection() {
               fontFeatureSettings: '"kern" 1, "ss01" 1',
             }}
           >
-            Built differently,
+            {t('landing.manifesto.heading1', 'Built differently,')}
             <br />
             <span
               className="bg-clip-text text-transparent"
@@ -69,14 +68,14 @@ export default function ManifestoSection() {
                   'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)',
               }}
             >
-              by design.
+              {t('landing.manifesto.heading2', 'by design.')}
             </span>
           </h2>
           <p
             className="mt-7 max-w-xl"
             style={{ color: 'var(--bridge-text-secondary)', lineHeight: 1.6 }}
           >
-            We started because every alternative was broken. This is what we fixed.
+            {t('landing.manifesto.subCopy', 'We started because every alternative was broken. This is what we fixed.')}
           </p>
         </RevealOnScroll>
 

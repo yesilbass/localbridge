@@ -192,27 +192,61 @@ function WorkExpRow({ job, onChange, onRemove }) {
 
 /* ─── Education row ─────────────────────────────────────────────────────────── */
 
+const DEGREE_LEVELS = [
+  { value: 'phd',       label: 'PhD / Doctorate' },
+  { value: 'masters',   label: 'Masters (MBA, MS, MA, MEng…)' },
+  { value: 'bachelors', label: 'Bachelors (BA, BS, BEng…)' },
+  { value: 'associate', label: 'Associate / Diploma' },
+  { value: 'other',     label: 'Other / Certification' },
+];
+
 function EduRow({ edu, onChange, onRemove }) {
   return (
     <div className="rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] p-4 space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>School</label>
-          <input type="text" value={edu.school} onChange={(e) => onChange({ ...edu, school: e.target.value })} className={inputCls} placeholder="MIT" />
+          <label className={labelCls}>School / Institution *</label>
+          <input type="text" value={edu.school} onChange={(e) => onChange({ ...edu, school: e.target.value })} className={inputCls} placeholder="MIT, Harvard, Stanford…" />
         </div>
         <div>
-          <label className={labelCls}>Degree</label>
-          <input type="text" value={edu.degree} onChange={(e) => onChange({ ...edu, degree: e.target.value })} className={inputCls} placeholder="B.S. Computer Science" />
+          <label className={labelCls}>Field of study</label>
+          <input type="text" value={edu.degree} onChange={(e) => onChange({ ...edu, degree: e.target.value })} className={inputCls} placeholder="Computer Science, Finance…" />
         </div>
       </div>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelCls}>Degree level *</label>
+          <select
+            value={edu.degree_level ?? ''}
+            onChange={(e) => onChange({ ...edu, degree_level: e.target.value })}
+            className={inputCls}
+          >
+            <option value="">Select level…</option>
+            {DEGREE_LEVELS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+          </select>
+        </div>
         <div>
           <label className={labelCls}>Graduation year</label>
           <select value={edu.year} onChange={(e) => onChange({ ...edu, year: Number(e.target.value) })} className={inputCls}>
             {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
-        <div className="sm:col-span-2 flex items-end">
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelCls}>Diploma / transcript upload</label>
+          <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-4 py-3 text-sm transition hover:border-amber-400">
+            <GraduationCap className="h-4 w-4 shrink-0 text-[var(--bridge-text-faint)]" />
+            <span className="truncate text-xs text-[var(--bridge-text-muted)]">
+              {edu.diplomaFileName
+                ? <span className="font-semibold text-[var(--bridge-text)]">{edu.diplomaFileName}</span>
+                : 'Upload diploma, transcript, or certificate (JPEG, PNG, PDF)'}
+            </span>
+            <input type="file" accept="image/*,.pdf" className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) onChange({ ...edu, diplomaFileName: f.name }); }} />
+          </label>
+        </div>
+        <div className="flex items-end">
           <button type="button" onClick={onRemove} className="flex w-full items-center justify-center gap-1 rounded-xl border border-red-200 bg-red-50 py-3 text-xs font-semibold text-red-700 hover:bg-red-100 transition">
             <X className="h-3.5 w-3.5" /> Remove
           </button>
@@ -377,6 +411,7 @@ export default function MentorOnboarding() {
   // Verification data
   const [verifyData, setVerifyData] = useState({
     govIdNumber: '', govIdFileName: '', faceFileName: '',
+    linkedinUrl: '', githubUrl: '',
     socialVerified: null, socialSkipped: false, motivationEssay: '',
   });
 
@@ -390,13 +425,11 @@ export default function MentorOnboarding() {
   const [assignedRate, setAssignedRate] = useState(null);
   const [bioLoading, setBioLoading] = useState(false);
 
-  // Social verify modal
-  const [socialModal, setSocialModal] = useState(null);
-  const [socialInput, setSocialInput] = useState('');
 
   /* ── Load existing profile ── */
   useEffect(() => {
-    if (authLoading || !user || !isMentor) return;
+    if (authLoading) return;
+    if (!user || !isMentor) { setLoadingProfile(false); return; }
     void (async () => {
       try {
         const profile = await getMentorOnboardingProfile(user.id);
@@ -431,6 +464,20 @@ export default function MentorOnboarding() {
             work_experience:  Array.isArray(profile.work_experience) ? profile.work_experience : [],
             education:        Array.isArray(profile.education) ? profile.education : [],
           }));
+          const vd = profile.verification_data || {};
+          if (vd.govIdNumber || vd.linkedinUrl || vd.motivationEssay) {
+            setVerifyData((v) => ({
+              ...v,
+              govIdNumber:     vd.govIdNumber ?? '',
+              govIdFileName:   vd.govIdFileName ?? '',
+              faceFileName:    vd.faceFileName ?? '',
+              linkedinUrl:     vd.linkedinUrl ?? '',
+              githubUrl:       vd.githubUrl ?? '',
+              socialVerified:  vd.socialVerified ?? null,
+              socialSkipped:   vd.socialSkipped ?? false,
+              motivationEssay: vd.motivationEssay ?? '',
+            }));
+          }
           go('app-1');
         }
       } catch (err) {
@@ -605,6 +652,8 @@ export default function MentorOnboarding() {
                   onClick={() => {
                     if (!appForm.name.trim()) { setError('Please enter your full name.'); return; }
                     if (appForm.work_experience.length === 0) { setError('Please add at least one work experience entry.'); return; }
+                    const missingDegreeLevel = appForm.education.some((e) => e.school.trim() && !e.degree_level);
+                    if (missingDegreeLevel) { setError('Please select the degree level for each education entry.'); return; }
                     go('app-2');
                   }}
                   label="Continue"
@@ -690,7 +739,7 @@ export default function MentorOnboarding() {
                 <button
                   type="button"
                   onClick={() => patchApp({
-                    education: [...appForm.education, { school: '', degree: '', year: CURRENT_YEAR - 4 }],
+                    education: [...appForm.education, { school: '', degree: '', degree_level: '', year: CURRENT_YEAR - 4, diplomaFileName: '' }],
                   })}
                   className={`flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--bridge-border)] py-3 text-sm font-semibold text-[var(--bridge-text-muted)] transition hover:border-amber-400 hover:text-amber-600 ${focusRing}`}
                 >
@@ -712,7 +761,13 @@ export default function MentorOnboarding() {
                 <NextBtn
                   onClick={() => {
                     if (!verifyData.govIdNumber.trim()) { setError('Please enter your government ID number.'); return; }
-                    if (!verifyData.socialVerified && !verifyData.socialSkipped) { setError('Please verify a social account or select the skip option.'); return; }
+                    const li = (verifyData.linkedinUrl ?? '').trim();
+                    if (!li) { setError('Please enter your LinkedIn profile URL.'); return; }
+                    if (!/linkedin\.com\/in\//i.test(li)) { setError('LinkedIn URL must be in the format linkedin.com/in/your-name.'); return; }
+                    const gh = (verifyData.githubUrl ?? '').trim();
+                    if (gh && !/github\.com\//i.test(gh)) { setError('GitHub URL must be in the format github.com/your-username.'); return; }
+                    const socialVerified = { provider: 'linkedin', username: li, displayName: appForm.name || li };
+                    setVerifyData((v) => ({ ...v, socialVerified, socialSkipped: false }));
                     go('app-3');
                   }}
                   label="Continue"
@@ -721,24 +776,6 @@ export default function MentorOnboarding() {
             }
           >
             <SectionHeader icon={ShieldCheck} label="Identity proof" sub="Step 2 of 3" />
-
-            <div className="rounded-xl border border-amber-200/50 bg-amber-50/60 px-4 py-3 text-xs text-amber-900 flex items-center justify-between gap-3">
-              <span><strong>Test mode:</strong> Any values work — gov ID can be anything, LinkedIn just needs any username.</span>
-              <button
-                type="button"
-                onClick={() => setVerifyData({
-                  govIdNumber: 'DL-TEST-' + Math.floor(Math.random() * 90000 + 10000),
-                  govIdFileName: 'test-id-front.jpg',
-                  faceFileName: 'test-selfie.jpg',
-                  socialVerified: { provider: 'linkedin', username: 'test-user-' + Math.floor(Math.random() * 9000 + 1000), displayName: appForm.name || 'Test User' },
-                  socialSkipped: false,
-                  motivationEssay: verifyData.motivationEssay,
-                })}
-                className="shrink-0 rounded-lg border border-amber-400 bg-amber-400/20 px-3 py-1.5 text-[11px] font-bold text-amber-900 hover:bg-amber-400/30 transition-colors whitespace-nowrap"
-              >
-                Fill test data
-              </button>
-            </div>
 
             {/* Gov ID number */}
             <div>
@@ -782,74 +819,38 @@ export default function MentorOnboarding() {
               </div>
             </div>
 
-            {/* Social verification */}
+            {/* Professional profiles */}
             <div className="space-y-3 pt-1">
-              <p className="text-[11px] font-black uppercase tracking-wider text-[var(--bridge-text-faint)]">Professional identity</p>
+              <p className="text-[11px] font-black uppercase tracking-wider text-[var(--bridge-text-faint)]">Professional profiles</p>
               <p className="text-xs text-[var(--bridge-text-muted)]">
-                Connect your LinkedIn or GitHub to prove professional ownership. We only read your public name — we never post or store your password.
+                Your LinkedIn profile URL is required. GitHub is optional but strengthens your application. Profiles must be publicly visible.
               </p>
-
-              {verifyData.socialVerified ? (
-                <div className="flex items-center justify-between rounded-xl border border-emerald-400/40 bg-emerald-500/8 px-4 py-3">
-                  <div>
-                    <p className="text-sm font-bold text-emerald-400">
-                      ✓ {verifyData.socialVerified.provider === 'linkedin' ? 'LinkedIn' : 'GitHub'} verified
-                    </p>
-                    <p className="text-xs text-[var(--bridge-text-muted)] mt-0.5">
-                      @{verifyData.socialVerified.username} · {verifyData.socialVerified.displayName}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setVerifyData((v) => ({ ...v, socialVerified: null, socialSkipped: false }))}
-                    className="text-xs text-stone-500 hover:text-stone-300 transition-colors"
-                  >
-                    Change
-                  </button>
-                </div>
-              ) : verifyData.socialSkipped ? (
-                <div className="flex items-center justify-between rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-3">
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--bridge-text-muted)]">Skipped</p>
-                    <p className="text-xs text-[var(--bridge-text-faint)] mt-0.5">No social network linked — other signals carry your score</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setVerifyData((v) => ({ ...v, socialSkipped: false }))}
-                    className="text-xs text-stone-500 hover:text-stone-300 transition-colors"
-                  >
-                    Connect instead
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => { setSocialModal('linkedin'); setSocialInput(''); }}
-                      className={`flex items-center gap-2.5 rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--bridge-text)] transition hover:border-sky-400/60 hover:bg-sky-500/5 ${focusRing}`}
-                    >
-                      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                      LinkedIn
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setSocialModal('github'); setSocialInput(''); }}
-                      className={`flex items-center gap-2.5 rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--bridge-text)] transition hover:border-purple-400/60 hover:bg-purple-500/5 ${focusRing}`}
-                    >
-                      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                      GitHub
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setVerifyData((v) => ({ ...v, socialSkipped: true }))}
-                    className="w-full text-center text-xs text-[var(--bridge-text-faint)] hover:text-[var(--bridge-text-muted)] py-1.5 transition-colors"
-                  >
-                    I don't use LinkedIn or GitHub →
-                  </button>
-                </div>
-              )}
+              <div>
+                <label className={labelCls}>
+                  <svg className="inline h-3 w-3 mr-1 -mt-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                  LinkedIn profile URL *
+                </label>
+                <input
+                  type="url"
+                  value={verifyData.linkedinUrl ?? ''}
+                  onChange={(e) => setVerifyData((v) => ({ ...v, linkedinUrl: e.target.value }))}
+                  className={inputCls}
+                  placeholder="https://linkedin.com/in/your-name"
+                />
+              </div>
+              <div>
+                <label className={labelCls}>
+                  <svg className="inline h-3 w-3 mr-1 -mt-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                  GitHub profile URL <span className="normal-case font-normal text-[var(--bridge-text-faint)]">(optional, +bonus)</span>
+                </label>
+                <input
+                  type="url"
+                  value={verifyData.githubUrl ?? ''}
+                  onChange={(e) => setVerifyData((v) => ({ ...v, githubUrl: e.target.value }))}
+                  className={inputCls}
+                  placeholder="https://github.com/your-username"
+                />
+              </div>
             </div>
 
             <p className="text-xs text-[var(--bridge-text-faint)]">
@@ -1147,69 +1148,6 @@ export default function MentorOnboarding() {
           </Card>
         )}
 
-        {/* ── OAuth simulate modal ── */}
-        {socialModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div
-              className="w-full max-w-sm rounded-3xl p-6 space-y-4"
-              style={{ background: 'var(--bridge-surface)', boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 32px 64px rgba(0,0,0,0.3)' }}
-            >
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-black text-[var(--bridge-text)]">
-                  {socialModal === 'linkedin' ? 'Connect LinkedIn' : 'Connect GitHub'}
-                  <span className="ml-2 rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-bold text-amber-600 uppercase tracking-wide">Test mode</span>
-                </h2>
-                <button onClick={() => setSocialModal(null)} className="text-[var(--bridge-text-faint)] hover:text-[var(--bridge-text)]">
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              <div className="rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-3 text-xs text-[var(--bridge-text-muted)]">
-                In production this opens a real {socialModal === 'linkedin' ? 'LinkedIn' : 'GitHub'} OAuth popup. In test mode, enter any username to simulate ownership verification.
-              </div>
-
-              <div>
-                <label className={labelCls}>
-                  {socialModal === 'linkedin' ? 'LinkedIn username (linkedin.com/in/…)' : 'GitHub username'}
-                </label>
-                <input
-                  type="text"
-                  value={socialInput}
-                  onChange={(e) => setSocialInput(e.target.value)}
-                  className={inputCls}
-                  placeholder={socialModal === 'linkedin' ? 'john-doe-123' : 'johndoe'}
-                  autoFocus
-                />
-              </div>
-
-              <div className="flex gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setSocialModal(null)}
-                  className="flex-1 rounded-xl border border-[var(--bridge-border)] py-2.5 text-xs font-semibold text-[var(--bridge-text-muted)] hover:bg-white/4 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  disabled={!socialInput.trim()}
-                  onClick={() => {
-                    const username = socialInput.trim().replace(/^@/, '');
-                    setVerifyData((v) => ({
-                      ...v,
-                      socialVerified: { provider: socialModal, username, displayName: username },
-                      socialSkipped: false,
-                    }));
-                    setSocialModal(null);
-                  }}
-                  className="flex-1 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 py-2.5 text-xs font-bold text-white transition-colors"
-                >
-                  Simulate verify
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Dashboard link */}
         <p className="mt-8 text-center text-xs text-[var(--bridge-text-faint)]">

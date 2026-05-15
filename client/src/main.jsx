@@ -5,6 +5,7 @@ import './appearance.css';
 import App from './App.jsx';
 import { applyAppearanceFromStorage, initGlobalThemeListeners } from './utils/appearance';
 import { I18nProvider } from './i18n';
+import { ContentProvider } from './content';
 
 applyAppearanceFromStorage();
 initGlobalThemeListeners();
@@ -39,7 +40,9 @@ window.addEventListener('unhandledrejection', (e) => maybeReloadForStaleChunk(e?
 createRoot(document.getElementById('root')).render(
     <StrictMode>
         <I18nProvider>
-            <App />
+            <ContentProvider>
+                <App />
+            </ContentProvider>
         </I18nProvider>
     </StrictMode>,
 );

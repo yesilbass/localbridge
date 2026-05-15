@@ -10,6 +10,7 @@ import {
   STAGGER,
   usePerfTier,
 } from './landingHooks';
+import { useI18n } from '../../i18n';
 
 const MATCHING_MS = 1500;
 const RESULTS_MS  = 5000;
@@ -30,6 +31,7 @@ function initialsOf(name) {
 }
 
 export default function HeroLiveMatch() {
+  const { t } = useI18n();
   const reduced = useReducedMotion();
   const tier    = usePerfTier();
   const flat    = reduced || tier === 'low';
@@ -212,7 +214,7 @@ export default function HeroLiveMatch() {
         className="font-display font-black"
         style={{ fontSize: 18, color: 'var(--bridge-text)', letterSpacing: '-0.02em' }}
       >
-        What do you want to figure out?
+        {t('landing.match.heading', 'What do you want to figure out?')}
       </p>
 
       {/* Chip row */}
@@ -289,7 +291,7 @@ export default function HeroLiveMatch() {
                 className="text-[13px]"
                 style={{ color: 'var(--bridge-text-muted)' }}
               >
-                Matching against 2,400+ mentors…
+                {t('landing.match.matching', 'Matching against 2,400+ mentors…')}
               </p>
             </motion.div>
           ) : (

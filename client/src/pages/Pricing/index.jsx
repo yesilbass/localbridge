@@ -1,20 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
+import { useContent } from '../../content';
 import { isMentorAccount } from '../../utils/accountRole';
 import Reveal from '../../components/Reveal';
 import { focusRing } from '../../ui';
 import EmbeddedCheckoutPanel from '../../components/EmbeddedCheckoutPanel';
 import { createSubscriptionCheckout, finalizeCheckout } from '../../api/stripe';
 import { AuroraBg, KineticNumber, Magnetic } from '../dashboard/dashboardCinematic.jsx';
-import { ANNUAL_DISCOUNT, MENTOR_TIERS, COMPARISON_ROWS, FAQ_ITEMS, tierMonthlyEquivalent } from './constants';
+import { ANNUAL_DISCOUNT, MENTOR_TIERS, COMPARISON_ROWS, FAQ_ITEMS, tierMonthlyEquivalent, isStudentEmail, STUDENT_DISCOUNT } from './constants';
 import CheckCell from './CheckCell';
 import PricingFaq from './PricingFaq';
 import StickyPricingBar from './StickyPricingBar';
 
 export default function Pricing() {
   const { user } = useAuth();
+  const { s } = useContent();
   const asMentor = user ? isMentorAccount(user) : false;
+  const isStudent = isStudentEmail(user?.email);
   const [searchParams, setSearchParams] = useSearchParams();
   const [annual, setAnnual] = useState(false);
   const [billingNote, setBillingNote] = useState(null);
@@ -208,23 +211,23 @@ export default function Pricing() {
                     }}
                   >
                     <span aria-hidden className="bridge-pulse inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: '#10b981' }} />
-                    <span style={{ color: 'var(--bridge-text-muted)' }}>Pick your plan — no card to start</span>
+                    <span style={{ color: 'var(--bridge-text-muted)' }}>{s.pricing.heroEyebrow}</span>
                   </div>
                   <h1
                     id="pricing-heading"
                     className="font-display font-black"
                     style={{ fontSize: 'clamp(2.2rem, 5.2vw, 4rem)', lineHeight: 1.08, letterSpacing: '-0.03em', color: 'var(--bridge-text)' }}
                   >
-                    <span className="block">Simple pricing,</span>
+                    <span className="block">{s.pricing.heroHeading1}</span>
                     <span
                       className="block bg-clip-text text-transparent italic pr-[0.15em]"
                       style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)' }}
                     >
-                      pick what fits.
+                      {s.pricing.heroHeading2}
                     </span>
                   </h1>
                   <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-[var(--bridge-text-secondary)]">
-                    Subscription plans cover Bridge platform access. Mentor sessions are paid separately at each mentor's rate.
+                    {s.pricing.heroSubCopy}
                   </p>
                 </div>
               </Reveal>
@@ -250,7 +253,7 @@ export default function Pricing() {
                       data-cursor="hover"
                       className={`relative z-[1] rounded-full px-5 py-1.5 text-sm font-black tracking-tight transition ${!annual ? 'text-[var(--color-on-primary)]' : 'text-[var(--bridge-text-secondary)] hover:text-[var(--bridge-text)]'} ${focusRing}`}
                     >
-                      Monthly
+                      {s.pricing.billingMonthly}
                     </button>
                     <button
                       type="button"
@@ -258,7 +261,7 @@ export default function Pricing() {
                       data-cursor="hover"
                       className={`relative z-[1] rounded-full px-5 py-1.5 text-sm font-black tracking-tight transition ${annual ? 'text-[var(--color-on-primary)]' : 'text-[var(--bridge-text-secondary)] hover:text-[var(--bridge-text)]'} ${focusRing}`}
                     >
-                      Annual
+                      {s.pricing.billingAnnual}
                     </button>
                   </div>
                   <span
@@ -302,15 +305,67 @@ export default function Pricing() {
                   4.9 / 5 from <KineticNumber to={2400} ms={900} />+ users
                 </span>
                 <span className="h-1 w-1 rounded-full bg-[var(--bridge-border-strong)]" />
-                <span>No card for Free tier</span>
+                <span>{s.pricing.trustNoCard}</span>
                 <span className="h-1 w-1 rounded-full bg-[var(--bridge-border-strong)]" />
-                <span>Cancel any time</span>
+                <span>{s.pricing.trustCancel}</span>
                 <span className="h-1 w-1 rounded-full bg-[var(--bridge-border-strong)]" />
-                <span>Stripe-secured checkout</span>
+                <span>{s.pricing.trustStripe}</span>
               </div>
             </Reveal>
           </div>
         </section>
+
+        {isStudent && (
+          <Reveal>
+            <div className="mx-auto mb-6 max-w-7xl px-5 sm:px-8">
+              <div
+                className="flex items-center gap-3 rounded-2xl border px-5 py-3.5"
+                style={{
+                  borderColor: 'color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                  backgroundColor: 'color-mix(in srgb, var(--color-primary) 7%, transparent)',
+                }}
+              >
+                <span className="text-lg">🎓</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-black" style={{ color: 'var(--bridge-text)' }}>
+                    {s.pricing.studentTitle}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--bridge-text-secondary)' }}>
+                    Your .edu email ({user?.email}) qualifies for Bridge's student rate. Discount applied automatically at checkout.
+                  </p>
+                </div>
+                <span
+                  className="shrink-0 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wide"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--color-primary) 15%, transparent)',
+                    color: 'var(--color-primary)',
+                  }}
+                >
+                  50% OFF
+                </span>
+              </div>
+            </div>
+          </Reveal>
+        )}
+        {!user && (
+          <Reveal>
+            <div className="mx-auto mb-6 max-w-7xl px-5 sm:px-8">
+              <div
+                className="flex items-center gap-3 rounded-2xl border px-5 py-3"
+                style={{
+                  borderColor: 'var(--bridge-border)',
+                  backgroundColor: 'color-mix(in srgb, var(--bridge-surface-muted) 60%, transparent)',
+                }}
+              >
+                <span className="text-base">🎓</span>
+                <p className="text-sm" style={{ color: 'var(--bridge-text-secondary)' }}>
+                  <span className="font-bold" style={{ color: 'var(--bridge-text)' }}>{s.pricing.studentLabel}</span>{' '}
+                  {s.pricing.studentNotLoggedInHint} <span className="font-semibold">{s.pricing.studentEduEmail}</span> {s.pricing.studentUnlockHint}
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        )}
 
         {/* Tier cards */}
         <div className="relative z-[2] mx-auto max-w-7xl px-5 pt-4 pb-12 sm:px-8 sm:pt-6 sm:pb-14">
@@ -375,9 +430,20 @@ export default function Pricing() {
 
                       <div className="relative z-[1]">
                         <p className="mt-5 flex flex-wrap items-baseline gap-x-1.5">
-                          <span className="font-display text-[3rem] font-black tabular-nums tracking-[-0.03em] leading-none text-[var(--bridge-text)]">
-                            ${tier.monthly === 0 ? '0' : <KineticNumber to={equiv} ms={900} />}
-                          </span>
+                          {isStudent && tier.monthly > 0 ? (
+                            <>
+                              <span className="font-display text-[2rem] font-black tabular-nums tracking-[-0.03em] leading-none line-through text-[var(--bridge-text-muted)]">
+                                ${equiv}
+                              </span>
+                              <span className="font-display text-[3rem] font-black tabular-nums tracking-[-0.03em] leading-none text-[var(--bridge-text)]">
+                                ${Math.round(equiv * (1 - STUDENT_DISCOUNT))}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="font-display text-[3rem] font-black tabular-nums tracking-[-0.03em] leading-none text-[var(--bridge-text)]">
+                              ${tier.monthly === 0 ? '0' : <KineticNumber to={equiv} ms={900} />}
+                            </span>
+                          )}
                           <span className="text-sm font-bold text-[var(--bridge-text-muted)]">/month</span>
                         </p>
                         <p className="mt-1.5 min-h-[1.25rem] text-[11px] font-bold text-[var(--bridge-text-muted)]">

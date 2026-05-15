@@ -1,17 +1,18 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import RevealOnScroll from '../landing/RevealOnScroll';
-import { RECEIPTS } from './whyUsData';
+import { RECEIPTS, WHY_US_SECTION_PAD } from './whyUsData';
 
 export default function ReceiptsSection() {
   return (
     <section
       id="receipts"
       aria-labelledby="receipts-heading"
-      className="py-24 lg:py-32"
+      className={`scroll-mt-[5.25rem] ${WHY_US_SECTION_PAD}`}
       style={{
         backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border)',
+        borderTop: '1px solid var(--bridge-border-strong)',
+        borderBottom: '1px solid var(--bridge-border-strong)',
       }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
@@ -56,7 +57,7 @@ export default function ReceiptsSection() {
           </p>
         </RevealOnScroll>
 
-        <div className="mt-12 grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
+        <div className="mt-10 sm:mt-12 grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
           <RevealOnScroll>
             <figure
               className="rounded-3xl p-7 sm:p-9 flex flex-col gap-6 h-full"

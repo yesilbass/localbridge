@@ -145,3 +145,9 @@ export const AUDIENCE_NOT_FOR = [
   'You want generic career advice with no specific question.',
   'You want a free reply to a LinkedIn DM.',
 ];
+
+export const WHY_US_SECTION_PAD =
+  'py-16 sm:py-20 md:py-24 lg:py-32';
+
+export const WHY_US_FINAL_SECTION_PAD =
+  'py-16 sm:py-20 md:py-24 lg:py-36';

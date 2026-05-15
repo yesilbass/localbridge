@@ -96,7 +96,7 @@ export default function HeroSection() {
               style={{ backgroundColor: '#10b981' }}
             />
             <span style={{ color: 'var(--bridge-text-muted)' }}>
-              Now booking — 2,400+ mentors live this week
+              {s.landing.heroEyebrow}
             </span>
           </motion.div>
 
@@ -116,7 +116,7 @@ export default function HeroSection() {
               {...enter(0.05, 'y', 14, DUR_MED)}
               className="block"
             >
-              The fastest path
+              {s.landing.heroHeadline1}
             </motion.span>
             <motion.span
               {...enter(0.18, 'y', 14, DUR_MED)}
@@ -126,7 +126,7 @@ export default function HeroSection() {
                   'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)',
               }}
             >
-              to your next role.
+              {s.landing.heroHeadline2}
             </motion.span>
           </h1>
 
@@ -140,7 +140,7 @@ export default function HeroSection() {
               color: 'color-mix(in srgb, var(--bridge-text) 55%, transparent)',
             }}
           >
-            Talk to someone who's already done it.
+            {s.landing.heroSubTagline}
           </motion.p>
 
           {/* Sub-copy (t=0.45) */}
@@ -153,7 +153,7 @@ export default function HeroSection() {
               lineHeight: 1.6,
             }}
           >
-            AI-matched to your exact goal. Booked in seconds — no subscriptions, no packages, no DMs.
+            {s.landing.heroSubCopy}
           </motion.p>
 
           {/* CTA pair (t=0.55) */}
@@ -181,7 +181,7 @@ export default function HeroSection() {
             >
               <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
               <span className="relative z-10 flex items-center gap-2">
-                Get matched
+                {s.landing.heroCtaGetMatched}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </span>
             </Link>
@@ -205,7 +205,7 @@ export default function HeroSection() {
                 e.currentTarget.style.color = 'var(--bridge-text-secondary)';
               }}
             >
-              See how it works ↓
+              {s.landing.heroCtaSeeHow}
             </Link>
           </motion.div>
 
@@ -214,14 +214,14 @@ export default function HeroSection() {
             {...enter(0.65, 'y', 14, DUR_MED)}
             className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-3"
           >
-            <Trust icon={<ShieldCheck className="h-4 w-4" aria-hidden="true" />} text="No credit card to browse" />
-            <Trust icon={<Calendar className="h-4 w-4" aria-hidden="true" />} text="Booked in 60 seconds" />
+            <Trust icon={<ShieldCheck className="h-4 w-4" aria-hidden="true" />} text={s.landing.heroTrustNoCard} />
+            <Trust icon={<Calendar className="h-4 w-4" aria-hidden="true" />} text={s.landing.heroTrustBooked} />
             <Trust
               icon={<Star className="h-4 w-4" style={{ fill: 'currentColor' }} aria-hidden="true" />}
               text={
                 <>
                   <b style={{ color: 'var(--bridge-text)', fontFeatureSettings: '"tnum" 1' }}>4.9</b>
-                  /5 across 1,200+ sessions
+                  {s.landing.heroTrustRating}
                 </>
               }
             />

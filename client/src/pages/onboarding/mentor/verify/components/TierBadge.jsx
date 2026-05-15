@@ -9,7 +9,7 @@ const STYLES = {
 
 export default function TierBadge({ tier, size = 'sm', showLabel = true, className = '' }) {
   const t = String(tier || 'rising').toLowerCase();
-  const s = STYLES[t] || STYLES.bronze;
+  const s = STYLES[t] || STYLES.rising;
   const Icon = s.icon || Sparkles;
   const px = size === 'lg' ? 'px-3 py-1 text-[12px]' : 'px-2 py-0.5 text-[11px]';
   return (

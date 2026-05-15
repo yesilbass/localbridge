@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, ShieldCheck, Eye, Receipt } from 'lucide-react';
+import { WHY_US_FINAL_SECTION_PAD } from './whyUsData';
 import RevealOnScroll from '../landing/RevealOnScroll';
 import { EASE, DUR_SHORT } from '../landing/landingHooks';
 
@@ -24,8 +25,9 @@ export default function WhyUsFinalCtaSection() {
     <section
       id="final"
       aria-labelledby="final-heading"
-      className="relative overflow-hidden py-24 lg:py-36"
+      className={`relative overflow-hidden ${WHY_US_FINAL_SECTION_PAD}`}
       style={{
+        borderTop: '1px solid var(--bridge-border-strong)',
         backgroundImage:
           'linear-gradient(180deg, var(--bridge-canvas) 0%, color-mix(in srgb, var(--color-primary) 6%, var(--bridge-canvas)) 50%, var(--bridge-canvas) 100%)',
       }}

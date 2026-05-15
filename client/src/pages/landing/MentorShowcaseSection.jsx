@@ -3,6 +3,7 @@ import { ArrowRight, Star } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
 import { findMentor } from './landingData';
 import { DUR_SHORT } from './landingHooks';
+import { useI18n } from '../../i18n';
 
 const FEATURED_ID = 'm-maya-chen';
 const SMALL_IDS = ['m-marcus-lee', 'm-elena-voss', 'm-omar-hassan', 'm-sarah-kim'];
@@ -29,6 +30,7 @@ function initialsOf(name) {
 }
 
 export default function MentorShowcaseSection() {
+  const { t } = useI18n();
   const featured = findMentor(FEATURED_ID);
   const smalls = SMALL_IDS.map(findMentor).filter(Boolean);
 
@@ -48,7 +50,7 @@ export default function MentorShowcaseSection() {
             className="text-[10px] font-black uppercase"
             style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.32em' }}
           >
-            This week&rsquo;s spotlight
+            {t('landing.showcase.eyebrow', "This week's spotlight")}
           </p>
           <h2
             id="mentors-heading"
@@ -61,7 +63,7 @@ export default function MentorShowcaseSection() {
               fontFeatureSettings: '"kern" 1, "ss01" 1',
             }}
           >
-            One mentor, <span style={{ color: 'var(--color-primary)' }}>up close.</span>
+            {t('landing.showcase.heading1', 'One mentor,')}{' '}<span style={{ color: 'var(--color-primary)' }}>{t('landing.showcase.heading2', 'up close.')}</span>
           </h2>
           <p
             className="mt-6 max-w-xl"
@@ -71,13 +73,13 @@ export default function MentorShowcaseSection() {
               lineHeight: 1.55,
             }}
           >
-            Every profile on Bridge looks like this — real bio, real numbers, real booking.
+            {t('landing.showcase.subCopy', 'Every profile on Bridge looks like this — real bio, real numbers, real booking.')}
           </p>
         </RevealOnScroll>
 
         {featured && (
           <div className="mt-10">
-            <Centerpiece mentor={featured} />
+            <Centerpiece mentor={featured} t={t} />
           </div>
         )}
 
@@ -87,7 +89,7 @@ export default function MentorShowcaseSection() {
               className="text-[10px] font-bold uppercase"
               style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.22em' }}
             >
-              Also booking this week
+              {t('landing.showcase.alsoBooking', 'Also booking this week')}
             </p>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
               {smalls.map((m) => (
@@ -96,14 +98,14 @@ export default function MentorShowcaseSection() {
             </div>
             <div className="mt-6 flex items-center justify-between">
               <p className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>
-                5 of 2,400+ vetted mentors.
+                {t('landing.showcase.count', '5 of 2,400+ vetted mentors.')}
               </p>
               <Link
                 to="/mentors"
                 className="inline-flex items-center gap-1.5 text-[13px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
                 style={{ color: 'var(--color-primary)', outlineColor: 'var(--color-primary)' }}
               >
-                See every mentor
+                {t('landing.showcase.seeEvery', 'See every mentor')}
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </Link>
             </div>
@@ -114,7 +116,7 @@ export default function MentorShowcaseSection() {
   );
 }
 
-function Centerpiece({ mentor }) {
+function Centerpiece({ mentor, t }) {
   return (
     <div
       className="grid grid-cols-1 overflow-hidden rounded-3xl lg:grid-cols-12"
@@ -198,7 +200,7 @@ function Centerpiece({ mentor }) {
             className="text-[10px] font-bold uppercase"
             style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.22em' }}
           >
-            About
+            {t('landing.showcase.about', 'About')}
           </p>
           <p
             className="mt-2 text-[15px]"
@@ -213,7 +215,7 @@ function Centerpiece({ mentor }) {
             className="text-[10px] font-bold uppercase"
             style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.22em' }}
           >
-            Focus areas
+            {t('landing.showcase.focusAreas', 'Focus areas')}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {FEATURED_FOCUS.map((t) => (
@@ -238,8 +240,8 @@ function Centerpiece({ mentor }) {
             boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
           }}
         >
-          <Stat label="Rating" value={mentor.rating.toFixed(1)} />
-          <Stat label="Sessions" value={String(mentor.sessions)} divider />
+          <Stat label={t('landing.showcase.rating', 'Rating')} value={mentor.rating.toFixed(1)} />
+          <Stat label={t('landing.showcase.sessions', 'Sessions')} value={String(mentor.sessions)} divider />
         </div>
 
         <div className="mt-1 flex flex-wrap items-center gap-3">
@@ -256,7 +258,7 @@ function Centerpiece({ mentor }) {
             onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
           >
-            Open full profile
+            {t('landing.showcase.openProfile', 'Open full profile')}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
           </Link>
         </div>

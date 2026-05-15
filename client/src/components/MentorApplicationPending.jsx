@@ -156,8 +156,8 @@ export default function MentorApplicationPending({ status = 'pending' }) {
             </div>
           )}
 
-          {/* Re-apply for rejected */}
-          {status === 'rejected' && (
+          {/* Edit application — for pending or rejected */}
+          {(status === 'pending' || status === 'rejected') && (
             <div className="mt-6">
               <button
                 onClick={() => navigate('/onboarding/mentor')}
@@ -165,10 +165,12 @@ export default function MentorApplicationPending({ status = 'pending' }) {
                 style={{ color: 'var(--bridge-text-secondary)' }}
               >
                 <RefreshCw className="h-4 w-4" />
-                Update application &amp; re-apply
+                {status === 'pending' ? 'Edit my application' : 'Update application & re-apply'}
               </button>
               <p className="mt-2 text-center text-xs" style={{ color: 'var(--bridge-text-faint)' }}>
-                Improve your verification score by adding work experience, education, a stronger LinkedIn URL, and a more detailed motivation essay.
+                {status === 'pending'
+                  ? 'You can update your work history, education, LinkedIn URL, or essay before your application is reviewed.'
+                  : 'Improve your verification score by adding work experience, education, a stronger LinkedIn URL, and a more detailed motivation essay.'}
               </p>
             </div>
           )}

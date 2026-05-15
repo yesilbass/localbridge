@@ -1,15 +1,17 @@
+import { Link } from 'react-router-dom';
 import RevealOnScroll from '../landing/RevealOnScroll';
-import { TIMELINE_ENTRIES } from './aboutData';
+import { ABOUT_SECTION_PAD, TIMELINE_ENTRIES } from './aboutData';
 
 export default function TimelineSection() {
   return (
     <section
       id="timeline"
       aria-labelledby="timeline-heading"
-      className="py-24 lg:py-32"
+      className={ABOUT_SECTION_PAD}
       style={{
         backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border)',
+        borderTop: '1px solid var(--bridge-border-strong)',
+        borderBottom: '1px solid var(--bridge-border-strong)',
       }}
     >
       <div className="mx-auto max-w-3xl px-5 sm:px-8">
@@ -54,7 +56,7 @@ export default function TimelineSection() {
           </p>
         </RevealOnScroll>
 
-        <div className="mt-14 relative">
+        <div className="relative mt-10 sm:mt-14">
           <div
             aria-hidden="true"
             className="absolute left-[15px] sm:left-[19px] top-2 bottom-2 w-px pointer-events-none"
@@ -64,7 +66,7 @@ export default function TimelineSection() {
           <div className="flex flex-col gap-10">
             {TIMELINE_ENTRIES.map((e) => (
               <RevealOnScroll key={e.date}>
-                <div className="relative grid grid-cols-[32px_1fr] sm:grid-cols-[40px_1fr] gap-5 sm:gap-7">
+                <div className="relative grid grid-cols-[32px_1fr] gap-5 sm:grid-cols-[40px_1fr] sm:gap-7">
                   <div className="relative pt-1">
                     <span
                       aria-hidden="true"
@@ -100,6 +102,9 @@ export default function TimelineSection() {
                       }}
                     >
                       {e.title}
+                      {e.live ? (
+                        <span className="sr-only"> — current milestone</span>
+                      ) : null}
                     </h3>
                     <p
                       className="max-w-xl"
@@ -111,6 +116,31 @@ export default function TimelineSection() {
                     >
                       {e.body}
                     </p>
+                    {e.cta ? (
+                      <Link
+                        to={e.cta.to}
+                        className="mt-4 inline-flex w-fit items-center rounded-full px-5 py-2.5 text-[13px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
+                        style={{
+                          color: 'var(--bridge-text)',
+                          boxShadow: 'inset 0 0 0 1px var(--bridge-border-strong)',
+                          outlineColor: 'var(--color-primary)',
+                          transition:
+                            'box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                        }}
+                        onMouseEnter={(ev) => {
+                          ev.currentTarget.style.boxShadow =
+                            'inset 0 0 0 1px var(--color-primary)';
+                          ev.currentTarget.style.color = 'var(--color-primary)';
+                        }}
+                        onMouseLeave={(ev) => {
+                          ev.currentTarget.style.boxShadow =
+                            'inset 0 0 0 1px var(--bridge-border-strong)';
+                          ev.currentTarget.style.color = 'var(--bridge-text)';
+                        }}
+                      >
+                        {e.cta.label}
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
               </RevealOnScroll>

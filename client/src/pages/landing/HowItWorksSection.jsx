@@ -1,37 +1,33 @@
 import { Search, Video } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
 import { DUR_SHORT } from './landingHooks';
-
-// PATTERN A: three static CSS-only product mocks (no asset dependency).
-// To swap to PATTERN B (single looping demo video), replace the three
-// <StepCard> renders below with a single centered <video playsInline muted
-// autoPlay loop poster="/landing/booking-demo.jpg" src="/landing/booking-demo.mp4" />
-// in a 16/10 device frame, plus a compact horizontal numbered list of STEPS.
-const STEPS = [
-  {
-    num: '01',
-    title: 'Tell us what you need.',
-    body: 'Two questions, sixty seconds. Matching surfaces the right operators in real time.',
-    chip: 'Sixty seconds',
-    Mock: SearchMock,
-  },
-  {
-    num: '02',
-    title: 'Pick someone who has done it.',
-    body: 'Real role, real company, real outcomes. Pricing, calendar, reviews on every profile.',
-    chip: 'Pick a slot',
-    Mock: CalendarMock,
-  },
-  {
-    num: '03',
-    title: 'Talk. Walk away with momentum.',
-    body: 'One hour, one focused conversation. Notes and action items stay with you after.',
-    chip: 'Live in one click',
-    Mock: VideoMock,
-  },
-];
+import { useI18n } from '../../i18n';
 
 export default function HowItWorksSection() {
+  const { t } = useI18n();
+  const STEPS = [
+    {
+      num: '01',
+      title: t('landing.how.step1.title', 'Tell us what you need.'),
+      body: t('landing.how.step1.body', 'Two questions, sixty seconds. Matching surfaces the right operators in real time.'),
+      chip: t('landing.how.step1.chip', 'Sixty seconds'),
+      Mock: SearchMock,
+    },
+    {
+      num: '02',
+      title: t('landing.how.step2.title', 'Pick someone who has done it.'),
+      body: t('landing.how.step2.body', 'Real role, real company, real outcomes. Pricing, calendar, reviews on every profile.'),
+      chip: t('landing.how.step2.chip', 'Pick a slot'),
+      Mock: CalendarMock,
+    },
+    {
+      num: '03',
+      title: t('landing.how.step3.title', 'Talk. Walk away with momentum.'),
+      body: t('landing.how.step3.body', 'One hour, one focused conversation. Notes and action items stay with you after.'),
+      chip: t('landing.how.step3.chip', 'Live in one click'),
+      Mock: VideoMock,
+    },
+  ];
   return (
     <section
       id="how"
@@ -48,7 +44,7 @@ export default function HowItWorksSection() {
             className="text-[10px] font-black uppercase"
             style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.32em' }}
           >
-            How it works
+            {t('landing.how.eyebrow', 'How it works')}
           </p>
           <h2
             id="how-heading"
@@ -61,8 +57,8 @@ export default function HowItWorksSection() {
               fontFeatureSettings: '"kern" 1, "ss01" 1',
             }}
           >
-            Three steps.{' '}
-            <span style={{ color: 'var(--color-primary)' }}>Real momentum.</span>
+            {t('landing.how.heading1', 'Three steps.')}{' '}
+            <span style={{ color: 'var(--color-primary)' }}>{t('landing.how.heading2', 'Real momentum.')}</span>
           </h2>
           <p
             className="mt-6 max-w-xl"
@@ -72,7 +68,7 @@ export default function HowItWorksSection() {
               lineHeight: 1.55,
             }}
           >
-            From profile to booked session in under five minutes.
+            {t('landing.how.subCopy', 'From profile to booked session in under five minutes.')}
           </p>
         </RevealOnScroll>
 

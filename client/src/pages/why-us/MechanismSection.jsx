@@ -1,6 +1,6 @@
 import { Check, Globe, Star } from 'lucide-react';
 import RevealOnScroll from '../landing/RevealOnScroll';
-import { MECHANISMS } from './whyUsData';
+import { MECHANISMS, WHY_US_SECTION_PAD } from './whyUsData';
 
 const VETTING_PILLS = [
   'Role verified at company',
@@ -19,8 +19,10 @@ export default function MechanismSection() {
     <section
       id="mechanism"
       aria-labelledby="mechanism-heading"
-      className="py-24 lg:py-32"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
+      className={WHY_US_SECTION_PAD}
+      style={{
+        backgroundColor: 'var(--bridge-canvas)',
+      }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -64,11 +66,11 @@ export default function MechanismSection() {
           </p>
         </RevealOnScroll>
 
-        <div className="mt-14">
+        <div className="mt-10 sm:mt-14">
           {MECHANISMS.map((m, i) => (
             <RevealOnScroll key={m.num}>
               <div
-                className="grid grid-cols-[80px_1fr] sm:grid-cols-[140px_1fr] gap-6 sm:gap-12 py-12 sm:py-14"
+                className="grid grid-cols-[80px_1fr] sm:grid-cols-[140px_1fr] gap-6 sm:gap-12 py-8 sm:py-11 lg:py-14"
                 style={
                   i > 0
                     ? { borderTop: '1px solid var(--bridge-border)' }

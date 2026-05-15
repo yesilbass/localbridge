@@ -1,14 +1,15 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
-
-const TIERS = [
-  { label: 'From',   amount: '$25',  unit: 'per 30 min',       badge: null    },
-  { label: 'Avg',    amount: '$60',  unit: 'per session',      badge: 'Most'  },
-  { label: 'Up to',  amount: '$150', unit: 'senior mentors',   badge: null    },
-];
+import { useI18n } from '../../i18n';
 
 export default function PricingBand() {
+  const { t } = useI18n();
+  const TIERS = [
+    { label: t('landing.pricing.from', 'From'),   amount: '$25',  unit: t('landing.pricing.per30min', 'per 30 min'),       badge: null    },
+    { label: t('landing.pricing.avg', 'Avg'),     amount: '$60',  unit: t('landing.pricing.perSession', 'per session'),    badge: t('landing.pricing.most', 'Most')  },
+    { label: t('landing.pricing.upto', 'Up to'),  amount: '$150', unit: t('landing.pricing.seniorMentors', 'senior mentors'), badge: null },
+  ];
   return (
     <section
       id="pricing"
@@ -35,7 +36,7 @@ export default function PricingBand() {
                 className="text-[10px] font-black uppercase"
                 style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.32em' }}
               >
-                Pricing, clearly
+                {t('landing.pricing.eyebrow', 'Pricing, clearly')}
               </p>
               <h2
                 id="pricing-heading"
@@ -48,8 +49,8 @@ export default function PricingBand() {
                   fontFeatureSettings: '"kern" 1, "ss01" 1',
                 }}
               >
-                No subscription to unlock mentors.{' '}
-                <span style={{ color: 'var(--color-primary)' }}>You pay per session.</span>
+                {t('landing.pricing.heading1', 'No subscription to unlock mentors.')}{' '}
+                <span style={{ color: 'var(--color-primary)' }}>{t('landing.pricing.heading2', 'You pay per session.')}</span>
               </h2>
               <p
                 className="mt-6 max-w-md"
@@ -59,14 +60,14 @@ export default function PricingBand() {
                   lineHeight: 1.55,
                 }}
               >
-                Browse free. Book the operator who fits. Pay once, walk away with momentum.
+                {t('landing.pricing.subCopy', 'Browse free. Book the operator who fits. Pay once, walk away with momentum.')}
               </p>
               <Link
                 to="/pricing"
                 className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
                 style={{ color: 'var(--color-primary)', outlineColor: 'var(--color-primary)' }}
               >
-                See pricing details
+                {t('landing.pricing.seeDetails', 'See pricing details')}
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </Link>
             </div>

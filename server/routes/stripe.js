@@ -28,6 +28,26 @@ function stripeUnavailable(res) {
   return res.status(503).json({ error: 'Stripe is not configured on the server.' });
 }
 
+function isStudentEmail(email) {
+  if (!email || typeof email !== 'string') return false;
+  const domain = email.split('@')[1] ?? '';
+  return domain.toLowerCase().endsWith('.edu');
+}
+
+async function getStudentCoupon() {
+  try {
+    return await stripe.coupons.retrieve('BRIDGE_STUDENT_50');
+  } catch {
+    return await stripe.coupons.create({
+      id: 'BRIDGE_STUDENT_50',
+      percent_off: 50,
+      duration: 'forever',
+      name: 'Student Discount — 50% off',
+      applies_to: undefined,
+    });
+  }
+}
+
 function toMetadataString(v, max = 500) {
   if (v == null) return '';
   const s = String(v);
@@ -43,6 +63,9 @@ router.post('/create-subscription-checkout', async (req, res) => {
     if (!PLAN_PRICES[planName]) {
       return res.status(400).json({ error: 'Invalid plan selected.' });
     }
+
+    const isStudent = isStudentEmail(userEmail);
+    const studentCoupon = isStudent && stripe ? await getStudentCoupon() : null;
 
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded_page',
@@ -62,10 +85,12 @@ router.post('/create-subscription-checkout', async (req, res) => {
           quantity: 1,
         },
       ],
+      ...(studentCoupon ? { discounts: [{ coupon: studentCoupon.id }] } : {}),
       metadata: {
         type: 'subscription',
         userId: toMetadataString(userId),
         planName: toMetadataString(planName),
+        studentDiscount: isStudent ? 'true' : 'false',
       },
       return_url: `${process.env.CLIENT_URL}/pricing?session_id={CHECKOUT_SESSION_ID}`,
     });
