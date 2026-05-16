@@ -9,10 +9,12 @@ import {
   DUR_LONG,
   usePerfTier,
 } from './landingHooks';
+import { useContent } from '../../content';
 
 export default function HeroSection() {
   const reduced = useReducedMotion();
   const tier    = usePerfTier();
+  const { s }   = useContent();
   const flat    = reduced || tier === 'low';
 
   const enter = (delay, axis = 'y', distance = 14, duration = DUR_MED) => {
