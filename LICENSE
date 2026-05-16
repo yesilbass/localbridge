@@ -1,0 +1,130 @@
+Copyright (c) 2024–2026 Berk and Muaz. All rights reserved.
+
+PROPRIETARY SOFTWARE LICENSE
+
+This software, its source code, documentation, algorithms, design assets,
+database schemas, and all associated files (collectively, the "Software")
+are the exclusive intellectual property of Berk and Muaz ("Owners").
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. OWNERSHIP
+
+   The Owners retain all right, title, and interest in and to the Software,
+   including all intellectual property rights therein. This License does not
+   convey to you any title or ownership of the Software, but only a limited
+   right of use expressly set forth in Section 2 below.
+
+2. LIMITED INTERNAL USE LICENSE
+
+   Subject to the terms and conditions of this License, the Owners grant the
+   authorized development team members (currently: Berk, Muaz, Omar, and
+   Irshad) a non-exclusive, non-transferable, revocable right to access and
+   use the Software solely for the purpose of developing, testing, and
+   maintaining Bridge on behalf of and under the direct supervision of the
+   Owners.
+
+   This right terminates automatically upon any breach of this License or
+   upon written notice from the Owners.
+
+3. RESTRICTIONS
+
+   Unless you have received prior, explicit, written consent from the Owners,
+   you may NOT:
+
+   a. Copy, reproduce, or duplicate the Software in whole or in part;
+
+   b. Distribute, publish, transmit, sublicense, sell, resell, transfer,
+      assign, or otherwise make the Software available to any third party;
+
+   c. Modify, adapt, translate, reverse-engineer, decompile, disassemble,
+      or create derivative works based on the Software;
+
+   d. Use the Software, or any portion thereof, to build a competing
+      product or service;
+
+   e. Use the Software for any purpose not expressly authorized under
+      Section 2;
+
+   f. Remove, alter, obscure, or circumvent any proprietary notices,
+      labels, copyright notices, or security mechanisms in or on the
+      Software;
+
+   g. Disclose, share, or make available the Software or any portion
+      thereof to any person who is not an authorized team member.
+
+4. CONTRIBUTIONS
+
+   Any work, code, design, idea, or other material contributed to the
+   Software by any team member, contractor, or other individual
+   ("Contribution") is assigned to and becomes the sole property of the
+   Owners immediately upon creation. Contributors waive any and all moral
+   rights in their Contributions to the extent permitted by applicable law.
+   Contributors represent and warrant that their Contributions are original
+   works and do not infringe any third-party intellectual property rights.
+
+5. CONFIDENTIALITY
+
+   The Software, including its architecture, algorithms, data models, and
+   business logic, is confidential and proprietary. Authorized team members
+   must not disclose any part of the Software or its implementation details
+   to any unauthorized person without the prior written consent of the Owners.
+
+6. THIRD-PARTY COMPONENTS
+
+   The Software incorporates third-party open-source libraries, each governed
+   by their respective licenses (MIT, Apache 2.0, etc.). This License applies
+   solely to the original work authored by the Owners and does not alter the
+   terms of any third-party license. A list of third-party dependencies and
+   their licenses can be found in the project's package.json files.
+
+7. NO WARRANTY
+
+   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, TITLE, OR NON-INFRINGEMENT. THE OWNERS
+   DO NOT WARRANT THAT THE SOFTWARE WILL BE ERROR-FREE OR UNINTERRUPTED.
+
+8. LIMITATION OF LIABILITY
+
+   IN NO EVENT SHALL THE OWNERS BE LIABLE TO ANY PARTY FOR ANY INDIRECT,
+   INCIDENTAL, SPECIAL, EXEMPLARY, PUNITIVE, OR CONSEQUENTIAL DAMAGES
+   (INCLUDING LOSS OF PROFITS, REVENUE, DATA, BUSINESS OPPORTUNITIES, OR
+   GOODWILL) ARISING OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THIS
+   LICENSE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+9. TERMINATION
+
+   This License and all rights granted herein terminate immediately and
+   automatically, without notice, if you breach any term of this License.
+   Upon termination, you must destroy all copies of the Software in your
+   possession or control. Sections 1, 3, 4, 5, 7, 8, and 10 survive
+   termination.
+
+10. GOVERNING LAW & DISPUTES
+
+    This License shall be governed by and construed in accordance with the
+    laws of the jurisdiction in which the Owners are domiciled, without
+    regard to conflict-of-law principles. Any dispute arising under or
+    relating to this License shall be resolved exclusively in the courts of
+    that jurisdiction, and all parties consent to personal jurisdiction therein.
+
+11. ENTIRE AGREEMENT
+
+    This License constitutes the entire agreement between the parties with
+    respect to the Software and supersedes all prior or contemporaneous
+    understandings, negotiations, or agreements, written or oral, relating
+    to its subject matter. Any modification to this License must be in
+    writing and signed by both Owners.
+
+12. CONTACT
+
+    For licensing inquiries, partnership requests, or to report unauthorized
+    use, contact the Owners directly through the Bridge platform or the
+    project's official communication channels.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Unauthorized use, copying, or distribution of this Software, in whole or
+in part, may result in severe civil and criminal penalties and will be
+prosecuted to the maximum extent possible under applicable law.
