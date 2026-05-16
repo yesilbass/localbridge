@@ -3,8 +3,10 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import { finalizeCheckout, confirmScheduledBooking } from '../../api/stripe';
 import CalendlyInlineWidget from '../../components/CalendlyInlineWidget';
+import { useContent } from '../../content';
 
 export default function BookingFinalizePage() {
+  const { s } = useContent();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const navigate = useNavigate();
@@ -43,17 +45,17 @@ export default function BookingFinalizePage() {
     <main className="relative min-h-screen px-4 py-12 sm:px-6 sm:py-16" style={{ backgroundColor: 'var(--bridge-canvas)' }}>
       <div className="relative mx-auto max-w-3xl">
         <p className="text-[11px] font-black uppercase tracking-[0.28em]" style={{ color: 'var(--color-primary)' }}>
-          Almost there
+          {s.pricing.almostThere}
         </p>
         <h1
           className="mt-2 font-display font-black tracking-[-0.025em]"
           style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--bridge-text)' }}
         >
-          Pick your hour
+          {s.pricing.pickYourHour}
         </h1>
         {result?.mentor_summary?.name && (
           <p className="mt-3 text-base" style={{ color: 'var(--bridge-text-secondary)' }}>
-            Choose a time that works for you with{' '}
+            {s.pricing.chooseTimeWith.replace('{name}', '').trim()}{' '}
             <span className="font-bold" style={{ color: 'var(--bridge-text)' }}>{result.mentor_summary.name}</span>.
           </p>
         )}
@@ -79,12 +81,11 @@ export default function BookingFinalizePage() {
               }}
             >
               <p className="text-base font-bold" style={{ color: 'var(--bridge-text)' }}>
-                We couldn't open your booking link.
+                {s.pricing.bookingErrorHeading}
               </p>
               <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
-                Your payment was processed. Email{' '}
+                {s.pricing.bookingErrorBody.replace('{email}', '').replace('{id}', sessionId ?? '').trim()}{' '}
                 <a href="mailto:support@bridge.com" style={{ color: 'var(--color-primary)' }}>support@bridge.com</a>
-                {' '}with your session id <span className="font-mono">{sessionId}</span> and we will set it up by hand.
               </p>
               <p className="mt-3 text-sm" style={{ color: 'var(--bridge-text-muted)' }}>{error}</p>
               <Link
@@ -95,7 +96,7 @@ export default function BookingFinalizePage() {
                   color: 'var(--color-on-primary)',
                 }}
               >
-                Open dashboard
+                {s.pricing.openDashboard}
               </Link>
             </div>
           )}

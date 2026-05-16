@@ -10,6 +10,7 @@ import supabase from '../../../api/supabase';
 import TierBadge from '../../onboarding/mentor/verify/components/TierBadge.jsx';
 import TestModeChip from '../../onboarding/mentor/verify/components/TestModeChip.jsx';
 import { COMPONENT_LABELS, COMPONENT_WEIGHTS } from '../../onboarding/mentor/verify/scoring.js';
+import { useContent } from '../../../content';
 
 const TABS = ['evidence', 'ai_notes', 'references', 'activity'];
 
@@ -37,6 +38,7 @@ async function postJson(path, body) {
 }
 
 export default function AdminVerification() {
+  const { s } = useContent();
   const [items, setItems] = useState([]);
   const [filter, setFilter] = useState('pending');
   const [selectedId, setSelectedId] = useState(null);
@@ -77,7 +79,7 @@ export default function AdminVerification() {
       <aside className="flex w-[360px] shrink-0 flex-col gap-3">
         <header className="flex items-center justify-between">
           <h1 className="font-display text-xl font-black" style={{ color: 'var(--bridge-text)' }}>
-            Verification queue
+            {s.admin.verificationQueue}
           </h1>
           <ShieldCheck className="h-4 w-4" style={{ color: 'var(--color-primary)' }} aria-hidden />
         </header>
@@ -361,6 +363,7 @@ function ActivityTab({ queue, steps }) {
 }
 
 function DecisionBar({ queueId, alreadyDecided, onDecided }) {
+  const { s } = useContent();
   const [busy, setBusy] = useState(false);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState(null);
@@ -406,7 +409,7 @@ function DecisionBar({ queueId, alreadyDecided, onDecided }) {
           className="bridge-focus rounded-full px-4 py-1.5 text-[12px] font-bold disabled:opacity-50"
           style={{ backgroundColor: 'transparent', color: 'var(--bridge-text-secondary)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}
         >
-          Request more info
+          {s.admin.requestMoreInfo}
         </button>
         <button
           type="button"
@@ -415,7 +418,7 @@ function DecisionBar({ queueId, alreadyDecided, onDecided }) {
           className="bridge-focus rounded-full px-4 py-1.5 text-[12px] font-bold disabled:opacity-50"
           style={{ backgroundColor: 'color-mix(in srgb, var(--color-error) 14%, transparent)', color: 'var(--color-error)' }}
         >
-          Reject
+          {s.admin.reject}
         </button>
         <button
           type="button"
@@ -424,7 +427,7 @@ function DecisionBar({ queueId, alreadyDecided, onDecided }) {
           className="bridge-focus rounded-full px-5 py-1.5 text-[12px] font-bold text-white disabled:opacity-50"
           style={{ backgroundColor: 'var(--color-primary)' }}
         >
-          Approve
+          {s.admin.approve}
         </button>
       </div>
     </footer>
@@ -432,19 +435,20 @@ function DecisionBar({ queueId, alreadyDecided, onDecided }) {
 }
 
 function StatusPill({ status }) {
+  const { s } = useContent();
   const map = {
-    passed:        { bg: 'color-mix(in srgb, var(--color-success, #16a34a) 14%, transparent)', fg: 'var(--color-success, #16a34a)', label: 'Passed' },
-    failed:        { bg: 'color-mix(in srgb, var(--color-error) 14%, transparent)',           fg: 'var(--color-error)',             label: 'Failed' },
-    manual_review: { bg: 'color-mix(in srgb, var(--color-warning) 14%, transparent)',         fg: 'var(--color-warning)',           label: 'Review' },
-    pending:       { bg: 'var(--bridge-surface-muted)',                                       fg: 'var(--bridge-text-muted)',       label: 'Pending' },
+    passed:        { bg: 'color-mix(in srgb, var(--color-success, #16a34a) 14%, transparent)', fg: 'var(--color-success, #16a34a)', label: s.onboardingVerify.pillPassed },
+    failed:        { bg: 'color-mix(in srgb, var(--color-error) 14%, transparent)',           fg: 'var(--color-error)',             label: s.onboardingVerify.pillFailed },
+    manual_review: { bg: 'color-mix(in srgb, var(--color-warning) 14%, transparent)',         fg: 'var(--color-warning)',           label: s.onboardingVerify.pillReview },
+    pending:       { bg: 'var(--bridge-surface-muted)',                                       fg: 'var(--bridge-text-muted)',       label: s.onboardingVerify.pillPending },
   };
-  const s = map[status] || map.pending;
+  const style = map[status] || map.pending;
   return (
     <span
       className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em]"
-      style={{ backgroundColor: s.bg, color: s.fg }}
+      style={{ backgroundColor: style.bg, color: style.fg }}
     >
-      {s.label}
+      {style.label}
     </span>
   );
 }

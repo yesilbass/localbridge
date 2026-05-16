@@ -7,31 +7,9 @@ import { uploadResumeToBucket, saveResumeReview, getResumeReview, deleteResumeRe
 import { hasReachedLimit } from '../api/aiUsage';
 import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
 import { focusRing } from '../ui';
+import { useContent } from '../content';
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
-
-const LOADING_MESSAGES = [
-  'Reading your resume…',
-  'Evaluating your experience section…',
-  'Checking formatting and structure…',
-  'Calculating your score…',
-  'Writing improvement suggestions…',
-];
-
-const EXPERIENCE_LEVELS = [
-  { value: 'entry', label: 'Entry Level', sub: '0–2 yrs', desc: 'Recent grads, career changers, and those just getting started.' },
-  { value: 'mid', label: 'Mid Level', sub: '3–7 yrs', desc: 'Building expertise, taking on more ownership and scope.' },
-  { value: 'senior', label: 'Senior Level', sub: '8+ yrs', desc: 'Deep expertise, leadership, and staff-to-executive roles.' },
-];
-
-const SECTION_LABELS = {
-  contact_info: 'Contact Info',
-  summary: 'Summary / Objective',
-  experience: 'Work Experience',
-  skills: 'Skills',
-  education: 'Education',
-  formatting: 'Formatting & Structure',
-};
 
 const SECTION_ORDER = ['contact_info', 'summary', 'experience', 'skills', 'education', 'formatting'];
 
@@ -96,9 +74,18 @@ function ScoreBar({ score }) {
 }
 
 function SectionCard({ sectionKey, section }) {
+  const { s } = useContent();
   const [expanded, setExpanded] = useState(false);
   const colors = scoreColors(section.score);
   const hasRewrites = Array.isArray(section.rewrites) && section.rewrites.length > 0;
+  const SECTION_LABELS = {
+    contact_info: s.resumeReview.sectionContactInfo,
+    summary: s.resumeReview.sectionSummary,
+    experience: s.resumeReview.sectionExperience,
+    skills: s.resumeReview.sectionSkills,
+    education: s.resumeReview.sectionEducation,
+    formatting: s.resumeReview.sectionFormatting,
+  };
 
   return (
     <div className="overflow-hidden rounded-2xl border border-stone-200/80 bg-white/95 shadow-sm">
@@ -131,7 +118,7 @@ function SectionCard({ sectionKey, section }) {
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
             </motion.svg>
-            {expanded ? 'Hide' : 'Show'} rewrite suggestions
+            {expanded ? s.resumeReview.hideRewriteSuggestions : s.resumeReview.showRewriteSuggestions}
           </button>
         )}
       </div>
@@ -148,7 +135,7 @@ function SectionCard({ sectionKey, section }) {
           >
             <div className="border-t border-stone-100 bg-violet-50/40 px-5 pb-4 pt-3">
               <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-violet-600">
-                Rewrite Suggestions
+                {s.resumeReview.rewriteSuggestions}
               </p>
               <div className="space-y-2.5">
                 {section.rewrites.map((rw, i) => (
@@ -172,6 +159,14 @@ function SectionCard({ sectionKey, section }) {
 }
 
 function LoadingView({ msgIdx }) {
+  const { s } = useContent();
+  const loadingMessages = [
+    s.resumeReview.loadingReading,
+    s.resumeReview.loadingExperience,
+    s.resumeReview.loadingFormatting,
+    s.resumeReview.loadingScore,
+    s.resumeReview.loadingSuggestions,
+  ];
   return (
     <div className="flex flex-col items-center justify-center py-24">
       <div className="relative mb-8 flex h-20 w-20 items-center justify-center">
@@ -181,9 +176,9 @@ function LoadingView({ msgIdx }) {
         </svg>
       </div>
       <div className="h-7 overflow-hidden">
-        {LOADING_MESSAGES.map((msg, i) => (
+        {loadingMessages.map((msg, i) => (
           <p
-            key={msg}
+            key={i}
             className="text-center font-display text-lg font-semibold text-stone-900 transition-all duration-300"
             style={{
               opacity: i === msgIdx ? 1 : 0,
@@ -196,14 +191,20 @@ function LoadingView({ msgIdx }) {
           </p>
         ))}
       </div>
-      <p className="mt-3 text-sm text-stone-500">This takes about 15–30 seconds</p>
+      <p className="mt-3 text-sm text-stone-500">{s.resumeReview.loadingTimer}</p>
     </div>
   );
 }
 
 export default function ResumeReview() {
+  const { s } = useContent();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const experienceLevels = [
+    { value: 'entry', label: s.resumeReview.entryLevel, sub: s.resumeReview.entryLevelRange, desc: s.resumeReview.entryLevelDesc },
+    { value: 'mid', label: s.resumeReview.midLevel, sub: s.resumeReview.midLevelRange, desc: s.resumeReview.midLevelDesc },
+    { value: 'senior', label: s.resumeReview.seniorLevel, sub: s.resumeReview.seniorLevelRange, desc: s.resumeReview.seniorLevelDesc },
+  ];
 
   const [pageState, setPageState] = useState('upload'); // 'upload' | 'loading' | 'results'
   const [experienceLevel, setExperienceLevel] = useState('');
@@ -251,15 +252,15 @@ export default function ResumeReview() {
     if (pageState !== 'loading') return;
     setLoadingMsgIdx(0);
     const id = setInterval(() => {
-      setLoadingMsgIdx((i) => (i + 1) % LOADING_MESSAGES.length);
+      setLoadingMsgIdx((i) => (i + 1) % 5);
     }, 2000);
     return () => clearInterval(id);
   }, [pageState]);
 
   function validateFile(f) {
-    if (!f) return 'Please select a file.';
-    if (f.type !== 'application/pdf') return 'Only PDF files are accepted.';
-    if (f.size > MAX_FILE_BYTES) return `File is too large (${(f.size / 1024 / 1024).toFixed(1)} MB). Max is 5 MB.`;
+    if (!f) return s.resumeReview.pleaseSelectFile;
+    if (f.type !== 'application/pdf') return s.resumeReview.onlyPdf;
+    if (f.size > MAX_FILE_BYTES) return s.resumeReview.fileTooLarge.replace('{size}', (f.size / 1024 / 1024).toFixed(1));
     return '';
   }
 
@@ -292,7 +293,7 @@ export default function ResumeReview() {
         reader.readAsDataURL(file);
       });
     } catch {
-      setApiError('Could not read the file. Please try again.');
+      setApiError(s.resumeReview.cannotReadFile);
       setPageState('upload');
       return;
     }
@@ -304,7 +305,7 @@ export default function ResumeReview() {
       try {
         fileUrl = await uploadResumeToBucket(user.id, file);
       } catch {
-        setSaveError('Resume could not be saved to storage, but your review is ready.');
+        setSaveError(s.resumeReview.storageSaveError);
       }
 
       try {
@@ -318,7 +319,7 @@ export default function ResumeReview() {
         });
         setSavedDate(new Date().toISOString());
       } catch {
-        setSaveError((prev) => prev || 'Review could not be saved to your account, but is shown below.');
+        setSaveError((prev) => prev || s.resumeReview.reviewSaveError);
       }
 
       setReview({ ...reviewData, experience_level: experienceLevel });
@@ -369,7 +370,7 @@ export default function ResumeReview() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
               </svg>
             </li>
-            <li className="font-medium text-stone-800">Resume Review</li>
+            <li className="font-medium text-stone-800">{s.resumeReview.breadcrumbLabel}</li>
           </ol>
         </nav>
 
@@ -388,38 +389,38 @@ export default function ResumeReview() {
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
                 </svg>
-                AI-Powered
+                {s.resumeReview.aiPoweredBadge}
               </div>
               <h1 className="font-display text-3xl font-bold leading-tight tracking-tight text-stone-900 sm:text-[2.25rem]">
-                AI Resume Review
+                {s.resumeReview.heading}
               </h1>
               <p className="mt-2 text-base leading-relaxed text-stone-600">
-                Get an honest, detailed grade on your resume from our AI career coach — with specific rewrite suggestions to help you stand out.
+                {s.resumeReview.subCopy}
               </p>
             </div>
 
             {limitReached ? (
               <div className="rounded-[1.75rem] border border-amber-200/80 bg-amber-50/70 px-6 py-10 text-center shadow-bridge-card">
-                <p className="font-display text-base font-semibold text-amber-900">You&apos;ve used your free resume review.</p>
-                <p className="mt-1.5 text-sm text-amber-800/80">Each account receives one free AI review.</p>
+                <p className="font-display text-base font-semibold text-amber-900">{s.resumeReview.limitReachedTitle}</p>
+                <p className="mt-1.5 text-sm text-amber-800/80">{s.resumeReview.limitReachedBody}</p>
               </div>
             ) : <>
             {/* API error */}
             {apiError && (
               <div className="mb-6 rounded-2xl border border-red-200/80 bg-red-50/90 px-5 py-4">
                 <p className="text-sm font-semibold text-red-900">{apiError}</p>
-                <p className="mt-1 text-xs text-red-700/80">Your file is still selected — click "Analyze My Resume" to try again.</p>
+                <p className="mt-1 text-xs text-red-700/80">{s.resumeReview.apiErrorRetry}</p>
               </div>
             )}
 
             {/* Step 1: Experience level */}
             <div className="mb-6 rounded-[1.75rem] border border-stone-200/80 bg-white/95 p-6 shadow-bridge-card">
               <h2 className="mb-1 text-sm font-bold uppercase tracking-[0.16em] text-stone-500">
-                Step 1 — Experience Level
+                {s.resumeReview.step1Heading}
               </h2>
-              <p className="mb-4 text-sm text-stone-600">This lets our AI grade you against the right benchmark.</p>
+              <p className="mb-4 text-sm text-stone-600">{s.resumeReview.step1Sub}</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {EXPERIENCE_LEVELS.map(({ value, label, sub, desc }) => (
+                {experienceLevels.map(({ value, label, sub, desc }) => (
                   <button
                     key={value}
                     type="button"
@@ -442,7 +443,7 @@ export default function ResumeReview() {
                         <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                         </svg>
-                        Selected
+                        {s.resumeReview.selected}
                       </div>
                     )}
                   </button>
@@ -453,9 +454,9 @@ export default function ResumeReview() {
             {/* Step 2: Upload */}
             <div className="mb-6 rounded-[1.75rem] border border-stone-200/80 bg-white/95 p-6 shadow-bridge-card">
               <h2 className="mb-1 text-sm font-bold uppercase tracking-[0.16em] text-stone-500">
-                Step 2 — Upload Your Resume
+                {s.resumeReview.step2Heading}
               </h2>
-              <p className="mb-4 text-sm text-stone-600">PDF only · max 5 MB · text-based (not a scanned image)</p>
+              <p className="mb-4 text-sm text-stone-600">{s.resumeReview.step2Sub}</p>
 
               {file ? (
                 <div className="flex items-center justify-between rounded-2xl border border-emerald-200/80 bg-emerald-50/60 px-4 py-3.5">
@@ -500,12 +501,12 @@ export default function ResumeReview() {
                     </svg>
                   </div>
                   <p className="mt-4 text-sm font-semibold text-stone-700">
-                    Drop your PDF here, or{' '}
+                    {s.resumeReview.dropzoneText}{' '}
                     <span className="text-violet-600 underline decoration-violet-300/60 underline-offset-2">
-                      click to browse
+                      {s.resumeReview.dropzoneBrowse}
                     </span>
                   </p>
-                  <p className="mt-1 text-xs text-stone-400">PDF only · max 5 MB</p>
+                  <p className="mt-1 text-xs text-stone-400">{s.resumeReview.dropzoneNote}</p>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -523,7 +524,7 @@ export default function ResumeReview() {
 
             {/* CTA */}
             <p className="mb-3 text-center text-xs font-medium text-stone-500">
-              1 free resume review per account
+              {s.resumeReview.freeReviewNote}
             </p>
             <button
               type="button"
@@ -531,10 +532,10 @@ export default function ResumeReview() {
               disabled={!canAnalyze}
               className={`w-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-500 py-3.5 text-sm font-semibold text-white shadow-md shadow-violet-500/25 transition hover:from-violet-500 hover:to-indigo-400 disabled:pointer-events-none disabled:opacity-40 ${focusRing}`}
             >
-              Analyze My Resume
+              {s.resumeReview.analyzeCta}
             </button>
             <p className="mt-3 text-center text-xs text-stone-400">
-              Your resume is stored privately and only used to generate your review.
+              {s.resumeReview.privacyNote}
             </p>
             </>}
           </>
@@ -567,11 +568,11 @@ export default function ResumeReview() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-stone-400">
-                    Graded as:{' '}
+                    {s.resumeReview.gradedAs}{' '}
                     <span className="text-stone-600">
-                      {review.experience_level === 'entry' ? 'Entry Level (0–2 yrs)'
-                        : review.experience_level === 'mid' ? 'Mid Level (3–7 yrs)'
-                        : 'Senior Level (8+ yrs)'}
+                      {review.experience_level === 'entry' ? s.resumeReview.gradeEntryLong
+                        : review.experience_level === 'mid' ? s.resumeReview.gradeMidLong
+                        : s.resumeReview.gradeSeniorLong}
                     </span>
                   </p>
                   <p className="mt-4 text-sm leading-relaxed text-stone-600 sm:text-base">
@@ -584,7 +585,7 @@ export default function ResumeReview() {
             {/* Section breakdown */}
             <div className="mb-6">
               <h2 className="mb-4 font-display text-lg font-semibold text-stone-900">
-                Section Breakdown
+                {s.resumeReview.sectionBreakdown}
               </h2>
               <div className="space-y-3">
                 {SECTION_ORDER.map((key) => {
@@ -598,10 +599,10 @@ export default function ResumeReview() {
             {/* Actions */}
             <div className="rounded-[1.75rem] border border-stone-200/80 bg-white/95 p-6 shadow-bridge-card">
               <h2 className="mb-1 font-display text-base font-semibold text-stone-900">
-                Ready to improve your score?
+                {s.resumeReview.readyToImproveHeading}
               </h2>
               <p className="mb-5 text-sm text-stone-500">
-                Work with a mentor who can give you hands-on feedback — or upload a revised resume to see your progress.
+                {s.resumeReview.readyToImproveSub}
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -609,7 +610,7 @@ export default function ResumeReview() {
                   state={{ openAIMatch: true }}
                   className={`flex-1 rounded-full bg-gradient-to-r from-violet-600 to-indigo-500 px-5 py-3 text-center text-sm font-semibold text-white shadow-md shadow-violet-500/25 transition hover:from-violet-500 hover:to-indigo-400 ${focusRing}`}
                 >
-                  Find a Mentor to Help Improve This
+                  {s.resumeReview.findMentorCta}
                 </Link>
                 <button
                   type="button"
@@ -617,12 +618,12 @@ export default function ResumeReview() {
                   disabled={deleting}
                   className={`flex-1 rounded-full border border-stone-200 bg-white px-5 py-3 text-sm font-semibold text-stone-700 shadow-sm transition hover:bg-stone-50 disabled:opacity-50 ${focusRing}`}
                 >
-                  {deleting ? 'Clearing…' : 'Upload a New Resume'}
+                  {deleting ? s.resumeReview.clearingText : s.resumeReview.uploadNewCta}
                 </button>
               </div>
               {savedDate && (
                 <p className="mt-4 text-center text-xs text-stone-400">
-                  Last analyzed:{' '}
+                  {s.resumeReview.lastAnalyzed}{' '}
                   {new Date(savedDate).toLocaleDateString('en-US', {
                     month: 'long',
                     day: 'numeric',

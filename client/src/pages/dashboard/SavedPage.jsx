@@ -4,9 +4,11 @@ import { Heart, Star, Trash2 } from 'lucide-react';
 import { useSavedMentors } from './dashboardHooks.js';
 import { toggleFavorite } from '../../api/favorites';
 import EmptyState from './EmptyState.jsx';
+import { useContent } from '../../content';
 
 function SavedCard({ mentor, onRemove, busy }) {
-  const initials = (mentor.name || '?').split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase()).join('');
+  const { s } = useContent();
+  const initials = (mentor.name || '?').split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('');
   return (
     <article
       className="flex flex-col gap-4 rounded-2xl p-5"
@@ -63,7 +65,7 @@ function SavedCard({ mentor, onRemove, busy }) {
           className="bridge-focus flex-1 rounded-lg px-3 py-2 text-center text-[12px] font-bold"
           style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
         >
-          Book a session
+          {s.common.bookSession}
         </Link>
         <button
           type="button"
@@ -85,6 +87,7 @@ function SavedCard({ mentor, onRemove, busy }) {
 }
 
 export default function SavedPage() {
+  const { s } = useContent();
   const { mentors, total, isLoading, refetch } = useSavedMentors({ limit: 50 });
   const [busyId, setBusyId] = useState(null);
 
@@ -131,9 +134,9 @@ export default function SavedPage() {
       >
         <EmptyState
           icon={Heart}
-          title="No saved mentors yet"
+          title={s.dashboard.noFavorites}
           description="Tap the heart on any mentor card to save them here."
-          ctaLabel="Browse mentors"
+          ctaLabel={s.dashboard.browseMentors}
           ctaHref="/mentors"
         />
       </div>

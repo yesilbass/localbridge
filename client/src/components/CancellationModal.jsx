@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, AlertTriangle, Clock, CheckCircle, ChevronDown } from 'lucide-react';
 import { requestCancellation, getMonthlyUsedCount } from '../api/cancellations.js';
+import { useContent } from '../content';
 
 const MONTHLY_LIMIT = 3;
 
@@ -14,6 +15,7 @@ const REASONS = [
 ];
 
 export default function CancellationModal({ session, isMentor, onClose, onSuccess }) {
+  const { s } = useContent();
   const [reason, setReason]     = useState('');
   const [details, setDetails]   = useState('');
   const [used, setUsed]         = useState(null);
@@ -90,8 +92,8 @@ export default function CancellationModal({ session, isMentor, onClose, onSucces
               <CheckCircle className="h-8 w-8 text-emerald-500" />
             </div>
             <div>
-              <p className="font-display text-xl font-black text-[var(--bridge-text)]">Request sent</p>
-              <p className="mt-1 text-sm text-[var(--bridge-text-muted)]">A developer will review and process your request. You'll be notified of the outcome.</p>
+              <p className="font-display text-xl font-black text-[var(--bridge-text)]">{s.cancellation.requestSent}</p>
+              <p className="mt-1 text-sm text-[var(--bridge-text-muted)]">{s.cancellation.requestSentBody}</p>
             </div>
           </div>
         ) : (
@@ -152,7 +154,7 @@ export default function CancellationModal({ session, isMentor, onClose, onSucces
               {/* Reason select */}
               <div>
                 <label className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.18em] text-[var(--bridge-text-secondary)]">
-                  Reason for cancellation <span className="text-red-500">*</span>
+                  {s.cancellation.reasonLabel} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <select
@@ -220,7 +222,7 @@ export default function CancellationModal({ session, isMentor, onClose, onSucces
                   disabled={loading || !reason || atLimit}
                   className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-red-400 disabled:opacity-50"
                 >
-                  {loading ? 'Submitting…' : 'Submit request'}
+                  {loading ? s.cancellation.submitting : 'Submit request'}
                 </button>
               </div>
             </div>

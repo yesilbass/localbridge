@@ -3,11 +3,13 @@
 
 import { Link } from 'react-router-dom';
 import { ShieldCheck, AlertTriangle } from 'lucide-react';
+import { useContent } from '../../content';
 
 export default function VerificationBanner({ status, score = 0 }) {
+  const { s } = useContent();
   if (status === 'verified') return null;
 
-  const config = configFor(status, score);
+  const config = configFor(status, score, s);
   return (
     <Link
       to="/onboarding/mentor/verify"
@@ -30,13 +32,13 @@ export default function VerificationBanner({ status, score = 0 }) {
   );
 }
 
-function configFor(status, score) {
+function configFor(status, score, s) {
   if (status === 'in_progress') {
     return {
       icon: ShieldCheck,
-      title: 'Pick up where you left off.',
-      body: `You're at ${score}/100. Finish the remaining steps to lock in your tier.`,
-      cta: 'Continue',
+      title: s.dashboard.verifyInProgressTitle,
+      body: s.dashboard.verifyInProgressBody.replace('{score}', score),
+      cta: s.dashboard.verifyInProgressCta,
       bg: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
       border: 'color-mix(in srgb, var(--color-primary) 25%, transparent)',
       fg: 'var(--color-primary)',
@@ -45,9 +47,9 @@ function configFor(status, score) {
   if (status === 'rejected') {
     return {
       icon: AlertTriangle,
-      title: 'Verification was rejected.',
-      body: 'Re-run the wizard with stronger evidence to be re-considered.',
-      cta: 'Retry',
+      title: s.dashboard.verifyRejectedTitle,
+      body: s.dashboard.verifyRejectedBody,
+      cta: s.dashboard.verifyRejectedCta,
       bg: 'color-mix(in srgb, var(--color-error) 10%, transparent)',
       border: 'color-mix(in srgb, var(--color-error) 30%, transparent)',
       fg: 'var(--color-error)',
@@ -56,9 +58,9 @@ function configFor(status, score) {
   if (status === 'suspended') {
     return {
       icon: AlertTriangle,
-      title: 'Your mentor account is suspended.',
-      body: 'Contact Bridge support to restore access.',
-      cta: 'Details',
+      title: s.dashboard.verifySuspendedTitle,
+      body: s.dashboard.verifySuspendedBody,
+      cta: s.dashboard.verifySuspendedCta,
       bg: 'color-mix(in srgb, var(--color-error) 10%, transparent)',
       border: 'color-mix(in srgb, var(--color-error) 30%, transparent)',
       fg: 'var(--color-error)',
@@ -67,9 +69,9 @@ function configFor(status, score) {
   // unverified default
   return {
     icon: ShieldCheck,
-    title: 'Verify your mentor account.',
-    body: 'Mentees see verified mentors first. Earn your tier in ~10 minutes.',
-    cta: 'Start',
+    title: s.dashboard.verifyTitle,
+    body: s.dashboard.verifyBody,
+    cta: s.dashboard.verifyCta,
     bg: 'color-mix(in srgb, var(--color-warning) 12%, transparent)',
     border: 'color-mix(in srgb, var(--color-warning) 30%, transparent)',
     fg: 'var(--color-warning)',

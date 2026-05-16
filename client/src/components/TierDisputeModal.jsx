@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
 import axios from '../api/client';
 import supabase from '../api/supabase';
+import { useContent } from '../content';
 
 const REASONS = [
   { value: 'rate_too_low', label: 'My rate is too low for my experience' },
@@ -11,6 +12,7 @@ const REASONS = [
 ];
 
 export default function TierDisputeModal({ profileId, currentRate, currentTier, onClose }) {
+  const { s } = useContent();
   const [reason, setReason] = useState('');
   const [preferredRate, setPreferredRate] = useState('');
   const [notes, setNotes] = useState('');
@@ -71,7 +73,7 @@ export default function TierDisputeModal({ profileId, currentRate, currentTier, 
               className="mt-6 rounded-xl px-6 py-2.5 text-sm font-bold"
               style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
             >
-              Done
+              {s.common.done}
             </button>
           </div>
         ) : (
@@ -147,7 +149,7 @@ export default function TierDisputeModal({ profileId, currentRate, currentTier, 
                 className="rounded-xl border px-4 py-2.5 text-sm font-semibold"
                 style={{ borderColor: 'var(--bridge-border)', color: 'var(--bridge-text-secondary)' }}
               >
-                Cancel
+                {s.common.cancel}
               </button>
               <button
                 type="button"

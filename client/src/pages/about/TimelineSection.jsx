@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import RevealOnScroll from '../landing/RevealOnScroll';
 import { ABOUT_SECTION_PAD, TIMELINE_ENTRIES } from './aboutData';
+import { useContent } from '../../content';
 
 export default function TimelineSection() {
+  const { s } = useContent();
   return (
     <section
       id="timeline"
@@ -23,7 +25,7 @@ export default function TimelineSection() {
               letterSpacing: '0.32em',
             }}
           >
-            Timeline
+            {s.about.timelineEyebrow}
           </p>
 
           <h2

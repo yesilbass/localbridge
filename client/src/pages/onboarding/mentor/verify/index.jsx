@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/useAuth.js';
+import { useContent } from '../../../../content';
 import supabase from '../../../../api/supabase';
 import { startVerification } from '../../../../api/verification';
 import { useVerificationRun, latestStep } from './hooks/useVerificationRun.js';
@@ -21,18 +22,19 @@ import ReferencesStep from './steps/ReferencesStep.jsx';
 import ReviewStep from './steps/ReviewStep.jsx';
 
 const STEP_ORDER = [
-  { id: 'welcome',    label: 'Welcome',          component: null },
-  { id: 'identity',   label: 'Identity',         component: 'identity' },
-  { id: 'gov_id',     label: 'Government ID',    component: 'gov_id' },
-  { id: 'pro_email',  label: 'Work email',       component: 'professional_email' },
-  { id: 'linkedin',   label: 'Profile',          component: 'linkedin' },
-  { id: 'resume',     label: 'Resume',           component: 'resume_ai' },
-  { id: 'interview',  label: 'Interview',        component: 'expertise_interview' },
-  { id: 'refs',       label: 'References',       component: 'reference' },
-  { id: 'review',     label: 'Review',           component: null },
+  { id: 'welcome',    component: null },
+  { id: 'identity',   component: 'identity' },
+  { id: 'gov_id',     component: 'gov_id' },
+  { id: 'pro_email',  component: 'professional_email' },
+  { id: 'linkedin',   component: 'linkedin' },
+  { id: 'resume',     component: 'resume_ai' },
+  { id: 'interview',  component: 'expertise_interview' },
+  { id: 'refs',       component: 'reference' },
+  { id: 'review',     component: null },
 ];
 
 export default function VerifyMentorWizard() {
+  const { s } = useContent();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [mentorProfileId, setMentorProfileId] = useState(null);
@@ -53,13 +55,13 @@ export default function VerifyMentorWizard() {
         .maybeSingle();
       if (cancelled) return;
       if (error || !profile?.id) {
-        setBootstrapError('You need a mentor profile before you can verify. Finish onboarding first.');
+        setBootstrapError(s.onboardingVerify.needMentorProfile);
         return;
       }
       setMentorProfileId(profile.id);
       const r = await startVerification();
       if (!r.ok) {
-        setBootstrapError(r.error || 'Could not start verification');
+        setBootstrapError(r.error || s.onboardingVerify.couldNotStartVerification);
       }
     })();
     return () => { cancelled = true; };
@@ -72,13 +74,25 @@ export default function VerifyMentorWizard() {
     if (next) setActiveStepId(next);
   }, [run, steps, activeStepId]);
 
+  const stepLabels = {
+    welcome:   s.onboardingVerify.stepWelcome,
+    identity:  s.onboardingVerify.stepIdentity,
+    gov_id:    s.onboardingVerify.stepGovId,
+    pro_email: s.onboardingVerify.stepProEmail,
+    linkedin:  s.onboardingVerify.stepLinkedIn,
+    resume:    s.onboardingVerify.stepResume,
+    interview: s.onboardingVerify.stepInterview,
+    refs:      s.onboardingVerify.stepRefs,
+    review:    s.onboardingVerify.stepReview,
+  };
+
   const stepperItems = useMemo(() => {
-    return STEP_ORDER.map((s) => {
-      if (!s.component) return { id: s.id, label: s.label, status: 'pending' };
-      const last = latestStep(steps, s.component);
-      return { id: s.id, label: s.label, status: last?.status || 'pending' };
+    return STEP_ORDER.map((step) => {
+      if (!step.component) return { id: step.id, label: stepLabels[step.id], status: 'pending' };
+      const last = latestStep(steps, step.component);
+      return { id: step.id, label: stepLabels[step.id], status: last?.status || 'pending' };
     });
-  }, [steps]);
+  }, [steps, s]);
 
   function jumpTo(stepId) {
     setActiveStepId(stepId);
@@ -92,23 +106,23 @@ export default function VerifyMentorWizard() {
   }
 
   if (loading) {
-    return <FullPageMessage title="Loading…" body="Checking your account." />;
+    return <FullPageMessage title={s.common.loading} body={s.onboardingVerify.checkingAccount} />;
   }
   if (!user) {
-    return <FullPageMessage title="Please sign in" body="You need to be signed in as a mentor to verify." onAction={() => navigate('/login')} actionLabel="Go to sign in" />;
+    return <FullPageMessage title={s.onboardingVerify.pleaseSignIn} body={s.onboardingVerify.signInBody} onAction={() => navigate('/login')} actionLabel={s.onboardingVerify.goToSignIn} />;
   }
   if (bootstrapError) {
     return (
       <FullPageMessage
-        title="We can't start verification yet"
+        title={s.onboardingVerify.cantStartVerification}
         body={bootstrapError}
         onAction={() => navigate('/onboarding')}
-        actionLabel="Go to onboarding"
+        actionLabel={s.onboardingVerify.goToOnboarding}
       />
     );
   }
   if (isLoading || !run) {
-    return <FullPageMessage title="Loading verification…" body="Setting up your run." />;
+    return <FullPageMessage title={s.onboardingVerify.loadingVerification} body={s.onboardingVerify.settingUpRun} />;
   }
 
   const stepProps = {
@@ -128,7 +142,7 @@ export default function VerifyMentorWizard() {
         tier={run.tier}
         footer={
           <StepFooter
-            secondaryLabel="Save & exit"
+            secondaryLabel={s.onboardingVerify.saveAndExit}
             onSecondary={() => navigate('/dashboard')}
           />
         }
@@ -167,6 +181,7 @@ function firstUnfinishedStep(steps) {
 }
 
 function FullPageMessage({ title, body, onAction, actionLabel }) {
+  const { s } = useContent();
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center px-6 text-center">
       <h2 className="font-display text-xl font-bold" style={{ color: 'var(--bridge-text)' }}>{title}</h2>
@@ -178,7 +193,7 @@ function FullPageMessage({ title, body, onAction, actionLabel }) {
           className="bridge-focus mt-4 inline-flex items-center rounded-full px-5 py-2 text-sm font-bold"
           style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
         >
-          {actionLabel || 'Continue'}
+          {actionLabel || s.common.continue}
         </button>
       ) : null}
     </div>

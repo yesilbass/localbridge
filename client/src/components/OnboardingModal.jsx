@@ -4,6 +4,7 @@ import { X, CheckCircle2, Sparkles, ArrowRight, Rocket } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { SESSION_TYPES } from '../constants/sessionTypes';
 import { isMentorAccount } from '../utils/accountRole';
+import { useContent } from '../content';
 
 const MENTEE_GOALS = [
   { key: 'job',       emoji: '💼', label: 'Land my first job',  sub: 'Get guidance on job hunting and applications' },
@@ -26,6 +27,7 @@ const focusRing =
 export default function OnboardingModal() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { s } = useContent();
   const isMentor = isMentorAccount(user);
 
   const [visible, setVisible] = useState(false);
@@ -123,7 +125,7 @@ export default function OnboardingModal() {
                 onClick={() => setStep(2)}
                 className={`btn-sheen group mt-9 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_36px_-8px_color-mix(in srgb, var(--color-primary) 55%, transparent)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-10px_color-mix(in srgb, var(--color-primary) 70%, transparent)] ${focusRing}`}
               >
-                Get started
+                {s.nav.getStarted}
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
               </button>
             </div>
@@ -184,7 +186,7 @@ export default function OnboardingModal() {
                   onClick={() => setStep(1)}
                   className={`inline-flex items-center justify-center rounded-full border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] px-5 py-3 text-sm font-semibold text-[var(--bridge-text-secondary)] transition hover:border-orange-300/70 hover:text-[var(--bridge-text)] sm:w-auto ${focusRing}`}
                 >
-                  Back
+                  {s.common.back}
                 </button>
                 <button
                   onClick={() => selectedGoal && setStep(3)}
@@ -195,7 +197,7 @@ export default function OnboardingModal() {
                       : 'cursor-not-allowed bg-[var(--bridge-surface-muted)] text-[var(--bridge-text-faint)]'
                   }`}
                 >
-                  Continue
+                  {s.common.continue}
                   <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                 </button>
               </div>
@@ -222,12 +224,12 @@ export default function OnboardingModal() {
                 {isMentor ? (
                   <>
                     <Rocket className="h-4 w-4" />
-                    Go to dashboard
+                    {s.onboardingVerify.goToDashboard}
                   </>
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4" />
-                    Browse mentors
+                    {s.dashboard.browseMentors}
                   </>
                 )}
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />

@@ -4,6 +4,7 @@ import { Loader2, AlertCircle, Check, X, ArrowLeft, Users } from 'lucide-react';
 import supabase from '../api/supabase';
 import { useAuth } from '../context/useAuth';
 import { isMentorAccount } from '../utils/accountRole';
+import { useContent } from '../content';
 
 // `/meet/:slug` — permanent per-mentor lobby. Mentees knock, mentor admits,
 // then both navigate into the existing /session/:id/video room.
@@ -29,6 +30,7 @@ function Spinner() {
 }
 
 function Blocked({ title, message, onBack }) {
+  const { s } = useContent();
   return (
     <Shell>
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-500/15">
@@ -41,7 +43,7 @@ function Blocked({ title, message, onBack }) {
         onClick={onBack}
         className="mt-5 inline-flex items-center gap-2 rounded-xl bg-stone-900 px-4 py-2.5 text-sm font-semibold text-stone-300 transition hover:bg-stone-800 hover:text-white"
       >
-        <ArrowLeft className="h-4 w-4" /> Back
+        <ArrowLeft className="h-4 w-4" /> {s.common.back}
       </button>
     </Shell>
   );
@@ -52,6 +54,7 @@ export default function MeetLobby() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const isMentor = user ? isMentorAccount(user) : false;
+  const { s } = useContent();
 
   const [mentor, setMentor] = useState(null);    // { id, name, user_id }
   const [session, setSession] = useState(null);  // mentee's accepted session with this mentor
@@ -311,7 +314,7 @@ export default function MeetLobby() {
             onClick={() => navigate('/dashboard')}
             className="mt-6 inline-flex items-center gap-2 text-xs font-medium text-stone-400 transition hover:text-white"
           >
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to dashboard
+            <ArrowLeft className="h-3.5 w-3.5" /> {s.common.backToDashboard}
           </button>
         </div>
       </div>

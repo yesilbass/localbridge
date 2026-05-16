@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { useContent } from '../content';
 import {
   ArrowRight, ArrowLeft, CheckCircle2, User, Briefcase,
   GraduationCap, Tag, Loader2, X, Plus, ShieldCheck, CreditCard, Camera,
@@ -71,6 +72,7 @@ function SectionHeader({ icon: Icon, label, sub }) {
 }
 
 function BackBtn({ onClick }) {
+  const { s } = useContent();
   return (
     <button
       type="button"
@@ -78,12 +80,13 @@ function BackBtn({ onClick }) {
       className={`flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-2.5 text-sm font-semibold text-[var(--bridge-text-secondary)] shadow-sm transition hover:bg-[var(--bridge-surface-muted)] ${focusRing}`}
     >
       <ArrowLeft className="h-4 w-4" />
-      Back
+      {s.onboarding.back}
     </button>
   );
 }
 
-function NextBtn({ onClick, disabled, loading, label = 'Continue' }) {
+function NextBtn({ onClick, disabled, loading, label }) {
+  const { s } = useContent();
   return (
     <button
       type="button"
@@ -92,7 +95,7 @@ function NextBtn({ onClick, disabled, loading, label = 'Continue' }) {
       className={`flex items-center gap-2 rounded-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition ${focusRing}`}
     >
       {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-      {loading ? 'Processing…' : label}
+      {loading ? s.onboarding.processing : (label ?? s.onboarding.continue)}
       {!loading && <ArrowRight className="h-4 w-4" />}
     </button>
   );
@@ -150,40 +153,41 @@ function TagInput({ tags, onChange, max = 8, placeholder = 'Type and press Enter
 /* ─── Work experience row ───────────────────────────────────────────────────── */
 
 function WorkExpRow({ job, onChange, onRemove }) {
+  const { s } = useContent();
   return (
     <div className="rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] p-4 space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>Job title</label>
+          <label className={labelCls}>{s.onboarding.jobTitle}</label>
           <input type="text" value={job.title} onChange={(e) => onChange({ ...job, title: e.target.value })} className={inputCls} placeholder="Senior Engineer" />
         </div>
         <div>
-          <label className={labelCls}>Company</label>
+          <label className={labelCls}>{s.onboarding.company}</label>
           <input type="text" value={job.company} onChange={(e) => onChange({ ...job, company: e.target.value })} className={inputCls} placeholder="Acme Inc." />
         </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         <div>
-          <label className={labelCls}>Start year</label>
+          <label className={labelCls}>{s.onboarding.startYear}</label>
           <select value={job.start_year} onChange={(e) => onChange({ ...job, start_year: Number(e.target.value) })} className={inputCls}>
             {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
         <div>
-          <label className={labelCls}>End year</label>
+          <label className={labelCls}>{s.onboarding.endYear}</label>
           <select value={job.end_year ?? ''} onChange={(e) => onChange({ ...job, end_year: e.target.value === '' ? null : Number(e.target.value) })} className={inputCls}>
-            <option value="">Present</option>
+            <option value="">{s.common.present}</option>
             {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
         <div className="flex items-end">
           <button type="button" onClick={onRemove} className="flex w-full items-center justify-center gap-1 rounded-xl border border-red-200 bg-red-50 py-3 text-xs font-semibold text-red-700 hover:bg-red-100 transition">
-            <X className="h-3.5 w-3.5" /> Remove
+            <X className="h-3.5 w-3.5" /> {s.onboarding.removeEntry}
           </button>
         </div>
       </div>
       <div>
-        <label className={labelCls}>One-line description</label>
+        <label className={labelCls}>{s.onboarding.oneLineDescription}</label>
         <input type="text" value={job.description} onChange={(e) => onChange({ ...job, description: e.target.value })} className={inputCls} placeholder="Led a team of 8 engineers to ship the payments platform…" />
       </div>
     </div>
@@ -192,41 +196,41 @@ function WorkExpRow({ job, onChange, onRemove }) {
 
 /* ─── Education row ─────────────────────────────────────────────────────────── */
 
-const DEGREE_LEVELS = [
-  { value: 'phd',       label: 'PhD / Doctorate' },
-  { value: 'masters',   label: 'Masters (MBA, MS, MA, MEng…)' },
-  { value: 'bachelors', label: 'Bachelors (BA, BS, BEng…)' },
-  { value: 'associate', label: 'Associate / Diploma' },
-  { value: 'other',     label: 'Other / Certification' },
-];
-
 function EduRow({ edu, onChange, onRemove }) {
+  const { s } = useContent();
+  const degreeLevels = [
+    { value: 'phd',       label: s.onboarding.degreePhd },
+    { value: 'masters',   label: s.onboarding.degreeMasters },
+    { value: 'bachelors', label: s.onboarding.degreeBachelors },
+    { value: 'associate', label: s.onboarding.degreeAssociate },
+    { value: 'other',     label: s.onboarding.degreeOther },
+  ];
   return (
     <div className="rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] p-4 space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>School / Institution *</label>
+          <label className={labelCls}>{s.onboarding.schoolLabel}</label>
           <input type="text" value={edu.school} onChange={(e) => onChange({ ...edu, school: e.target.value })} className={inputCls} placeholder="MIT, Harvard, Stanford…" />
         </div>
         <div>
-          <label className={labelCls}>Field of study</label>
+          <label className={labelCls}>{s.onboarding.fieldOfStudy}</label>
           <input type="text" value={edu.degree} onChange={(e) => onChange({ ...edu, degree: e.target.value })} className={inputCls} placeholder="Computer Science, Finance…" />
         </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>Degree level *</label>
+          <label className={labelCls}>{s.onboarding.degreeLevel}</label>
           <select
             value={edu.degree_level ?? ''}
             onChange={(e) => onChange({ ...edu, degree_level: e.target.value })}
             className={inputCls}
           >
-            <option value="">Select level…</option>
-            {DEGREE_LEVELS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+            <option value="">{s.onboarding.selectLevel}</option>
+            {degreeLevels.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
           </select>
         </div>
         <div>
-          <label className={labelCls}>Graduation year</label>
+          <label className={labelCls}>{s.onboarding.graduationYear}</label>
           <select value={edu.year} onChange={(e) => onChange({ ...edu, year: Number(e.target.value) })} className={inputCls}>
             {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
@@ -234,13 +238,13 @@ function EduRow({ edu, onChange, onRemove }) {
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>Diploma / transcript upload</label>
+          <label className={labelCls}>{s.onboarding.diplomaUpload}</label>
           <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-4 py-3 text-sm transition hover:border-amber-400">
             <GraduationCap className="h-4 w-4 shrink-0 text-[var(--bridge-text-faint)]" />
             <span className="truncate text-xs text-[var(--bridge-text-muted)]">
               {edu.diplomaFileName
                 ? <span className="font-semibold text-[var(--bridge-text)]">{edu.diplomaFileName}</span>
-                : 'Upload diploma, transcript, or certificate (JPEG, PNG, PDF)'}
+                : s.onboarding.diplomaUploadHint}
             </span>
             <input type="file" accept="image/*,.pdf" className="hidden"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) onChange({ ...edu, diplomaFileName: f.name }); }} />
@@ -248,7 +252,7 @@ function EduRow({ edu, onChange, onRemove }) {
         </div>
         <div className="flex items-end">
           <button type="button" onClick={onRemove} className="flex w-full items-center justify-center gap-1 rounded-xl border border-red-200 bg-red-50 py-3 text-xs font-semibold text-red-700 hover:bg-red-100 transition">
-            <X className="h-3.5 w-3.5" /> Remove
+            <X className="h-3.5 w-3.5" /> {s.onboarding.removeEntry}
           </button>
         </div>
       </div>
@@ -259,6 +263,7 @@ function EduRow({ edu, onChange, onRemove }) {
 /* ─── Profile preview panel ─────────────────────────────────────────────────── */
 
 function ProfilePreview({ data }) {
+  const { s } = useContent();
   const industryLabel = formatIndustry(data.industry);
   return (
     <div className="space-y-5">
@@ -286,7 +291,7 @@ function ProfilePreview({ data }) {
           </div>
           {data.session_rate && (
             <div className="text-right">
-              <p className="text-xs text-[var(--bridge-text-muted)]">Per session</p>
+              <p className="text-xs text-[var(--bridge-text-muted)]">{s.onboarding.perSession}</p>
               <p className="text-2xl font-bold text-[var(--bridge-text)]">${data.session_rate}</p>
             </div>
           )}
@@ -295,14 +300,14 @@ function ProfilePreview({ data }) {
 
       {data.bio && (
         <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)] mb-2">About</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)] mb-2">{s.onboarding.aboutLabel}</p>
           <p className="text-sm leading-relaxed text-[var(--bridge-text-secondary)]">{data.bio}</p>
         </div>
       )}
 
       {data.expertise?.length > 0 && (
         <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)] mb-3">Expertise</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)] mb-3">{s.onboarding.expertiseLabel}</p>
           <div className="flex flex-wrap gap-2">
             {data.expertise.map((tag) => (
               <span key={tag} className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700">{tag}</span>
@@ -313,7 +318,7 @@ function ProfilePreview({ data }) {
 
       {data.work_experience?.length > 0 && (
         <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)] mb-4">Experience</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)] mb-4">{s.onboarding.experienceLabel}</p>
           <div className="space-y-4">
             {[...data.work_experience].sort((a, b) => (b.start_year ?? 0) - (a.start_year ?? 0)).map((job, i) => (
               <div key={i} className="flex gap-3">
@@ -323,7 +328,7 @@ function ProfilePreview({ data }) {
                 <div>
                   <p className="text-sm font-bold text-[var(--bridge-text)]">{job.title}</p>
                   <p className="text-xs text-[var(--bridge-text-secondary)]">
-                    {job.company} · {job.start_year}–{job.end_year ?? 'Present'}
+                    {job.company} · {job.start_year}–{job.end_year ?? s.common.present}
                   </p>
                   {job.description && <p className="mt-1 text-xs text-[var(--bridge-text-muted)]">{job.description}</p>}
                 </div>
@@ -335,7 +340,7 @@ function ProfilePreview({ data }) {
 
       {data.education?.length > 0 && (
         <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)] mb-4">Education</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)] mb-4">{s.onboarding.educationLabel}</p>
           <div className="space-y-3">
             {data.education.map((edu, i) => (
               <div key={i} className="flex gap-3">
@@ -354,17 +359,17 @@ function ProfilePreview({ data }) {
 
       {(data.languages?.length > 0 || data.years_experience) && (
         <div className="rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)] mb-3">Details</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--bridge-text-muted)] mb-3">{s.onboarding.detailsLabel}</p>
           <dl className="space-y-2 text-sm">
             {data.years_experience && (
               <div className="flex justify-between">
-                <dt className="text-[var(--bridge-text-muted)]">Experience</dt>
-                <dd className="font-medium text-[var(--bridge-text)]">{data.years_experience} years</dd>
+                <dt className="text-[var(--bridge-text-muted)]">{s.onboarding.experienceLabel}</dt>
+                <dd className="font-medium text-[var(--bridge-text)]">{s.onboarding.yearsLabel.replace('{n}', data.years_experience)}</dd>
               </div>
             )}
             {data.languages?.length > 0 && (
               <div className="flex justify-between">
-                <dt className="text-[var(--bridge-text-muted)]">Languages</dt>
+                <dt className="text-[var(--bridge-text-muted)]">{s.onboarding.languagesLabel}</dt>
                 <dd className="font-medium text-[var(--bridge-text)]">{data.languages.join(', ')}</dd>
               </div>
             )}
@@ -379,22 +384,23 @@ function ProfilePreview({ data }) {
    SCREEN META
 ═══════════════════════════════════════════════════════════════════════════════ */
 
-const SCREEN_META = {
-  'app-1':     { title: 'Apply to become a mentor',   sub: 'Tell us about your professional background.' },
-  'app-2':     { title: 'Verify your identity',       sub: 'We verify all mentors to keep Bridge trustworthy.' },
-  'app-3':     { title: 'Why do you want to mentor?', sub: 'This essay is scored algorithmically.' },
-  'profile-1': { title: 'Complete your profile',      sub: 'Your application was approved. You\'re almost live.' },
-  'profile-2': { title: 'Skills & presence',          sub: 'Help mentees find the right match.' },
-};
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    MAIN PAGE
 ═══════════════════════════════════════════════════════════════════════════════ */
 
 export default function MentorOnboarding() {
+  const { s } = useContent();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const isMentor = user?.user_metadata?.role === 'mentor';
+  const SCREEN_META = {
+    'app-1':     { title: s.onboarding.applyTitle,          sub: s.onboarding.applySub },
+    'app-2':     { title: s.onboarding.verifyTitle,         sub: s.onboarding.verifySub },
+    'app-3':     { title: s.onboarding.motivationTitle,     sub: s.onboarding.motivationSub },
+    'profile-1': { title: s.onboarding.completeProfileTitle, sub: s.onboarding.completeProfileSub },
+    'profile-2': { title: s.onboarding.skillsTitle,         sub: s.onboarding.skillsSub },
+  };
 
   const [screen, setScreen] = useState('app-1');
   const [profileId, setProfileId] = useState(null);
@@ -594,7 +600,7 @@ export default function MentorOnboarding() {
     ((!eduSane && appForm.education.length > 0) ? -5 : 0)
   );
   const scoreColor = liveScore >= 75 ? '#22c55e' : liveScore >= 50 ? '#f59e0b' : '#ef4444';
-  const scoreLabel = liveScore >= 75 ? 'Likely approved' : liveScore >= 50 ? 'May need review' : 'Low — add more info';
+  const scoreLabel = liveScore >= 75 ? s.onboarding.likelyApproved : liveScore >= 50 ? s.onboarding.mayNeedReview : s.onboarding.lowAddMoreInfo;
 
   const canSubmitApp = verifyData.govIdNumber.trim() && (verifyData.socialVerified || verifyData.socialSkipped) && essayWords >= 50;
 
@@ -713,7 +719,7 @@ export default function MentorOnboarding() {
                   })}
                   className={`flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--bridge-border)] py-3 text-sm font-semibold text-[var(--bridge-text-muted)] transition hover:border-amber-400 hover:text-amber-600 ${focusRing}`}
                 >
-                  <Plus className="h-4 w-4" /> Add job
+                  <Plus className="h-4 w-4" /> {s.onboarding.addJobCta}
                 </button>
               )}
               {appForm.work_experience.length === 0 && (
@@ -971,7 +977,7 @@ export default function MentorOnboarding() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className={labelCls}>Job title *</label>
+                <label className={labelCls}>{s.onboarding.jobTitleLabel}</label>
                 <input
                   type="text"
                   value={profileForm.title}
@@ -981,7 +987,7 @@ export default function MentorOnboarding() {
                 />
               </div>
               <div>
-                <label className={labelCls}>Company</label>
+                <label className={labelCls}>{s.onboarding.company}</label>
                 <input
                   type="text"
                   value={profileForm.company}
@@ -991,7 +997,7 @@ export default function MentorOnboarding() {
                 />
               </div>
               <div>
-                <label className={labelCls}>Location</label>
+                <label className={labelCls}>{s.onboarding.locationLabel}</label>
                 <input
                   type="text"
                   value={profileForm.location}
@@ -1027,7 +1033,7 @@ export default function MentorOnboarding() {
             </div>
 
             <div>
-              <label className={labelCls}>Industry</label>
+              <label className={labelCls}>{s.onboarding.industryLabel}</label>
               <div className="flex flex-wrap gap-2 mt-1">
                 {INDUSTRIES.map((ind) => (
                   <button
@@ -1048,7 +1054,7 @@ export default function MentorOnboarding() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className={`${labelCls} mb-0`}>Bio</label>
+                <label className={`${labelCls} mb-0`}>{s.onboarding.bioLabel}</label>
                 <button
                   type="button"
                   onClick={handleDraftBio}
@@ -1056,7 +1062,7 @@ export default function MentorOnboarding() {
                   className={`flex items-center gap-1.5 rounded-full border border-amber-300/60 bg-amber-50/80 px-3 py-1 text-[11px] font-bold text-amber-700 transition hover:bg-amber-100/80 disabled:opacity-50 ${focusRing}`}
                 >
                   {bioLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
-                  {bioLoading ? 'Drafting…' : 'Draft bio with AI'}
+                  {bioLoading ? s.onboarding.draftingBio : s.onboarding.draftBioWithAI}
                 </button>
               </div>
               <textarea
@@ -1093,7 +1099,7 @@ export default function MentorOnboarding() {
             <SectionHeader icon={Tag} label="Skills & presence" sub="Step 2 of 2" />
 
             <div>
-              <label className={labelCls}>Expertise tags <span className="normal-case font-normal text-[var(--bridge-text-faint)]">(max 8)</span></label>
+              <label className={labelCls}>{s.onboarding.expertiseTagsLabel} <span className="normal-case font-normal text-[var(--bridge-text-faint)]">(max 8)</span></label>
               <TagInput
                 tags={profileForm.expertise}
                 onChange={(tags) => patchProfile({ expertise: tags })}
@@ -1104,7 +1110,7 @@ export default function MentorOnboarding() {
             </div>
 
             <div>
-              <label className={labelCls}>Languages spoken <span className="normal-case font-normal text-[var(--bridge-text-faint)]">(max 10)</span></label>
+              <label className={labelCls}>{s.onboarding.languagesTagsLabel} <span className="normal-case font-normal text-[var(--bridge-text-faint)]">(max 10)</span></label>
               <TagInput
                 tags={profileForm.languages}
                 onChange={(langs) => patchProfile({ languages: langs })}
@@ -1114,7 +1120,7 @@ export default function MentorOnboarding() {
             </div>
 
             <div>
-              <label className={labelCls}>Profile photo URL <span className="normal-case font-normal text-[var(--bridge-text-faint)]">(optional)</span></label>
+              <label className={labelCls}>{s.onboarding.profileImageUrl} <span className="normal-case font-normal text-[var(--bridge-text-faint)]">(optional)</span></label>
               <input
                 type="url"
                 value={profileForm.image_url}

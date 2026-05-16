@@ -5,8 +5,10 @@ import { finalizeVerification } from '../../../../../api/verification';
 import { COMPONENT_WEIGHTS } from '../scoring.js';
 import TierBadge from '../components/TierBadge.jsx';
 import StepFooter from './_StepFooter.jsx';
+import { useContent } from '../../../../../content';
 
 export default function ReviewStep({ run, steps }) {
+  const { s } = useContent();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -29,14 +31,25 @@ export default function ReviewStep({ run, steps }) {
   const score = finalized?.aggregate?.score ?? run.score ?? 0;
   const tier  = finalized?.tier ?? run.tier ?? 'bronze';
 
+  const componentLabels = {
+    identity:             s.onboardingVerify.reviewLabelIdentity,
+    gov_id:               s.onboardingVerify.reviewLabelGovId,
+    professional_email:   s.onboardingVerify.reviewLabelProEmail,
+    linkedin:             s.onboardingVerify.reviewLabelLinkedIn,
+    resume_ai:            s.onboardingVerify.reviewLabelResume,
+    expertise_interview:  s.onboardingVerify.reviewLabelInterview,
+    reference:            s.onboardingVerify.reviewLabelReference,
+    track_record:         s.onboardingVerify.reviewLabelTrackRecord,
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col items-start gap-2">
         <h2 className="font-display text-2xl font-black tracking-tight" style={{ color: 'var(--bridge-text)' }}>
-          Your tier
+          {s.onboardingVerify.yourTierHeading}
         </h2>
         <p className="text-[13px]" style={{ color: 'var(--bridge-text-secondary)' }}>
-          Here's how each component contributed.
+          {s.onboardingVerify.yourTierSub}
         </p>
       </header>
 
@@ -64,7 +77,7 @@ export default function ReviewStep({ run, steps }) {
           const weight = COMPONENT_WEIGHTS[c];
           return (
             <li key={c} className="flex items-center justify-between py-2.5" style={{ borderColor: 'var(--bridge-border)' }}>
-              <span className="text-[13px] font-semibold" style={{ color: 'var(--bridge-text)' }}>{LABELS[c]}</span>
+              <span className="text-[13px] font-semibold" style={{ color: 'var(--bridge-text)' }}>{componentLabels[c]}</span>
               <span className="flex items-center gap-3">
                 <Pill status={status} />
                 <span className="text-[12px] font-bold tabular-nums" style={{ color: 'var(--bridge-text-secondary)' }}>
@@ -86,40 +99,30 @@ export default function ReviewStep({ run, steps }) {
       ) : null}
 
       <StepFooter
-        primaryLabel={busy ? 'Finalizing…' : 'Go to dashboard'}
+        primaryLabel={busy ? s.onboardingVerify.finalizing : s.onboardingVerify.goToDashboard}
         onPrimary={() => navigate('/dashboard')}
-        secondaryLabel="Re-run a step"
+        secondaryLabel={s.onboardingVerify.reRunAStep}
         onSecondary={() => navigate('/onboarding/mentor/verify')}
       />
     </div>
   );
 }
 
-const LABELS = {
-  identity:             'Identity',
-  gov_id:               'Government ID',
-  professional_email:   'Professional email',
-  linkedin:             'LinkedIn / portfolio',
-  resume_ai:            'Resume',
-  expertise_interview:  'Domain interview',
-  reference:            'References',
-  track_record:         'Track record',
-};
-
 function Pill({ status }) {
+  const { s } = useContent();
   const map = {
-    passed:        { bg: 'color-mix(in srgb, var(--color-success, #16a34a) 14%, transparent)', fg: 'var(--color-success, #16a34a)', label: 'Passed' },
-    failed:        { bg: 'color-mix(in srgb, var(--color-error) 14%, transparent)',           fg: 'var(--color-error)',             label: 'Failed' },
-    manual_review: { bg: 'color-mix(in srgb, var(--color-warning) 14%, transparent)',         fg: 'var(--color-warning)',           label: 'Review' },
-    pending:       { bg: 'var(--bridge-surface-muted)',                                       fg: 'var(--bridge-text-muted)',       label: 'Pending' },
+    passed:        { bg: 'color-mix(in srgb, var(--color-success, #16a34a) 14%, transparent)', fg: 'var(--color-success, #16a34a)', label: s.onboardingVerify.pillPassed },
+    failed:        { bg: 'color-mix(in srgb, var(--color-error) 14%, transparent)',           fg: 'var(--color-error)',             label: s.onboardingVerify.pillFailed },
+    manual_review: { bg: 'color-mix(in srgb, var(--color-warning) 14%, transparent)',         fg: 'var(--color-warning)',           label: s.onboardingVerify.pillReview },
+    pending:       { bg: 'var(--bridge-surface-muted)',                                       fg: 'var(--bridge-text-muted)',       label: s.onboardingVerify.pillPending },
   };
-  const s = map[status] || map.pending;
+  const style = map[status] || map.pending;
   return (
     <span
       className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em]"
-      style={{ backgroundColor: s.bg, color: s.fg }}
+      style={{ backgroundColor: style.bg, color: style.fg }}
     >
-      {s.label}
+      {style.label}
     </span>
   );
 }

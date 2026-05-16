@@ -606,20 +606,14 @@ html.theme-dark {
   animation: bridge-slide-x 38s linear infinite;
 }
 
-/* Subtle page-enter — apply to <main> to fade in */
+/* Subtle page-enter — opacity-only, fast so palette changes don't overlay */
 @keyframes bridge-page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @utility animate-page-enter {
-  animation: bridge-page-enter 520ms cubic-bezier(0.2, 0.9, 0.32, 1) both;
+  animation: bridge-page-enter 120ms ease-out both;
 }
 
 @keyframes bridge-skeleton-shimmer {

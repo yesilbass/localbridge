@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Circle } from 'lucide-react';
 import { useProfileHealth } from './dashboardHooks.js';
+import { useContent } from '../../content';
 
 function CircularGauge({ score, animate }) {
   const r = 44;
@@ -53,6 +54,7 @@ function CircularGauge({ score, animate }) {
 }
 
 export default function ProfileHealthCard() {
+  const { s } = useContent();
   const { score, breakdown, isLoading } = useProfileHealth();
   const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
@@ -93,7 +95,7 @@ export default function ProfileHealthCard() {
           className="text-[10px] font-black uppercase tracking-[0.32em]"
           style={{ color: 'var(--color-primary)' }}
         >
-          Profile health
+          {s.dashboard.profileCompletion}
         </h2>
         <span className="text-[14px] font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
           {score}/100

@@ -5,6 +5,7 @@ import { usePastSessions } from './dashboardHooks.js';
 import EmptyState from './EmptyState.jsx';
 import ReviewModal from '../../components/ReviewModal.jsx';
 import { getMyReviewedSessionIds } from '../../api/reviews';
+import { useContent } from '../../content';
 
 function formatDate(iso) {
   if (!iso) return '';
@@ -80,6 +81,7 @@ function PastRow({ session, isFirst, onReview, reviewed }) {
 }
 
 export default function PastSessionsBlock() {
+  const { s } = useContent();
   const { sessions, isLoading } = usePastSessions({ limit: 5 });
   const [reviewed, setReviewed] = useState(new Set());
   const [reviewing, setReviewing] = useState(null);
@@ -137,9 +139,9 @@ export default function PastSessionsBlock() {
         ) : sessions.length === 0 ? (
           <EmptyState
             icon={Calendar}
-            title="No past sessions yet"
+            title={s.dashboard.noPast}
             description="Your session history will appear here."
-            ctaLabel="Find your first mentor"
+            ctaLabel={s.dashboard.browseMentors}
             ctaHref="/mentors"
           />
         ) : (

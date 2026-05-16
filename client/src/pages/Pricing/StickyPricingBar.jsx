@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Magnetic } from '../dashboard/dashboardCinematic.jsx';
+import { useContent } from '../../content';
 
 export default function StickyPricingBar({ onClick, equivalent, annual }) {
+  const { s } = useContent();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -35,9 +37,9 @@ export default function StickyPricingBar({ onClick, equivalent, annual }) {
             className="truncate text-[11px] font-black uppercase tracking-[0.16em]"
             style={{ color: 'var(--color-primary)' }}
           >
-            Most popular plan
+            {s.pricing.mostPopularPlan}
           </p>
-          <p className="truncate text-[12px] font-bold text-[var(--bridge-text)]">${equivalent}/mo · {annual ? 'billed annually' : 'cancel anytime'}</p>
+          <p className="truncate text-[12px] font-bold text-[var(--bridge-text)]">${equivalent}/mo · {annual ? s.pricing.billedAnnually : s.pricing.cancelAnytime}</p>
         </div>
         <Magnetic strength={0.18}>
           <button
@@ -51,7 +53,7 @@ export default function StickyPricingBar({ onClick, equivalent, annual }) {
               boxShadow: '0 8px 20px -6px color-mix(in srgb, var(--color-primary) 70%, transparent)',
             }}
           >
-            Choose Pro
+            {s.pricing.choosePro}
             <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>

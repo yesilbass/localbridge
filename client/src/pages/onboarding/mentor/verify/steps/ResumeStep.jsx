@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { FileText } from 'lucide-react';
 import { submitResume } from '../../../../../api/verification';
 import { Header, Field, Actions, Done } from './IdentityStep.jsx';
+import { useContent } from '../../../../../content';
 
 export default function ResumeStep({ run, latest, onAdvance }) {
+  const { s } = useContent();
   const isPassed = latest?.status === 'passed';
   const [resumeText, setResumeText] = useState('');
   const [filename, setFilename] = useState('');
@@ -29,20 +31,20 @@ export default function ResumeStep({ run, latest, onAdvance }) {
   }
 
   if (isPassed) {
-    return <Done title="Resume evaluated" body={evaluation?.rationale || 'AI scored your resume favorably.'} onContinue={onAdvance} />;
+    return <Done title={s.onboardingVerify.resumeEvaluated} body={evaluation?.rationale || 'AI scored your resume favorably.'} onContinue={onAdvance} />;
   }
 
   return (
     <div className="flex flex-col gap-5">
       <Header
-        title="Upload your resume"
+        title={s.onboardingVerify.resumeHeading}
         body="Test mode: filenames ending in _pass.pdf / _fail.pdf / _review.pdf force outcomes. Otherwise the AI scores you (mocked when no API key)."
       />
 
       <Field icon={FileText} label="Filename (test-mode shortcut)" value={filename} onChange={setFilename} placeholder="my-resume_pass.pdf" />
 
       <label className="flex flex-col gap-1 text-[12px] font-semibold" style={{ color: 'var(--bridge-text-secondary)' }}>
-        <span>Resume content (paste or summary)</span>
+        <span>{s.onboardingVerify.resumeContent}</span>
         <textarea
           rows={6}
           value={resumeText}
@@ -58,8 +60,8 @@ export default function ResumeStep({ run, latest, onAdvance }) {
       </label>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field icon={null} label="Claimed title" value={title} onChange={setTitle} placeholder="Senior Product Designer" />
-        <Field icon={null} label="Claimed company" value={company} onChange={setCompany} placeholder="Acme Co." />
+        <Field icon={null} label={s.onboardingVerify.claimedTitle} value={title} onChange={setTitle} placeholder="Senior Product Designer" />
+        <Field icon={null} label={s.onboardingVerify.claimedCompany} value={company} onChange={setCompany} placeholder="Acme Co." />
       </div>
 
       {evaluation ? (
@@ -71,7 +73,7 @@ export default function ResumeStep({ run, latest, onAdvance }) {
             color: 'var(--bridge-text-secondary)',
           }}
         >
-          <p className="font-bold" style={{ color: 'var(--bridge-text)' }}>AI evaluation</p>
+          <p className="font-bold" style={{ color: 'var(--bridge-text)' }}>{s.onboardingVerify.aiEvaluation}</p>
           <p className="mt-1">{evaluation.rationale}</p>
           {Array.isArray(evaluation.expertise_signals) && evaluation.expertise_signals.length ? (
             <ul className="mt-2 list-disc pl-4">
@@ -81,7 +83,7 @@ export default function ResumeStep({ run, latest, onAdvance }) {
         </div>
       ) : null}
 
-      <Actions primaryLabel={busy ? 'Scoring…' : 'Submit resume'} onPrimary={submit} disabled={busy} error={error} />
+      <Actions primaryLabel={busy ? s.onboardingVerify.scoring : s.onboardingVerify.submitResume} onPrimary={submit} disabled={busy} error={error} />
     </div>
   );
 }

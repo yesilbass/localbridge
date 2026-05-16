@@ -1,7 +1,9 @@
 import { focusRing } from '../../ui';
 import { Tilt3D } from '../dashboard/dashboardCinematic.jsx';
+import { useContent } from '../../content';
 
 export default function PricingFaq({ headingId, items }) {
+  const { s } = useContent();
   return (
     <Tilt3D max={2.5} className="rounded-3xl">
       <section
@@ -43,7 +45,7 @@ export default function PricingFaq({ headingId, items }) {
           className="relative mt-2 font-display font-black tracking-[-0.025em] text-[var(--bridge-text)]"
           style={{ fontSize: 'clamp(1.4rem, 2.4vw, 1.85rem)', lineHeight: '1.05' }}
         >
-          Common <span className="text-gradient-bridge italic">questions</span>
+          {s.pricing.faqHeading} <span className="text-gradient-bridge italic">{s.pricing.faqHeadingItalic}</span>
         </h2>
 
         <div className="relative mt-5 overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/60 divide-y divide-[var(--bridge-border)]">

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
@@ -7,41 +7,62 @@ import MagneticPointer from './components/MagneticPointer';
 import PaletteDevBadge from './components/PaletteDevBadge';
 import { applyPalette } from './utils/appearance';
 import { resolvePalette } from './utils/routePalette';
-import Landing from './pages/landing';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Mentors from './pages/Mentors';
-import MentorProfile from './pages/mentor-profile';
-import Dashboard from './pages/dashboard/index.jsx';
-import Profile from './pages/Profile';
-import Settings from './pages/Settings';
-import Pricing from './pages/Pricing';
-import ResumeReview from './pages/ResumeReview';
 import Footer from './components/Footer';
 import BridgeGlobalAtmosphere from './components/BridgeGlobalAtmosphere';
-import About from './pages/about';
-import WhyUs from './pages/why-us';
-import Careers from './pages/footer/Careers.jsx';
-import Blog from './pages/footer/Blog.jsx';
-import FAQ from './pages/footer/FAQ.jsx';
-import Contact from './pages/footer/Contact.jsx';
-import Help from './pages/footer/Help.jsx';
-import Trust from './pages/footer/Trust.jsx';
-import Community from './pages/footer/Community.jsx';
-import Privacy from './pages/footer/Privacy.jsx';
-import Terms from './pages/footer/Terms.jsx';
-import Cookies from './pages/footer/Cookies.jsx';
 import FeedbackFAB from './components/FeedbackFAB';
 import ErrorBoundary from './components/ErrorBoundary';
-import VideoCall from './pages/VideoCall';
-import MeetLobby from './pages/MeetLobby';
-import IntakeCall from './pages/IntakeCall';
-import MentorOnboarding from './pages/MentorOnboarding';
 import DevPortal from './pages/DevPortal/index.jsx';
-import BookingFinalize from './pages/booking/finalize.jsx';
-import VerifyMentorWizard from './pages/onboarding/mentor/verify/index.jsx';
-import SubmitReferencePage from './pages/refs/SubmitReference.jsx';
-import AdminVerification from './pages/admin/verification/index.jsx';
+
+const Landing          = lazy(() => import('./pages/landing'));
+const Login            = lazy(() => import('./pages/Login'));
+const Register         = lazy(() => import('./pages/Register'));
+const Mentors          = lazy(() => import('./pages/Mentors'));
+const MentorProfile    = lazy(() => import('./pages/mentor-profile'));
+const Dashboard        = lazy(() => import('./pages/dashboard/index.jsx'));
+const Profile          = lazy(() => import('./pages/Profile'));
+const Settings         = lazy(() => import('./pages/Settings'));
+const Pricing          = lazy(() => import('./pages/Pricing'));
+const ResumeReview     = lazy(() => import('./pages/ResumeReview'));
+const About            = lazy(() => import('./pages/about'));
+const WhyUs            = lazy(() => import('./pages/why-us'));
+const VideoCall        = lazy(() => import('./pages/VideoCall'));
+const MeetLobby        = lazy(() => import('./pages/MeetLobby'));
+const IntakeCall       = lazy(() => import('./pages/IntakeCall'));
+const MentorOnboarding = lazy(() => import('./pages/MentorOnboarding'));
+const BookingFinalize  = lazy(() => import('./pages/booking/finalize.jsx'));
+const VerifyMentorWizard    = lazy(() => import('./pages/onboarding/mentor/verify/index.jsx'));
+const SubmitReferencePage   = lazy(() => import('./pages/refs/SubmitReference.jsx'));
+const AdminVerification     = lazy(() => import('./pages/admin/verification/index.jsx'));
+const Careers   = lazy(() => import('./pages/footer/Careers.jsx'));
+const Blog      = lazy(() => import('./pages/footer/Blog.jsx'));
+const FAQ       = lazy(() => import('./pages/footer/FAQ.jsx'));
+const Contact   = lazy(() => import('./pages/footer/Contact.jsx'));
+const Help      = lazy(() => import('./pages/footer/Help.jsx'));
+const Trust     = lazy(() => import('./pages/footer/Trust.jsx'));
+const Community = lazy(() => import('./pages/footer/Community.jsx'));
+const Privacy   = lazy(() => import('./pages/footer/Privacy.jsx'));
+const Terms     = lazy(() => import('./pages/footer/Terms.jsx'));
+const Cookies   = lazy(() => import('./pages/footer/Cookies.jsx'));
+
+function PageLoadingFallback() {
+  return (
+    <div
+      className="flex flex-1 flex-col items-center justify-center"
+      style={{ minHeight: 'calc(100vh - 5.25rem)' }}
+      aria-hidden="true"
+    >
+      <div
+        className="h-8 w-8 animate-spin rounded-full"
+        style={{
+          borderWidth: 2,
+          borderStyle: 'solid',
+          borderColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)',
+          borderTopColor: 'var(--color-primary)',
+        }}
+      />
+    </div>
+  );
+}
 
 function AppContent() {
   const location = useLocation();
@@ -79,6 +100,7 @@ function AppContent() {
         className={`relative z-10 flex flex-1 flex-col animate-page-enter ${isLanding || isDashboard ? '' : 'pt-[5.25rem]'}`}
       >
         <ErrorBoundary>
+        <Suspense fallback={<PageLoadingFallback />}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
@@ -114,6 +136,7 @@ function AppContent() {
           <Route path="/onboarding" element={<MentorOnboarding />} />
           <Route path="/onboarding/mentor" element={<MentorOnboarding />} />
         </Routes>
+        </Suspense>
         </ErrorBoundary>
       </div>
       {!isVideoCall && <FeedbackFAB />}

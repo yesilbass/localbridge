@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { CreditCard, ArrowRight } from 'lucide-react';
 import { useDashboardSessions } from './dashboardHooks.js';
+import { useContent } from '../../content';
 
 const SESSION_TYPE_LABEL = {
   career_advice: 'Career advice',
@@ -20,13 +21,13 @@ function getInitials(name = '') {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map((s) => s[0]?.toUpperCase()).join('') || '?';
 }
 
-const STATUS_META = {
-  pending:   { label: 'Awaiting mentor', color: 'var(--color-warning)' },
-  accepted:  { label: 'Confirmed',       color: 'var(--color-primary)' },
-  completed: { label: 'Completed',       color: 'var(--color-success)' },
-};
-
 function StatusPill({ status }) {
+  const { s } = useContent();
+  const STATUS_META = {
+    pending:   { label: s.dashboard.billingAwaitingMentor, color: 'var(--color-warning)' },
+    accepted:  { label: s.dashboard.billingConfirmed,      color: 'var(--color-primary)' },
+    completed: { label: s.dashboard.billingCompleted,      color: 'var(--color-success)' },
+  };
   const meta = STATUS_META[status] ?? STATUS_META.pending;
   return (
     <span
@@ -42,6 +43,7 @@ function StatusPill({ status }) {
 }
 
 export default function BillingPage() {
+  const { s } = useContent();
   const { isMentor, sessions, isLoading, mentorMap } = useDashboardSessions();
 
   if (isMentor) {
@@ -60,14 +62,14 @@ export default function BillingPage() {
           Earnings
         </p>
         <p className="mt-2 text-[14px]" style={{ color: 'var(--bridge-text-secondary)' }}>
-          Mentor earnings live in the Earnings tab.
+          {s.dashboard.earningsMentorNote}
         </p>
         <Link
           to="/dashboard/earnings"
           className="bridge-focus mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-bold"
           style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
         >
-          Open Earnings <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          {s.dashboard.earningsGoToEarnings} <ArrowRight className="h-3.5 w-3.5" aria-hidden />
         </Link>
       </div>
     );

@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Briefcase } from 'lucide-react';
 import { startProfessionalEmail, confirmProfessionalEmail } from '../../../../../api/verification';
 import { Header, Field, Actions, Done } from './IdentityStep.jsx';
+import { useContent } from '../../../../../content';
 
 export default function ProfessionalEmailStep({ run, latest, onAdvance }) {
+  const { s } = useContent();
   const isPassed = latest?.status === 'passed';
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
@@ -26,19 +28,19 @@ export default function ProfessionalEmailStep({ run, latest, onAdvance }) {
     onAdvance?.();
   }
 
-  if (isPassed) return <Done title="Professional email verified" body={`Confirmed via ${latest?.payload?.domain || 'magic link'}.`} onContinue={onAdvance} />;
+  if (isPassed) return <Done title={s.onboardingVerify.proEmailVerified} body={`Confirmed via ${latest?.payload?.domain || 'magic link'}.`} onContinue={onAdvance} />;
 
   return (
     <div className="flex flex-col gap-5">
       <Header
-        title="Verify your professional email"
+        title={s.onboardingVerify.proEmailHeading}
         body="Use a work email — Gmail/Yahoo get partial credit in test mode. @bridge-test.com and @stripe-test.com always pass."
       />
 
-      <Field icon={Briefcase} label="Work email" value={email} onChange={setEmail} placeholder="you@company.com" />
+      <Field icon={Briefcase} label={s.onboardingVerify.workEmail} value={email} onChange={setEmail} placeholder="you@company.com" />
 
       {!token ? (
-        <Actions primaryLabel={busy ? 'Sending magic link…' : 'Send magic link'} onPrimary={start} disabled={busy || !email} error={error} />
+        <Actions primaryLabel={busy ? s.onboardingVerify.sendingMagicLink : s.onboardingVerify.sendMagicLink} onPrimary={start} disabled={busy || !email} error={error} />
       ) : (
         <>
           <p
@@ -50,7 +52,7 @@ export default function ProfessionalEmailStep({ run, latest, onAdvance }) {
           >
             Test mode: magic link token is auto-filled. Click confirm.
           </p>
-          <Actions primaryLabel={busy ? 'Confirming…' : 'Confirm email'} onPrimary={confirm} disabled={busy} error={error} />
+          <Actions primaryLabel={busy ? s.onboardingVerify.confirming : s.onboardingVerify.confirmEmail} onPrimary={confirm} disabled={busy} error={error} />
         </>
       )}
     </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useContent } from '../content';
 import {
   Bell, X, CheckCircle, XCircle, Clock,
   AlertCircle, ChevronRight, Inbox, RefreshCw,
@@ -137,6 +138,7 @@ function persistRead(ids) {
 export default function NotificationPanel() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { s } = useContent();
   const isMentor = user ? isMentorAccount(user) : false;
 
   const [open, setOpen]       = useState(false);
@@ -269,7 +271,7 @@ export default function NotificationPanel() {
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500/10">
                 <Bell className="h-3.5 w-3.5 text-orange-500" />
               </div>
-              <span className="text-[13px] font-bold text-[var(--bridge-text)]">Notifications</span>
+              <span className="text-[13px] font-bold text-[var(--bridge-text)]">{s.notifications.heading}</span>
               {unreadCount > 0 && (
                 <span className="inline-flex items-center rounded-full bg-orange-500 px-1.5 py-px text-[10px] font-black text-white">
                   {unreadCount}
@@ -311,7 +313,7 @@ export default function NotificationPanel() {
             {loading ? (
               <div className="flex flex-col items-center gap-3 py-10">
                 <div className="h-7 w-7 animate-spin rounded-full border-2 border-[var(--bridge-border)] border-t-orange-500" />
-                <span className="text-[12px] text-[var(--bridge-text-faint)]">Loading…</span>
+                <span className="text-[12px] text-[var(--bridge-text-faint)]">{s.common.loading}</span>
               </div>
             ) : error ? (
               <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">

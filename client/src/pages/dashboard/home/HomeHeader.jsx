@@ -11,6 +11,7 @@ import {
 } from '../dashboardHooks.js';
 import { isMentorAccount } from '../../../utils/accountRole';
 import { usePerfTier } from '../../landing/landingHooks';
+import { useContent } from '../../../content';
 
 function getGreeting(hour) {
   if (hour < 12) return 'Good morning';
@@ -60,6 +61,7 @@ function PrimaryAction({ to, icon: Icon, children }) {
 }
 
 export default function HomeHeader({ activeRole }) {
+  const { s } = useContent();
   const { user } = useAuth();
   const reduced = useReducedMotion();
   const tier = usePerfTier();
@@ -85,37 +87,37 @@ export default function HomeHeader({ activeRole }) {
   if (session?.scheduledAt) {
     const delta = new Date(session.scheduledAt).getTime() - now;
     if (delta <= 0 && delta > -30 * 60 * 1000) {
-      subline = 'You have a session live right now.';
+      subline = s.dashboard.sessionLiveNow;
     } else if (delta > 0 && delta <= 60 * 60 * 1000) {
-      subline = `Your next session starts ${formatCountdown(session.scheduledAt, now)}.`;
+      subline = s.dashboard.sessionStartsSoon.replace('{countdown}', formatCountdown(session.scheduledAt, now));
     }
   } else if (session && !isMentor) {
     // Mentee booked but Calendly slot not yet picked.
-    subline = 'Your booking is waiting on a time. Check your email to schedule.';
+    subline = s.dashboard.bookingWaiting;
   }
   if (!subline) {
     if (isMentor && !isAvailable) {
-      subline = 'Open your hours so mentees can book you.';
+      subline = s.dashboard.openHours;
     } else if (isMentor) {
       subline = formatNowDate(mountDate);
     } else {
-      subline = 'Ready to book your next hour?';
+      subline = s.dashboard.readyToBook;
     }
   }
 
-  const headlineText = firstName ? `${greeting}, ${firstName}.` : 'Welcome back.';
+  const headlineText = firstName ? `${greeting}, ${firstName}.` : s.dashboard.welcome;
   const enterClass = flat ? '' : 'animate-page-enter';
 
   // Single primary action per role.
   let action;
   if (isMentor) {
     if (profileScore < 60) {
-      action = <PrimaryAction to="/dashboard/profile" icon={UserRound}>Open profile</PrimaryAction>;
+      action = <PrimaryAction to="/dashboard/profile" icon={UserRound}>{s.dashboard.openProfile}</PrimaryAction>;
     } else {
-      action = <PrimaryAction to="/dashboard/availability" icon={Clock}>Set availability</PrimaryAction>;
+      action = <PrimaryAction to="/dashboard/availability" icon={Clock}>{s.dashboard.setAvailability}</PrimaryAction>;
     }
   } else {
-    action = <PrimaryAction to="/mentors" icon={Search}>Browse mentors</PrimaryAction>;
+    action = <PrimaryAction to="/mentors" icon={Search}>{s.dashboard.browseMentors}</PrimaryAction>;
   }
 
   return (
