@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SESSION_TYPES } from '../constants/sessionTypes';
 import { focusRing } from '../ui';
+import { useContent } from '../content';
 
 const TOTAL_STEPS = 5;
 
@@ -77,6 +78,7 @@ function Label({ children }) {
 }
 
 export default function MentorMatchWizard({ onComplete, onClose, prefill }) {
+  const { s } = useContent();
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [errors, setErrors] = useState({});
@@ -271,7 +273,7 @@ export default function MentorMatchWizard({ onComplete, onClose, prefill }) {
               {step === 2 && (
                 <div className="flex flex-col gap-5">
                   <div>
-                    <Label>Target role</Label>
+                    <Label>{s.mentors.targetRoleLabel}</Label>
                     <input
                       type="text"
                       placeholder="e.g. Software Engineer, Product Manager, Data Analyst"
@@ -282,7 +284,7 @@ export default function MentorMatchWizard({ onComplete, onClose, prefill }) {
                     <FieldError msg={errors.targetRole} />
                   </div>
                   <div>
-                    <Label>Target industry</Label>
+                    <Label>{s.mentors.targetIndustryLabel}</Label>
                     <div className="flex flex-wrap gap-2">
                       {INDUSTRY_OPTIONS.map(({ label, value }) => (
                         <SelectChip
@@ -320,7 +322,7 @@ export default function MentorMatchWizard({ onComplete, onClose, prefill }) {
               {step === 4 && (
                 <div className="flex flex-col gap-5">
                   <div>
-                    <Label>Session types you need</Label>
+                    <Label>{s.mentors.sessionTypesLabel}</Label>
                     <p className="mb-2.5 text-xs text-stone-500">Select all that apply.</p>
                     <div className="flex flex-wrap gap-2">
                       {SESSION_TYPES.map((type) => (
@@ -428,14 +430,14 @@ export default function MentorMatchWizard({ onComplete, onClose, prefill }) {
             disabled={step === 1}
             className={`rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm font-semibold text-stone-700 shadow-sm transition hover:bg-stone-50 disabled:pointer-events-none disabled:opacity-40 ${focusRing}`}
           >
-            Back
+            {s.common.back}
           </button>
           <button
             type="button"
             onClick={goNext}
             className={`rounded-full border border-transparent bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-orange-500/25 transition hover:from-orange-500 hover:to-amber-400 ${focusRing}`}
           >
-            {step === TOTAL_STEPS ? 'Find My Mentors' : 'Next'}
+            {step === TOTAL_STEPS ? s.mentors.findMyMentors : s.common.next}
           </button>
         </div>
       </div>

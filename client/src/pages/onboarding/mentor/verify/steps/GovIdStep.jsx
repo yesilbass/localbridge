@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Upload } from 'lucide-react';
 import { submitGovId } from '../../../../../api/verification';
 import { Header, Done, Actions } from './IdentityStep.jsx';
+import { useContent } from '../../../../../content';
 
 const TEST_PARSED = { name: 'Demo Mentor', date_of_birth: '1992-04-12', document_type: 'driver_license', issuing_country: 'US' };
 
 export default function GovIdStep({ run, latest, onAdvance }) {
+  const { s } = useContent();
   const isPassed = latest?.status === 'passed';
   const [idFilename, setIdFilename] = useState('');
   const [selfieFilename, setSelfieFilename] = useState('');
@@ -25,22 +27,22 @@ export default function GovIdStep({ run, latest, onAdvance }) {
     onAdvance?.();
   }
 
-  if (isPassed) return <Done title="Government ID verified" body="Your ID and selfie matched." onContinue={onAdvance} />;
+  if (isPassed) return <Done title={s.onboardingVerify.govIdVerified} body={s.onboardingVerify.govIdVerifiedBody} onContinue={onAdvance} />;
 
   return (
     <div className="flex flex-col gap-5">
       <Header
-        title="Upload government ID + selfie"
+        title={s.onboardingVerify.govIdHeading}
         body="Filename hints in test mode: end with _pass.jpg, _fail.jpg, or _review.jpg to force the outcome. Anything else passes at 80%."
       />
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <DropPanel label="ID front" filename={idFilename} onChange={setIdFilename} />
-        <DropPanel label="Selfie" filename={selfieFilename} onChange={setSelfieFilename} />
+        <DropPanel label={s.onboardingVerify.idFront} filename={idFilename} onChange={setIdFilename} />
+        <DropPanel label={s.onboardingVerify.selfie} filename={selfieFilename} onChange={setSelfieFilename} />
       </div>
 
       <Actions
-        primaryLabel={busy ? 'Submitting…' : 'Submit'}
+        primaryLabel={busy ? s.onboardingVerify.submitting : s.common.submit}
         onPrimary={submit}
         disabled={busy}
         error={error}

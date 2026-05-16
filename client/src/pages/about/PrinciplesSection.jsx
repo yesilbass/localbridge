@@ -1,7 +1,9 @@
 import RevealOnScroll from '../landing/RevealOnScroll';
 import { ABOUT_SECTION_PAD, PRINCIPLES } from './aboutData';
+import { useContent } from '../../content';
 
 export default function PrinciplesSection() {
+  const { s } = useContent();
   return (
     <section
       id="principles"
@@ -18,7 +20,7 @@ export default function PrinciplesSection() {
               letterSpacing: '0.32em',
             }}
           >
-            Principles
+            {s.about.principlesEyebrow}
           </p>
 
           <h2
@@ -32,10 +34,10 @@ export default function PrinciplesSection() {
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
-              How we make
+              {s.about.principlesHeading1}
             </span>
             <span className="block" style={{ color: 'var(--color-primary)' }}>
-              every decision.
+              {s.about.principlesHeading2}
             </span>
           </h2>
 
@@ -47,7 +49,7 @@ export default function PrinciplesSection() {
               lineHeight: 1.6,
             }}
           >
-            Four rules we use to settle every product, hiring, and pricing call.
+            {s.about.principlesSub}
           </p>
         </RevealOnScroll>
 

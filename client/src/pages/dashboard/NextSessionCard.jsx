@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useContent } from '../../content';
 import { useNextSession, useSavedMentors, useMentorRecommendations } from './dashboardHooks.js';
 import ReviewModal from '../../components/ReviewModal.jsx';
 import CancellationModal from '../../components/CancellationModal.jsx';
@@ -37,11 +38,13 @@ function formatCountdown(scheduledAt, now) {
   return `in ${mins}m ${String(secs).padStart(2, '0')}s`;
 }
 
-function formatStartedAgo(scheduledAt, now) {
+function formatStartedAgo(scheduledAt, now, s) {
   const elapsed = now - new Date(scheduledAt).getTime();
-  if (elapsed < 60_000) return 'Just started';
+  if (elapsed < 60_000) return s.dashboard.justStarted;
   const mins = Math.floor(elapsed / 60_000);
-  return `Started ${mins} minute${mins === 1 ? '' : 's'} ago`;
+  return mins === 1
+    ? s.dashboard.startedAgo.replace('{mins}', mins)
+    : s.dashboard.startedAgoPlural.replace('{mins}', mins);
 }
 
 function ShellCard({ live, children }) {
@@ -67,6 +70,7 @@ function ShellCard({ live, children }) {
 // ─── State A / B — scheduled or live ─────────────────────────────────────────
 
 function ScheduledState({ session }) {
+  const { s } = useContent();
   const navigate = useNavigate();
   const now = useLiveCountdown(session.scheduledAt);
   const hasTime = !!session.scheduledAt;
@@ -275,7 +279,7 @@ function ScheduledState({ session }) {
             style={{ color: 'var(--bridge-text)' }}
           >
             {live
-              ? formatStartedAgo(session.scheduledAt, now)
+              ? formatStartedAgo(session.scheduledAt, now, s)
               : phase === 'past'
                 ? 'Recently ended'
                 : phase === 'awaiting'

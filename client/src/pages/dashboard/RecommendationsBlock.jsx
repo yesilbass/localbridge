@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Star, Sparkles } from 'lucide-react';
 import { useMentorRecommendations } from './dashboardHooks.js';
 import EmptyState from './EmptyState.jsx';
+import { useContent } from '../../content';
 
 function ReasonedCard({ rec }) {
   const m = rec.mentor;
@@ -87,6 +88,7 @@ function ReasonedCard({ rec }) {
 }
 
 export default function RecommendationsBlock({ limit = 3 } = {}) {
+  const { s } = useContent();
   const { recommendations, isLoading } = useMentorRecommendations({ limit });
   const cols = limit <= 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-3';
 
@@ -98,7 +100,7 @@ export default function RecommendationsBlock({ limit = 3 } = {}) {
           className="text-[10px] font-black uppercase tracking-[0.32em]"
           style={{ color: 'var(--color-primary)' }}
         >
-          Suggested for you
+          {s.dashboard.recommendedMentors}
         </h2>
         <span className="text-[12px]" style={{ color: 'var(--bridge-text-muted)' }}>
           Based on your activity
@@ -140,7 +142,7 @@ export default function RecommendationsBlock({ limit = 3 } = {}) {
             icon={Sparkles}
             title="Suggestions appear with activity"
             description="Save mentors or book a session and we'll surface matches here."
-            ctaLabel="Browse mentors"
+            ctaLabel={s.dashboard.browseMentors}
             ctaHref="/mentors"
           />
         </div>

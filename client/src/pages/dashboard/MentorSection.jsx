@@ -7,6 +7,7 @@ import UpcomingSessionsBlock from './UpcomingSessionsBlock.jsx';
 import ReviewsRecentBlock from './ReviewsRecentBlock.jsx';
 import supabase from '../../api/supabase';
 import { useDashboardSessions } from './dashboardHooks.js';
+import { useContent } from '../../content';
 
 /**
  * Compact one-liner that only renders when the mentor has not yet connected
@@ -14,6 +15,7 @@ import { useDashboardSessions } from './dashboardHooks.js';
  * disappears once Calendly is set up — no nag.
  */
 function NoAvailabilityBanner() {
+  const { s } = useContent();
   const { mentorProfileId } = useDashboardSessions();
   const [hidden, setHidden] = useState(true);
 
@@ -46,13 +48,13 @@ function NoAvailabilityBanner() {
         aria-hidden
       />
       <span className="flex-1 text-[13px] font-bold" style={{ color: 'var(--bridge-text)' }}>
-        Connect your booking calendar — mentees can't book you yet.
+        {s.dashboard.noAvailabilityBanner}
       </span>
       <span
         className="inline-flex items-center gap-1 text-[12px] font-bold"
         style={{ color: 'var(--color-warning)' }}
       >
-        Open availability <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        {s.dashboard.openAvailability} <ArrowRight className="h-3.5 w-3.5" aria-hidden />
       </span>
     </Link>
   );

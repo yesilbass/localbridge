@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Reveal from '../../components/Reveal';
 import { focusRing, pageShell } from '../../ui';
 
@@ -13,6 +13,115 @@ const POSTS = [
 
 const CATEGORIES = ['All', 'Career', 'Craft', 'Mentors', 'Stories', 'Product'];
 
+const CATEGORY_COLORS = {
+    Career:  { bg: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', bar: 'var(--color-primary)' },
+    Craft:   { bg: 'color-mix(in srgb, #6366f1 10%, transparent)',             bar: '#6366f1' },
+    Mentors: { bg: 'color-mix(in srgb, #0ea5e9 10%, transparent)',             bar: '#0ea5e9' },
+    Stories: { bg: 'color-mix(in srgb, #10b981 10%, transparent)',             bar: '#10b981' },
+    Product: { bg: 'color-mix(in srgb, #f59e0b 10%, transparent)',             bar: '#f59e0b' },
+};
+
+function BackToTop() {
+    const [visible, setVisible] = useState(false);
+
+    useEffect(() => {
+        const onScroll = () => setVisible(window.scrollY > 480);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
+    return (
+        <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            aria-label="Back to top"
+            className={`fixed bottom-6 right-6 z-40 flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ${focusRing}`}
+            style={{
+                backgroundColor: 'var(--bridge-surface)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 4px 12px color-mix(in srgb, var(--bridge-text) 8%, transparent)',
+                opacity: visible ? 1 : 0,
+                transform: visible ? 'translateY(0)' : 'translateY(12px)',
+                pointerEvents: visible ? 'auto' : 'none',
+            }}
+        >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 12V4M4 8l4-4 4 4" stroke="var(--bridge-text)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        </button>
+    );
+}
+
+function ArticleView({ post, onBack }) {
+    const color = CATEGORY_COLORS[post.category] ?? CATEGORY_COLORS.Career;
+
+    return (
+        <main className={`${pageShell} px-4 py-16 sm:px-6 sm:py-20 lg:px-8`} style={{ backgroundColor: 'var(--bridge-canvas)' }}>
+            <article className="mx-auto max-w-2xl">
+                <Reveal>
+                    <button
+                        onClick={onBack}
+                        className={`mb-10 inline-flex items-center gap-2 text-[13px] font-semibold transition-opacity hover:opacity-70 ${focusRing} rounded-lg`}
+                        style={{ color: 'var(--bridge-text-secondary)' }}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                            <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        All posts
+                    </button>
+                </Reveal>
+
+                <Reveal delay={60}>
+                    <div className="mb-8 rounded-2xl p-8 sm:p-10" style={{ backgroundColor: 'var(--bridge-surface)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}>
+                        <div className="mb-5 flex items-center gap-3">
+                            <span
+                                className="rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase"
+                                style={{ letterSpacing: '0.32em', backgroundColor: color.bg, color: color.bar }}
+                            >
+                                {post.category}
+                            </span>
+                            <span className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>{post.readTime} read</span>
+                        </div>
+
+                        <h1
+                            className="font-display font-black"
+                            style={{
+                                fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
+                                lineHeight: 1.02,
+                                letterSpacing: '-0.03em',
+                                color: 'var(--bridge-text)',
+                            }}
+                        >
+                            {post.title}
+                        </h1>
+
+                        <div className="mt-5 flex items-center gap-2">
+                            <div
+                                className="flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold"
+                                style={{ backgroundColor: color.bg, color: color.bar }}
+                            >
+                                {post.author[0]}
+                            </div>
+                            <span className="text-[13px]" style={{ color: 'var(--bridge-text-secondary)' }}>
+                                {post.author} · {post.date}
+                            </span>
+                        </div>
+                    </div>
+                </Reveal>
+
+                <Reveal delay={100}>
+                    <div className="space-y-5">
+                        {post.body.split('\n\n').map((para, i) => (
+                            <p key={i} className="text-[15px] leading-[1.75]" style={{ color: 'var(--bridge-text-secondary)' }}>
+                                {para}
+                            </p>
+                        ))}
+                    </div>
+                </Reveal>
+            </article>
+            <BackToTop />
+        </main>
+    );
+}
+
 export default function Blog() {
     const [category, setCategory] = useState('All');
     const [open, setOpen] = useState(null);
@@ -20,51 +129,114 @@ export default function Blog() {
     const active = POSTS.find((p) => p.id === open);
 
     if (active) {
-        return (
-            <main className={`${pageShell} px-4 py-16 sm:px-6 sm:py-20 lg:px-8`}>
-                <article className="mx-auto max-w-3xl">
-                    <button onClick={() => setOpen(null)} className={`mb-8 inline-flex items-center gap-1.5 text-sm font-semibold text-orange-700 transition hover:text-orange-900 ${focusRing} rounded`}>
-                        ← Back to blog
-                    </button>
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">{active.category} · {active.readTime} read</p>
-                    <h1 className="mt-3 font-display text-4xl font-bold leading-tight text-stone-900 sm:text-5xl">{active.title}</h1>
-                    <p className="mt-5 text-sm text-stone-500">By {active.author} · {active.date}</p>
-                    <div className="mt-8 space-y-5 text-lg leading-relaxed text-stone-700">
-                        {active.body.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
-                    </div>
-                </article>
-            </main>
-        );
+        return <ArticleView post={active} onBack={() => setOpen(null)} />;
     }
 
     return (
-        <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
+        <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`} style={{ backgroundColor: 'var(--bridge-canvas)' }}>
             <div className="mx-auto max-w-5xl">
-                <Reveal className="mb-10 max-w-3xl">
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-700">Blog</p>
-                    <h1 className="mt-3 font-display text-4xl font-bold text-stone-900 sm:text-5xl">Essays on careers, craft, and mentorship.</h1>
+                <Reveal className="mb-12 max-w-2xl">
+                    <p
+                        className="font-black uppercase"
+                        style={{ fontSize: '10px', letterSpacing: '0.32em', color: 'var(--color-primary)' }}
+                    >
+                        Blog
+                    </p>
+                    <h1
+                        className="mt-3 font-display font-black"
+                        style={{
+                            fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
+                            lineHeight: 1.02,
+                            letterSpacing: '-0.03em',
+                            color: 'var(--bridge-text)',
+                        }}
+                    >
+                        Essays on careers,<br />craft, and mentorship.
+                    </h1>
                 </Reveal>
 
-                <div className="mb-8 flex flex-wrap gap-2">
-                    {CATEGORIES.map((c) => (
-                        <button key={c} onClick={() => setCategory(c)} className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${category === c ? 'border-stone-900 bg-stone-900 text-amber-50' : 'border-stone-300 bg-white text-stone-700 hover:border-stone-500'} ${focusRing}`}>{c}</button>
-                    ))}
-                </div>
+                <Reveal delay={60} className="mb-10">
+                    <div className="flex flex-wrap gap-2">
+                        {CATEGORIES.map((c) => {
+                            const isActive = category === c;
+                            return (
+                                <button
+                                    key={c}
+                                    onClick={() => setCategory(c)}
+                                    className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition-all duration-150 ${focusRing}`}
+                                    style={{
+                                        backgroundColor: isActive ? 'var(--color-primary)' : 'var(--bridge-surface)',
+                                        color: isActive ? 'var(--color-on-primary)' : 'var(--bridge-text-secondary)',
+                                        boxShadow: isActive ? 'none' : 'inset 0 0 0 1px var(--bridge-border)',
+                                    }}
+                                >
+                                    {c}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </Reveal>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                    {filtered.map((post, i) => (
-                        <Reveal key={post.id} delay={i * 50}>
-                            <button onClick={() => setOpen(post.id)} className={`group h-full w-full overflow-hidden rounded-[1.75rem] border border-stone-200/90 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-bridge-card ${focusRing}`}>
-                                <div className="mb-4 h-40 rounded-xl bg-gradient-to-br from-amber-200 via-orange-200 to-rose-200" />
-                                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-700">{post.category} · {post.readTime}</p>
-                                <h2 className="mt-3 font-display text-xl font-semibold text-stone-900 group-hover:text-orange-800">{post.title}</h2>
-                                <p className="mt-3 text-sm leading-relaxed text-stone-600">{post.excerpt}</p>
-                                <p className="mt-4 text-xs text-stone-500">{post.author} · {post.date}</p>
-                            </button>
-                        </Reveal>
-                    ))}
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {filtered.map((post, i) => {
+                        const color = CATEGORY_COLORS[post.category] ?? CATEGORY_COLORS.Career;
+                        return (
+                            <Reveal key={post.id} delay={i * 50}>
+                                <button
+                                    onClick={() => setOpen(post.id)}
+                                    className={`group flex h-full w-full flex-col rounded-2xl p-8 text-left transition-all duration-200 hover:-translate-y-1 ${focusRing}`}
+                                    style={{
+                                        backgroundColor: 'var(--bridge-surface)',
+                                        boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                                    }}
+                                >
+                                    <div className="mb-5 flex items-center gap-2">
+                                        <span
+                                            className="rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase"
+                                            style={{ letterSpacing: '0.32em', backgroundColor: color.bg, color: color.bar }}
+                                        >
+                                            {post.category}
+                                        </span>
+                                        <span className="text-[12px]" style={{ color: 'var(--bridge-text-muted)' }}>
+                                            {post.readTime} read
+                                        </span>
+                                    </div>
+
+                                    <h2
+                                        className="font-display text-xl font-semibold sm:text-2xl"
+                                        style={{ color: 'var(--bridge-text)', lineHeight: 1.2 }}
+                                    >
+                                        {post.title}
+                                    </h2>
+
+                                    <p
+                                        className="mt-3 flex-1 text-[15px] leading-[1.75]"
+                                        style={{ color: 'var(--bridge-text-secondary)' }}
+                                    >
+                                        {post.excerpt}
+                                    </p>
+
+                                    <div className="mt-6 flex items-center justify-between">
+                                        <span className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>
+                                            {post.author} · {post.date}
+                                        </span>
+                                        <span
+                                            className="flex items-center gap-1 text-[12px] font-semibold transition-all duration-150 group-hover:gap-2"
+                                            style={{ color: 'var(--color-primary)' }}
+                                        >
+                                            Read
+                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                                                <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </button>
+                            </Reveal>
+                        );
+                    })}
                 </div>
             </div>
+            <BackToTop />
         </main>
     );
 }

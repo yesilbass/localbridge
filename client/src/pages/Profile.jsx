@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useContent } from '../content';
 import { useAuth } from '../context/useAuth';
 import { isMentorAccount } from '../utils/accountRole';
 import {
@@ -30,6 +31,7 @@ import { uploadResumeFile, removeResumeFile, getResumeSignedUrl } from '../api/r
 import { toJsonbSafe } from '../utils/jsonbSafe';
 
 function ResumeDownloadButton({ meta }) {
+  const { s } = useContent();
   const [url, setUrl] = useState(null);
   const [err, setErr] = useState(false);
   useEffect(() => {
@@ -47,8 +49,8 @@ function ResumeDownloadButton({ meta }) {
     };
   }, [meta?.path]);
   if (!meta?.path) return null;
-  if (err) return <span className="text-xs text-red-600">Link unavailable</span>;
-  if (!url) return <span className="text-xs text-stone-500">Preparing link…</span>;
+  if (err) return <span className="text-xs text-red-600">{s.profile.linkUnavailable}</span>;
+  if (!url) return <span className="text-xs text-stone-500">{s.profile.preparingLink}</span>;
   return (
     <a
       href={url}
@@ -56,13 +58,14 @@ function ResumeDownloadButton({ meta }) {
       rel="noopener noreferrer"
       className="px-3 py-2 text-sm font-medium text-orange-700 border border-orange-200 rounded-lg hover:bg-orange-50"
     >
-      Download
+      {s.common.download}
     </a>
   );
 }
 
 // ─── Inline skill input ───────────────────────────────────────────────────────
 function SkillInput({ onAdd }) {
+  const { s } = useContent();
   const [value, setValue] = useState('');
   const inputRef = useRef(null);
 
@@ -84,7 +87,7 @@ function SkillInput({ onAdd }) {
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), submit())}
         className="flex-1 px-3 py-2 border border-stone-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
-        placeholder="Type a skill and press Enter or Add…"
+        placeholder={s.profile.skillInputPlaceholder}
       />
       <button
         type="button"
@@ -92,7 +95,7 @@ function SkillInput({ onAdd }) {
         className="flex items-center gap-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
       >
         <Plus className="h-4 w-4" />
-        Add
+        {s.common.add}
       </button>
     </div>
   );
@@ -100,6 +103,7 @@ function SkillInput({ onAdd }) {
 
 // ─── Expertise tag input (same pattern, used for mentor profile) ──────────────
 function ExpertiseInput({ onAdd }) {
+  const { s } = useContent();
   const [value, setValue] = useState('');
   const inputRef = useRef(null);
 
@@ -121,7 +125,7 @@ function ExpertiseInput({ onAdd }) {
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), submit())}
         className="flex-1 px-3 py-2 border border-stone-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
-        placeholder="e.g. Product Strategy, Career Growth…"
+        placeholder={s.profile.expertisePlaceholder}
       />
       <button
         type="button"
@@ -129,13 +133,14 @@ function ExpertiseInput({ onAdd }) {
         className="flex items-center gap-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
       >
         <Plus className="h-4 w-4" />
-        Add
+        {s.common.add}
       </button>
     </div>
   );
 }
 
 export default function Profile() {
+  const { s } = useContent();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const isMentor = user ? isMentorAccount(user) : false;
@@ -308,7 +313,7 @@ export default function Profile() {
         }
       }
       if (error) throw error;
-      showMsg('success', 'Profile saved successfully!');
+      showMsg('success', s.profile.profileSaved);
     } catch (error) {
       console.error('Error saving profile:', error);
       const hint = error.code === '42P01' || error.message?.includes('user_profiles')
@@ -356,7 +361,7 @@ export default function Profile() {
         if (!error && res.data?.id) setMentorProfileId(res.data.id);
       }
       if (error) throw error;
-      showMsg('success', 'Mentor profile saved!');
+      showMsg('success', s.profile.mentorProfileSaved);
     } catch (error) {
       console.error('Error saving mentor profile:', error);
       showMsg('error', error.message || 'Could not save mentor profile.');
@@ -378,7 +383,7 @@ export default function Profile() {
       file.type === 'application/msword' ||
       file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     if (!ok) {
-      showMsg('error', 'Please upload a PDF or Word document.');
+      showMsg('error', s.profile.uploadError);
       return;
     }
     setResumeUploading(true);
@@ -410,7 +415,7 @@ export default function Profile() {
         else ({ error } = await supabase.from('user_profiles').insert(saveRow));
       }
       if (error) throw error;
-      showMsg('success', 'Résumé uploaded and saved.');
+      showMsg('success', s.profile.resumeUploaded);
     } catch (err) {
       console.error(err);
       showMsg('error', err.message || 'Upload failed. Run supabase/BRIDGE_PUBLISH.sql if the DB is not set up.');
@@ -443,7 +448,7 @@ export default function Profile() {
         else ({ error } = await supabase.from('user_profiles').insert(saveRow));
       }
       if (error) throw error;
-      showMsg('success', 'Résumé removed.');
+      showMsg('success', s.profile.resumeRemoved);
     } catch (err) {
       console.error(err);
       showMsg('error', err.message || 'Could not remove file.');
@@ -508,7 +513,7 @@ export default function Profile() {
   const removeExpertise = (index) =>
     setMentorProfile((prev) => ({ ...prev, expertise: prev.expertise.filter((_, i) => i !== index) }));
 
-  if (authLoading) return <LoadingSpinner label="Checking your session…" className="min-h-screen" />;
+  if (authLoading) return <LoadingSpinner label={s.auth.checkingSession} className="min-h-screen" />;
   if (loading) return <LoadingSpinner />;
   if (showPreview) return <ProfilePreview profileData={profileData} onBack={() => setShowPreview(false)} />;
 
@@ -556,13 +561,13 @@ export default function Profile() {
   );
 
   const sectionMeta = {
-    personal: { label: 'Personal', icon: User },
-    resume: { label: 'Résumé', icon: FileText },
-    experience: { label: 'Experience', icon: Briefcase },
-    education: { label: 'Education', icon: GraduationCap },
-    skills: { label: 'Skills', icon: Award },
-    achievements: { label: 'Achievements', icon: Star },
-    mentor: { label: 'Mentor Profile', icon: Star },
+    personal: { label: s.profile.sectionPersonal, icon: User },
+    resume: { label: s.profile.sectionResume, icon: FileText },
+    experience: { label: s.profile.sectionExperience, icon: Briefcase },
+    education: { label: s.profile.sectionEducation, icon: GraduationCap },
+    skills: { label: s.profile.sectionSkills, icon: Award },
+    achievements: { label: s.profile.sectionAchievements, icon: Star },
+    mentor: { label: s.profile.sectionMentor, icon: Star },
   };
 
   return (
@@ -607,7 +612,7 @@ export default function Profile() {
                         : 'border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-raised)] text-[var(--bridge-text-secondary)]'
                     }`}>
                       {isMentor ? <Star className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                      {isMentor ? 'Mentor' : 'Member'}
+                      {isMentor ? s.profile.mentorBadge : s.profile.memberBadge}
                     </span>
                   </div>
                   <p className="mt-1.5 truncate text-sm font-medium text-[var(--bridge-text-secondary)]">{displayTitle}</p>
@@ -623,7 +628,7 @@ export default function Profile() {
                     className="inline-flex items-center gap-2 rounded-xl border border-[var(--bridge-border-strong)] bg-[color-mix(in_srgb,var(--bridge-surface)_85%,transparent)] px-4 py-2.5 text-sm font-semibold text-[var(--bridge-text-secondary)] shadow-sm transition hover:bg-[var(--bridge-surface-raised)]"
                   >
                     <Eye className="h-4 w-4" />
-                    Preview
+                    {s.common.preview}
                   </button>
                 )}
                 <button
@@ -633,7 +638,7 @@ export default function Profile() {
                 >
                   <span aria-hidden className="absolute inset-0 bg-[linear-gradient(110deg,transparent_20%,rgba(255,255,255,0.4)_50%,transparent_80%)] opacity-0 transition group-hover:translate-x-full group-hover:opacity-100" />
                   <Save className="relative h-4 w-4" />
-                  <span className="relative">{isSaving ? 'Saving…' : 'Save changes'}</span>
+                  <span className="relative">{isSaving ? s.profile.saving : s.profile.saveChanges}</span>
                 </button>
               </div>
             </div>
@@ -643,7 +648,7 @@ export default function Profile() {
               <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className={`inline-flex h-2 w-2 rounded-full ${completionPct === 100 ? 'bg-emerald-500' : 'bg-amber-500'} shadow-[0_0_0_3px_rgba(245,158,11,0.2)]`} />
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--bridge-text-muted)]">Profile completion</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--bridge-text-muted)]">{s.profile.profileCompletionLabel}</p>
                 </div>
                 <p className="text-sm font-bold tabular-nums text-[var(--bridge-text)]">{completionPct}%</p>
               </div>
@@ -655,9 +660,7 @@ export default function Profile() {
               </div>
               {completionPct < 100 && (
                 <p className="mt-2 text-xs text-[var(--bridge-text-muted)]">
-                  {isMentor
-                    ? 'Complete your mentor profile so mentees can find and book you.'
-                    : 'A complete profile helps mentors understand what you need.'}
+                  {isMentor ? s.profile.completeMentorPrompt : s.profile.completeMenteePrompt}
                 </p>
               )}
             </div>
@@ -706,12 +709,12 @@ export default function Profile() {
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
                 <User className="h-5 w-5 text-orange-500" />
-                <h2 className="text-xl font-semibold text-stone-900">Personal Information</h2>
+                <h2 className="text-xl font-semibold text-stone-900">{s.profile.personalInfoHeading}</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
-                  { label: 'Full Name', field: 'full_name', type: 'text', placeholder: 'John Doe' },
-                  { label: 'Professional Title', field: 'title', type: 'text', placeholder: 'Software Engineer' },
+                  { label: s.profile.fullName, field: 'full_name', type: 'text', placeholder: 'John Doe' },
+                  { label: s.profile.professionalTitle, field: 'title', type: 'text', placeholder: 'Software Engineer' },
                 ].map(({ label, field, type, placeholder }) => (
                   <div key={field}>
                     <label className="block text-sm font-medium text-stone-700 mb-2">{label}</label>
@@ -725,22 +728,22 @@ export default function Profile() {
                   </div>
                 ))}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-stone-700 mb-2">Bio</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.bio}</label>
                   <textarea
                     value={profileData.personal.bio || ''}
                     onChange={(e) => updatePersonalInfo('bio', e.target.value)}
                     rows={4}
                     className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors resize-none"
-                    placeholder="Tell us about yourself…"
+                    placeholder={s.profile.bioPlaceholder}
                   />
                 </div>
                 {[
-                  { label: 'Email', field: 'email', type: 'email', placeholder: 'john@example.com' },
-                  { label: 'Phone', field: 'phone', type: 'tel', placeholder: '+1 (555) 123-4567' },
-                  { label: 'Location', field: 'location', type: 'text', placeholder: 'San Francisco, CA' },
-                  { label: 'Website', field: 'website', type: 'url', placeholder: 'https://johndoe.com' },
-                  { label: 'LinkedIn', field: 'linkedin', type: 'url', placeholder: 'https://linkedin.com/in/johndoe' },
-                  { label: 'GitHub', field: 'github', type: 'url', placeholder: 'https://github.com/johndoe' },
+                  { label: s.profile.email, field: 'email', type: 'email', placeholder: 'john@example.com' },
+                  { label: s.profile.phone, field: 'phone', type: 'tel', placeholder: '+1 (555) 123-4567' },
+                  { label: s.profile.location, field: 'location', type: 'text', placeholder: 'San Francisco, CA' },
+                  { label: s.profile.website, field: 'website', type: 'url', placeholder: 'https://johndoe.com' },
+                  { label: s.profile.linkedin, field: 'linkedin', type: 'url', placeholder: 'https://linkedin.com/in/johndoe' },
+                  { label: s.profile.github, field: 'github', type: 'url', placeholder: 'https://github.com/johndoe' },
                 ].map(({ label, field, type, placeholder }) => (
                   <div key={field}>
                     <label className="block text-sm font-medium text-stone-700 mb-2">{label}</label>
@@ -761,10 +764,10 @@ export default function Profile() {
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-2">
                 <FileText className="h-5 w-5 text-orange-500" />
-                <h2 className="text-xl font-semibold text-stone-900">Résumé / CV</h2>
+                <h2 className="text-xl font-semibold text-stone-900">{s.profile.resumeHeading}</h2>
               </div>
               <p className="text-sm text-stone-500">
-                Upload a PDF or Word file. It is stored privately; share the preview or download link when you apply or book sessions.
+                {s.profile.resumeDescription}
               </p>
               {profileData.personal.resume?.path ? (
                 <div className="rounded-xl border border-stone-200 bg-stone-50/80 p-4 flex flex-wrap items-center justify-between gap-3">
@@ -782,16 +785,16 @@ export default function Profile() {
                       onClick={handleResumeRemove}
                       className="px-3 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50"
                     >
-                      Remove
+                      {s.common.remove}
                     </button>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-stone-600">No file uploaded yet.</p>
+                <p className="text-sm text-stone-600">{s.profile.noFileUploaded}</p>
               )}
               <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 cursor-pointer text-sm font-medium disabled:opacity-50">
                 <input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" disabled={resumeUploading} onChange={handleResumeUpload} />
-                {resumeUploading ? 'Uploading…' : profileData.personal.resume ? 'Replace file' : 'Upload PDF or Word'}
+                {resumeUploading ? s.profile.uploading : profileData.personal.resume ? s.profile.replaceFile : s.profile.uploadPdfOrWord}
               </label>
             </div>
           )}
@@ -802,11 +805,11 @@ export default function Profile() {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <Briefcase className="h-5 w-5 text-orange-500" />
-                  <h2 className="text-xl font-semibold text-stone-900">Work Experience</h2>
+                  <h2 className="text-xl font-semibold text-stone-900">{s.profile.workExperienceHeading}</h2>
                 </div>
                 <button onClick={addExperience} className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
                   <Plus className="h-4 w-4" />
-                  Add Experience
+                  {s.profile.addExperience}
                 </button>
               </div>
               <div className="space-y-4">
@@ -820,8 +823,8 @@ export default function Profile() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {[
-                        { label: 'Company', field: 'company', placeholder: 'Company Name' },
-                        { label: 'Position', field: 'position', placeholder: 'Job Title' },
+                        { label: s.profile.company, field: 'company', placeholder: 'Company Name' },
+                        { label: s.profile.position, field: 'position', placeholder: 'Job Title' },
                       ].map(({ label, field, placeholder }) => (
                         <div key={field}>
                           <label className="block text-sm font-medium text-stone-700 mb-1">{label}</label>
@@ -835,12 +838,12 @@ export default function Profile() {
                         </div>
                       ))}
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-1">Start Date</label>
+                        <label className="block text-sm font-medium text-stone-700 mb-1">{s.profile.startDate}</label>
                         <input type="month" value={exp.start_date} onChange={(e) => updateExperience(exp.id, 'start_date', e.target.value)}
                           className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-1">End Date</label>
+                        <label className="block text-sm font-medium text-stone-700 mb-1">{s.profile.endDate}</label>
                         <input type="month" value={exp.end_date} onChange={(e) => updateExperience(exp.id, 'end_date', e.target.value)}
                           disabled={exp.current}
                           className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors disabled:bg-stone-50" />
@@ -849,14 +852,14 @@ export default function Profile() {
                         <label className="flex items-center gap-2 text-sm font-medium text-stone-700 mb-1 cursor-pointer">
                           <input type="checkbox" checked={exp.current} onChange={(e) => updateExperience(exp.id, 'current', e.target.checked)}
                             className="rounded border-stone-300 text-orange-500 focus:ring-orange-500" />
-                          Currently working here
+                          {s.profile.currentlyWorkingHere}
                         </label>
                       </div>
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-stone-700 mb-1">Description</label>
+                        <label className="block text-sm font-medium text-stone-700 mb-1">{s.profile.description}</label>
                         <textarea value={exp.description} onChange={(e) => updateExperience(exp.id, 'description', e.target.value)} rows={3}
                           className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors resize-none"
-                          placeholder="Describe your responsibilities and achievements…" />
+                          placeholder={s.profile.descriptionPlaceholder} />
                       </div>
                     </div>
                   </div>
@@ -864,8 +867,8 @@ export default function Profile() {
                 {profileData.experience.length === 0 && (
                   <div className="text-center py-8 text-stone-500">
                     <Briefcase className="h-12 w-12 mx-auto mb-3 text-stone-300" />
-                    <p>No work experience added yet</p>
-                    <button onClick={addExperience} className="mt-3 text-orange-500 hover:text-orange-600 font-medium">Add your first experience</button>
+                    <p>{s.profile.noExperienceYet}</p>
+                    <button onClick={addExperience} className="mt-3 text-orange-500 hover:text-orange-600 font-medium">{s.profile.addFirstExperience}</button>
                   </div>
                 )}
               </div>
@@ -878,11 +881,11 @@ export default function Profile() {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <GraduationCap className="h-5 w-5 text-orange-500" />
-                  <h2 className="text-xl font-semibold text-stone-900">Education</h2>
+                  <h2 className="text-xl font-semibold text-stone-900">{s.profile.educationHeading}</h2>
                 </div>
                 <button onClick={addEducation} className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
                   <Plus className="h-4 w-4" />
-                  Add Education
+                  {s.profile.addEducation}
                 </button>
               </div>
               <div className="space-y-4">
@@ -896,10 +899,10 @@ export default function Profile() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {[
-                        { label: 'School', field: 'school', placeholder: 'University Name' },
-                        { label: 'Degree', field: 'degree', placeholder: "Bachelor's, Master's, etc." },
-                        { label: 'Field of Study', field: 'field', placeholder: 'Computer Science' },
-                        { label: 'GPA', field: 'gpa', placeholder: '3.8' },
+                        { label: s.profile.school, field: 'school', placeholder: 'University Name' },
+                        { label: s.profile.degree, field: 'degree', placeholder: "Bachelor's, Master's, etc." },
+                        { label: s.profile.fieldOfStudy, field: 'field', placeholder: 'Computer Science' },
+                        { label: s.profile.gpa, field: 'gpa', placeholder: '3.8' },
                       ].map(({ label, field, placeholder }) => (
                         <div key={field}>
                           <label className="block text-sm font-medium text-stone-700 mb-1">{label}</label>
@@ -909,12 +912,12 @@ export default function Profile() {
                         </div>
                       ))}
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-1">Start Date</label>
+                        <label className="block text-sm font-medium text-stone-700 mb-1">{s.profile.startDate}</label>
                         <input type="month" value={edu.start_date} onChange={(e) => updateEducation(edu.id, 'start_date', e.target.value)}
                           className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-1">End Date</label>
+                        <label className="block text-sm font-medium text-stone-700 mb-1">{s.profile.endDate}</label>
                         <input type="month" value={edu.end_date} onChange={(e) => updateEducation(edu.id, 'end_date', e.target.value)}
                           disabled={edu.current}
                           className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors disabled:bg-stone-50" />
@@ -923,7 +926,7 @@ export default function Profile() {
                         <label className="flex items-center gap-2 text-sm font-medium text-stone-700 mb-1 cursor-pointer">
                           <input type="checkbox" checked={edu.current} onChange={(e) => updateEducation(edu.id, 'current', e.target.checked)}
                             className="rounded border-stone-300 text-orange-500 focus:ring-orange-500" />
-                          Currently studying here
+                          {s.profile.currentlyStudyingHere}
                         </label>
                       </div>
                     </div>
@@ -932,8 +935,8 @@ export default function Profile() {
                 {profileData.education.length === 0 && (
                   <div className="text-center py-8 text-stone-500">
                     <GraduationCap className="h-12 w-12 mx-auto mb-3 text-stone-300" />
-                    <p>No education added yet</p>
-                    <button onClick={addEducation} className="mt-3 text-orange-500 hover:text-orange-600 font-medium">Add your education</button>
+                    <p>{s.profile.noEducationYet}</p>
+                    <button onClick={addEducation} className="mt-3 text-orange-500 hover:text-orange-600 font-medium">{s.profile.addYourEducation}</button>
                   </div>
                 )}
               </div>
@@ -945,12 +948,12 @@ export default function Profile() {
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
                 <Award className="h-5 w-5 text-orange-500" />
-                <h2 className="text-xl font-semibold text-stone-900">Skills</h2>
+                <h2 className="text-xl font-semibold text-stone-900">{s.profile.skillsHeading}</h2>
               </div>
               {profileData.skills.length === 0 ? (
                 <div className="text-center py-8 text-stone-500">
                   <Award className="h-12 w-12 mx-auto mb-3 text-stone-300" />
-                  <p>No skills added yet — type below to add your first one</p>
+                  <p>{s.profile.noSkillsYet}</p>
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-2">
@@ -974,11 +977,11 @@ export default function Profile() {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <Award className="h-5 w-5 text-orange-500" />
-                  <h2 className="text-xl font-semibold text-stone-900">Achievements</h2>
+                  <h2 className="text-xl font-semibold text-stone-900">{s.profile.achievementsHeading}</h2>
                 </div>
                 <button onClick={addAchievement} className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
                   <Plus className="h-4 w-4" />
-                  Add Achievement
+                  {s.profile.addAchievement}
                 </button>
               </div>
               <div className="space-y-4">
@@ -992,21 +995,21 @@ export default function Profile() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-1">Title</label>
+                        <label className="block text-sm font-medium text-stone-700 mb-1">{s.profile.achievementTitle}</label>
                         <input type="text" value={achievement.title} onChange={(e) => updateAchievement(achievement.id, 'title', e.target.value)}
                           className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
                           placeholder="Achievement Title" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-1">Date</label>
+                        <label className="block text-sm font-medium text-stone-700 mb-1">{s.profile.achievementDate}</label>
                         <input type="month" value={achievement.date} onChange={(e) => updateAchievement(achievement.id, 'date', e.target.value)}
                           className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors" />
                       </div>
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-stone-700 mb-1">Description</label>
+                        <label className="block text-sm font-medium text-stone-700 mb-1">{s.profile.description}</label>
                         <textarea value={achievement.description} onChange={(e) => updateAchievement(achievement.id, 'description', e.target.value)} rows={3}
                           className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors resize-none"
-                          placeholder="Describe your achievement…" />
+                          placeholder={s.profile.achievementDescriptionPlaceholder} />
                       </div>
                     </div>
                   </div>
@@ -1014,8 +1017,8 @@ export default function Profile() {
                 {profileData.achievements.length === 0 && (
                   <div className="text-center py-8 text-stone-500">
                     <Award className="h-12 w-12 mx-auto mb-3 text-stone-300" />
-                    <p>No achievements added yet</p>
-                    <button onClick={addAchievement} className="mt-3 text-orange-500 hover:text-orange-600 font-medium">Add your first achievement</button>
+                    <p>{s.profile.noAchievementsYet}</p>
+                    <button onClick={addAchievement} className="mt-3 text-orange-500 hover:text-orange-600 font-medium">{s.profile.addFirstAchievement}</button>
                   </div>
                 )}
               </div>
@@ -1027,56 +1030,56 @@ export default function Profile() {
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-2">
                 <Star className="h-5 w-5 text-orange-500" />
-                <h2 className="text-xl font-semibold text-stone-900">Mentor Profile</h2>
+                <h2 className="text-xl font-semibold text-stone-900">{s.profile.mentorProfileHeading}</h2>
               </div>
-              <p className="text-sm text-stone-500 -mt-2">This information appears on your public mentor listing that mentees browse.</p>
+              <p className="text-sm text-stone-500 -mt-2">{s.profile.mentorProfileDescription}</p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">Display Name</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.displayName}</label>
                   <input type="text" value={mentorProfile.name} onChange={(e) => updateMentorField('name', e.target.value)}
                     className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
                     placeholder="Jane Smith" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">Job Title</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.jobTitle}</label>
                   <input type="text" value={mentorProfile.title} onChange={(e) => updateMentorField('title', e.target.value)}
                     className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
                     placeholder="Senior Product Manager" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">Company</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.company}</label>
                   <input type="text" value={mentorProfile.company} onChange={(e) => updateMentorField('company', e.target.value)}
                     className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
                     placeholder="Google" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">Industry</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.industry}</label>
                   <input type="text" value={mentorProfile.industry} onChange={(e) => updateMentorField('industry', e.target.value)}
                     className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
                     placeholder="Technology" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">Years of Experience</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.yearsOfExperience}</label>
                   <input type="number" min="0" max="50" value={mentorProfile.years_experience} onChange={(e) => updateMentorField('years_experience', e.target.value)}
                     className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
                     placeholder="8" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">Session Rate (USD/hr)</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.sessionRate}</label>
                   <div className="flex items-center gap-2 w-full px-4 py-2 border border-stone-200 rounded-lg bg-stone-50 text-stone-500 text-sm">
                     {mentorProfile.session_rate ? `$${mentorProfile.session_rate}/hr` : '—'}
-                    <span className="ml-auto text-xs text-stone-400">Set algorithmically · dispute from dashboard</span>
+                    <span className="ml-auto text-xs text-stone-400">{s.profile.sessionRateNote}</span>
                   </div>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-stone-700 mb-2">Bio / About</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.bioAbout}</label>
                   <textarea value={mentorProfile.bio} onChange={(e) => updateMentorField('bio', e.target.value)} rows={4}
                     className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors resize-none"
-                    placeholder="Describe your experience and what you can help mentees with…" />
+                    placeholder={s.profile.bioAboutPlaceholder} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">Profile Image URL</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.profileImageUrl}</label>
                   <input type="url" value={mentorProfile.image_url} onChange={(e) => updateMentorField('image_url', e.target.value)}
                     className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
                     placeholder="https://…" />
@@ -1085,26 +1088,26 @@ export default function Profile() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">Tier</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.tier}</label>
                   <div className="flex items-center gap-2 w-full px-4 py-2 border border-stone-200 rounded-lg bg-stone-50 text-stone-500 text-sm capitalize">
                     {mentorProfile.tier || 'verified'}
-                    <span className="ml-auto text-xs text-stone-400">Set algorithmically · dispute from dashboard</span>
+                    <span className="ml-auto text-xs text-stone-400">{s.profile.tierNote}</span>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">LinkedIn</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.linkedin}</label>
                   <input type="url" value={mentorProfile.linkedin_url} onChange={(e) => updateMentorField('linkedin_url', e.target.value)}
                     className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
                     placeholder="https://linkedin.com/in/…" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">GitHub</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.github}</label>
                   <input type="url" value={mentorProfile.github_url} onChange={(e) => updateMentorField('github_url', e.target.value)}
                     className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
                     placeholder="https://github.com/…" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">Website</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.website}</label>
                   <input type="url" value={mentorProfile.website_url} onChange={(e) => updateMentorField('website_url', e.target.value)}
                     className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
                     placeholder="https://…" />
@@ -1113,14 +1116,14 @@ export default function Profile() {
                   <label className="flex items-center gap-2 text-sm font-medium text-stone-700 cursor-pointer">
                     <input type="checkbox" checked={mentorProfile.available} onChange={(e) => updateMentorField('available', e.target.checked)}
                       className="rounded border-stone-300 text-orange-500 focus:ring-orange-500" />
-                    Available for new sessions
+                    {s.profile.availableForSessions}
                   </label>
                 </div>
               </div>
 
               {/* Expertise tags */}
               <div className="border-t border-stone-100 pt-6">
-                <label className="block text-sm font-medium text-stone-700 mb-3">Areas of Expertise</label>
+                <label className="block text-sm font-medium text-stone-700 mb-3">{s.profile.areasOfExpertise}</label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {mentorProfile.expertise.map((tag, index) => (
                     <div key={index} className="flex items-center gap-2 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-full text-sm">
@@ -1131,7 +1134,7 @@ export default function Profile() {
                     </div>
                   ))}
                   {mentorProfile.expertise.length === 0 && (
-                    <p className="text-sm text-stone-400 italic">No expertise areas added yet</p>
+                    <p className="text-sm text-stone-400 italic">{s.profile.noExpertiseYet}</p>
                   )}
                 </div>
                 <ExpertiseInput onAdd={addExpertise} />
@@ -1146,6 +1149,7 @@ export default function Profile() {
 
 // ─── Profile Preview / Resume ─────────────────────────────────────────────────
 function ProfilePreview({ profileData, onBack }) {
+  const { s } = useContent();
   const { personal, experience, education, skills, achievements } = profileData;
 
   const handlePrint = () => window.print();
@@ -1156,8 +1160,8 @@ function ProfilePreview({ profileData, onBack }) {
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 print:hidden">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-stone-900 mb-2">Resume Preview</h1>
-            <p className="text-stone-600">This is how mentors will see your profile</p>
+            <h1 className="text-3xl font-bold text-stone-900 mb-2">{s.profile.resumePreviewHeading}</h1>
+            <p className="text-stone-600">{s.profile.resumePreviewSubtitle}</p>
           </div>
           <div className="flex gap-3">
             <button
@@ -1165,14 +1169,14 @@ function ProfilePreview({ profileData, onBack }) {
               className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 rounded-lg text-stone-700 hover:bg-stone-50 transition-colors"
             >
               <Download className="h-4 w-4" />
-              Save as PDF
+              {s.profile.saveAsPdf}
             </button>
             <button
               onClick={onBack}
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-amber-500 text-white rounded-lg hover:from-orange-500 hover:to-amber-400 transition-colors"
             >
               <Edit className="h-4 w-4" />
-              Edit Profile
+              {s.profile.editProfile}
             </button>
           </div>
         </div>
@@ -1194,14 +1198,14 @@ function ProfilePreview({ profileData, onBack }) {
           <div className="p-8">
             {personal.bio && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-stone-900 mb-3 border-b border-stone-100 pb-2">About</h3>
+                <h3 className="text-lg font-semibold text-stone-900 mb-3 border-b border-stone-100 pb-2">{s.profile.aboutSection}</h3>
                 <p className="text-stone-600 leading-relaxed">{personal.bio}</p>
               </div>
             )}
 
             {personal.resume?.path && (
               <div className="mb-8 rounded-xl border border-stone-200 bg-stone-50/80 p-4">
-                <h3 className="text-lg font-semibold text-stone-900 mb-3 border-b border-stone-100 pb-2">Résumé</h3>
+                <h3 className="text-lg font-semibold text-stone-900 mb-3 border-b border-stone-100 pb-2">{s.profile.sectionResume}</h3>
                 <p className="text-sm text-stone-600 mb-2">{personal.resume.filename || 'Attached CV'}</p>
                 <ResumeDownloadButton meta={personal.resume} />
               </div>
@@ -1209,7 +1213,7 @@ function ProfilePreview({ profileData, onBack }) {
 
             {experience.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-stone-900 mb-4 border-b border-stone-100 pb-2">Work Experience</h3>
+                <h3 className="text-lg font-semibold text-stone-900 mb-4 border-b border-stone-100 pb-2">{s.profile.workExperienceSection}</h3>
                 <div className="space-y-4">
                   {experience.map((exp) => (
                     <div key={exp.id} className="border-l-2 border-orange-200 pl-4">
@@ -1218,7 +1222,7 @@ function ProfilePreview({ profileData, onBack }) {
                       <p className="text-sm text-stone-500 mb-1">
                         {exp.start_date && new Date(exp.start_date + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
                         {' – '}
-                        {exp.current ? 'Present' : exp.end_date && new Date(exp.end_date + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
+                        {exp.current ? s.common.present : exp.end_date && new Date(exp.end_date + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
                       </p>
                       {exp.description && <p className="text-stone-600 text-sm whitespace-pre-line">{exp.description}</p>}
                     </div>
@@ -1229,7 +1233,7 @@ function ProfilePreview({ profileData, onBack }) {
 
             {education.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-stone-900 mb-4 border-b border-stone-100 pb-2">Education</h3>
+                <h3 className="text-lg font-semibold text-stone-900 mb-4 border-b border-stone-100 pb-2">{s.profile.educationSection}</h3>
                 <div className="space-y-4">
                   {education.map((edu) => (
                     <div key={edu.id} className="border-l-2 border-orange-200 pl-4">
@@ -1238,7 +1242,7 @@ function ProfilePreview({ profileData, onBack }) {
                       <p className="text-sm text-stone-500">
                         {edu.start_date && new Date(edu.start_date + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
                         {' – '}
-                        {edu.current ? 'Present' : edu.end_date && new Date(edu.end_date + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
+                        {edu.current ? s.common.present : edu.end_date && new Date(edu.end_date + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
                         {edu.gpa ? ` · GPA: ${edu.gpa}` : ''}
                       </p>
                     </div>
@@ -1249,7 +1253,7 @@ function ProfilePreview({ profileData, onBack }) {
 
             {skills.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-stone-900 mb-4 border-b border-stone-100 pb-2">Skills</h3>
+                <h3 className="text-lg font-semibold text-stone-900 mb-4 border-b border-stone-100 pb-2">{s.profile.skillsSection}</h3>
                 <div className="flex flex-wrap gap-2">
                   {skills.map((skill, index) => (
                     <span key={index} className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm">{skill}</span>
@@ -1260,7 +1264,7 @@ function ProfilePreview({ profileData, onBack }) {
 
             {achievements.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-stone-900 mb-4 border-b border-stone-100 pb-2">Achievements</h3>
+                <h3 className="text-lg font-semibold text-stone-900 mb-4 border-b border-stone-100 pb-2">{s.profile.achievementsSection}</h3>
                 <div className="space-y-3">
                   {achievements.map((a) => (
                     <div key={a.id} className="border-l-2 border-orange-200 pl-4">
@@ -1275,7 +1279,7 @@ function ProfilePreview({ profileData, onBack }) {
 
             {(personal.website || personal.linkedin || personal.github) && (
               <div>
-                <h3 className="text-lg font-semibold text-stone-900 mb-4 border-b border-stone-100 pb-2">Links</h3>
+                <h3 className="text-lg font-semibold text-stone-900 mb-4 border-b border-stone-100 pb-2">{s.profile.linksSection}</h3>
                 <div className="flex flex-wrap gap-4">
                   {personal.website && <a href={personal.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-orange-600 hover:text-orange-700"><Globe className="h-4 w-4" />Website</a>}
                   {personal.linkedin && <a href={personal.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-orange-600 hover:text-orange-700"><Linkedin className="h-4 w-4" />LinkedIn</a>}

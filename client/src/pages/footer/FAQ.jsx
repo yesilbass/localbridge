@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Search, X, Plus, HelpCircle, ArrowRight } from 'lucide-react';
 import Reveal from '../../components/Reveal';
 import { focusRing, pageShell } from '../../ui';
+import { useContent } from '../../content';
 
 const FAQS = [
     { cat: 'Getting Started', q: 'How does Bridge work?', a: 'Browse 2,400+ vetted mentors by industry, role, or skill. Pick a session format, book an available time slot, and meet over video. Payment is handled securely — you only pay when the session is confirmed.' },
@@ -22,6 +23,7 @@ const FAQS = [
 const CATEGORIES = ['All', ...new Set(FAQS.map((f) => f.cat))];
 
 export default function FAQ() {
+    const { s } = useContent();
     const [open, setOpen] = useState(null);
     const [cat, setCat] = useState('All');
     const [search, setSearch] = useState('');
@@ -51,11 +53,11 @@ export default function FAQ() {
                 <Reveal className="mb-12 text-center">
                     <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 shadow-sm backdrop-blur-md">
                         <HelpCircle className="h-3.5 w-3.5 text-orange-500" />
-                        <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-secondary)]">Help center</span>
+                        <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-secondary)]">{s.footer.faqEyebrow}</span>
                     </div>
                     <h1 className="font-display text-[2.5rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.25rem] lg:text-[3.75rem]">
-                        Questions,{' '}
-                        <span className="font-editorial italic text-gradient-bridge">answered</span>.
+                        {s.footer.faqHeadingLine1}{' '}
+                        <span className="font-editorial italic text-gradient-bridge">{s.footer.faqHeadingItalic}</span>.
                     </h1>
                     <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-[var(--bridge-text-secondary)]">
                         Can&apos;t find what you&apos;re looking for?{' '}
@@ -72,7 +74,7 @@ export default function FAQ() {
                         <input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search questions…"
+                            placeholder={s.footer.faqSearchPlaceholder}
                             className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] py-4 pl-12 pr-12 text-base text-[var(--bridge-text)] shadow-bridge-tile placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 20%, transparent)]"
                         />
                         {search ? (

@@ -4,11 +4,16 @@ import { EN_CONTENT } from './en';
 import { useI18n } from '../i18n';
 
 const CACHE_KEY_PREFIX = 'bridge_content_';
+const CACHE_VERSION = 2; // bump when EN_CONTENT gains new namespaces
 
 function readCache(lang) {
   try {
     const raw = localStorage.getItem(`${CACHE_KEY_PREFIX}${lang}`);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // Invalidate caches built before versioning was added
+    if (parsed?.__v !== CACHE_VERSION) return null;
+    return parsed.content ?? null;
   } catch {
     return null;
   }
@@ -16,10 +21,25 @@ function readCache(lang) {
 
 function writeCache(lang, content) {
   try {
-    localStorage.setItem(`${CACHE_KEY_PREFIX}${lang}`, JSON.stringify(content));
+    localStorage.setItem(`${CACHE_KEY_PREFIX}${lang}`, JSON.stringify({ __v: CACHE_VERSION, content }));
   } catch {
     // localStorage full or unavailable — skip silently
   }
+}
+
+// Deep-merge translated content with EN_CONTENT so that any namespace or key
+// missing from the translation falls back to English instead of being undefined.
+function mergeWithEnglish(translated) {
+  const merged = {};
+  const allNamespaces = new Set([...Object.keys(EN_CONTENT), ...Object.keys(translated)]);
+  for (const ns of allNamespaces) {
+    if (typeof EN_CONTENT[ns] === 'object' && EN_CONTENT[ns] !== null) {
+      merged[ns] = { ...EN_CONTENT[ns], ...(translated[ns] ?? {}) };
+    } else {
+      merged[ns] = translated[ns] ?? EN_CONTENT[ns];
+    }
+  }
+  return merged;
 }
 
 async function translateContent(targetLanguage) {
@@ -77,7 +97,7 @@ export function ContentProvider({ children }) {
 
     const cached = readCache(lang);
     if (cached) {
-      setContent(cached);
+      setContent(mergeWithEnglish(cached));
       setIsTranslating(false);
       return;
     }
@@ -85,9 +105,10 @@ export function ContentProvider({ children }) {
     setIsTranslating(true);
     try {
       const translated = await translateContent(lang);
+      const merged = mergeWithEnglish(translated);
       writeCache(lang, translated);
       if (activeRef.current === lang) {
-        setContent(translated);
+        setContent(merged);
       }
     } catch {
       // Fall back to English silently on translation failure

@@ -3,63 +3,56 @@ export const PAGE_SIZE = 12;
 export const MENTOR_TIERS = [
   {
     name: 'Rising',
-    rateRange: '$40–$70',
-    experienceDesc: '0–4 years · Early-career professionals and recent grads who have earned their first real wins.',
-    useCases: ['First job search and resume polish', 'Breaking into competitive entry-level roles', 'Building professional habits and early momentum'],
+    rateRange: '$40 – $74',
+    experienceDesc: '0 – 2 years · Early-career professionals with first-hand, current knowledge of modern hiring.',
+    useCases: ['Resume and LinkedIn review', 'Entry-level interview prep', 'Job search strategy and targeting'],
+    accentFrom: 'from-slate-400',
+    accentTo: 'to-slate-300',
+    badgeBg: 'bg-slate-100 dark:bg-slate-500/20',
+    badgeText: 'text-slate-700 dark:text-slate-300',
+    badgeBorder: 'border-slate-300 dark:border-slate-500/35',
+    checkColor: 'text-slate-500 dark:text-slate-400',
+    glowColor: 'rgba(100,116,139,0.28)',
+  },
+  {
+    name: 'Professional',
+    rateRange: '$75 – $114',
+    experienceDesc: '3 – 6 years · Mid-career professionals with a proven track record and defined expertise.',
+    useCases: ['Mid-level role transitions and promotions', 'Industry pivots and salary negotiation', 'Technical and behavioural interview coaching'],
     accentFrom: 'from-emerald-500',
-    accentTo: 'to-emerald-400',
-    cardBg: 'bg-emerald-50/80 dark:bg-emerald-500/6',
-    badgeBg: 'bg-emerald-100 dark:bg-emerald-500/15',
-    badgeText: 'text-emerald-700 dark:text-emerald-300',
-    badgeBorder: 'border-emerald-300 dark:border-emerald-500/30',
+    accentTo: 'to-teal-400',
+    badgeBg: 'bg-emerald-100 dark:bg-emerald-500/20',
+    badgeText: 'text-emerald-800 dark:text-emerald-300',
+    badgeBorder: 'border-emerald-300 dark:border-emerald-500/35',
     checkColor: 'text-emerald-600 dark:text-emerald-400',
-    hoverBorder: 'hover:border-emerald-400/50',
-    glowColor: 'rgba(16,185,129,0.22)',
+    glowColor: 'rgba(16,185,129,0.28)',
   },
   {
-    name: 'Established',
-    rateRange: '$75–$120',
-    experienceDesc: '5–9 years · Mid-career contributors with a proven track record and a clear area of focus.',
-    useCases: ['Mid-level to senior career transitions', 'Navigating promotion cycles and leveling up', 'Changing industries or switching functions'],
+    name: 'Senior',
+    rateRange: '$115 – $164',
+    experienceDesc: '7 – 12 years · Senior contributors who have hired, managed, and shaped organisational decisions.',
+    useCases: ['Senior and staff-level interview prep', 'IC-to-management track coaching', 'High-stakes compensation negotiation'],
     accentFrom: 'from-sky-500',
-    accentTo: 'to-sky-400',
-    cardBg: 'bg-sky-50/80 dark:bg-sky-500/6',
-    badgeBg: 'bg-sky-100 dark:bg-sky-500/15',
-    badgeText: 'text-sky-700 dark:text-sky-300',
-    badgeBorder: 'border-sky-300 dark:border-sky-500/30',
+    accentTo: 'to-blue-400',
+    badgeBg: 'bg-sky-100 dark:bg-sky-500/20',
+    badgeText: 'text-sky-800 dark:text-sky-300',
+    badgeBorder: 'border-sky-300 dark:border-sky-500/35',
     checkColor: 'text-sky-600 dark:text-sky-400',
-    hoverBorder: 'hover:border-sky-400/50',
-    glowColor: 'rgba(14,165,233,0.22)',
-  },
-  {
-    name: 'Expert',
-    rateRange: '$125–$175',
-    experienceDesc: '10–15 years · Senior leaders with deep functional expertise and meaningful organizational scope.',
-    useCases: ['Senior or staff-level interview preparation', 'Executive communication and cross-functional influence', 'High-stakes career pivots and role expansions'],
-    accentFrom: 'from-violet-500',
-    accentTo: 'to-violet-400',
-    cardBg: 'bg-violet-50/80 dark:bg-violet-500/6',
-    badgeBg: 'bg-violet-100 dark:bg-violet-500/15',
-    badgeText: 'text-violet-700 dark:text-violet-300',
-    badgeBorder: 'border-violet-300 dark:border-violet-500/30',
-    checkColor: 'text-violet-600 dark:text-violet-400',
-    hoverBorder: 'hover:border-violet-400/50',
-    glowColor: 'rgba(139,92,246,0.22)',
+    glowColor: 'rgba(14,165,233,0.28)',
   },
   {
     name: 'Elite',
-    rateRange: '$180–$250',
-    experienceDesc: '15+ years · C-suite executives and industry-defining practitioners at the top of their fields.',
-    useCases: ['VP and C-suite transition coaching', 'Board-level presence and strategic positioning', 'Legacy career decisions, exits, and portfolio moves'],
+    rateRange: '$165 – $250+',
+    experienceDesc: '13+ years · Executives and directors who have operated at the top of their fields.',
+    useCases: ['VP, director, and C-suite preparation', 'Executive presence and board exposure', 'Strategic pivots for senior leaders'],
     accentFrom: 'from-amber-500',
     accentTo: 'to-orange-500',
-    cardBg: 'bg-amber-50/80 dark:bg-amber-500/6',
     badgeBg: 'bg-gradient-to-r from-amber-500 to-orange-500',
     badgeText: 'text-white',
     badgeBorder: '',
-    checkColor: 'text-amber-600 dark:text-amber-400',
-    hoverBorder: 'hover:border-amber-400/50',
-    glowColor: 'rgba(245,158,11,0.28)',
+    checkColor: 'text-amber-500 dark:text-amber-400',
+    glowColor: 'rgba(245,158,11,0.32)',
+    isElite: true,
   },
 ];
 
@@ -77,8 +70,8 @@ export const INDUSTRIES = [
 export const TIERS = [
   { label: 'All tiers', value: '' },
   { label: 'Rising', value: 'rising' },
-  { label: 'Established', value: 'established' },
-  { label: 'Expert', value: 'expert' },
+  { label: 'Professional', value: 'professional' },
+  { label: 'Senior', value: 'senior' },
   { label: 'Elite', value: 'elite' },
 ];
 
@@ -90,11 +83,11 @@ export const SORT_OPTIONS = [
 
 export function tierBadge(tier) {
   switch (tier) {
-    case 'rising':      return 'bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-400/30 dark:text-emerald-300';
-    case 'established': return 'bg-sky-500/10 text-sky-600 ring-1 ring-sky-400/30 dark:text-sky-300';
-    case 'expert':      return 'bg-violet-500/10 text-violet-600 ring-1 ring-violet-400/30 dark:text-violet-300';
-    case 'elite':       return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-[0_2px_10px_color-mix(in srgb, var(--color-primary) 45%, transparent)]';
-    default:            return 'bg-[var(--bridge-surface-muted)] text-[var(--bridge-text-muted)] ring-1 ring-[var(--bridge-border)]';
+    case 'rising':       return 'bg-slate-500/10 text-slate-600 ring-1 ring-slate-400/30 dark:text-slate-300';
+    case 'professional': return 'bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-400/30 dark:text-emerald-300';
+    case 'senior':       return 'bg-sky-500/10 text-sky-700 ring-1 ring-sky-400/30 dark:text-sky-300';
+    case 'elite':        return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-[0_2px_10px_color-mix(in srgb, var(--color-primary) 45%, transparent)]';
+    default:             return 'bg-[var(--bridge-surface-muted)] text-[var(--bridge-text-muted)] ring-1 ring-[var(--bridge-border)]';
   }
 }
 

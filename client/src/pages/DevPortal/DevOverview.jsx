@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { devFetch } from './devAuth.js';
 import {
   Users, CalendarDays, Star, Heart,
-  TrendingUp, Clock, CheckCircle, XCircle,
+  Clock, CheckCircle, XCircle,
   AlertCircle, RefreshCw,
 } from 'lucide-react';
 
@@ -26,9 +26,8 @@ function StatCard({ icon: Icon, label, value, sub, color }) {
     <div className="rounded-2xl border border-white/6 bg-white/3 p-5 hover:bg-white/5 transition-colors">
       <div className="flex items-start justify-between">
         <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${color}`}>
-          <Icon className="h-4.5 w-4.5" />
+          <Icon className="h-4 w-4" />
         </div>
-        <TrendingUp className="h-3.5 w-3.5 text-stone-600" />
       </div>
       <p className="mt-4 text-2xl font-bold tabular-nums text-white">{value ?? '—'}</p>
       <p className="mt-0.5 text-xs font-medium text-stone-400">{label}</p>
@@ -109,12 +108,9 @@ export default function DevOverview() {
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-white">Overview</h1>
-          <p className="text-xs text-stone-500 mt-0.5">
-            {lastRefresh ? `Last updated ${lastRefresh.toLocaleTimeString()}` : 'Loading…'}
-          </p>
-        </div>
+        <p className="text-sm text-stone-400">
+          {lastRefresh ? `Last updated ${lastRefresh.toLocaleTimeString()}` : 'Loading…'}
+        </p>
         <button
           onClick={load}
           disabled={loading}

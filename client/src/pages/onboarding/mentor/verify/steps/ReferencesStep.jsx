@@ -3,6 +3,7 @@ import { UserPlus, Mail } from 'lucide-react';
 import { inviteReference } from '../../../../../api/verification';
 import { Header, Actions } from './IdentityStep.jsx';
 import StepFooter from './_StepFooter.jsx';
+import { useContent } from '../../../../../content';
 
 const RELATIONSHIPS = [
   { value: 'manager',   label: 'Manager' },
@@ -12,6 +13,7 @@ const RELATIONSHIPS = [
 ];
 
 export default function ReferencesStep({ run, references, onAdvance }) {
+  const { s } = useContent();
   const [refEmail, setRefEmail] = useState('');
   const [refName, setRefName] = useState('');
   const [relationship, setRelationship] = useState('manager');
@@ -34,15 +36,15 @@ export default function ReferencesStep({ run, references, onAdvance }) {
   return (
     <div className="flex flex-col gap-5">
       <Header
-        title="Invite references"
+        title={s.onboardingVerify.referencesHeading}
         body="Two submitted references unlock full credit. Test emails: foo+ref-pass@bridge.dev (auto-passes), foo+ref-fail@bridge.dev (auto-fails), foo+ref-review@bridge.dev (auto-flags for manual review)."
       />
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <FieldRaw label="Reference email" value={refEmail} onChange={setRefEmail} placeholder="alice+ref-pass@bridge.dev" icon={Mail} />
-        <FieldRaw label="Name (optional)" value={refName} onChange={setRefName} placeholder="Alice Anderson" icon={UserPlus} />
+        <FieldRaw label={s.onboardingVerify.referenceEmail} value={refEmail} onChange={setRefEmail} placeholder="alice+ref-pass@bridge.dev" icon={Mail} />
+        <FieldRaw label={s.onboardingVerify.referenceName} value={refName} onChange={setRefName} placeholder="Alice Anderson" icon={UserPlus} />
         <label className="flex flex-col gap-1 text-[12px] font-semibold" style={{ color: 'var(--bridge-text-secondary)' }}>
-          <span>Relationship</span>
+          <span>{s.onboardingVerify.relationship}</span>
           <select
             value={relationship}
             onChange={(e) => setRelationship(e.target.value)}
@@ -58,7 +60,7 @@ export default function ReferencesStep({ run, references, onAdvance }) {
         </label>
       </div>
 
-      <Actions primaryLabel={busy ? 'Inviting…' : 'Send invite'} onPrimary={invite} disabled={busy || !refEmail} error={error} />
+      <Actions primaryLabel={busy ? s.onboardingVerify.inviting : s.onboardingVerify.sendInvite} onPrimary={invite} disabled={busy || !refEmail} error={error} />
 
       <ul className="flex flex-col gap-2">
         {(references || []).map((r) => {
@@ -96,7 +98,7 @@ export default function ReferencesStep({ run, references, onAdvance }) {
         })}
         {(references || []).length === 0 ? (
           <li className="text-[12px]" style={{ color: 'var(--bridge-text-muted)' }}>
-            No references yet. Invite at least 2 to qualify for Gold or higher.
+            {s.onboardingVerify.noReferencesYet}
           </li>
         ) : null}
       </ul>
@@ -105,7 +107,7 @@ export default function ReferencesStep({ run, references, onAdvance }) {
         Submitted: {submitted} · Pending: {pending}
       </p>
 
-      <StepFooter primaryLabel={enough ? 'Continue' : 'Skip for now'} onPrimary={onAdvance} />
+      <StepFooter primaryLabel={enough ? s.common.continue : s.onboardingVerify.skipForNow} onPrimary={onAdvance} />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import {
   nextTier,
   nextTierFloor,
 } from '../onboarding/mentor/verify/scoring.js';
+import { useContent } from '../../content';
 
 /**
  * @param {{
@@ -24,6 +25,7 @@ import {
  * }} props
  */
 export default function TierExplainer({ score = 0, tier = 'bronze', components = {}, status = 'unverified' }) {
+  const { s } = useContent();
   const target = nextTier(tier);
   const floor = nextTierFloor(tier);
   const gap = floor != null ? Math.max(0, floor - (Number(score) || 0)) : 0;
@@ -51,7 +53,7 @@ export default function TierExplainer({ score = 0, tier = 'bronze', components =
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--bridge-text-muted)' }}>
-            Verification tier
+            {s.dashboard.verificationTier}
           </p>
           <div className="flex items-center gap-3">
             <TierBadge tier={tier} size="lg" />
@@ -67,7 +69,7 @@ export default function TierExplainer({ score = 0, tier = 'bronze', components =
             className="bridge-focus inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-bold text-white"
             style={{ backgroundColor: 'var(--color-primary)' }}
           >
-            Continue verification <ArrowRight className="h-3 w-3" aria-hidden />
+            {s.dashboard.continueVerification} <ArrowRight className="h-3 w-3" aria-hidden />
           </Link>
         ) : (
           <Link
@@ -75,7 +77,7 @@ export default function TierExplainer({ score = 0, tier = 'bronze', components =
             className="bridge-focus inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-bold"
             style={{ color: 'var(--bridge-text-secondary)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}
           >
-            Re-verify
+            {s.dashboard.reVerify}
           </Link>
         )}
       </header>
@@ -128,8 +130,8 @@ export default function TierExplainer({ score = 0, tier = 'bronze', components =
           }}
         >
           <p className="text-[12px]" style={{ color: 'var(--bridge-text-secondary)' }}>
-            <span className="font-bold" style={{ color: 'var(--bridge-text)' }}>+{gap} pts to {target}</span>
-            {suggestions.length > 0 ? ' — fastest paths:' : ''}
+            <span className="font-bold" style={{ color: 'var(--bridge-text)' }}>{s.dashboard.ptsToNextTier.replace('{gap}', gap).replace('{tier}', target)}</span>
+            {suggestions.length > 0 ? s.dashboard.fastestPaths : ''}
           </p>
           <ul className="mt-2 flex flex-wrap gap-2">
             {suggestions.map((s) => (
@@ -151,7 +153,7 @@ export default function TierExplainer({ score = 0, tier = 'bronze', components =
         </section>
       ) : !target ? (
         <p className="text-[12px]" style={{ color: 'var(--bridge-text-muted)' }}>
-          You're at the highest tier. Keep your sessions strong to stay there.
+          {s.dashboard.atHighestTier}
         </p>
       ) : null}
     </article>

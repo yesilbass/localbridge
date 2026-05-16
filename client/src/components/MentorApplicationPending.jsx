@@ -1,56 +1,59 @@
 import { Clock, ShieldCheck, CheckCircle2, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-const CONFIG = {
-  pending: {
-    icon: Clock,
-    iconColor: '#f59e0b',
-    iconBg: 'rgba(245,158,11,0.12)',
-    badge: 'Awaiting Background Check',
-    badgeColor: '#f59e0b',
-    title: 'Your application is under review.',
-    body: 'We\'ve received your profile and triggered a background check via Checkr. This typically takes 1–3 business days. You\'ll be notified once it\'s complete.',
-  },
-  under_review: {
-    icon: ShieldCheck,
-    iconColor: '#6366f1',
-    iconBg: 'rgba(99,102,241,0.12)',
-    badge: 'In Admin Review',
-    badgeColor: '#6366f1',
-    title: 'Background check passed.',
-    body: 'Your background check came back clear. Our team is now reviewing your application. Approvals typically happen within 1 business day.',
-  },
-  rejected: {
-    icon: XCircle,
-    iconColor: '#ef4444',
-    iconBg: 'rgba(239,68,68,0.12)',
-    badge: 'Application Not Approved',
-    badgeColor: '#ef4444',
-    title: 'We couldn\'t approve your application.',
-    body: 'Unfortunately your application did not pass our verification process at this time. If you believe this is an error, please contact support.',
-  },
-  suspended: {
-    icon: AlertTriangle,
-    iconColor: '#ef4444',
-    iconBg: 'rgba(239,68,68,0.12)',
-    badge: 'Account Suspended',
-    badgeColor: '#ef4444',
-    title: 'Your account has been suspended.',
-    body: 'Please contact our support team for more information about your account status.',
-  },
-};
-
-const STEPS = [
-  { label: 'Application submitted', statuses: ['pending', 'under_review', 'active'] },
-  { label: 'Background check complete', statuses: ['under_review', 'active'] },
-  { label: 'Admin review', statuses: ['active'] },
-];
+import { useContent } from '../content';
 
 export default function MentorApplicationPending({ status = 'pending' }) {
+  const { s } = useContent();
+  const navigate = useNavigate();
+
+  const CONFIG = {
+    pending: {
+      icon: Clock,
+      iconColor: '#f59e0b',
+      iconBg: 'rgba(245,158,11,0.12)',
+      badge: s.onboarding.applicationPending,
+      badgeColor: '#f59e0b',
+      title: s.onboarding.applicationPendingTitle,
+      body: s.onboarding.applicationPendingBody,
+    },
+    under_review: {
+      icon: ShieldCheck,
+      iconColor: '#6366f1',
+      iconBg: 'rgba(99,102,241,0.12)',
+      badge: s.onboarding.applicationUnderReview,
+      badgeColor: '#6366f1',
+      title: s.onboarding.applicationUnderReviewTitle,
+      body: s.onboarding.applicationUnderReviewBody,
+    },
+    rejected: {
+      icon: XCircle,
+      iconColor: '#ef4444',
+      iconBg: 'rgba(239,68,68,0.12)',
+      badge: s.onboarding.applicationRejected,
+      badgeColor: '#ef4444',
+      title: s.onboarding.applicationRejectedTitle,
+      body: s.onboarding.applicationRejectedBody,
+    },
+    suspended: {
+      icon: AlertTriangle,
+      iconColor: '#ef4444',
+      iconBg: 'rgba(239,68,68,0.12)',
+      badge: s.onboarding.applicationSuspended,
+      badgeColor: '#ef4444',
+      title: s.onboarding.applicationSuspendedTitle,
+      body: s.onboarding.applicationSuspendedBody,
+    },
+  };
+
+  const STEPS = [
+    { label: s.onboarding.stepApplicationSubmitted, statuses: ['pending', 'under_review', 'active'] },
+    { label: s.onboarding.stepBackgroundCheck, statuses: ['under_review', 'active'] },
+    { label: s.onboarding.stepAdminReview, statuses: ['active'] },
+  ];
+
   const cfg = CONFIG[status] || CONFIG.pending;
   const Icon = cfg.icon;
   const isRejected = status === 'rejected' || status === 'suspended';
-  const navigate = useNavigate();
 
   return (
     <div
@@ -142,12 +145,12 @@ export default function MentorApplicationPending({ status = 'pending' }) {
                         className="ml-auto text-[10px] font-black uppercase tracking-wider"
                         style={{ color: cfg.iconColor }}
                       >
-                        In progress
+                        {s.onboarding.stepInProgress}
                       </span>
                     )}
                     {done && (
                       <span className="ml-auto text-[10px] font-black uppercase tracking-wider text-emerald-500">
-                        Done
+                        {s.onboarding.stepDone}
                       </span>
                     )}
                   </div>
@@ -165,12 +168,12 @@ export default function MentorApplicationPending({ status = 'pending' }) {
                 style={{ color: 'var(--bridge-text-secondary)' }}
               >
                 <RefreshCw className="h-4 w-4" />
-                {status === 'pending' ? 'Edit my application' : 'Update application & re-apply'}
+                {status === 'pending' ? s.onboarding.editApplication : s.onboarding.updateAndReapply}
               </button>
               <p className="mt-2 text-center text-xs" style={{ color: 'var(--bridge-text-faint)' }}>
                 {status === 'pending'
-                  ? 'You can update your work history, education, LinkedIn URL, or essay before your application is reviewed.'
-                  : 'Improve your verification score by adding work experience, education, a stronger LinkedIn URL, and a more detailed motivation essay.'}
+                  ? s.onboarding.editApplicationHint
+                  : s.onboarding.updateApplicationHint}
               </p>
             </div>
           )}
@@ -178,13 +181,13 @@ export default function MentorApplicationPending({ status = 'pending' }) {
           {/* Support link */}
           <div className="mt-6 border-t pt-5" style={{ borderColor: 'var(--bridge-border)' }}>
             <p className="text-center text-xs" style={{ color: 'var(--bridge-text-faint)' }}>
-              Questions?{' '}
+              {s.common.questions}{' '}
               <a
                 href="mailto:support@bridge.com"
                 className="font-semibold underline"
                 style={{ color: 'var(--bridge-text-secondary)' }}
               >
-                Contact support
+                {s.common.contactSupport}
               </a>
             </p>
           </div>

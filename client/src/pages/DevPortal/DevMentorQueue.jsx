@@ -331,11 +331,12 @@ function ApplicationRow({ item, onDecide, onSimulateClear, onAutoVerify, isPendi
 }
 
 export default function DevMentorQueue() {
-  const [tab, setTab] = useState('awaiting'); // 'awaiting' | 'ready' | 'decided'
+  const [tab, setTab] = useState('ready');
   const [readyItems, setReadyItems] = useState([]);
   const [awaitingItems, setAwaitingItems] = useState([]);
   const [decidedItems, setDecidedItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -358,7 +359,7 @@ export default function DevMentorQueue() {
       body: JSON.stringify({ queueId, decision, notes }),
     });
     const json = await r.json().catch(() => ({}));
-    if (!r.ok) { alert(`Error: ${json.error || r.status}`); return; }
+    if (!r.ok) { setError(json.error || `Request failed (${r.status})`); return; }
     setTab('decided');
     await loadAll();
   }
@@ -369,7 +370,7 @@ export default function DevMentorQueue() {
       body: JSON.stringify({ mentorProfileId }),
     });
     const json = await r.json().catch(() => ({}));
-    if (!r.ok) { alert(`Error: ${json.error || r.status}`); return; }
+    if (!r.ok) { setError(json.error || `Request failed (${r.status})`); return; }
     setTab('ready');
     await loadAll();
   }
@@ -380,8 +381,7 @@ export default function DevMentorQueue() {
       body: JSON.stringify({ mentorProfileId }),
     });
     const json = await r.json().catch(() => ({}));
-    if (!r.ok) { alert(`Error: ${json.error || r.status}`); return; }
-    // Switch to the tab where the result landed
+    if (!r.ok) { setError(json.error || `Request failed (${r.status})`); return; }
     if (json.autoDecision === 'flagged_review') setTab('ready');
     else if (json.autoDecision) setTab('decided');
     await loadAll();
@@ -402,10 +402,7 @@ export default function DevMentorQueue() {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-black text-white">Mentor Application Queue</h1>
-          <p className="text-[11px] text-stone-500 mt-0.5">Review and approve mentor applications after background checks complete.</p>
-        </div>
+        <p className="text-sm text-stone-400">Review and approve mentor applications after background checks complete.</p>
         <button
           onClick={loadAll}
           disabled={loading}
@@ -415,6 +412,13 @@ export default function DevMentorQueue() {
           Refresh
         </button>
       </div>
+
+      {error && (
+        <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-400">
+          <span className="flex-1">{error}</span>
+          <button onClick={() => setError('')} className="text-red-400/60 hover:text-red-400 transition-colors text-base leading-none">×</button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 rounded-xl bg-white/4 p-1">

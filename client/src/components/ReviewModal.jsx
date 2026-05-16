@@ -18,6 +18,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { X, Star } from 'lucide-react';
 import { createReview, sendReviewNotificationEmail } from '../api/reviews';
 import { useAuth } from '../context/useAuth';
+import { useContent } from '../content';
 
 const LABELS = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
 
@@ -56,6 +57,7 @@ export default function ReviewModal({
   onSubmitted,
 }) {
   const { user } = useAuth();
+  const { s } = useContent();
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [comment, setComment] = useState('');
@@ -229,14 +231,14 @@ export default function ReviewModal({
                 disabled={submitting}
                 className="flex-1 rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] py-3 text-sm font-semibold text-stone-600 transition hover:border-stone-300 hover:bg-stone-50 disabled:opacity-50"
               >
-                Skip for now
+                {s.onboardingVerify.skipForNow}
               </button>
               <button
                 type="submit"
                 disabled={submitting || rating < 1}
                 className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-sm font-bold text-white shadow-[0_6px_18px_-4px_color-mix(in srgb, var(--color-primary) 45%, transparent)] transition hover:from-amber-400 hover:to-orange-400 hover:shadow-[0_8px_24px_-6px_color-mix(in srgb, var(--color-primary) 60%, transparent)] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {submitting ? 'Submitting…' : 'Submit Review'}
+                {submitting ? s.reviews.submitting : s.reviews.submitReview}
               </button>
             </div>
           </form>
