@@ -4,7 +4,10 @@ import { useContent } from '../content';
 import {
   ArrowRight, ArrowLeft, CheckCircle2, User, Briefcase,
   GraduationCap, Tag, Loader2, X, Plus, ShieldCheck, CreditCard, Camera,
+  Upload, FileText,
 } from 'lucide-react';
+import { uploadResumeFile } from '../api/resumeStorage';
+import { extractResumeData } from '../api/ai';
 import { useAuth } from '../context/useAuth';
 import LoadingSpinner from '../components/LoadingSpinner';
 import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
@@ -395,6 +398,7 @@ export default function MentorOnboarding() {
   const navigate = useNavigate();
   const isMentor = user?.user_metadata?.role === 'mentor';
   const SCREEN_META = {
+    'resume':    { title: 'Start your application',          sub: 'Upload your resume to auto-fill, or fill in manually.' },
     'app-1':     { title: s.onboarding.applyTitle,          sub: s.onboarding.applySub },
     'app-2':     { title: s.onboarding.verifyTitle,         sub: s.onboarding.verifySub },
     'app-3':     { title: s.onboarding.motivationTitle,     sub: s.onboarding.motivationSub },
@@ -402,7 +406,7 @@ export default function MentorOnboarding() {
     'profile-2': { title: s.onboarding.skillsTitle,         sub: s.onboarding.skillsSub },
   };
 
-  const [screen, setScreen] = useState('app-1');
+  const [screen, setScreen] = useState('resume');
   const [profileId, setProfileId] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -431,6 +435,12 @@ export default function MentorOnboarding() {
   const [assignedRate, setAssignedRate] = useState(null);
   const [bioLoading, setBioLoading] = useState(false);
 
+  // Resume upload state
+  const [resumeUploading, setResumeUploading] = useState(false);
+  const [resumeExtracting, setResumeExtracting] = useState(false);
+  const [resumeStoragePath, setResumeStoragePath] = useState(null);
+  const [resumeError, setResumeError] = useState('');
+
 
   /* ── Load existing profile ── */
   useEffect(() => {
@@ -448,6 +458,7 @@ export default function MentorOnboarding() {
         setProfileId(profile.id);
 
         if (profile.mentor_status === 'active' && !profile.onboarding_complete) {
+          // approved — skip resume step, go straight to profile completion
           setProfileForm((p) => ({
             ...p,
             title:         profile.title && profile.title !== 'Mentor' ? profile.title : '',
@@ -484,7 +495,7 @@ export default function MentorOnboarding() {
               motivationEssay: vd.motivationEssay ?? '',
             }));
           }
-          go('app-1');
+          go('resume');
         }
       } catch (err) {
         setError(err.message ?? 'Could not load profile.');
@@ -512,6 +523,70 @@ export default function MentorOnboarding() {
   function patchApp(patch) { setAppForm((p) => ({ ...p, ...patch })); setError(''); }
   function patchProfile(patch) { setProfileForm((p) => ({ ...p, ...patch })); setError(''); }
 
+  /* ── Resume upload + AI extraction ── */
+  async function handleResumeUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { setResumeError('File must be under 10 MB.'); return; }
+    setResumeError('');
+    setResumeUploading(true);
+    try {
+      const uploaded = await uploadResumeFile(user.id, file);
+      setResumeStoragePath(uploaded.path);
+      setResumeUploading(false);
+      setResumeExtracting(true);
+      const text = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve(ev.target?.result || '');
+        reader.onerror = () => reject(new Error('Could not read file'));
+        reader.readAsText(file);
+      });
+      const parsed = await extractResumeData(text);
+      if (parsed) {
+        patchApp({
+          name: parsed.name || appForm.name,
+          years_experience: parsed.years_experience ? String(parsed.years_experience) : appForm.years_experience,
+          work_experience: parsed.work_experience?.length
+            ? parsed.work_experience.slice(0, 3).map((j) => ({
+                title: j.title || '',
+                company: j.company || '',
+                start_year: j.start_year || CURRENT_YEAR - 1,
+                end_year: j.end_year ?? null,
+                description: j.description || '',
+              }))
+            : appForm.work_experience,
+          education: parsed.education?.length
+            ? parsed.education.slice(0, 2).map((ed) => ({
+                school: ed.school || '',
+                degree: ed.degree || '',
+                degree_level: ed.degree_level || '',
+                year: ed.year || CURRENT_YEAR - 4,
+                diplomaFileName: '',
+              }))
+            : appForm.education,
+        });
+        if (parsed.linkedin_url || parsed.linkedinUrl) {
+          setVerifyData((v) => ({ ...v, linkedinUrl: parsed.linkedin_url || parsed.linkedinUrl || '' }));
+        }
+        patchProfile({
+          title: parsed.title || profileForm.title,
+          company: parsed.company || profileForm.company,
+          industry: parsed.industry || profileForm.industry,
+          bio: parsed.bio || profileForm.bio,
+          expertise: parsed.expertise?.length ? parsed.expertise.slice(0, 8) : profileForm.expertise,
+          languages: parsed.languages?.length ? parsed.languages.slice(0, 10) : profileForm.languages,
+          location: parsed.location || profileForm.location,
+        });
+      }
+      go('app-1');
+    } catch (err) {
+      setResumeError(err.message || 'Could not process resume. Fill in manually below.');
+    } finally {
+      setResumeUploading(false);
+      setResumeExtracting(false);
+    }
+  }
+
   /* ── Phase 1 submit ── */
   async function handleSubmitApplication() {
     setSaving(true);
@@ -530,7 +605,7 @@ export default function MentorOnboarding() {
           'Content-Type': 'application/json',
           ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
         },
-        body: JSON.stringify({ verificationData: verifyData }),
+        body: JSON.stringify({ verificationData: { ...verifyData, resumeStoragePath } }),
       }).catch(() => {});
       navigate('/dashboard', { replace: true });
     } catch (err) {
@@ -630,8 +705,8 @@ export default function MentorOnboarding() {
 
         {/* Step dots */}
         <div className="mb-8 flex items-center justify-center gap-2">
-          {(['app-1', 'app-2', 'app-3'].includes(screen)
-            ? ['app-1', 'app-2', 'app-3']
+          {(['resume', 'app-1', 'app-2', 'app-3'].includes(screen)
+            ? ['resume', 'app-1', 'app-2', 'app-3']
             : ['profile-1', 'profile-2']
           ).map((s) => (
             <div
@@ -647,13 +722,84 @@ export default function MentorOnboarding() {
         {error && <div className="mb-4" />}
 
         {/* ══════════════════════════════════════════════════════
+            RESUME: Upload & AI extraction (optional entry)
+        ══════════════════════════════════════════════════════ */}
+        {screen === 'resume' && (
+          <Card
+            footer={
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => navigate('/dashboard')}
+                  className={`flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-5 py-2.5 text-sm font-semibold text-[var(--bridge-text-secondary)] shadow-sm transition hover:bg-[var(--bridge-surface-muted)] ${focusRing}`}
+                >
+                  <ArrowLeft className="h-4 w-4" /> Back to dashboard
+                </button>
+                <button
+                  type="button"
+                  onClick={() => go('app-1')}
+                  className={`text-sm font-semibold text-[var(--bridge-text-muted)] underline underline-offset-2 hover:text-[var(--bridge-text)] transition ${focusRing} rounded-sm`}
+                >
+                  Fill in manually →
+                </button>
+              </div>
+            }
+          >
+            <SectionHeader icon={FileText} label="Upload your resume" sub="Optional — auto-fills your application" />
+
+            <p className="text-sm leading-relaxed text-[var(--bridge-text-secondary)]">
+              Upload your resume PDF and we'll extract your work history, education, and skills automatically. You can review and edit everything before submitting.
+            </p>
+
+            {!resumeUploading && !resumeExtracting ? (
+              <label className={`flex cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-6 py-12 text-center transition hover:border-amber-400 hover:bg-[var(--bridge-surface)] ${focusRing}`}>
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 border border-amber-100">
+                  <Upload className="h-6 w-6 text-amber-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[var(--bridge-text)]">Click to upload your resume</p>
+                  <p className="mt-1 text-xs text-[var(--bridge-text-muted)]">PDF only · Max 10 MB</p>
+                </div>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  className="hidden"
+                  onChange={handleResumeUpload}
+                />
+              </label>
+            ) : (
+              <div className="flex flex-col items-center gap-4 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-6 py-12 text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+                <div>
+                  <p className="text-sm font-semibold text-[var(--bridge-text)]">
+                    {resumeUploading ? 'Uploading your resume…' : 'Reading your resume with AI…'}
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--bridge-text-muted)]">
+                    {resumeUploading ? 'Saving securely to Bridge' : 'Extracting work history, education, and skills'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {resumeError && <ErrorBanner msg={resumeError} />}
+
+            <div className="rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-3">
+              <p className="text-xs text-[var(--bridge-text-muted)]">
+                <span className="font-semibold text-[var(--bridge-text)]">No resume handy?</span>{' '}
+                Use the "Fill in manually" link below to complete the application yourself — it only takes a few minutes.
+              </p>
+            </div>
+          </Card>
+        )}
+
+        {/* ══════════════════════════════════════════════════════
             APP-1: Personal background
         ══════════════════════════════════════════════════════ */}
         {screen === 'app-1' && (
           <Card
             footer={
               <div className="flex items-center justify-between">
-                <BackBtn onClick={() => navigate('/dashboard')} />
+                <BackBtn onClick={() => go('resume')} />
                 <NextBtn
                   onClick={() => {
                     if (!appForm.name.trim()) { setError('Please enter your full name.'); return; }

@@ -159,8 +159,8 @@ export default function MentorApplicationPending({ status = 'pending' }) {
             </div>
           )}
 
-          {/* Edit application — for pending or rejected */}
-          {(status === 'pending' || status === 'rejected') && (
+          {/* Re-apply — only for rejected */}
+          {status === 'rejected' && (
             <div className="mt-6">
               <button
                 onClick={() => navigate('/onboarding/mentor')}
@@ -168,12 +168,10 @@ export default function MentorApplicationPending({ status = 'pending' }) {
                 style={{ color: 'var(--bridge-text-secondary)' }}
               >
                 <RefreshCw className="h-4 w-4" />
-                {status === 'pending' ? s.onboarding.editApplication : s.onboarding.updateAndReapply}
+                {s.onboarding.updateAndReapply}
               </button>
               <p className="mt-2 text-center text-xs" style={{ color: 'var(--bridge-text-faint)' }}>
-                {status === 'pending'
-                  ? s.onboarding.editApplicationHint
-                  : s.onboarding.updateApplicationHint}
+                {s.onboarding.updateApplicationHint}
               </p>
             </div>
           )}

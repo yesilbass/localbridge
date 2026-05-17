@@ -8,7 +8,7 @@ export default function IdentityStep({ run, latest, onAdvance }) {
   const { s } = useContent();
   const isPassed = latest?.status === 'passed';
 
-  const [phone, setPhone] = useState('+15555550100');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [stepId, setStepId] = useState(null);
   const [otp, setOtp] = useState('');
@@ -50,7 +50,7 @@ export default function IdentityStep({ run, latest, onAdvance }) {
     <div className="flex flex-col gap-5">
       <Header
         title={s.onboardingVerify.identityHeading}
-        body="We use OTP via SMS plus email confirmation. Test sentinels: +15555550100 (pass), +15555550101 (fail), +15555550102 (review)."
+        body={s.onboardingVerify.identityBody || 'We verify your identity via a one-time code sent to your mobile number.'}
       />
 
       <div className="grid gap-3 sm:grid-cols-2">

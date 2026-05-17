@@ -33,6 +33,8 @@ const BookingFinalize  = lazy(() => import('./pages/booking/finalize.jsx'));
 const VerifyMentorWizard    = lazy(() => import('./pages/onboarding/mentor/verify/index.jsx'));
 const SubmitReferencePage   = lazy(() => import('./pages/refs/SubmitReference.jsx'));
 const AdminVerification     = lazy(() => import('./pages/admin/verification/index.jsx'));
+const AdminBlog             = lazy(() => import('./pages/admin/blog/index.jsx'));
+const WriteBlogPost         = lazy(() => import('./pages/blog/WriteBlogPost.jsx'));
 const Careers   = lazy(() => import('./pages/footer/Careers.jsx'));
 const Blog      = lazy(() => import('./pages/footer/Blog.jsx'));
 const FAQ       = lazy(() => import('./pages/footer/FAQ.jsx'));
@@ -113,6 +115,8 @@ function AppContent() {
           <Route path="/onboarding/mentor/verify" element={<VerifyMentorWizard />} />
           <Route path="/refs/:token" element={<SubmitReferencePage />} />
           <Route path="/admin/verification" element={<AdminVerification />} />
+          <Route path="/admin/blog" element={<AdminBlog />} />
+          <Route path="/blog/write" element={<WriteBlogPost />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/session/:sessionId/video" element={<VideoCall />} />
