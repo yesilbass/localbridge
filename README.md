@@ -214,3 +214,10 @@ vercel --prod
 | Muaz | Mentor profile flow, onboarding, calendar integration |
 | Omar | Dashboard v2 — session management, mentor earnings view |
 | Irshad | Review system — post-session prompt, review display |
+
+## Contributing & Legal
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — branching model, PR checklist, commit conventions
+- [ARCHITECTURE.md](ARCHITECTURE.md) — system design, data flow, key decisions
+- [SECURITY.md](SECURITY.md) — vulnerability reporting and security policy
+- [LICENSE](LICENSE)
