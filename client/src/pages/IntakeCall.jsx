@@ -4,6 +4,7 @@ import { Mic, MicOff, CheckCircle2, Loader2, Type } from 'lucide-react'
 import supabase from '../api/supabase'
 import { callAIProxy } from '../api/ai'
 import { useAuth } from '../context/useAuth'
+import { useContent } from '../content'
 
 const QUESTIONS = {
   career_advice: [
@@ -28,12 +29,6 @@ const QUESTIONS = {
   ],
 }
 
-const SESSION_TYPE_LABELS = {
-  career_advice: 'Career Advice',
-  interview_prep: 'Interview Prep',
-  resume_review: 'Resume Review',
-  networking: 'Networking',
-}
 
 function isVoiceSupported() {
   return (
@@ -44,6 +39,7 @@ function isVoiceSupported() {
 }
 
 export default function IntakeCall() {
+  const { s } = useContent()
   const { sessionId } = useParams()
   const navigate = useNavigate()
   const { user, loading: authLoading } = useAuth()
@@ -310,10 +306,10 @@ export default function IntakeCall() {
         <div className="text-center max-w-sm">
           <MicOff size={48} className="mx-auto mb-4" style={{ color: 'var(--bridge-text-muted)' }} />
           <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--bridge-text)' }}>
-            Voice input not supported
+            {s.intakeCall.voiceNotSupportedHeading}
           </h2>
           <p className="text-sm" style={{ color: 'var(--bridge-text-muted)' }}>
-            Your browser doesn't support voice input. Please use Chrome or Edge.
+            {s.intakeCall.voiceNotSupportedBody}
           </p>
         </div>
       </div>
@@ -329,16 +325,16 @@ export default function IntakeCall() {
         >
           <CheckCircle2 size={52} className="mx-auto mb-4 text-amber-400" />
           <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--bridge-text)' }}>
-            You've already completed your intake
+            {s.intakeCall.alreadyCompletedHeading}
           </h2>
           <p className="text-sm mb-6" style={{ color: 'var(--bridge-text-muted)' }}>
-            Your mentor is ready for your session.
+            {s.intakeCall.alreadyCompletedBody}
           </p>
           <button
             onClick={() => navigate('/dashboard')}
             className="px-6 py-2.5 rounded-xl text-sm font-medium text-white bg-amber-500 hover:bg-amber-400 transition-colors"
           >
-            Back to Dashboard
+            {s.common.backToDashboard}
           </button>
         </div>
       </div>
@@ -351,16 +347,16 @@ export default function IntakeCall() {
         <div className="text-center max-w-sm">
           <CheckCircle2 size={64} className="mx-auto mb-6 text-emerald-400" />
           <h2 className="text-2xl font-semibold mb-2" style={{ color: 'var(--bridge-text)' }}>
-            All done!
+            {s.intakeCall.allDone}
           </h2>
           <p className="text-base mb-8" style={{ color: 'var(--bridge-text-muted)' }}>
-            Your mentor will be prepared for your session.
+            {s.intakeCall.mentorPrepared}
           </p>
           <button
             onClick={() => navigate('/dashboard')}
             className="px-6 py-2.5 rounded-xl text-sm font-medium text-white bg-amber-500 hover:bg-amber-400 transition-colors"
           >
-            Back to Dashboard
+            {s.common.backToDashboard}
           </button>
         </div>
       </div>
@@ -374,13 +370,13 @@ export default function IntakeCall() {
       <div className="min-h-screen" style={{ background: 'var(--bridge-canvas)' }}>
         <div className="bg-stone-950 border-b border-white/10 px-6 py-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">
-            {SESSION_TYPE_LABELS[sessionData?.session_type] ?? 'Session'} · Intake
+            {s.intakeCall.intakeBadge.replace('{type}', sessionData?.session_type?.replace('_', ' ') ?? 'Session')}
           </p>
           <h1 className="text-2xl font-bold text-white mb-2">
-            Session with {mentorName}
+            {s.intakeCall.sessionWith.replace('{name}', mentorName)}
           </h1>
           <p className="text-sm text-stone-400 max-w-md mx-auto leading-relaxed">
-            Before your session, answer a few short questions to help your mentor prepare.
+            {s.intakeCall.intakeIntroAlt}
           </p>
         </div>
 
@@ -391,7 +387,7 @@ export default function IntakeCall() {
           >
             <div className="flex items-center justify-between mb-6">
               <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--bridge-text-muted)' }}>
-                Question {textStep + 1} of {allQuestions.length}
+                {s.intakeCall.questionOf.replace('{current}', textStep + 1).replace('{total}', allQuestions.length)}
               </p>
               <div className="flex gap-1">
                 {allQuestions.map((_, i) => (
@@ -413,7 +409,7 @@ export default function IntakeCall() {
 
             <div className="flex items-center gap-1.5 mb-4 text-xs" style={{ color: 'var(--bridge-text-muted)' }}>
               <Type size={12} aria-hidden />
-              <span>Type your answer below</span>
+              <span>{s.intakeCall.typeYourAnswer}</span>
             </div>
 
             <textarea
@@ -423,7 +419,7 @@ export default function IntakeCall() {
                 if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleTextNext()
               }}
               rows={4}
-              placeholder="Your answer..."
+              placeholder={s.intakeCall.answerPlaceholder}
               aria-label={`Answer for: ${allQuestions[textStep]}`}
               className="w-full resize-none rounded-xl border px-4 py-3 text-sm leading-relaxed outline-none transition"
               style={{
@@ -434,7 +430,7 @@ export default function IntakeCall() {
             />
 
             <p className="text-xs mt-1 mb-4" style={{ color: 'var(--bridge-text-muted)' }}>
-              Ctrl+Enter to continue
+              {s.intakeCall.ctrlEnterHint}
             </p>
 
             {flowState === 'error' && (
@@ -450,7 +446,7 @@ export default function IntakeCall() {
                 color: 'var(--color-on-primary)',
               }}
             >
-              {textStep < allQuestions.length - 1 ? 'Next question →' : 'Submit & generate briefing'}
+              {textStep < allQuestions.length - 1 ? s.intakeCall.nextQuestion : s.intakeCall.submitBriefing}
             </button>
           </div>
         </div>
@@ -465,10 +461,10 @@ export default function IntakeCall() {
         <div className="text-center">
           <Loader2 size={36} className="animate-spin text-amber-400 mx-auto mb-4" />
           <p className="text-sm font-medium" style={{ color: 'var(--bridge-text)' }}>
-            Generating mentor briefing...
+            {s.intakeCall.generatingBriefing}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--bridge-text-muted)' }}>
-            This will just take a moment
+            {s.intakeCall.justAMoment}
           </p>
         </div>
       </div>
@@ -483,12 +479,12 @@ export default function IntakeCall() {
   const isLive = flowState === 'speaking' || flowState === 'listening'
 
   const stateLabel = isConnecting
-    ? 'Connecting...'
+    ? s.intakeCall.connecting
     : {
-        idle: 'Tap to speak',
-        speaking: 'Session live',
-        listening: 'Listening...',
-        processing: 'Processing...',
+        idle: s.intakeCall.tapToSpeak,
+        speaking: s.intakeCall.sessionLive,
+        listening: s.intakeCall.listening,
+        processing: s.intakeCall.processing,
         error: 'Error',
       }[flowState] ?? ''
 
@@ -504,10 +500,10 @@ export default function IntakeCall() {
           </div>
         </div>
         <p className="text-sm font-semibold tracking-widest uppercase text-amber-400 mb-2">
-          Connecting to Bridge AI
+          {s.intakeCall.connectingToBridgeAI}
         </p>
         <p className="text-xs" style={{ color: 'var(--bridge-text-muted)' }}>
-          Setting up your voice session...
+          {s.intakeCall.settingUpVoice}
         </p>
       </div>
     )
@@ -520,15 +516,15 @@ export default function IntakeCall() {
           style={{ borderColor: 'var(--bridge-border)' }}>
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">
-              {SESSION_TYPE_LABELS[sessionData?.session_type]} · Intake
+              {s.intakeCall.intakeBadge.replace('{type}', sessionData?.session_type?.replace('_', ' ') ?? 'Session')}
             </p>
             <p className="text-sm font-medium mt-0.5" style={{ color: 'var(--bridge-text)' }}>
-              Session with {mentorName}
+              {s.intakeCall.sessionWith.replace('{name}', mentorName)}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" aria-hidden />
-            <span className="text-xs font-medium text-emerald-400">Live</span>
+            <span className="text-xs font-medium text-emerald-400">{s.intakeCall.live}</span>
           </div>
         </div>
 
@@ -536,7 +532,7 @@ export default function IntakeCall() {
           {transcriptItems.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-sm" style={{ color: 'var(--bridge-text-muted)' }}>
-                Your conversation will appear here...
+                {s.intakeCall.conversationWillAppear}
               </p>
             </div>
           ) : (
@@ -610,7 +606,7 @@ export default function IntakeCall() {
           </div>
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium" style={{ color: 'var(--bridge-text-muted)' }}>
-              {flowState === 'speaking' ? 'Bridge AI is speaking...' : 'Listening to you...'}
+              {flowState === 'speaking' ? s.intakeCall.bridgeAISpeaking : s.intakeCall.listeningToYou}
             </p>
             <button
               onClick={endSessionAndSummarise}
@@ -618,7 +614,7 @@ export default function IntakeCall() {
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-red-500/80 hover:bg-red-500 transition-colors"
             >
               <MicOff size={14} aria-hidden />
-              End Session
+              {s.intakeCall.endSession}
             </button>
           </div>
         </div>
@@ -630,13 +626,13 @@ export default function IntakeCall() {
     <div className="min-h-screen" style={{ background: 'var(--bridge-canvas)' }}>
       <div className="bg-stone-950 border-b border-white/10 px-6 py-10 text-center">
         <p className="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">
-          {SESSION_TYPE_LABELS[sessionData?.session_type] ?? 'Session'} · Intake
+          {s.intakeCall.intakeBadge.replace('{type}', sessionData?.session_type?.replace('_', ' ') ?? 'Session')}
         </p>
         <h1 className="text-2xl font-bold text-white mb-2">
-          Session with {mentorName}
+          {s.intakeCall.sessionWith.replace('{name}', mentorName)}
         </h1>
         <p className="text-sm text-stone-400 max-w-md mx-auto leading-relaxed">
-          Before your session, we'd like to learn a bit about you so your mentor can hit the ground running.
+          {s.intakeCall.intakeIntro}
         </p>
       </div>
 
@@ -647,7 +643,7 @@ export default function IntakeCall() {
         >
           <div className="flex items-center justify-between mb-6">
             <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--bridge-text-muted)' }}>
-              {totalQuestions} questions
+              {s.intakeCall.totalQuestions.replace('{total}', totalQuestions)}
             </p>
           </div>
 
@@ -655,7 +651,7 @@ export default function IntakeCall() {
             className="text-xl font-medium leading-snug text-center mb-10"
             style={{ color: 'var(--bridge-text)', minHeight: '4rem' }}
           >
-            Ready when you are. We'll ask you a few short questions — just speak naturally.
+            {s.intakeCall.readyMessage}
           </p>
 
           <div className="flex flex-col items-center gap-3 mb-6">
@@ -700,7 +696,7 @@ export default function IntakeCall() {
             }}
           >
             <Type size={14} className="inline mr-1.5" aria-hidden />
-            Use text instead
+            {s.intakeCall.useTextInstead}
           </button>
         </div>
       </div>

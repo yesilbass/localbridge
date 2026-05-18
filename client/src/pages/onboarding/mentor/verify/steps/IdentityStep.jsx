@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Phone, Mail } from 'lucide-react';
 import { startIdentity, confirmIdentity } from '../../../../../api/verification';
 import StepFooter from './_StepFooter.jsx';
+import { useContent } from '../../../../../content';
 
 export default function IdentityStep({ run, latest, onAdvance }) {
+  const { s } = useContent();
   const isPassed = latest?.status === 'passed';
 
-  const [phone, setPhone] = useState('+15555550100');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [stepId, setStepId] = useState(null);
   const [otp, setOtp] = useState('');
@@ -22,7 +24,6 @@ export default function IdentityStep({ run, latest, onAdvance }) {
     setStepId(r.stepId);
     if (r.test_otp) {
       setTestOtp(r.test_otp);
-      // In dev, prefill so the user can hit confirm immediately.
       if (import.meta.env.DEV) setOtp(r.test_otp);
     }
   }
@@ -38,8 +39,8 @@ export default function IdentityStep({ run, latest, onAdvance }) {
   if (isPassed) {
     return (
       <Done
-        title="Identity verified"
-        body="Your phone number and email are confirmed."
+        title={s.onboardingVerify.identityVerified}
+        body={s.onboardingVerify.identityVerifiedBody}
         onContinue={onAdvance}
       />
     );
@@ -48,21 +49,21 @@ export default function IdentityStep({ run, latest, onAdvance }) {
   return (
     <div className="flex flex-col gap-5">
       <Header
-        title="Verify your identity"
-        body="We use OTP via SMS plus email confirmation. Test sentinels: +15555550100 (pass), +15555550101 (fail), +15555550102 (review)."
+        title={s.onboardingVerify.identityHeading}
+        body={s.onboardingVerify.identityBody || 'We verify your identity via a one-time code sent to your mobile number.'}
       />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field
           icon={Phone}
-          label="Mobile number"
+          label={s.onboardingVerify.mobileNumber}
           value={phone}
           onChange={setPhone}
           placeholder="+1 555 555 0100"
         />
         <Field
           icon={Mail}
-          label="Email (optional)"
+          label={s.onboardingVerify.emailOptional}
           value={email}
           onChange={setEmail}
           placeholder="leave blank to use signup email"
@@ -71,7 +72,7 @@ export default function IdentityStep({ run, latest, onAdvance }) {
 
       {!stepId ? (
         <Actions
-          primaryLabel={busy ? 'Sending…' : 'Send OTP'}
+          primaryLabel={busy ? s.onboardingVerify.sending : s.onboardingVerify.sendOtp}
           onPrimary={handleStart}
           disabled={busy || !phone}
           error={error}
@@ -87,7 +88,7 @@ export default function IdentityStep({ run, latest, onAdvance }) {
             inputMode="numeric"
           />
           <Actions
-            primaryLabel={busy ? 'Verifying…' : 'Verify'}
+            primaryLabel={busy ? s.onboardingVerify.verifying : s.onboardingVerify.verify}
             onPrimary={handleConfirm}
             disabled={busy || !otp}
             error={error}
@@ -163,10 +164,11 @@ export function Actions({ primaryLabel, onPrimary, secondaryLabel, onSecondary, 
 }
 
 export function Done({ title, body, onContinue }) {
+  const { s } = useContent();
   return (
     <div className="flex flex-col gap-4">
       <Header title={title} body={body} />
-      <StepFooter primaryLabel="Continue" onPrimary={onContinue} />
+      <StepFooter primaryLabel={s.common.continue} onPrimary={onContinue} />
     </div>
   );
 }

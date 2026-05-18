@@ -1,34 +1,34 @@
 import { Award, Clock, ShieldCheck } from 'lucide-react';
+import { useContent } from '../../../../../content';
 
 export default function WelcomeStep({ onContinue }) {
+  const { s } = useContent();
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h2 className="font-display text-2xl font-black tracking-tight" style={{ color: 'var(--bridge-text)' }}>
-          Welcome to Bridge mentor verification
+          {s.onboardingVerify.welcomeHeading}
         </h2>
         <p className="mt-2 text-[15px]" style={{ color: 'var(--bridge-text-secondary)' }}>
-          Bridge is a paid marketplace. Mentees expect verified, accountable experts.
-          We score your evidence across 8 components and place you in a tier — Bronze, Silver, Gold, or Platinum.
-          Higher tiers unlock featured placement and stronger pricing bands.
+          {s.onboardingVerify.welcomeBody}
         </p>
       </div>
 
       <ul className="grid gap-3 sm:grid-cols-3">
         <ExpectationCard
           icon={Clock}
-          title="~10 minutes for Silver"
-          body="Identity, professional email, resume."
+          title={s.onboardingVerify.expectation1Title}
+          body={s.onboardingVerify.expectation1Body}
         />
         <ExpectationCard
           icon={Award}
-          title="~30 minutes for Gold"
-          body="Plus LinkedIn, the AI interview, and references."
+          title={s.onboardingVerify.expectation2Title}
+          body={s.onboardingVerify.expectation2Body}
         />
         <ExpectationCard
           icon={ShieldCheck}
-          title="Manual review for Platinum"
-          body="Strong evidence + human admin verification."
+          title={s.onboardingVerify.expectation3Title}
+          body={s.onboardingVerify.expectation3Body}
         />
       </ul>
 
@@ -39,7 +39,7 @@ export default function WelcomeStep({ onContinue }) {
           className="bridge-focus inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-bold transition-colors"
           style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
         >
-          Begin verification
+          {s.onboardingVerify.beginVerification}
         </button>
       </div>
     </div>

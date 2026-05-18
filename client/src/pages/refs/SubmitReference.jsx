@@ -5,8 +5,10 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import { submitReference } from '../../api/verification';
+import { useContent } from '../../content';
 
 export default function SubmitReferencePage() {
+  const { s } = useContent();
   const { token } = useParams();
   const [rating, setRating] = useState(5);
   const [comments, setComments] = useState('');
@@ -15,8 +17,8 @@ export default function SubmitReferencePage() {
   const [submitted, setSubmitted] = useState(false);
 
   async function submit() {
-    if (!token) { setError('Invalid link'); return; }
-    if (!comments || comments.trim().length < 20) { setError('Please write at least 20 characters.'); return; }
+    if (!token) { setError(s.admin.submitReferenceInvalid); return; }
+    if (!comments || comments.trim().length < 20) { setError(s.admin.submitReferenceMinLength); return; }
     setBusy(true); setError(null);
     const r = await submitReference({ token, rating, comments });
     setBusy(false);
@@ -27,9 +29,9 @@ export default function SubmitReferencePage() {
   if (submitted) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center px-6 text-center">
-        <h1 className="font-display text-2xl font-black" style={{ color: 'var(--bridge-text)' }}>Thanks!</h1>
+        <h1 className="font-display text-2xl font-black" style={{ color: 'var(--bridge-text)' }}>{s.admin.submitReferenceThanks}</h1>
         <p className="mt-2 text-[14px]" style={{ color: 'var(--bridge-text-secondary)' }}>
-          Your reference has been recorded. You can close this page.
+          {s.admin.submitReferenceRecorded}
         </p>
       </div>
     );
@@ -39,13 +41,13 @@ export default function SubmitReferencePage() {
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-4 py-12 sm:px-6">
       <header>
         <p className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: 'var(--color-primary)' }}>
-          Bridge reference
+          {s.admin.submitReferenceEyebrow}
         </p>
         <h1 className="mt-1 font-display text-2xl font-black" style={{ color: 'var(--bridge-text)' }}>
-          Speak to this mentor's work
+          {s.admin.submitReferenceHeading}
         </h1>
         <p className="mt-1 text-[13px]" style={{ color: 'var(--bridge-text-secondary)' }}>
-          Your honest feedback helps us tier mentors fairly. Specifics beat generic praise.
+          {s.admin.submitReferenceSub}
         </p>
       </header>
 
@@ -78,7 +80,7 @@ export default function SubmitReferencePage() {
         </div>
 
         <label className="flex flex-col gap-1 text-[12px] font-semibold" style={{ color: 'var(--bridge-text-secondary)' }}>
-          <span>Comments</span>
+          <span>{s.admin.commentsLabel}</span>
           <textarea
             rows={6}
             value={comments}
@@ -110,7 +112,7 @@ export default function SubmitReferencePage() {
             className="bridge-focus inline-flex items-center rounded-full px-5 py-2 text-sm font-bold disabled:opacity-50"
             style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
           >
-            {busy ? 'Submitting…' : 'Submit reference'}
+            {busy ? s.onboardingVerify.submitting : s.admin.submitReferenceCta}
           </button>
         </div>
       </section>

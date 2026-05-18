@@ -3,12 +3,14 @@ import { useDashboardSessions, formatCurrency } from './dashboardHooks.js';
 import { useEffect, useState } from 'react';
 import supabase from '../../api/supabase';
 import { useAuth } from '../../context/useAuth.js';
+import { useContent } from '../../content';
 
 function PayoutHistoryTable({ rows, rate }) {
+  const { s } = useContent();
   if (!rows.length) {
     return (
       <p className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>
-        No completed sessions yet — this is where your payouts will show up.
+        {s.dashboard.earningsNoCompletedYet}
       </p>
     );
   }
@@ -21,25 +23,25 @@ function PayoutHistoryTable({ rows, rate }) {
               className="py-2 text-left text-[10px] font-bold uppercase tracking-[0.18em]"
               style={{ color: 'var(--bridge-text-muted)' }}
             >
-              Date
+              {s.dashboard.earningsDate}
             </th>
             <th
               className="py-2 text-left text-[10px] font-bold uppercase tracking-[0.18em]"
               style={{ color: 'var(--bridge-text-muted)' }}
             >
-              Mentee
+              {s.dashboard.earningsMentee}
             </th>
             <th
               className="py-2 text-left text-[10px] font-bold uppercase tracking-[0.18em]"
               style={{ color: 'var(--bridge-text-muted)' }}
             >
-              Type
+              {s.dashboard.earningsType}
             </th>
             <th
               className="py-2 text-right text-[10px] font-bold uppercase tracking-[0.18em]"
               style={{ color: 'var(--bridge-text-muted)' }}
             >
-              Amount
+              {s.dashboard.earningsAmount}
             </th>
           </tr>
         </thead>

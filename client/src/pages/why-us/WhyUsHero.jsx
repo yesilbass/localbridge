@@ -14,6 +14,7 @@ import {
   DUR_LONG,
   usePerfTier,
 } from '../landing/landingHooks';
+import { useContent } from '../../content';
 
 const STATEMENTS = [
   'An hour with someone who has done it beats a year of advice from someone who has read about it.',
@@ -22,6 +23,7 @@ const STATEMENTS = [
 ];
 
 export default function WhyUsHero() {
+  const { s } = useContent();
   const reduced = useReducedMotion();
   const tier = usePerfTier();
   const flat = reduced || tier === 'low';
@@ -58,7 +60,7 @@ export default function WhyUsHero() {
                 letterSpacing: '0.22em',
               }}
             >
-              Why Bridge
+              {s.whyUs.eyebrow}
             </motion.div>
 
             <h1

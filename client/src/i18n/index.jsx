@@ -3,8 +3,13 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { APPEARANCE_STORAGE_KEY } from '../utils/appearance';
 
 export const LANGUAGE_OPTIONS = [
-  { code: 'en', label: 'English', nativeLabel: 'English' },
-  { code: 'es', label: 'Spanish', nativeLabel: 'Español' },
+  { code: 'en', label: 'English',  nativeLabel: 'English'   },
+  { code: 'es', label: 'Español',  nativeLabel: 'Español'   },
+  { code: 'fr', label: 'Français', nativeLabel: 'Français'  },
+  { code: 'it', label: 'Italiano', nativeLabel: 'Italiano'  },
+  { code: 'de', label: 'Deutsch',  nativeLabel: 'Deutsch'   },
+  { code: 'ar', label: 'العربية', nativeLabel: 'العربية', rtl: true },
+  { code: 'tr', label: 'Türkçe',  nativeLabel: 'Türkçe'    },
 ];
 
 export const SUPPORTED_LANGUAGE_CODES = LANGUAGE_OPTIONS.map((l) => l.code);

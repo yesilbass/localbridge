@@ -11,7 +11,8 @@
       "Bash(timeout 4 node index.js)",
       "Bash(node index.js)",
       "Bash(kill %1)",
-      "Bash(wait)"
+      "Bash(wait)",
+      "Bash(node --input-type=module --eval \"import\\('/Users/berk/Downloads/localbridge/client/src/pages/MentorOnboarding.jsx'\\)\")"
     ]
   }
 }

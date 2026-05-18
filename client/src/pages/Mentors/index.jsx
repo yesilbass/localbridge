@@ -253,200 +253,122 @@ export default function Mentors() {
     <main role="main" className="relative isolate min-h-screen overflow-x-hidden" style={{ backgroundColor: 'var(--bridge-canvas)' }}>
       <AuroraBg />
 
-      {/* Navbar-integrated hero glows — fixed position so they bleed up behind the transparent navbar */}
-      {!aiMode && (
-        <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[420px]">
-          <div
-            className="absolute -left-[8%] -top-[20%] h-[100%] w-[55%] rounded-full blur-[120px]"
-            style={{
-              background:
-                'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 28%, transparent) 0%, transparent 70%)',
-              opacity: 0.30,
-            }}
-          />
-          <div
-            className="absolute -right-[10%] -top-[10%] h-[80%] w-[40%] rounded-full blur-[120px]"
-            style={{
-              background:
-                'radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 32%, transparent) 0%, transparent 70%)',
-              opacity: 0.18,
-            }}
-          />
-        </div>
-      )}
 
-      {/* Hero — directory-page header: confident, compact, anchored to context.
-          Mentors are the protagonist; the hero exists to frame them, not eclipse them. */}
+      {/* Hero */}
       {!aiMode && (
         <section
           aria-labelledby="mentors-heading"
-          className="relative px-5 pt-28 pb-6 sm:px-8 lg:pt-32 lg:pb-8"
+          className="relative px-5 pt-10 pb-9 sm:px-8 sm:pt-14 sm:pb-12"
+          style={{
+            background: 'linear-gradient(to bottom, color-mix(in srgb, var(--color-primary) 5%, var(--bridge-canvas)) 0%, var(--bridge-canvas) 100%)',
+          }}
         >
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" />
-
           <div className="relative mx-auto max-w-7xl">
-            <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
-              {/* Left: live-count, headline, supporting line */}
-              <div className="min-w-0 max-w-2xl">
-                {/* Live-count eyebrow pill */}
-                <div
-                  className="mb-3 inline-flex items-center gap-2.5 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide backdrop-blur-sm"
+            <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
+
+              {/* Left: eyebrow + headline + sub */}
+              <div className="min-w-0">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1"
                   style={{
-                    backgroundColor:
-                      'color-mix(in srgb, var(--bridge-surface) 80%, transparent)',
-                    color: 'var(--bridge-text-secondary)',
-                    boxShadow:
-                      '0 0 0 1px var(--bridge-border) inset, 0 4px 14px -8px color-mix(in srgb, var(--color-primary) 35%, transparent)',
-                  }}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="bridge-pulse inline-block h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: '#10b981' }}
-                  />
-                  <span style={{ color: 'var(--bridge-text-muted)' }}>
-                    {totalCount > 0
-                      ? `${totalCount.toLocaleString()} mentors live · updated in real-time`
-                      : s.mentors.heroEyebrowBrowse}
+                    backgroundColor: 'color-mix(in srgb, #10b981 10%, transparent)',
+                    boxShadow: 'inset 0 0 0 1px color-mix(in srgb, #10b981 28%, transparent)',
+                  }}>
+                  <span aria-hidden="true" className="bridge-pulse inline-block h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: '#10b981' }} />
+                  <span className="text-[11px] font-bold tracking-wide" style={{ color: '#10b981' }}>
+                    {totalCount > 0 ? `${totalCount.toLocaleString()} mentors live` : s.mentors.heroEyebrowBrowse}
                   </span>
                 </div>
 
-                {/* Compact, single-line headline */}
                 <h1
                   id="mentors-heading"
                   className="font-display font-black"
                   style={{
-                    fontSize: 'clamp(1.85rem, 3.6vw, 2.75rem)',
-                    lineHeight: 1.05,
-                    letterSpacing: '-0.025em',
+                    fontSize: 'clamp(2rem, 4.5vw, 3rem)',
+                    lineHeight: 1.06,
+                    letterSpacing: '-0.03em',
                     color: 'var(--bridge-text)',
-                    fontFeatureSettings: '"kern" 1, "ss01" 1',
                   }}
                 >
                   {s.mentors.heroHeading1}{' '}
                   <span
                     className="bg-clip-text text-transparent"
-                    style={{
-                      backgroundImage:
-                        'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)',
-                    }}
+                    style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)' }}
                   >
                     {s.mentors.heroHeading2}
-                  </span>
-                  .
+                  </span>.
                 </h1>
 
-                {/* One supporting line — context, not pitch */}
-                <p
-                  className="mt-2 max-w-xl text-[14px] sm:text-[15px]"
-                  style={{ color: 'var(--bridge-text-muted)', lineHeight: 1.55 }}
-                >
+                <p className="mt-3 max-w-lg text-[14px] leading-relaxed" style={{ color: 'var(--bridge-text-muted)' }}>
                   {s.mentors.heroSubCopy}
                 </p>
               </div>
 
-              {/* Right: inline secondary affordances — AI match + compare tiers */}
-              <div className="flex flex-col items-start gap-2 sm:items-end">
-                <div className="flex flex-wrap items-center gap-2">
-                  {!asMentor && remainingUses !== 0 && (
-                    <button
-                      type="button"
-                      onClick={handleAiMatchClick}
-                      className={`group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-4 py-2.5 text-[13px] font-bold transition hover:-translate-y-0.5 ${focusRing}`}
-                      style={{
-                        backgroundColor: 'var(--color-primary)',
-                        color: 'var(--color-on-primary)',
-                        boxShadow:
-                          '0 14px 32px -12px color-mix(in srgb, var(--color-primary) 55%, transparent)',
-                      }}
-                    >
-                      <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
-                      <svg className="relative z-10 h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
-                      <span className="relative z-10">{s.mentors.aiMatch}</span>
-                    </button>
-                  )}
-                  {!asMentor && remainingUses === 0 && (
-                    <span
-                      className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-medium"
-                      style={{
-                        boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-                        color: 'var(--bridge-text-faint)',
-                      }}
-                    >
-                      <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
-                      {s.mentors.aiMatchUsedUp}
-                    </span>
-                  )}
+              {/* Right: action buttons */}
+              <div className="flex shrink-0 flex-wrap items-center gap-3">
+                {!asMentor && remainingUses !== 0 && (
                   <button
                     type="button"
-                    onClick={() => setShowTiersModal(true)}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-semibold transition ${focusRing}`}
+                    onClick={handleAiMatchClick}
+                    className={`group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-3 text-[13px] font-bold transition hover:-translate-y-0.5 active:translate-y-0 ${focusRing}`}
                     style={{
-                      color: 'var(--bridge-text-secondary)',
-                      backgroundColor: 'transparent',
-                      boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border-strong)';
-                      e.currentTarget.style.color = 'var(--bridge-text)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border)';
-                      e.currentTarget.style.color = 'var(--bridge-text-secondary)';
+                      backgroundColor: 'var(--color-primary)',
+                      color: 'var(--color-on-primary)',
+                      boxShadow: '0 12px 32px -10px color-mix(in srgb, var(--color-primary) 60%, transparent)',
                     }}
                   >
-                    {s.mentors.compareTiers}
+                    <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
+                    <svg className="relative z-10 h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
+                    <span className="relative z-10">{s.mentors.aiMatch}</span>
+                    {remainingUses !== null && remainingUses > 0 && (
+                      <span className="relative z-10 ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-black" style={{ backgroundColor: 'rgba(255,255,255,0.22)' }}>
+                        {remainingUses}
+                      </span>
+                    )}
                   </button>
-                </div>
-
-                {/* Tiny usage indicator beneath the AI button — preserves the "X uses left" feedback */}
-                {!asMentor && remainingUses !== null && remainingUses > 0 && (
-                  <div className="flex items-center gap-1.5 pr-1">
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: LIMITS.mentor_match }).map((_, i) => {
-                        const used = i < LIMITS.mentor_match - remainingUses;
-                        return (
-                          <span
-                            key={i}
-                            className="h-1 w-1 rounded-full"
-                            style={{
-                              backgroundColor: used
-                                ? 'var(--bridge-border-strong)'
-                                : 'var(--color-primary)',
-                              boxShadow: used
-                                ? 'none'
-                                : '0 0 4px color-mix(in srgb, var(--color-primary) 60%, transparent)',
-                            }}
-                          />
-                        );
-                      })}
-                    </div>
-                    <span className="text-[10px] font-medium tracking-wide" style={{ color: 'var(--bridge-text-faint)' }}>
-                      {remainingUses} AI {remainingUses === 1 ? 'match' : 'matches'} left
-                    </span>
-                  </div>
                 )}
+                {!asMentor && remainingUses === 0 && (
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-[12px] font-medium"
+                    style={{ boxShadow: 'inset 0 0 0 1px var(--bridge-border)', color: 'var(--bridge-text-faint)' }}
+                  >
+                    <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
+                    {s.mentors.aiMatchUsedUp}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowTiersModal(true)}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-3 text-[13px] font-semibold transition hover:-translate-y-0.5 ${focusRing}`}
+                  style={{
+                    color: 'var(--bridge-text-secondary)',
+                    backgroundColor: 'var(--bridge-surface)',
+                    boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 2px 8px -4px color-mix(in srgb, var(--bridge-text) 8%, transparent)',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border-strong), 0 2px 8px -4px color-mix(in srgb, var(--bridge-text) 8%, transparent)'; e.currentTarget.style.color = 'var(--bridge-text)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border), 0 2px 8px -4px color-mix(in srgb, var(--bridge-text) 8%, transparent)'; e.currentTarget.style.color = 'var(--bridge-text-secondary)'; }}
+                >
+                  {s.mentors.compareTiers}
+                </button>
               </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* Sticky control bar — softened: no top accent strip, palette-token shadow */}
+      {/* Sticky control bar */}
       <div
         className={`sticky top-[3.75rem] z-30 backdrop-blur-xl sm:top-16 ${aiMode ? 'opacity-60 pointer-events-none' : ''}`}
         style={{
-          backgroundColor: 'color-mix(in srgb, var(--bridge-canvas) 88%, transparent)',
+          backgroundColor: 'color-mix(in srgb, var(--bridge-canvas) 90%, transparent)',
           borderBottom: '1px solid var(--bridge-border)',
-          boxShadow: '0 10px 30px -28px color-mix(in srgb, var(--color-primary) 35%, transparent)',
         }}
       >
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="flex items-center gap-2 py-2.5">
+          <div className="flex items-center gap-2.5 py-3">
             {/* Search */}
             <div className="group relative flex-1">
               <svg
-                className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 transition"
+                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2"
                 style={{ color: 'var(--bridge-text-faint)' }}
                 fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
               >
@@ -457,14 +379,14 @@ export default function Mentors() {
                 placeholder={s.mentors.searchPlaceholder}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="h-10 w-full rounded-xl py-0 pl-9 pr-8 text-[13px] font-medium transition focus:outline-none"
+                className="h-11 w-full rounded-2xl py-0 pl-10 pr-9 text-[13px] font-medium transition focus:outline-none"
                 style={{
-                  backgroundColor: 'color-mix(in srgb, var(--bridge-surface) 88%, transparent)',
+                  backgroundColor: 'var(--bridge-surface)',
                   color: 'var(--bridge-text)',
                   boxShadow: '0 0 0 1px var(--bridge-border) inset',
                 }}
                 onFocus={(e) => {
-                  e.currentTarget.style.boxShadow = `0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, var(--bridge-border)) inset, 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent)`;
+                  e.currentTarget.style.boxShadow = `0 0 0 1.5px color-mix(in srgb, var(--color-primary) 65%, var(--bridge-border)) inset, 0 0 0 4px color-mix(in srgb, var(--color-primary) 10%, transparent)`;
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.boxShadow = '0 0 0 1px var(--bridge-border) inset';
@@ -472,7 +394,8 @@ export default function Mentors() {
               />
               {search && (
                 <button type="button" onClick={() => setSearch('')} aria-label="Clear"
-                  className="absolute right-2 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded text-[var(--bridge-text-faint)] transition hover:text-[var(--bridge-text)]">
+                  className="absolute right-2.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full transition"
+                  style={{ color: 'var(--bridge-text-faint)', backgroundColor: 'var(--bridge-surface-muted)' }}>
                   <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" d="M6 18 18 6M6 6l12 12" /></svg>
                 </button>
               )}
@@ -481,11 +404,12 @@ export default function Mentors() {
             {/* Sort */}
             <div ref={sortRef} className="relative hidden sm:block">
               <button type="button" onClick={() => setSortOpen(o => !o)} aria-haspopup="listbox" aria-expanded={sortOpen}
-                className={`inline-flex h-10 items-center gap-1.5 rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/88 px-3 text-[12px] font-semibold text-[var(--bridge-text-secondary)] shadow-bridge-tile transition hover:-translate-y-px hover:border-[var(--bridge-border-strong)] hover:text-[var(--bridge-text)] ${focusRing}`}>
-                <svg className="h-3.5 w-3.5 shrink-0 text-[var(--bridge-text-faint)]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5h18M6 12h12M10 16.5h4" /></svg>
+                className={`inline-flex h-11 items-center gap-1.5 rounded-2xl px-3.5 text-[12px] font-semibold transition hover:-translate-y-px ${focusRing}`}
+                style={{ backgroundColor: 'var(--bridge-surface)', color: 'var(--bridge-text-secondary)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}>
+                <svg className="h-3.5 w-3.5 shrink-0" style={{ color: 'var(--bridge-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5h18M6 12h12M10 16.5h4" /></svg>
                 <span className="hidden lg:inline">{SORT_OPTIONS.find(o => o.value === sortBy)?.label}</span>
                 <span className="lg:hidden">Sort</span>
-                <svg className={`h-3 w-3 shrink-0 text-[var(--bridge-text-faint)] transition-transform ${sortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                <svg className={`h-3 w-3 shrink-0 transition-transform ${sortOpen ? 'rotate-180' : ''}`} style={{ color: 'var(--bridge-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
               </button>
               {sortOpen && (
                 <div
@@ -493,8 +417,7 @@ export default function Mentors() {
                   className="animate-pop-in absolute right-0 top-full z-20 mt-1.5 w-48 overflow-hidden rounded-xl backdrop-blur-xl"
                   style={{
                     backgroundColor: 'var(--bridge-surface-raised)',
-                    boxShadow:
-                      'inset 0 0 0 1px var(--bridge-border), 0 18px 40px -18px color-mix(in srgb, var(--color-primary) 28%, transparent)',
+                    boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 18px 40px -18px color-mix(in srgb, var(--color-primary) 28%, transparent)',
                   }}
                 >
                   {SORT_OPTIONS.map(opt => (
@@ -503,11 +426,7 @@ export default function Mentors() {
                       className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-[13px] transition ${sortBy === opt.value ? 'bg-[var(--bridge-surface-muted)] font-semibold text-[var(--bridge-text)]' : 'text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)]'} ${focusRing}`}>
                       {opt.label}
                       {sortBy === opt.value && (
-                        <span
-                          className="flex h-3.5 w-3.5 items-center justify-center rounded-full text-white"
-                          style={{ backgroundColor: 'var(--color-primary)' }}
-                          aria-hidden
-                        >
+                        <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full text-white" style={{ backgroundColor: 'var(--color-primary)' }} aria-hidden>
                           <svg className="h-2 w-2" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                         </span>
                       )}
@@ -522,41 +441,32 @@ export default function Mentors() {
               type="button"
               onClick={() => setFilterOpen(o => !o)}
               aria-expanded={filterOpen}
-              className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-3 text-[12px] font-semibold transition hover:-translate-y-px ${focusRing}`}
+              className={`inline-flex h-11 items-center gap-1.5 rounded-2xl px-3.5 text-[12px] font-semibold transition hover:-translate-y-px ${focusRing}`}
               style={
                 filterOpen || activeFilterCount > 0
-                  ? {
-                      backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                      color: 'var(--color-primary)',
-                      boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 45%, transparent)',
-                    }
-                  : {
-                      backgroundColor: 'color-mix(in srgb, var(--bridge-surface) 88%, transparent)',
-                      color: 'var(--bridge-text-secondary)',
-                      boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-                    }
+                  ? { backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)', color: 'var(--color-primary)', boxShadow: 'inset 0 0 0 1.5px color-mix(in srgb, var(--color-primary) 50%, transparent)' }
+                  : { backgroundColor: 'var(--bridge-surface)', color: 'var(--bridge-text-secondary)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }
               }
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" /></svg>
               Filters
               {activeFilterCount > 0 && (
-                <span
-                  className="flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold text-white"
-                  style={{ backgroundColor: 'var(--color-primary)' }}
-                >
+                <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold text-white" style={{ backgroundColor: 'var(--color-primary)' }}>
                   {activeFilterCount}
                 </span>
               )}
             </button>
 
-            <div className="hidden h-5 w-px bg-[var(--bridge-border)] sm:block" />
-
             {activeFilterCount > 0 && (
-              <button type="button" onClick={resetFilters}
-                className={`hidden items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-medium text-[var(--bridge-text-faint)] transition hover:text-[var(--bridge-text)] sm:inline-flex ${focusRing}`}>
-                <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" d="M6 18 18 6M6 6l12 12" /></svg>
-                Clear
-              </button>
+              <>
+                <div className="hidden h-5 w-px bg-[var(--bridge-border)] sm:block" />
+                <button type="button" onClick={resetFilters}
+                  className={`hidden items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition hover:text-[var(--bridge-text)] sm:inline-flex ${focusRing}`}
+                  style={{ color: 'var(--bridge-text-faint)' }}>
+                  <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                  Clear
+                </button>
+              </>
             )}
           </div>
 
@@ -567,28 +477,23 @@ export default function Mentors() {
                 key={value || 'all'}
                 type="button"
                 onClick={() => setActiveIndustry(value)}
-                className={`inline-flex shrink-0 items-center rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${focusRing}`}
+                className={`inline-flex shrink-0 items-center rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition ${focusRing}`}
                 style={
                   activeIndustry === value
-                    ? {
-                        backgroundColor: 'var(--color-primary)',
-                        color: 'var(--color-on-primary)',
-                        boxShadow: '0 4px 14px -6px color-mix(in srgb, var(--color-primary) 45%, transparent)',
-                      }
-                    : {
-                        backgroundColor: 'transparent',
-                        color: 'var(--bridge-text-muted)',
-                      }
+                    ? { backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)', boxShadow: '0 4px 14px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)' }
+                    : { backgroundColor: 'var(--bridge-surface)', color: 'var(--bridge-text-secondary)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }
                 }
                 onMouseEnter={(e) => {
                   if (activeIndustry === value) return;
-                  e.currentTarget.style.backgroundColor = 'var(--bridge-surface-muted)';
+                  e.currentTarget.style.backgroundColor = 'var(--bridge-surface-raised)';
                   e.currentTarget.style.color = 'var(--bridge-text)';
+                  e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border-strong)';
                 }}
                 onMouseLeave={(e) => {
                   if (activeIndustry === value) return;
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'var(--bridge-text-muted)';
+                  e.currentTarget.style.backgroundColor = 'var(--bridge-surface)';
+                  e.currentTarget.style.color = 'var(--bridge-text-secondary)';
+                  e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border)';
                 }}
               >
                 {label}

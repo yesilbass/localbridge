@@ -1,6 +1,7 @@
 import { Star } from 'lucide-react';
 import { useMentorReviewsRecent, formatRelativeTime } from './dashboardHooks.js';
 import EmptyState from './EmptyState.jsx';
+import { useContent } from '../../content';
 
 function StarsRow({ rating }) {
   return (
@@ -82,6 +83,7 @@ function RatingDistribution({ reviews }) {
 }
 
 export default function ReviewsPage() {
+  const { s } = useContent();
   const { reviews, total, avgRating, isLoading } = useMentorReviewsRecent({ limit: 100 });
 
   if (isLoading) {
@@ -116,7 +118,7 @@ export default function ReviewsPage() {
       >
         <EmptyState
           icon={Star}
-          title="No reviews yet"
+          title={s.mentorProfile.noReviewsYet}
           description="Reviews will appear here after your first completed session."
         />
       </div>

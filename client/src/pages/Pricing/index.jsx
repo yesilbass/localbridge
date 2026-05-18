@@ -668,7 +668,7 @@ export default function Pricing() {
                   className="mt-4 font-display font-black tracking-[-0.03em] text-[var(--bridge-text)]"
                   style={{ fontSize: 'clamp(2rem, 4.5vw, 3.4rem)', lineHeight: '1' }}
                 >
-                  Mentor <span className="text-gradient-bridge italic">tiers</span>
+                  Mentor <span style={{ color: 'var(--color-primary)' }}>tiers</span>
                 </h2>
                 <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-[var(--bridge-text-secondary)]">
                   Each mentor is placed in a tier based on their experience and seniority. Session rates are set by each mentor individually and shown on their profile — not by Bridge.
@@ -679,13 +679,28 @@ export default function Pricing() {
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4" aria-labelledby="mentor-tiers-heading">
               {MENTOR_TIERS.map((tier, idx) => (
                 <Reveal key={tier.name} delay={40 + idx * 80}>
-                  <div className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border p-7 shadow-bridge-tile transition-all duration-500 hover:-translate-y-1 ${tier.edgeClass} ${tier.bgClass}`}>
-                    <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-52 w-52 rounded-full opacity-25 blur-3xl bd-aurora" style={{ background: `radial-gradient(circle, ${tier.halo} 0%, transparent 70%)` }} />
-                    <div aria-hidden className={`absolute inset-x-0 top-0 h-1 ${tier.accentBar} ${tier.isElite ? 'shadow-[0_0_14px_color-mix(in srgb,var(--color-primary)_60%,transparent)]' : ''}`} />
+                  <div
+                    className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border p-7 shadow-bridge-tile transition-all duration-500 hover:-translate-y-1 ${tier.isElite ? '' : `${tier.edgeClass} ${tier.bgClass}`}`}
+                    style={tier.isElite ? {
+                      background: 'linear-gradient(145deg, #fef9e7 0%, #fef3c7 45%, #fff7ed 100%)',
+                      borderColor: 'rgba(245,158,11,0.45)',
+                      boxShadow: '0 0 0 1px rgba(245,158,11,0.18)',
+                    } : undefined}
+                  >
+                    <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-52 w-52 rounded-full opacity-40 blur-3xl" style={{ background: `radial-gradient(circle, ${tier.halo} 0%, transparent 70%)` }} />
+                    <div aria-hidden className={`absolute inset-x-0 top-0 h-1 ${tier.accentBar}`}
+                      style={tier.isElite ? { boxShadow: '0 0 14px rgba(245,158,11,0.7)' } : undefined} />
 
                     <div className="relative flex flex-col gap-3 flex-1">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <span className={`bd-status-shine relative inline-flex w-fit items-center gap-1 self-start overflow-hidden rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${tier.badgeClass}`}>
+                        <span
+                          className={`relative inline-flex w-fit items-center gap-1 self-start rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${tier.isElite ? '' : `bd-status-shine overflow-hidden ${tier.badgeClass}`}`}
+                          style={tier.isElite ? {
+                            background: 'linear-gradient(to right, #f59e0b, #f97316)',
+                            color: '#fff',
+                            boxShadow: '0 0 18px rgba(245,158,11,0.5)',
+                          } : undefined}
+                        >
                           {tier.name}
                         </span>
                         {tier.highlight && (
@@ -700,7 +715,15 @@ export default function Pricing() {
                         <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--bridge-text-muted)]">per hour · algorithm-assigned</p>
                       </div>
 
-                      <div className="flex items-center gap-2 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/70 px-3 py-2">
+                      <div className="flex items-center gap-2 rounded-2xl px-3 py-2"
+                        style={tier.isElite ? {
+                          border: '1px solid rgba(245,158,11,0.3)',
+                          backgroundColor: 'rgba(255,255,255,0.6)',
+                        } : {
+                          border: '1px solid var(--bridge-border)',
+                          backgroundColor: 'color-mix(in srgb, var(--bridge-surface) 70%, transparent)',
+                        }}
+                      >
                         <p className="font-display text-sm font-black tabular-nums tracking-tight text-[var(--bridge-text)]">{tier.yearsRange}</p>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--bridge-text-muted)]">experience</p>
                       </div>
@@ -717,7 +740,14 @@ export default function Pricing() {
                       </ul>
 
                       {tier.whoTheyAre && (
-                        <p className="mt-4 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/60 px-3 py-2.5 text-[11px] leading-relaxed text-[var(--bridge-text-muted)]">
+                        <p className="mt-4 rounded-2xl px-3 py-2.5 text-[11px] leading-relaxed text-[var(--bridge-text-muted)]"
+                          style={tier.isElite ? {
+                            border: '1px solid rgba(245,158,11,0.22)',
+                            backgroundColor: 'rgba(255,255,255,0.55)',
+                          } : {
+                            border: '1px solid var(--bridge-border)',
+                            backgroundColor: 'color-mix(in srgb, var(--bridge-surface) 60%, transparent)',
+                          }}>
                           {tier.whoTheyAre}
                         </p>
                       )}

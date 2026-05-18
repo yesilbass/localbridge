@@ -2,8 +2,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import RevealOnScroll from '../landing/RevealOnScroll';
 import { RECEIPTS, WHY_US_SECTION_PAD } from './whyUsData';
+import { useContent } from '../../content';
 
 export default function ReceiptsSection() {
+  const { s } = useContent();
   return (
     <section
       id="receipts"
@@ -24,7 +26,7 @@ export default function ReceiptsSection() {
               letterSpacing: '0.32em',
             }}
           >
-            Receipts
+            {s.whyUs.receiptsEyebrow}
           </p>
 
           <h2

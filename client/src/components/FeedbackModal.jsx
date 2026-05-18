@@ -3,6 +3,7 @@ import { X, Check, ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from 'lucide-r
 import { focusRing } from '../ui';
 import { generateTicketId } from '../config/contact';
 import { sendSupportEmail } from '../api/supportEmail';
+import { useContent } from '../content';
 
 const focusRingWhite =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900';
@@ -25,6 +26,7 @@ const SENTIMENTS = [
 ];
 
 export default function FeedbackModal({ open, onClose }) {
+  const { s } = useContent();
   const [step, setStep] = useState(1);
   const [category, setCategory] = useState(null);
   const [sentiment, setSentiment] = useState(null);
@@ -162,23 +164,25 @@ export default function FeedbackModal({ open, onClose }) {
             <button
               type="button"
               onClick={handleClose}
-              className={`btn-sheen mt-9 inline-flex items-center gap-2 rounded-full bg-stone-900 px-8 py-3 text-sm font-semibold text-amber-50 shadow-[0_12px_30px_-8px_color-mix(in srgb, var(--color-secondary) 45%, transparent)] transition hover:-translate-y-0.5 hover:bg-stone-800 dark:bg-gradient-to-r dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 ${focusRing}`}
+              className={`btn-sheen mt-9 inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold transition hover:-translate-y-0.5 ${focusRing}`}
+              style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)', boxShadow: '0 12px 30px -8px color-mix(in srgb, var(--color-primary) 50%, transparent)' }}
             >
-              Done
+              {s.common.done}
             </button>
           </div>
         ) : (
           <>
-            <header className="relative shrink-0 overflow-hidden bg-gradient-to-br from-stone-900 via-stone-900 to-orange-950 px-6 pb-6 pt-7 sm:px-7">
-              <div aria-hidden className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.13] mix-blend-overlay" />
-              <div aria-hidden className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-amber-500/20 blur-3xl" />
-              <div aria-hidden className="pointer-events-none absolute -left-16 bottom-0 h-40 w-40 rounded-full bg-orange-500/15 blur-3xl" />
+            <header className="relative shrink-0 overflow-hidden px-6 pb-6 pt-7 sm:px-7"
+              style={{ background: 'linear-gradient(135deg, var(--bridge-surface-raised) 0%, color-mix(in srgb, var(--color-primary) 10%, var(--bridge-surface-raised)) 100%)', borderBottom: '1px solid var(--bridge-border)' }}>
+              <div aria-hidden className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.06] mix-blend-overlay" />
+              <div aria-hidden className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full blur-3xl" style={{ background: 'color-mix(in srgb, var(--color-primary) 18%, transparent)' }} />
+              <div aria-hidden className="pointer-events-none absolute -left-16 bottom-0 h-40 w-40 rounded-full blur-3xl" style={{ background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)' }} />
               <div className="relative flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-200/90">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--color-primary)' }}>
                     Share feedback · Step {step} of 3
                   </p>
-                  <h2 id="feedback-title" className="mt-1.5 font-display text-2xl font-semibold text-white">
+                  <h2 id="feedback-title" className="mt-1.5 font-display text-2xl font-semibold" style={{ color: 'var(--bridge-text)' }}>
                     {step === 1 && 'What kind of feedback?'}
                     {step === 2 && "How's it going overall?"}
                     {step === 3 && 'Tell us more'}
@@ -187,7 +191,10 @@ export default function FeedbackModal({ open, onClose }) {
                 <button
                   type="button"
                   onClick={handleClose}
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-sm transition hover:border-white/25 hover:bg-white/20 ${focusRingWhite}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${focusRing}`}
+                  style={{ backgroundColor: 'color-mix(in srgb, var(--bridge-text) 8%, transparent)', color: 'var(--bridge-text-muted)', border: '1px solid var(--bridge-border)' }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--bridge-text) 15%, transparent)'; e.currentTarget.style.color = 'var(--bridge-text)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--bridge-text) 8%, transparent)'; e.currentTarget.style.color = 'var(--bridge-text-muted)'; }}
                   aria-label="Close"
                 >
                   <X className="h-4 w-4" />
@@ -197,9 +204,13 @@ export default function FeedbackModal({ open, onClose }) {
                 {[1, 2, 3].map((n) => (
                   <div
                     key={n}
-                    className={`h-1 flex-1 rounded-full transition-all duration-500 ${
-                      n <= step ? 'bg-gradient-to-r from-amber-400 to-orange-400 shadow-[0_0_10px_color-mix(in srgb, var(--color-primary) 60%, transparent)]' : 'bg-white/10'
-                    }`}
+                    className="h-1 flex-1 rounded-full transition-all duration-500"
+                    style={n <= step ? {
+                      backgroundColor: 'var(--color-primary)',
+                      boxShadow: '0 0 8px color-mix(in srgb, var(--color-primary) 50%, transparent)',
+                    } : {
+                      backgroundColor: 'var(--bridge-border)',
+                    }}
                   />
                 ))}
               </div>
@@ -216,11 +227,15 @@ export default function FeedbackModal({ open, onClose }) {
                         setCategory(c);
                         setStep(2);
                       }}
-                      className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border px-4 py-3.5 text-left transition-all duration-300 ${
-                        category?.key === c.key
-                          ? 'border-orange-300/70 bg-gradient-to-r from-orange-50/95 to-amber-50/60 shadow-[0_10px_30px_-8px_color-mix(in srgb, var(--color-primary) 35%, transparent)] dark:from-orange-500/10 dark:to-amber-500/5'
-                          : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] hover:-translate-y-0.5 hover:border-orange-300/70 hover:bg-orange-50/40 hover:shadow-bridge-tile dark:hover:bg-white/[0.04]'
-                      } ${focusRing}`}
+                      className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border px-4 py-3.5 text-left transition-all duration-200 ${focusRing}`}
+                      style={category?.key === c.key ? {
+                        borderColor: 'color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                        backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, var(--bridge-surface))',
+                        boxShadow: '0 8px 24px -8px color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                      } : {
+                        borderColor: 'var(--bridge-border)',
+                        backgroundColor: 'var(--bridge-surface)',
+                      }}
                     >
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--bridge-surface-muted)] text-xl ring-1 ring-[var(--bridge-border)]">
                         {c.icon}
@@ -229,7 +244,7 @@ export default function FeedbackModal({ open, onClose }) {
                         <p className="font-semibold text-[var(--bridge-text)]">{c.label}</p>
                         <p className="text-xs text-[var(--bridge-text-muted)]">{c.desc}</p>
                       </div>
-                      <ArrowRight className="h-4 w-4 text-[var(--bridge-text-faint)] transition group-hover:translate-x-0.5 group-hover:text-orange-500" />
+                      <ArrowRight className="h-4 w-4 text-[var(--bridge-text-faint)] transition group-hover:translate-x-0.5" style={{ color: 'var(--bridge-text-faint)' }} />
                     </button>
                   ))}
                 </div>
@@ -245,11 +260,15 @@ export default function FeedbackModal({ open, onClose }) {
                         setSentiment(s);
                         setStep(3);
                       }}
-                      className={`group relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border py-6 transition-all duration-300 ${
-                        sentiment?.key === s.key
-                          ? 'border-orange-300/70 bg-gradient-to-b from-orange-50/80 to-white shadow-[0_10px_30px_-8px_color-mix(in srgb, var(--color-primary) 35%, transparent)] dark:from-orange-500/10 dark:to-[var(--bridge-surface)]'
-                          : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] hover:-translate-y-1 hover:border-orange-300/70 hover:shadow-bridge-tile'
-                      } ${focusRing}`}
+                      className={`group relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border py-6 transition-all duration-200 hover:-translate-y-1 ${focusRing}`}
+                      style={sentiment?.key === s.key ? {
+                        borderColor: 'color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                        backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, var(--bridge-surface))',
+                        boxShadow: '0 8px 24px -8px color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                      } : {
+                        borderColor: 'var(--bridge-border)',
+                        backgroundColor: 'var(--bridge-surface)',
+                      }}
                     >
                       <span
                         aria-hidden
@@ -268,8 +287,9 @@ export default function FeedbackModal({ open, onClose }) {
 
               {step === 3 && (
                 <div className="space-y-5">
-                  <div className="relative overflow-hidden rounded-2xl border border-orange-200/70 bg-gradient-to-br from-orange-50/80 via-amber-50/50 to-orange-50/20 p-4 dark:border-orange-400/25 dark:from-orange-500/12 dark:via-amber-500/8 dark:to-transparent">
-                    <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-orange-400/15 blur-2xl" />
+                  <div className="relative overflow-hidden rounded-2xl p-4"
+                    style={{ border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 7%, var(--bridge-surface))' }}>
+                    <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full blur-2xl" style={{ background: 'color-mix(in srgb, var(--color-primary) 15%, transparent)' }} />
                     <p className="relative text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-muted)]">You&apos;re reporting</p>
                     <p className="relative mt-1.5 text-sm font-semibold text-[var(--bridge-text)]">
                       {category?.icon} {category?.label} · {sentiment?.emoji} {sentiment?.label}
@@ -285,7 +305,9 @@ export default function FeedbackModal({ open, onClose }) {
                       onChange={(e) => setMessage(e.target.value)}
                       rows={5}
                       placeholder="What happened? What did you expect? The more specific, the better."
-                      className="w-full resize-none rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 18%, transparent)]"
+                      className="w-full resize-none rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:bg-[var(--bridge-surface)]"
+                      onFocus={e => { e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-primary) 65%, transparent)'; e.currentTarget.style.boxShadow = '0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent)'; }}
+                      onBlur={e => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.boxShadow = ''; }}
                     />
                     <p className="mt-1.5 text-right text-[10px] font-medium text-[var(--bridge-text-faint)]">
                       {message.length} characters
@@ -304,7 +326,9 @@ export default function FeedbackModal({ open, onClose }) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:bg-[var(--bridge-surface)] focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 18%, transparent)]"
+                      className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)] px-4 py-3.5 text-sm text-[var(--bridge-text)] shadow-inner placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:bg-[var(--bridge-surface)]"
+                      onFocus={e => { e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-primary) 65%, transparent)'; e.currentTarget.style.boxShadow = '0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent)'; }}
+                      onBlur={e => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.boxShadow = ''; }}
                     />
                   </div>
                 </div>
@@ -325,7 +349,7 @@ export default function FeedbackModal({ open, onClose }) {
                     disabled={submitting}
                     className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)] disabled:opacity-50 ${focusRing}`}
                   >
-                    <ArrowLeft className="h-4 w-4" /> Back
+                    <ArrowLeft className="h-4 w-4" /> {s.common.back}
                   </button>
                 ) : (
                   <span />
@@ -335,7 +359,8 @@ export default function FeedbackModal({ open, onClose }) {
                     type="button"
                     onClick={submit}
                     disabled={!message.trim() || submitting}
-                    className={`btn-sheen group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_-6px_color-mix(in srgb, var(--color-primary) 55%, transparent)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-8px_color-mix(in srgb, var(--color-primary) 70%, transparent)] disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
+                    className={`btn-sheen group inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
+                  style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)', boxShadow: '0 12px 30px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)' }}
                   >
                     {submitting ? (
                       <>

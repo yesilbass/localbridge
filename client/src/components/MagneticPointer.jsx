@@ -10,7 +10,8 @@ import { useEffect } from 'react';
 export default function MagneticPointer() {
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) return;
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (prefersReduced || isTouch) return;
 
     const tiltTargets = new WeakMap();
 

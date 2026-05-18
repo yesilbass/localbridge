@@ -4,6 +4,7 @@ import { useAuth } from '../context/useAuth';
 import { isMentorAccount } from '../utils/accountRole';
 import supabase from '../api/supabase';
 import { updateSessionStatus } from '../api/sessions';
+import { useContent } from '../content';
 import {
   Mic, MicOff, Video, VideoOff, ScreenShare, ScreenShareOff,
   MessageCircle, Pencil, Volume2, VolumeX,
@@ -29,12 +30,6 @@ const ICE_SERVERS = [
   },
 ];
 
-const SESSION_TYPE_LABELS = {
-  career_advice:  'Career Advice',
-  interview_prep: 'Interview Prep',
-  resume_review:  'Resume Review',
-  networking:     'Networking',
-};
 
 const DRAW_COLORS = ['#ef4444', '#f97316', '#facc15', '#22c55e', '#3b82f6', '#a855f7', '#ffffff'];
 
@@ -60,6 +55,7 @@ function formatBytes(b) {
 // ─── PreJoinScreen ────────────────────────────────────────────────────────────
 
 function PreJoinScreen({ session, isMentor, user, onJoin }) {
+  const { s } = useContent();
   const previewRef   = useRef(null);
   const streamRef    = useRef(null);
   const [mic, setMic]             = useState(true);
@@ -71,8 +67,14 @@ function PreJoinScreen({ session, isMentor, user, onJoin }) {
   const [audioId, setAudioId]     = useState('');
   const [videoId, setVideoId]     = useState('');
 
+  const sessionTypeLabels = {
+    career_advice:  s.videoCall.careerAdvice,
+    interview_prep: s.videoCall.interviewPrep,
+    resume_review:  s.videoCall.resumeReview,
+    networking:     s.videoCall.networking,
+  };
   const otherName    = isMentor ? (session?.mentee_name ?? 'Mentee') : (session?.mentor?.name ?? 'Mentor');
-  const sessionLabel = SESSION_TYPE_LABELS[session?.session_type] ?? 'Session';
+  const sessionLabel = sessionTypeLabels[session?.session_type] ?? 'Session';
 
   useEffect(() => {
     let alive = true;
@@ -97,8 +99,8 @@ function PreJoinScreen({ session, isMentor, user, onJoin }) {
         if (!alive) return;
         setPreviewErr(
           err.name === 'NotAllowedError'
-            ? 'Camera/mic access denied — you can still join audio-only.'
-            : (err.message || 'Could not access camera or microphone.'),
+            ? s.videoCall.cameraAccessDenied
+            : (err.message || s.videoCall.couldNotAccessCamera),
         );
       } finally {
         if (alive) setLoading(false);
@@ -129,7 +131,7 @@ function PreJoinScreen({ session, isMentor, user, onJoin }) {
     <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-stone-950 p-4">
       <div className="w-full max-w-3xl">
         <div className="mb-5 text-center">
-          <h1 className="text-xl font-bold text-white sm:text-2xl">Ready to join?</h1>
+          <h1 className="text-xl font-bold text-white sm:text-2xl">{s.videoCall.readyToJoin}</h1>
           <p className="mt-1 text-sm text-stone-400">
             {sessionLabel} with <span className="font-semibold text-white">{otherName}</span>
           </p>
@@ -151,7 +153,7 @@ function PreJoinScreen({ session, isMentor, user, onJoin }) {
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-stone-800 text-lg font-bold text-white">
                   {getInitials(user?.user_metadata?.full_name ?? user?.email)}
                 </div>
-                <span className="text-xs text-stone-500">Camera off</span>
+                <span className="text-xs text-stone-500">{s.videoCall.cameraOff}</span>
               </div>
             )}
             {loading && (
@@ -192,7 +194,7 @@ function PreJoinScreen({ session, isMentor, user, onJoin }) {
             )}
             {audioDevices.length > 0 && (
               <div>
-                <label className="mb-1 block text-xs font-medium text-stone-400">Microphone</label>
+                <label className="mb-1 block text-xs font-medium text-stone-400">{s.videoCall.microphone}</label>
                 <select
                   value={audioId}
                   onChange={(e) => setAudioId(e.target.value)}
@@ -200,14 +202,14 @@ function PreJoinScreen({ session, isMentor, user, onJoin }) {
                   style={{ colorScheme: 'dark', backgroundColor: '#1c1917', color: '#ffffff' }}
                 >
                   {audioDevices.map((d) => (
-                    <option key={d.deviceId} value={d.deviceId}>{d.label || 'Microphone'}</option>
+                    <option key={d.deviceId} value={d.deviceId}>{d.label || s.videoCall.microphone}</option>
                   ))}
                 </select>
               </div>
             )}
             {videoDevices.length > 0 && (
               <div>
-                <label className="mb-1 block text-xs font-medium text-stone-400">Camera</label>
+                <label className="mb-1 block text-xs font-medium text-stone-400">{s.videoCall.camera}</label>
                 <select
                   value={videoId}
                   onChange={(e) => setVideoId(e.target.value)}
@@ -215,7 +217,7 @@ function PreJoinScreen({ session, isMentor, user, onJoin }) {
                   style={{ colorScheme: 'dark', backgroundColor: '#1c1917', color: '#ffffff' }}
                 >
                   {videoDevices.map((d) => (
-                    <option key={d.deviceId} value={d.deviceId}>{d.label || 'Camera'}</option>
+                    <option key={d.deviceId} value={d.deviceId}>{d.label || s.videoCall.camera}</option>
                   ))}
                 </select>
               </div>
@@ -225,10 +227,10 @@ function PreJoinScreen({ session, isMentor, user, onJoin }) {
               onClick={join}
               className="mt-1 w-full rounded-xl bg-orange-500 py-3 text-sm font-bold text-white shadow-[0_4px_16px_color-mix(in srgb, var(--color-primary) 35%, transparent)] transition hover:bg-orange-400 active:scale-95"
             >
-              Join Meeting
+              {s.videoCall.joinMeeting}
             </button>
             <p className="text-center text-xs text-stone-500">
-              {isMentor ? 'You are the host of this session' : 'You are joining as a participant'}
+              {isMentor ? s.videoCall.youAreHost : s.videoCall.youAreParticipant}
             </p>
           </div>
         </div>
@@ -240,6 +242,7 @@ function PreJoinScreen({ session, isMentor, user, onJoin }) {
 // ─── ChatSidebar ──────────────────────────────────────────────────────────────
 
 function ChatSidebar({ messages, sessionId, currentUserId, onSend, onClose }) {
+  const { s } = useContent();
   const [text, setText]         = useState('');
   const [uploading, setUploading] = useState(false);
   const bottomRef               = useRef(null);
@@ -282,7 +285,7 @@ function ChatSidebar({ messages, sessionId, currentUserId, onSend, onClose }) {
     <div className="flex h-full w-72 flex-none flex-col border-l border-white/10 bg-stone-950/95 backdrop-blur-xl sm:w-80">
       {/* Header */}
       <div className="flex flex-shrink-0 items-center justify-between border-b border-white/10 px-4 py-3">
-        <span className="text-sm font-semibold text-white">In-meeting chat</span>
+        <span className="text-sm font-semibold text-white">{s.videoCall.inMeetingChat}</span>
         <button type="button" onClick={onClose} className="flex h-6 w-6 items-center justify-center rounded-md text-stone-400 transition hover:bg-white/10 hover:text-white">
           <X className="h-3.5 w-3.5" />
         </button>
@@ -293,7 +296,7 @@ function ChatSidebar({ messages, sessionId, currentUserId, onSend, onClose }) {
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-10 text-center">
             <MessageCircle className="mb-2 h-7 w-7 text-stone-700" />
-            <p className="text-xs text-stone-500">No messages yet</p>
+            <p className="text-xs text-stone-500">{s.videoCall.noMessages}</p>
           </div>
         )}
         {messages.map((msg) => {
@@ -336,7 +339,7 @@ function ChatSidebar({ messages, sessionId, currentUserId, onSend, onClose }) {
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(e); } }}
-              placeholder="Message…"
+              placeholder={s.videoCall.messagePlaceholder}
               rows={1}
               className="flex-1 resize-none px-3 py-2 text-sm placeholder-stone-500 focus:outline-none"
               style={{ maxHeight: 72, overflowY: 'auto', backgroundColor: '#1c1917', color: '#ffffff', caretColor: '#ffffff' }}
@@ -459,6 +462,7 @@ function DrawCanvas({ enabled, color, strokes, onStroke }) {
 // ─── MentorMenteeReviewModal ──────────────────────────────────────────────────
 
 function MentorMenteeReviewModal({ session, menteeId, onDone }) {
+  const { s } = useContent();
   const [rating, setRating]     = useState(0);
   const [hovered, setHovered]   = useState(0);
   const [notes, setNotes]       = useState('');
@@ -488,8 +492,8 @@ function MentorMenteeReviewModal({ session, menteeId, onDone }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
       <div className="w-full max-w-sm rounded-2xl bg-stone-900 p-6 ring-1 ring-white/10">
-        <h2 className="text-base font-bold text-white">Rate this mentee</h2>
-        <p className="mt-1 text-xs text-stone-400">Private — never visible to anyone except admins.</p>
+        <h2 className="text-base font-bold text-white">{s.videoCall.rateMentee}</h2>
+        <p className="mt-1 text-xs text-stone-400">{s.videoCall.rateMenteePrivate}</p>
         <div className="mt-4 flex justify-center gap-1.5">
           {[1, 2, 3, 4, 5].map((i) => (
             <button
@@ -572,6 +576,7 @@ function CtrlBtn({ active = true, danger = false, onClick, title, children, badg
 // ─── Main VideoCall ───────────────────────────────────────────────────────────
 
 export default function VideoCall() {
+  const { s } = useContent();
   const { sessionId }                  = useParams();
   const { user, loading: authLoading } = useAuth();
   const navigate                       = useNavigate();
@@ -640,7 +645,13 @@ export default function VideoCall() {
   const otherName = isMentor
     ? (session?.mentee_name ?? 'Mentee')
     : (session?.mentor?.name ?? 'Mentor');
-  const sessionLabel = SESSION_TYPE_LABELS[session?.session_type] ?? 'Session';
+  const sessionTypeLabels = {
+    career_advice:  s.videoCall.careerAdvice,
+    interview_prep: s.videoCall.interviewPrep,
+    resume_review:  s.videoCall.resumeReview,
+    networking:     s.videoCall.networking,
+  };
+  const sessionLabel = sessionTypeLabels[session?.session_type] ?? 'Session';
 
   // keep chatOpenRef in sync so signal handler closure can check it
   useEffect(() => { chatOpenRef.current = chatOpen; }, [chatOpen]);

@@ -151,18 +151,15 @@ export default function DevMentors() {
       const updated = await r.json();
       setMentors(ms => ms.map(m => m.id === id ? { ...m, available: updated.available } : m));
     } catch (e) {
-      alert(`Failed: ${e.message}`);
+      setError(e.message);
     }
   }
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-white">Mentors</h1>
-          <p className="text-xs text-stone-500 mt-0.5">{mentors.length} profiles</p>
-        </div>
-        <div className="flex gap-2">
+        <p className="text-sm text-stone-400">{mentors.length} profiles</p>
+        <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-stone-500 pointer-events-none" />
             <input
@@ -172,15 +169,21 @@ export default function DevMentors() {
               className="rounded-xl border border-white/8 bg-white/4 pl-8 pr-3 py-2 text-xs text-white placeholder-stone-600 outline-none focus:border-orange-500/50 focus:bg-white/6 w-48"
             />
           </div>
-          <select
-            value={filterAvailable}
-            onChange={e => setFilterAvailable(e.target.value)}
-            className="rounded-xl border border-white/8 bg-white/4 px-3 py-2 text-xs text-stone-300 outline-none focus:border-orange-500/50"
-          >
-            <option value="">All</option>
-            <option value="true">Active</option>
-            <option value="false">Hidden</option>
-          </select>
+          <div className="flex gap-1">
+            {[['', 'All'], ['true', 'Active'], ['false', 'Hidden']].map(([val, label]) => (
+              <button
+                key={val}
+                onClick={() => setFilterAvailable(val)}
+                className={`rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide transition-all ${
+                  filterAvailable === val
+                    ? 'bg-orange-500/15 text-orange-400 ring-1 ring-orange-500/25'
+                    : 'text-stone-500 hover:text-stone-300 hover:bg-white/4'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <button
             onClick={load}
             disabled={loading}
@@ -194,7 +197,8 @@ export default function DevMentors() {
       {error && (
         <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />
-          {error}
+          <span className="flex-1">{error}</span>
+          <button onClick={() => setError('')} className="text-red-400/60 hover:text-red-400 transition-colors text-base leading-none">×</button>
         </div>
       )}
 

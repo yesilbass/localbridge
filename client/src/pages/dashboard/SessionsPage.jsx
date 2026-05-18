@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useContent } from '../../content';
 import { Calendar, Check, X as XIcon, Clock, Video, List, CalendarDays, Star, AlertTriangle } from 'lucide-react';
 import { useDashboardSessions } from './dashboardHooks.js';
 import EmptyState from './EmptyState.jsx';
@@ -9,19 +10,12 @@ import ReviewModal from '../../components/ReviewModal.jsx';
 import { getMyReviewedSessionIds } from '../../api/reviews';
 import supabase from '../../api/supabase';
 
-function formatDateTime(iso, status) {
-  if (iso) {
-    const d = new Date(iso);
-    const date = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    const tz   = d.toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop();
-    return `${date} · ${time} ${tz}`;
-  }
-  if (status === 'pending')   return 'Time TBD · awaiting mentor';
-  if (status === 'accepted')  return 'Time syncing from Calendly';
-  if (status === 'cancelled') return 'Cancelled — no time';
-  if (status === 'declined')  return 'Declined — no time';
-  return 'Time TBD';
+function formatDateTimeRaw(iso) {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const tz   = d.toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop();
+  return `${date} · ${time} ${tz}`;
 }
 
 // Strip Bridge's internal markers from `session.message` so the user never
@@ -32,27 +26,36 @@ function cleanMessage(raw) {
   return cleaned || null;
 }
 
-const STATUS_STYLE = {
-  pending:   { bg: 'color-mix(in srgb, var(--color-warning) 14%, transparent)', fg: 'var(--color-warning)', label: 'Pending' },
-  accepted:  { bg: 'color-mix(in srgb, var(--color-success) 14%, transparent)', fg: 'var(--color-success)', label: 'Accepted' },
-  completed: { bg: 'var(--bridge-surface-muted)', fg: 'var(--bridge-text-muted)', label: 'Completed' },
-  declined:  { bg: 'color-mix(in srgb, var(--color-error) 14%, transparent)', fg: 'var(--color-error)', label: 'Declined' },
-  cancelled: { bg: 'color-mix(in srgb, var(--color-error) 14%, transparent)', fg: 'var(--color-error)', label: 'Cancelled' },
+const STATUS_BG_FG = {
+  pending:   { bg: 'color-mix(in srgb, var(--color-warning) 14%, transparent)', fg: 'var(--color-warning)' },
+  accepted:  { bg: 'color-mix(in srgb, var(--color-success) 14%, transparent)', fg: 'var(--color-success)' },
+  completed: { bg: 'var(--bridge-surface-muted)', fg: 'var(--bridge-text-muted)' },
+  declined:  { bg: 'color-mix(in srgb, var(--color-error) 14%, transparent)', fg: 'var(--color-error)' },
+  cancelled: { bg: 'color-mix(in srgb, var(--color-error) 14%, transparent)', fg: 'var(--color-error)' },
 };
 
 function StatusChip({ status }) {
-  const s = STATUS_STYLE[status] ?? STATUS_STYLE.pending;
+  const { s } = useContent();
+  const statusLabels = {
+    pending:   s.dashboard.statusPending,
+    accepted:  s.dashboard.statusAccepted,
+    completed: s.dashboard.statusCompleted,
+    declined:  s.dashboard.statusDeclined,
+    cancelled: s.dashboard.statusCancelled,
+  };
+  const style = STATUS_BG_FG[status] ?? STATUS_BG_FG.pending;
   return (
     <span
       className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.12em]"
-      style={{ backgroundColor: s.bg, color: s.fg }}
+      style={{ backgroundColor: style.bg, color: style.fg }}
     >
-      {s.label}
+      {statusLabels[status] ?? status}
     </span>
   );
 }
 
 function SessionCard({ session, isMentor, mentor, onAccept, onDecline, onCancel, onReview, reviewed, busy }) {
+  const { s } = useContent();
   const status = String(session.status ?? 'pending').toLowerCase();
   const isPast = session.scheduled_date && new Date(session.scheduled_date).getTime() <= Date.now() - 30 * 60 * 1000;
   const otherName = isMentor
@@ -105,7 +108,7 @@ function SessionCard({ session, isMentor, mentor, onAccept, onDecline, onCancel,
             className="mt-1 inline-flex items-center gap-1 text-[12px] tabular-nums"
             style={{ color: 'var(--bridge-text-secondary)' }}
           >
-            <Clock className="h-3.5 w-3.5" aria-hidden /> {formatDateTime(session.scheduled_date, status)}
+            <Clock className="h-3.5 w-3.5" aria-hidden /> {session.scheduled_date ? formatDateTimeRaw(session.scheduled_date) : status === 'pending' ? s.dashboard.timeTbd : status === 'accepted' ? s.dashboard.timeSyncing : status === 'cancelled' ? s.dashboard.timeCancelled : status === 'declined' ? s.dashboard.timeDeclined : s.dashboard.timeTbd}
           </p>
           {(() => {
             const msg = cleanMessage(session.message);
@@ -128,7 +131,7 @@ function SessionCard({ session, isMentor, mentor, onAccept, onDecline, onCancel,
             className="bridge-focus inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-bold"
             style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
           >
-            <Video className="h-3.5 w-3.5" aria-hidden /> Join
+            <Video className="h-3.5 w-3.5" aria-hidden /> {s.dashboard.joinCall}
           </Link>
         )}
         {isMentor && status === 'pending' && (
@@ -140,7 +143,7 @@ function SessionCard({ session, isMentor, mentor, onAccept, onDecline, onCancel,
               className="bridge-focus inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-bold"
               style={{ backgroundColor: 'var(--color-success)', color: '#fff', opacity: busy ? 0.5 : 1 }}
             >
-              <Check className="h-3.5 w-3.5" aria-hidden /> Accept
+              <Check className="h-3.5 w-3.5" aria-hidden /> {s.dashboard.accept}
             </button>
             <button
               type="button"
@@ -153,7 +156,7 @@ function SessionCard({ session, isMentor, mentor, onAccept, onDecline, onCancel,
                 opacity: busy ? 0.5 : 1,
               }}
             >
-              <XIcon className="h-3.5 w-3.5" aria-hidden /> Decline
+              <XIcon className="h-3.5 w-3.5" aria-hidden /> {s.dashboard.decline}
             </button>
           </>
         )}
@@ -169,7 +172,7 @@ function SessionCard({ session, isMentor, mentor, onAccept, onDecline, onCancel,
               opacity: busy ? 0.5 : 1,
             }}
           >
-            Cancel
+            {s.dashboard.cancelSession}
           </button>
         )}
         {!isMentor && (status === 'completed' || isPast) && status !== 'cancelled' && status !== 'declined' && onReview && !reviewed && (
@@ -179,7 +182,7 @@ function SessionCard({ session, isMentor, mentor, onAccept, onDecline, onCancel,
             className="bridge-focus inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-bold"
             style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
           >
-            <Star className="h-3.5 w-3.5" aria-hidden /> Leave a review
+            <Star className="h-3.5 w-3.5" aria-hidden /> {s.common.leaveReview}
           </button>
         )}
         {!isMentor && reviewed && (
@@ -190,7 +193,7 @@ function SessionCard({ session, isMentor, mentor, onAccept, onDecline, onCancel,
               color: 'var(--bridge-text-muted)',
             }}
           >
-            <Star className="h-3.5 w-3.5" aria-hidden /> Reviewed
+            <Star className="h-3.5 w-3.5" aria-hidden /> {s.dashboard.reviewed}
           </span>
         )}
       </div>

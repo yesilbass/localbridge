@@ -7,8 +7,10 @@ import {
   DUR_LONG,
   usePerfTier,
 } from '../landing/landingHooks';
+import { useContent } from '../../content';
 
 export default function AboutHero() {
+  const { s } = useContent();
   const reduced = useReducedMotion();
   const tier = usePerfTier();
   const flat = reduced || tier === 'low';
@@ -56,7 +58,7 @@ export default function AboutHero() {
                   letterSpacing: '0.22em',
                 }}
               >
-                About Bridge
+                {s.about.eyebrow}
               </span>
             </motion.div>
 

@@ -15,6 +15,7 @@ import { AuroraBg, KineticNumber } from '../dashboard/dashboardCinematic.jsx';
 import supabase from '../../api/supabase';
 import { ArrowLeft, BadgeCheck, Heart, Share } from 'lucide-react';
 import TierBadge from '../onboarding/mentor/verify/components/TierBadge';
+import { useContent } from '../../content';
 
 import {
   useFavoriteMentor,
@@ -48,6 +49,7 @@ function SessionTypeIcon({ typeKey, className = 'h-5 w-5' }) {
 // ─── Helpers ──────────────────────────────────────────────────────────
 // ─── MentorHero ───────────────────────────────────────────────────────
 function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare, shareCopied, onBook, heroCtaRef, flat }) {
+  const { s } = useContent();
   const rate = rawMentor?.session_rate ?? null;
   const joinedLabel = formatJoinedDate(mentor.joinedAt);
   const bio = rawMentor?.bio ?? null;
@@ -73,7 +75,7 @@ function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare,
             onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--bridge-text-muted)'; }}
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
-            All mentors
+            {s.mentorProfile.allMentors}
           </Link>
         </nav>
 
@@ -295,7 +297,7 @@ function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare,
                 }}
               >
                 <Heart className="h-4 w-4" style={{ fill: isFavorited ? 'currentColor' : 'none' }} aria-hidden />
-                {isFavorited ? 'Saved' : 'Save'}
+                {isFavorited ? s.mentorProfile.savedToFavorites : s.mentorProfile.saveToFavorites}
               </button>
 
               <button
@@ -305,7 +307,7 @@ function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare,
                 style={{ background: 'var(--bridge-surface)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)', color: 'var(--bridge-text-secondary)', outlineColor: 'var(--color-primary)' }}
               >
                 <Share className="h-4 w-4" aria-hidden />
-                {shareCopied ? 'Copied' : 'Share'}
+                {shareCopied ? s.mentorProfile.shareCopied : s.mentorProfile.share}
               </button>
             </div>
 
@@ -418,6 +420,7 @@ function StickyBar({ mentor, rawMentor, isFavorited, onToggleFavorite, onBook, v
 
 // ─── AboutSection ─────────────────────────────────────────────────────
 function AboutSection({ mentor, rawMentor }) {
+  const { s } = useContent();
   const bio = rawMentor?.bio ?? null;
   const [expanded, setExpanded] = useState(false);
   if (!bio?.trim()) return null;
@@ -428,7 +431,7 @@ function AboutSection({ mentor, rawMentor }) {
   return (
     <section aria-labelledby="about-heading" className="mt-16 pt-14" style={{ borderTop: '1px solid var(--bridge-border)' }}>
       <p className="font-black uppercase" style={{ fontSize: '11px', letterSpacing: '0.28em', color: 'var(--color-primary)' }}>
-        About
+        {s.mentorProfile.aboutHeading}
       </p>
       <h2
         id="about-heading"

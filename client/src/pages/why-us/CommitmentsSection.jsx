@@ -2,6 +2,7 @@ import { BadgeCheck, Eye, ShieldOff, Handshake } from 'lucide-react';
 import RevealOnScroll from '../landing/RevealOnScroll';
 import { EASE, DUR_SHORT } from '../landing/landingHooks';
 import { COMMITMENTS, WHY_US_SECTION_PAD } from './whyUsData';
+import { useContent } from '../../content';
 
 const ICON_MAP = {
   BadgeCheck,
@@ -22,6 +23,7 @@ const cardLeave = (e) => {
 };
 
 export default function CommitmentsSection() {
+  const { s } = useContent();
   return (
     <section
       id="commitments"
@@ -46,10 +48,10 @@ export default function CommitmentsSection() {
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
-              Four commitments,
+              {s.whyUs.commitmentsHeading1}
             </span>
             <span className="block" style={{ color: 'var(--color-primary)' }}>
-              in writing.
+              {s.whyUs.commitmentsHeading2}
             </span>
           </h2>
 

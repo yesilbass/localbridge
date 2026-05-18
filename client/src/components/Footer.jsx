@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone, Sun, Moon, Monitor } from 'lucide-react';
+import { Mail, MapPin, Sun, Moon, Monitor } from 'lucide-react';
 import { COMPANY_EMAIL, mailtoHref } from '../config/contact';
 import { applyAppearance, APPEARANCE_STORAGE_KEY } from '../utils/appearance';
 import { useI18n } from '../i18n';
@@ -9,56 +9,85 @@ import { useContent } from '../content';
 const linkClass =
   'text-sm text-white transition-colors duration-200 hover:text-orange-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded-sm';
 
+const bottomLinkClass =
+  'text-white transition-colors hover:text-orange-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded-sm';
+
 function useCurrentTheme() {
   const [theme, setThemeState] = useState(() => {
     try {
       const raw = localStorage.getItem(APPEARANCE_STORAGE_KEY);
-      if (raw) {
-        const o = JSON.parse(raw);
-        return o?.theme || 'light';
-      }
+      if (raw) { const o = JSON.parse(raw); return o?.theme || 'light'; }
     } catch { /* ignore */ }
     return 'light';
   });
+
+  // Sync when theme is changed from another component (Settings, etc.)
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key !== APPEARANCE_STORAGE_KEY) return;
+      try {
+        const o = JSON.parse(e.newValue);
+        if (o?.theme) setThemeState(o.theme);
+      } catch { /* ignore */ }
+    };
+    // Also handle same-tab changes via a custom event that applyAppearance could dispatch
+    const onSameTab = () => {
+      try {
+        const raw = localStorage.getItem(APPEARANCE_STORAGE_KEY);
+        if (raw) { const o = JSON.parse(raw); if (o?.theme) setThemeState(o.theme); }
+      } catch { /* ignore */ }
+    };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('bridge-theme-change', onSameTab);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('bridge-theme-change', onSameTab);
+    };
+  }, []);
+
   return [theme, setThemeState];
 }
 
 export default function Footer() {
   const { t } = useI18n();
-  const { isTranslating } = useContent();
+  useContent(); // keep subscription for any future content usage
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [theme, setThemeState] = useCurrentTheme();
 
-  function handleTheme(t) {
-    setThemeState(t);
-    applyAppearance({ theme: t });
+  function handleTheme(val) {
+    setThemeState(val);
+    applyAppearance({ theme: val });
+    // Notify same-tab listeners (e.g. other footer instances, devtools)
+    window.dispatchEvent(new Event('bridge-theme-change'));
   }
 
   return (
-    <footer className="relative z-10 mt-auto overflow-hidden border-t border-orange-500/18 bg-gradient-to-b from-[#111009] via-stone-950 to-[#070604] text-stone-400">
+    <footer className="relative z-10 mt-auto overflow-hidden border-t border-orange-500/15 bg-gradient-to-b from-[#16130e] via-stone-950 to-[#070604] text-stone-400">
 
-      {/* Luminous top hairline */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/65 to-transparent" />
+      {/* Top gradient fade — softens the transition from light-mode canvas */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{ background: 'linear-gradient(to right, transparent, color-mix(in srgb, var(--color-primary) 55%, transparent), transparent)' }} />
 
-      {/* Ambient top glow */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_140%_65%_at_50%_-25%,color-mix(in srgb, var(--color-primary) 13%, transparent),transparent_52%)]" />
+      {/* Ambient glow */}
+      <div aria-hidden className="pointer-events-none absolute inset-0"
+        style={{ background: 'radial-gradient(ellipse 140% 60% at 50% -20%, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent 52%)' }} />
 
-      {/* Grain */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.07] mix-blend-overlay" />
+      {/* Grain texture */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-bridge-noise opacity-[0.06] mix-blend-overlay" />
 
       {/* ── Newsletter banner ── */}
-      <div className="relative border-b border-white/[0.055]">
+      <div className="relative border-b border-white/[0.05]">
         <div className="mx-auto max-w-bridge px-4 py-10 sm:px-6 lg:px-8 xl:px-10">
           <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[1.05rem] font-bold text-stone-100 tracking-tight">{t('footer.stayInLoop', 'Stay in the loop')}</p>
+              <p className="text-[1.05rem] font-bold tracking-tight text-stone-100">{t('footer.stayInLoop', 'Stay in the loop')}</p>
               <p className="mt-1 text-sm text-stone-400">{t('footer.newsletterBody', 'Mentor spotlights, career resources, product updates. No spam, ever.')}</p>
             </div>
             {subscribed ? (
-              <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/22 bg-emerald-500/[0.09] px-5 py-3 text-sm font-medium text-emerald-400">
+              <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/22 bg-emerald-500/[0.08] px-5 py-3 text-sm font-medium text-emerald-400">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                {t('footer.subscribed', "You're subscribed!")}
+                {t('footer.subscribed', "You're on the list!")}
               </div>
             ) : (
               <form
@@ -71,11 +100,15 @@ export default function Footer() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   required
-                  className="w-full min-w-0 rounded-xl border border-white/[0.09] bg-white/[0.04] px-4 py-3 text-sm text-stone-100 placeholder:text-stone-600 outline-none transition focus:border-orange-400/45 focus:bg-white/[0.06] sm:w-60"
+                  className="w-full min-w-0 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-stone-100 placeholder:text-stone-600 outline-none transition focus:border-orange-400/40 focus:bg-white/[0.06] sm:w-60"
                 />
                 <button
                   type="submit"
-                  className="btn-sheen shrink-0 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_22px_-4px_color-mix(in_srgb,_var(--color-primary)_50%,_transparent)] transition hover:shadow-[0_8px_34px_-4px_color-mix(in_srgb,_var(--color-primary)_72%,_transparent)] hover:brightness-105"
+                  className="btn-sheen shrink-0 rounded-xl px-5 py-3 text-sm font-semibold text-white transition hover:brightness-105"
+                  style={{
+                    background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-hover))',
+                    boxShadow: '0 4px 22px -4px color-mix(in srgb, var(--color-primary) 50%, transparent)',
+                  }}
                 >
                   {t('footer.subscribe', 'Subscribe')}
                 </button>
@@ -91,12 +124,8 @@ export default function Footer() {
 
           {/* ── Brand column ── */}
           <div className="space-y-5 lg:col-span-4">
-            <Link to="/" className="group inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">
-              <span className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-lg font-bold text-white shadow-[0_8px_24px_-4px_color-mix(in srgb, var(--color-primary) 55%, transparent)] transition group-hover:shadow-[0_14px_36px_-4px_color-mix(in srgb, var(--color-primary) 80%, transparent)] group-hover:brightness-110">
-                <span aria-hidden className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-white/28 to-transparent opacity-55 transition group-hover:opacity-85" />
-                <span className="relative">B</span>
-              </span>
-              <span className="font-display text-xl font-semibold tracking-tight text-stone-50">Bridge</span>
+            <Link to="/" className="group inline-flex items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">
+              <span className="font-display text-xl font-semibold tracking-tight text-stone-50 transition group-hover:text-white">Bridge</span>
             </Link>
 
             <p className="max-w-xs text-sm leading-relaxed text-stone-300">
@@ -125,7 +154,7 @@ export default function Footer() {
               ].map((s) => (
                 <a
                   key={s.label} href={s.href} aria-label={s.label}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.055] bg-white/[0.03] text-white transition hover:border-orange-500/22 hover:bg-orange-500/[0.09]"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.05] bg-white/[0.03] text-stone-400 transition hover:border-orange-500/20 hover:bg-orange-500/[0.08] hover:text-stone-200"
                 >
                   {s.icon}
                 </a>
@@ -135,11 +164,11 @@ export default function Footer() {
             {/* Theme switcher */}
             <div className="pt-1">
               <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.22em] text-white">{t('footer.displayMode', 'Display mode')}</p>
-              <div className="inline-flex items-center rounded-xl border border-white/[0.065] bg-white/[0.025] p-1 gap-0.5">
+              <div className="inline-flex items-center rounded-xl border border-white/[0.06] bg-white/[0.025] p-1 gap-0.5">
                 {[
-                  { value: 'light',  label: t('footer.light', 'Light'),  icon: <Sun className="h-3.5 w-3.5 shrink-0" /> },
+                  { value: 'light',  label: t('footer.light',  'Light'),  icon: <Sun  className="h-3.5 w-3.5 shrink-0" /> },
                   { value: 'system', label: t('footer.system', 'System'), icon: <Monitor className="h-3.5 w-3.5 shrink-0" /> },
-                  { value: 'dark',   label: t('footer.dark', 'Dark'),   icon: <Moon className="h-3.5 w-3.5 shrink-0" /> },
+                  { value: 'dark',   label: t('footer.dark',   'Dark'),   icon: <Moon className="h-3.5 w-3.5 shrink-0" /> },
                 ].map(({ value, label, icon }) => (
                   <button
                     key={value}
@@ -147,9 +176,13 @@ export default function Footer() {
                     title={label}
                     className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-semibold transition-all duration-200 ${
                       theme === value
-                        ? 'bg-orange-500/18 text-orange-400 shadow-[inset_0_1px_0_color-mix(in srgb, var(--color-primary) 12%, transparent)]'
+                        ? 'text-orange-400'
                         : 'text-white hover:text-orange-200'
                     }`}
+                    style={theme === value ? {
+                      backgroundColor: 'color-mix(in srgb, var(--color-primary) 14%, transparent)',
+                      boxShadow: 'inset 0 1px 0 color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                    } : undefined}
                   >
                     {icon}
                     <span className="hidden sm:inline">{label}</span>
@@ -165,10 +198,10 @@ export default function Footer() {
             <ul className="mt-4 space-y-3">
               {[
                 { label: t('footer.browseMentors', 'Browse Mentors'), to: '/mentors' },
-                { label: t('footer.aiMatching', 'AI Matching'), to: '/mentors' },
-                { label: t('footer.resumeReview', 'Resume Review'), to: '/resume' },
-                { label: t('nav.pricing', 'Pricing'), to: '/pricing' },
-                { label: t('footer.dashboard', 'Dashboard'), to: '/dashboard' },
+                { label: t('footer.aiMatching', 'AI Matching'),       to: '/mentors' },
+                { label: t('footer.resumeReview', 'Resume Review'),   to: '/resume' },
+                { label: t('nav.pricing', 'Pricing'),                 to: '/pricing' },
+                { label: t('footer.dashboard', 'Dashboard'),          to: '/dashboard' },
               ].map(({ label, to }) => (
                 <li key={label}><Link to={to} className={linkClass}>{label}</Link></li>
               ))}
@@ -180,12 +213,12 @@ export default function Footer() {
             <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">{t('footer.company', 'Company')}</p>
             <ul className="mt-4 space-y-3">
               {[
-                { label: t('nav.about', 'About'), to: '/about' },
-                { label: t('footer.whyUs', 'Why Bridge'), to: '/why-us' },
-                { label: t('footer.blog', 'Blog'), to: '/blog' },
-                { label: t('footer.careers', 'Careers'), to: '/careers' },
-                { label: t('footer.trustSafety', 'Trust & Safety'), to: '/trust' },
-                { label: t('footer.community', 'Community'), to: '/community' },
+                { label: t('nav.about', 'About'),                    to: '/about' },
+                { label: t('footer.whyUs', 'Why Bridge'),            to: '/why-us' },
+                { label: t('footer.blog', 'Blog'),                   to: '/blog' },
+                { label: t('footer.careers', 'Careers'),             to: '/careers' },
+                { label: t('footer.trustSafety', 'Trust & Safety'),  to: '/trust' },
+                { label: t('footer.community', 'Community'),         to: '/community' },
               ].map(({ label, to }) => (
                 <li key={label}><Link to={to} className={linkClass}>{label}</Link></li>
               ))}
@@ -201,17 +234,13 @@ export default function Footer() {
                 <a href={mailtoHref()} className="transition-colors hover:text-white">{COMPANY_EMAIL}</a>
               </li>
               <li className="flex items-start gap-3 text-stone-300">
-                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-orange-400/65" aria-hidden />
-                <span>+1 (555) 123-4567</span>
-              </li>
-              <li className="flex items-start gap-3 text-stone-300">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-400/65" aria-hidden />
                 <span>San Francisco, CA</span>
               </li>
             </ul>
 
             {/* Platform status */}
-            <div className="mt-6 inline-flex items-center gap-2.5 rounded-xl border border-white/[0.055] bg-white/[0.03] px-4 py-2.5">
+            <div className="mt-6 inline-flex items-center gap-2.5 rounded-xl border border-white/[0.05] bg-white/[0.03] px-4 py-2.5">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]" />
@@ -223,18 +252,18 @@ export default function Footer() {
       </div>
 
       {/* ── Bottom bar ── */}
-      <div className="relative border-t border-white/[0.045]">
-        <div className="mx-auto flex max-w-bridge flex-col items-center justify-between gap-4 px-4 py-5 text-xs text-white sm:flex-row sm:px-6 lg:px-8 xl:px-10">
-          <p className="shrink-0">© {new Date().getFullYear()} Bridge. {t('footer.rightsReserved', 'All rights reserved.')}</p>
+      <div className="relative border-t border-white/[0.04]">
+        <div className="mx-auto flex max-w-bridge flex-col items-center justify-between gap-4 px-4 py-5 text-xs sm:flex-row sm:px-6 lg:px-8 xl:px-10">
+          <p className="shrink-0 text-white">© {new Date().getFullYear()} Bridge. {t('footer.rightsReserved', 'All rights reserved.')}</p>
           <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
             {[
               { label: t('footer.privacy', 'Privacy'), to: '/privacy' },
-              { label: t('footer.terms', 'Terms'), to: '/terms' },
+              { label: t('footer.terms', 'Terms'),     to: '/terms' },
               { label: t('footer.cookies', 'Cookies'), to: '/cookies' },
-              { label: t('footer.help', 'Help'), to: '/help' },
+              { label: t('footer.help', 'Help'),       to: '/help' },
               { label: t('footer.contact', 'Contact'), to: '/contact' },
             ].map(({ label, to }) => (
-              <Link key={to} to={to} className="text-white transition-colors hover:text-orange-200">{label}</Link>
+              <Link key={to} to={to} className={bottomLinkClass}>{label}</Link>
             ))}
           </div>
         </div>

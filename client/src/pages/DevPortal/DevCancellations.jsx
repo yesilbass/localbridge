@@ -34,9 +34,10 @@ export default function DevCancellations() {
   const [loading, setLoading]   = useState(true);
   const [filter, setFilter]     = useState('pending');
   const [expanded, setExpanded] = useState(null);
-  const [acting, setActing]     = useState(null);
-  const [denyNote, setDenyNote] = useState('');
+  const [acting, setActing]         = useState(null);
+  const [denyNote, setDenyNote]     = useState('');
   const [denyTarget, setDenyTarget] = useState(null);
+  const [approveTarget, setApproveTarget] = useState(null);
 
   async function load() {
     setLoading(true);
@@ -51,13 +52,13 @@ export default function DevCancellations() {
   useEffect(() => { load(); }, [filter]); // eslint-disable-line
 
   async function handleApprove(id) {
-    if (!window.confirm('Approve this cancellation? The session will be marked cancelled and, if the mentor requested it, the mentee gets 2 weeks of Pro.')) return;
     setActing(id);
     try {
       await devFetch(`/cancellations/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ action: 'approve' }),
       });
+      setApproveTarget(null);
       await load();
     } finally { setActing(null); }
   }
@@ -82,12 +83,8 @@ export default function DevCancellations() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-orange-500">Review Queue</p>
-          <h1 className="mt-1 font-display text-2xl font-black text-white">Cancellation Requests</h1>
-          <p className="mt-1 text-sm text-stone-400">Review, approve, or deny user-submitted cancellation requests.</p>
-        </div>
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-stone-400">Review, approve, or deny user-submitted cancellation requests.</p>
         <button onClick={load} className="flex items-center gap-2 rounded-xl border border-white/8 px-4 py-2 text-xs font-bold text-stone-400 hover:text-white transition">
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -244,23 +241,49 @@ export default function DevCancellations() {
                     {r.status === 'pending' && (
                       <div className="space-y-3 pt-1">
                         {!isDenyOpen ? (
-                          <div className="flex gap-3">
-                            <button
-                              onClick={() => handleApprove(r.id)}
-                              disabled={acting === r.id}
-                              className="flex items-center gap-2 rounded-xl bg-emerald-500/12 px-5 py-2.5 text-xs font-bold text-emerald-400 ring-1 ring-emerald-500/20 hover:bg-emerald-500/20 transition disabled:opacity-50"
-                            >
-                              <CheckCircle className="h-3.5 w-3.5" />
-                              {acting === r.id ? 'Processing…' : 'Approve'}
-                            </button>
-                            <button
-                              onClick={() => setDenyTarget(r.id)}
-                              disabled={acting === r.id}
-                              className="flex items-center gap-2 rounded-xl bg-red-500/12 px-5 py-2.5 text-xs font-bold text-red-400 ring-1 ring-red-500/20 hover:bg-red-500/20 transition disabled:opacity-50"
-                            >
-                              <XCircle className="h-3.5 w-3.5" />
-                              Deny
-                            </button>
+                          <div className="space-y-3">
+                            {approveTarget === r.id ? (
+                              <div className="rounded-xl border border-amber-500/20 bg-amber-500/8 px-4 py-3 space-y-3">
+                                <p className="text-xs font-semibold text-amber-400">
+                                  Session will be marked cancelled.{r.requester_role === 'mentor' ? ' Mentee receives 2 weeks of Pro.' : ''}
+                                </p>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => handleApprove(r.id)}
+                                    disabled={acting === r.id}
+                                    className="flex items-center gap-2 rounded-xl bg-emerald-500/12 px-4 py-2 text-xs font-bold text-emerald-400 ring-1 ring-emerald-500/20 hover:bg-emerald-500/20 transition disabled:opacity-50"
+                                  >
+                                    <CheckCircle className="h-3.5 w-3.5" />
+                                    {acting === r.id ? 'Processing…' : 'Confirm Approve'}
+                                  </button>
+                                  <button
+                                    onClick={() => setApproveTarget(null)}
+                                    className="rounded-xl px-4 py-2 text-xs font-bold text-stone-500 hover:text-stone-300 transition"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex gap-3">
+                                <button
+                                  onClick={() => setApproveTarget(r.id)}
+                                  disabled={acting === r.id}
+                                  className="flex items-center gap-2 rounded-xl bg-emerald-500/12 px-5 py-2.5 text-xs font-bold text-emerald-400 ring-1 ring-emerald-500/20 hover:bg-emerald-500/20 transition disabled:opacity-50"
+                                >
+                                  <CheckCircle className="h-3.5 w-3.5" />
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => setDenyTarget(r.id)}
+                                  disabled={acting === r.id}
+                                  className="flex items-center gap-2 rounded-xl bg-red-500/12 px-5 py-2.5 text-xs font-bold text-red-400 ring-1 ring-red-500/20 hover:bg-red-500/20 transition disabled:opacity-50"
+                                >
+                                  <XCircle className="h-3.5 w-3.5" />
+                                  Deny
+                                </button>
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <div className="space-y-3">

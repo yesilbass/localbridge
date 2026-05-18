@@ -3,6 +3,7 @@ import RevealOnScroll from '../landing/RevealOnScroll';
 import { mailtoHref } from '../../config/contact';
 import { EASE, DUR_SHORT } from '../landing/landingHooks';
 import { ABOUT_SECTION_PAD, TEAM_FEATURED, TEAM_SMALL } from './aboutData';
+import { useContent } from '../../content';
 
 const SOCIAL_RESET = (e) => {
   e.currentTarget.style.color = 'var(--bridge-text-secondary)';
@@ -35,6 +36,7 @@ const CARD_TRANSITION = `transform ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})
 const SOCIAL_TRANSITION = `color ${DUR_SHORT}s cubic-bezier(${EASE.join(',')}), box-shadow ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`;
 
 export default function TeamSection() {
+  const { s } = useContent();
   return (
     <section
       id="team"
@@ -53,7 +55,7 @@ export default function TeamSection() {
               letterSpacing: '0.32em',
             }}
           >
-            Team
+            {s.about.teamEyebrow}
           </p>
 
           <h2

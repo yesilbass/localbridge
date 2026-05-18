@@ -1,90 +1,79 @@
 # Bridge
 
-Bridge is a paid mentorship marketplace that connects job seekers and early-career professionals with vetted industry mentors for one-on-one sessions. Users browse mentors, book via Stripe, complete an AI-guided intake call, join a live video session, and leave a review — all in one flow.
+A paid mentorship marketplace connecting job seekers and early-career professionals with vetted industry mentors. Mentees browse mentors, book a session via Stripe, complete an AI-guided intake call, join a live video session, and leave a review — all in one flow.
+
+---
 
 ## Features
 
-- **AI mentor matching** — OpenAI-powered goal-based matching with an animated live-demo widget on the landing page (`MentorMatchWizard`, `aiMatching.js`)
-- **Mentor browse & profiles** — filterable mentor directory with tier badges, availability, reviews, and a booking widget
-- **Session booking** — Stripe Checkout (price locked server-side); Google Calendar invite sent on confirmation
-- **AI intake call** — voice-driven pre-session intake using the OpenAI Realtime API; answers saved to Supabase and surfaced to the mentor via `IntakeSummaryModal`
-- **WebRTC video calls** — peer-to-peer video via the browser WebRTC APIs with Supabase Realtime signalling; includes mic/cam toggle, screen share, in-call chat, a collaborative whiteboard, and a session timer (`VideoCall.jsx`)
-- **AI resume review** — PDF upload to Supabase Storage + Anthropic/OpenAI analysis with section-by-section scoring and improvement suggestions
-- **Mentor subscriptions** — tiered subscription plans via Stripe Billing (`Pricing/`)
-- **Reviews** — star ratings with averages maintained by a Postgres DB trigger (never computed client-side)
-- **Notifications** — in-app notification panel (`NotificationPanel.jsx`) via Supabase Realtime
-- **Session cancellations** — cancellation requests with monthly rate-limiting (`cancel-session.js`, `CancellationModal.jsx`)
-- **Multi-step mentor onboarding** — availability, rate, bio, Google Calendar OAuth connect
-- **Three design palettes × light/dark** — `modern-signal`, `grounded-guidance`, `quiet-authority`; route-driven via `routePalette.js` and `appearance.css`
-- **Developer portal** — internal tooling at `/bridge-internal/*` outside the normal app layout
+- **Mentor discovery** — filterable directory with tier badges, session rates, availability, and AI-powered goal-based matching
+- **Two-phase mentor onboarding** — 9-step verification application (LinkedIn, diploma, references, identity) → admin review → profile completion; tiers and rates assigned server-side by a scoring algorithm
+- **Admin review panel** — approve or reject mentor applications at `/admin`, with scoring breakdowns
+- **Session booking** — Stripe Checkout (price locked server-side); Calendly integration for scheduling; Google Calendar invite sent on confirmation
+- **AI intake call** — voice-driven pre-session intake via the OpenAI Realtime API; answers surfaced to the mentor on their dashboard
+- **Live video sessions** — peer-to-peer WebRTC video with mic/camera toggle, screen share, in-call chat, collaborative whiteboard, and session timer; no third-party video SDK
+- **AI resume review** — PDF upload to Supabase Storage + Claude analysis with section-by-section scoring and improvement suggestions
+- **Mentor subscriptions** — tiered plans via Stripe Billing; 50% student discount auto-applied for `.edu` emails
+- **Reviews** — star ratings with averages maintained by a Postgres trigger
+- **Favorites** — save and manage preferred mentors
+- **In-app notifications** — real-time notification panel via Supabase Realtime
+- **Three design palettes** — `modern-signal`, `grounded-guidance`, `quiet-authority`; route-driven palette switching with light and dark variants
+
+---
 
 ## Tech Stack
 
-| Layer | Tech |
+| Layer | Technology |
 |---|---|
-| Frontend | React 19, Vite 8, Tailwind CSS v4 (CSS-first, no config file) |
-| Animation | `motion/react`, GSAP (scroll-linked), Three.js + React Three Fiber (3D) |
-| Routing | `react-router-dom` v7 |
-| Auth & DB | Supabase (Postgres + RLS + Auth + Storage + Realtime) |
-| Video | WebRTC (native browser APIs) + Supabase Realtime (signalling) |
-| Payments | Stripe — Checkout Sessions + Subscriptions (`stripe@22`) |
-| Serverless API | Vercel Functions (`/api/*.js`) |
-| Local dev server | Express 5 (`server/`) — mirrors the Vercel functions |
+| Frontend | React 19, Vite 8, Tailwind CSS v4 (CSS-first) |
+| Routing | react-router-dom v7 |
+| Animation | motion/react, GSAP, Three.js + React Three Fiber |
+| Auth & Database | Supabase (Postgres + RLS + Auth + Realtime + Storage) |
+| Payments | Stripe — Checkout Sessions + Subscriptions |
+| Scheduling | Calendly (embedded widget + webhook) |
+| Video | Native browser WebRTC + Supabase Realtime (signalling) |
 | Calendar | Google OAuth 2.0 + Google Calendar API |
-| AI | OpenAI Realtime API (intake call) · OpenAI + Anthropic SDK (matching, resume review) |
+| AI | OpenAI Realtime API · OpenAI GPT-4o-mini · Anthropic Claude Sonnet |
+| API (production) | Vercel Serverless Functions (`api/`) |
+| API (local dev) | Express 5 (`server/`) — mirrors `api/` |
 | Deployment | Vercel (auto-deploy from `main`) |
+
+---
 
 ## Project Structure
 
 ```
 bridge/
-├── api/                          # Vercel serverless functions (production)
-│   ├── _lib/                     # Shared: JWT auth, CORS helper, calendar booking logic
-│   ├── calendar-availability.js
-│   ├── calendar-book.js
-│   ├── cancel-session.js
+├── api/                    # Vercel serverless functions (production)
+│   ├── _lib/               # Shared: JWT auth, CORS, calendar booking logic
+│   ├── admin/              # Approve / reject mentor applications
+│   ├── calendly/           # Calendly OAuth + webhook handlers
+│   ├── verification/       # Mentor verification pipeline endpoints
+│   ├── utils/              # User name lookup, room slug, cron helpers
 │   ├── create-booking-checkout.js
 │   ├── create-subscription-checkout.js
 │   ├── finalize-checkout.js
-│   ├── google-auth.js
-│   ├── google-callback.js
-│   └── realtime-session.js       # OpenAI Realtime API ephemeral key endpoint
+│   ├── cancel-session.js
+│   ├── realtime-session.js
+│   └── ai-proxy.js
 ├── client/
 │   └── src/
-│       ├── api/                  # Client-side data modules (one file per domain)
-│       │   ├── supabase.js       # Singleton — never re-instantiate
-│       │   ├── sessions.js · mentors.js · reviews.js · favorites.js
-│       │   ├── aiMatching.js · aiResumeReview.js · aiUsage.js
-│       │   ├── calendar.js · stripe.js · intake.js · cancellations.js
-│       │   └── resumeStorage.js · mentorOnboarding.js · menteeProfile.js
-│       ├── components/           # Shared UI (Navbar, Footer, ReviewModal, EmbeddedCheckoutPanel…)
-│       ├── context/              # AuthContext + useAuth hook
-│       ├── pages/
-│       │   ├── landing/          # Hero, Bento, Manifesto, HowItWorks, Outcomes, FinalCta…
-│       │   ├── dashboard/        # Mentee + mentor dashboards, session calendar, hooks
-│       │   ├── mentor-profile/   # Profile page with booking widget
-│       │   ├── Mentors/          # Browse/filter directory + AI match cards
-│       │   ├── Pricing/          # Subscription tiers + comparison table
-│       │   ├── VideoCall.jsx     # WebRTC video session
-│       │   ├── IntakeCall.jsx    # OpenAI Realtime intake flow
-│       │   ├── ResumeReview.jsx  # AI resume upload + analysis
-│       │   ├── MentorOnboarding.jsx
-│       │   ├── Settings.jsx · Profile.jsx · Login.jsx · Register.jsx
-│       │   ├── About.jsx · DevPortal/
-│       │   └── footer/           # Static pages (FAQ, Terms, Privacy…)
-│       ├── utils/                # appearance.js, routePalette.js, mentorAvailability…
-│       ├── constants/            # sessionTypes.js (single source of truth)
-│       ├── index.css             # Tailwind v4 entry + all @utility definitions + keyframes
-│       └── appearance.css        # 3 palettes × 2 themes — do not duplicate tokens
-├── server/                       # Express 5 dev server (local only, mirrors /api)
-│   └── routes/                   # sessions, calendar, googleAuth, stripe, support, cancellations
+│       ├── api/            # Client data modules — one file per domain
+│       ├── components/     # Shared UI components
+│       ├── context/        # AuthContext + useAuth hook
+│       ├── pages/          # Route-level page components
+│       ├── constants/      # sessionTypes.js — source of truth for session type keys
+│       ├── utils/          # routePalette.js, helpers
+│       ├── index.css       # Tailwind v4 entry + custom utilities + keyframes
+│       └── appearance.css  # Palette tokens (3 palettes × 2 themes)
+├── server/                 # Express 5 — local dev API server (mirrors api/)
 ├── supabase/
-│   ├── migrations/               # Versioned SQL migrations (apply via Supabase CLI)
-│   ├── seeds/                    # mentor_tiers_seed.sql
-│   └── functions/                # Edge functions (send-support-email…)
-├── vercel.json                   # Rewrites + cache headers
-└── package.json                  # Monorepo root — shared deps for Vercel serverless functions
+│   ├── migrations/         # Versioned SQL migrations
+│   └── seeds/
+└── vercel.json             # Rewrites, cache headers, security headers
 ```
+
+---
 
 ## Getting Started
 
@@ -92,91 +81,110 @@ bridge/
 
 - Node.js 18+
 - npm 9+
-- A [Supabase](https://supabase.com) project
-- A [Stripe](https://stripe.com) account (test mode is fine for local dev)
-- A [Google Cloud](https://console.cloud.google.com) project with the Calendar API and OAuth credentials
-- An [OpenAI](https://platform.openai.com) API key
+- Access to the shared Supabase project (ask Berk)
+- Stripe test-mode keys
+- Google Cloud project with Calendar API and OAuth 2.0 credentials
+- OpenAI API key (GPT-4o and Realtime API access)
+- Anthropic API key (Claude Sonnet access)
 
-### Install dependencies
+### Install
 
 ```bash
-# From the repo root
+# Install root + API dependencies
 npm install
+
+# Install frontend dependencies
 cd client && npm install
 ```
 
-### Configure environment
+### Configure Environment
 
-```bash
-cp server/.env.example server/.env
+You need two `.env` files. Never commit either one.
+
+**`server/.env`**
+
+```
+PORT=3001
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+JWT_SECRET=
+STRIPE_SECRET_KEY=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://localhost:3001/auth/google/callback
+CLIENT_URL=http://localhost:5173
 ```
 
-Fill in `server/.env`:
+**`client/.env.local`**
 
-| Variable | Description |
-|---|---|
-| `SUPABASE_URL` | Your Supabase project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key — **server-side only, never expose to client** |
-| `JWT_SECRET` | Secret used to sign/verify session JWTs |
-| `STRIPE_SECRET_KEY` | Stripe secret key |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `GOOGLE_REDIRECT_URI` | `http://localhost:3001/auth/google/callback` for local dev |
-| `CLIENT_URL` | Frontend origin, e.g. `http://localhost:5173` |
-| `PORT` | Express port (default `3001`) |
-
-Create `client/.env.local` for public client-side keys:
-
-```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
-VITE_OPENAI_API_KEY=sk-...
+```
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_STRIPE_PUBLISHABLE_KEY=
+VITE_SERVER_URL=http://localhost:3001
+VITE_OPENAI_API_KEY=
+VITE_ANTHROPIC_API_KEY=
 ```
 
-### Run locally
+### Run Locally
 
 ```bash
-# From the repo root — starts Express API + Vite dev server concurrently
+# From the repo root — starts Express API (port 3001) + Vite dev server (port 5173)
 npm run dev
 ```
 
-- **Client** → http://localhost:5173
-- **API** → http://localhost:3001
+- Frontend: http://localhost:5173  
+- API: http://localhost:3001
 
-### Build
-
-```bash
-npm run build
-```
-
-Output goes to `client/dist/`. Vercel picks this up automatically on every push to `main`.
-
-## Database
-
-Migrations live in `supabase/migrations/`. Apply via the Supabase CLI:
-
-```bash
-supabase db push
-```
-
-Seed mentor subscription tiers:
-
-```bash
-supabase db seed --file supabase/seeds/mentor_tiers_seed.sql
-```
-
-Key schema notes:
-- `mentor_profiles.rating` is maintained by a Postgres trigger — never compute it client-side
-- `mentor_profiles.id` ≠ `auth.users.id` — always query by profile UUID
-- RLS is enforced on all user-owned tables; silent failures mean a missing policy, not a bug
+---
 
 ## Deployment
 
-Vercel auto-deploys from `main`. `vercel.json` routes named `/api/*` paths to their matching serverless function and falls back to `client/dist/index.html` for all other routes (SPA).
+Vercel auto-deploys from `main`. `vercel.json` routes `/api/*` to their matching serverless functions and falls back to `client/dist/index.html` for all other paths.
 
 Manual deploy:
 
 ```bash
 vercel --prod
 ```
+
+When adding new environment variables, add them to the Vercel project under **Settings → Environment Variables** in addition to your local `.env` files.
+
+---
+
+## Database
+
+Supabase Postgres. Schema is versioned in `supabase/migrations/` and applied with `supabase db push`. Core tables:
+
+| Table | Purpose |
+|---|---|
+| `mentor_profiles` | Mentor public data, tier, rate, availability, verification status |
+| `sessions` | Booked sessions between mentees and mentors |
+| `reviews` | Post-session ratings; averages maintained by a Postgres trigger |
+| `favorites` | Saved mentors per user |
+| `user_profiles` | Mentee personal info, experience, education, skills |
+| `mentee_profiles` | AI onboarding output used for mentor matching |
+| `user_settings` | Per-user app preferences |
+| `ai_usage` | Per-user AI feature usage tracking and limits |
+
+RLS is enabled on all tables. Row-level policies restrict reads and writes to authenticated owners except where public access is explicitly granted (e.g. mentor profile reads).
+
+---
+
+## Team
+
+| Person | Area |
+|---|---|
+| Berk | Project lead, infrastructure, deployment |
+| Muaz | Mentor profile flow, onboarding, calendar integration |
+| Omar | Dashboard v2 — session management, mentor earnings view |
+| Irshad | Review system — post-session prompt, review display |
+
+---
+
+## Documentation
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) — end-to-end system design, data flow, and key technical decisions
+- [CONTRIBUTING.md](CONTRIBUTING.md) — branching model, PR checklist, code standards, commit conventions
+- [SECURITY.md](SECURITY.md) — vulnerability reporting and security policy
+- [LICENSE](LICENSE)

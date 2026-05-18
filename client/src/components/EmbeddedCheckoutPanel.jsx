@@ -2,6 +2,7 @@ import { EmbeddedCheckout, EmbeddedCheckoutProvider } from '@stripe/react-stripe
 import { loadStripe } from '@stripe/stripe-js';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useContent } from '../content';
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 if (!PUBLISHABLE_KEY) {
@@ -15,6 +16,7 @@ const stripePromise = PUBLISHABLE_KEY ? loadStripe(PUBLISHABLE_KEY) : Promise.re
  * Shell matches FeedbackModal: viewport-centered on sm+, bottom sheet on narrow screens.
  */
 export default function EmbeddedCheckoutPanel({ clientSecret, onClose }) {
+  const { s } = useContent();
   useEffect(() => {
     if (!clientSecret) return;
     const prev = document.body.style.overflow;
@@ -58,7 +60,7 @@ export default function EmbeddedCheckoutPanel({ clientSecret, onClose }) {
         <div className="relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-[2rem] border border-[var(--bridge-border)] bg-white shadow-bridge-float sm:rounded-[2rem] ring-1 ring-stone-900/10 dark:bg-stone-950 dark:ring-stone-700/40">
           <div className="flex shrink-0 items-center justify-between border-b border-stone-200 bg-white px-6 py-4 dark:border-stone-800 dark:bg-stone-950">
             <div>
-              <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Complete payment</h2>
+              <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{s.mentorProfile.completePayment}</h2>
               <p className="mt-0.5 text-sm text-stone-500 dark:text-stone-400">Secure checkout powered by Stripe.</p>
             </div>
             <button
@@ -97,7 +99,7 @@ export default function EmbeddedCheckoutPanel({ clientSecret, onClose }) {
               onClick={onClose}
               className="text-xs font-semibold text-stone-500 transition hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200"
             >
-              Cancel
+              {s.common.cancel}
             </button>
           </div>
         </div>
