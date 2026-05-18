@@ -419,45 +419,52 @@ router.post('/schedule-meeting', async (req, res) => {
 function computeTierAndRate(profile, _verificationData, verificationScore) {
   const yrs = profile.years_experience || 0;
   const expertise = Array.isArray(profile.expertise) ? profile.expertise : [];
-  // Education is stored as mentor_profiles.education (saved from app-1 form)
   const education = Array.isArray(profile.education) ? profile.education : [];
+  const work = Array.isArray(profile.work_experience) ? profile.work_experience : [];
   const score = verificationScore || 0;
 
-  // Education bonus — degree_level dropdown takes precedence over degree text regex
-  let eduBonus = 0;
-  const topLevel = education.reduce((best, e) => {
+  // Education (max 35 pts) — highest degree is the base; 2+ advanced degrees earn +5
+  let eduPts = 0;
+  let advancedCount = 0;
+  for (const e of education) {
     const lvl = e.degree_level;
-    if (lvl === 'phd')       return Math.max(best, 4);
-    if (lvl === 'masters')   return Math.max(best, 3);
-    if (lvl === 'bachelors') return Math.max(best, 2);
-    if (lvl === 'associate') return Math.max(best, 1);
-    // Fallback to degree text regex for entries without degree_level
     const d = (e.degree || '').toLowerCase();
-    if (/phd|doctorate|d\.?sc|j\.?d|\bmd\b|dba|d\.?phil/i.test(d)) return Math.max(best, 4);
-    if (/master|mba|msc|meng|m\.s\b|m\.a\b|llm/i.test(d))          return Math.max(best, 3);
-    if (/bachelor|b\.s\b|b\.a\b|b\.e\b|b\.tech|bsc\b|beng/i.test(d)) return Math.max(best, 2);
-    return best;
-  }, 0);
-  if (topLevel >= 4) eduBonus = 50;
-  else if (topLevel === 3) eduBonus = 25;
-  else if (topLevel === 2) eduBonus = 10;
+    const isPhd      = lvl === 'phd'       || /phd|doctorate|d\.?sc|j\.?d|\bmd\b|dba|d\.?phil/i.test(d);
+    const isMasters  = lvl === 'masters'   || /master|mba|msc|meng|m\.s\b|m\.a\b|llm/i.test(d);
+    const isBachelors = lvl === 'bachelors' || /bachelor|b\.s\b|b\.a\b|b\.e\b|b\.tech|bsc\b|beng/i.test(d);
+    if (isPhd)          { advancedCount++; eduPts = Math.max(eduPts, 32); }
+    else if (isMasters) { advancedCount++; eduPts = Math.max(eduPts, 22); }
+    else if (isBachelors) eduPts = Math.max(eduPts, 13);
+    else if (lvl === 'associate') eduPts = Math.max(eduPts, 7);
+    else if (lvl)       eduPts = Math.max(eduPts, 4);
+  }
+  if (advancedCount >= 2) eduPts = Math.min(35, eduPts + 5);
 
-  // Experience bonus
-  const expBonus = yrs >= 15 ? 90 : yrs >= 10 ? 65 : yrs >= 6 ? 40 : yrs >= 3 ? 20 : 0;
+  // Experience years (max 30 pts)
+  const expPts = yrs >= 20 ? 30 : yrs >= 15 ? 26 : yrs >= 10 ? 22 : yrs >= 6 ? 14 : yrs >= 3 ? 8 : yrs >= 1 ? 3 : 0;
 
-  // Verification score bonus
-  const scoreBonus = score >= 85 ? 15 : score >= 75 ? 10 : score >= 60 ? 5 : 0;
+  // Work history depth (max 15 pts)
+  const workPts = work.length >= 3 ? 15 : work.length >= 2 ? 10 : work.length >= 1 ? 5 : 0;
 
-  const session_rate = 40 + expBonus + eduBonus + scoreBonus;
+  // Verification integrity (max 10 pts)
+  const verifyPts = score >= 90 ? 10 : score >= 75 ? 7 : score >= 60 ? 5 : score >= 40 ? 3 : 1;
 
-  // Four tiers: verified → professional → senior → elite
-  // Rate thresholds are primary; years act as a floor so a 7-yr Bachelors
-  // isn't held back by missing the rate cutoff by a few dollars.
+  // Expertise breadth (max 10 pts; populated after profile completion)
+  const expertisePts = expertise.length >= 8 ? 10 : expertise.length >= 5 ? 7 : expertise.length >= 3 ? 4 : expertise.length >= 1 ? 2 : 0;
+
+  const qualityScore = Math.min(100, eduPts + expPts + workPts + verifyPts + expertisePts);
+
   let tier;
-  if (session_rate >= 165 || (yrs >= 13 && expertise.length >= 3)) tier = 'elite';
-  else if (session_rate >= 115 || yrs >= 7) tier = 'senior';
-  else if (session_rate >= 75 || yrs >= 3) tier = 'professional';
-  else tier = 'rising';
+  if (qualityScore >= 80)      tier = 'elite';
+  else if (qualityScore >= 60) tier = 'senior';
+  else if (qualityScore >= 40) tier = 'professional';
+  else                         tier = 'rising';
+
+  let session_rate;
+  if (tier === 'elite')             session_rate = 140 + Math.round((qualityScore - 80) * 3);
+  else if (tier === 'senior')       session_rate = 100 + Math.round((qualityScore - 60) * 2);
+  else if (tier === 'professional') session_rate = 70  + Math.round((qualityScore - 40) * 1.5);
+  else                              session_rate = 40  + Math.round(qualityScore * 0.6);
 
   return { tier, session_rate };
 }
@@ -687,7 +694,7 @@ router.post('/mentor-queue/auto-verify', async (req, res) => {
       // Year math consistency: 13 pts if years add up, 6 if plausible
       workYearsConsistent: yearsConsistent ? 13 : workYearsValid && workExp.length > 0 ? 6 : 0,
       // Motivation essay length: 20 pts max for 150+ words
-      motivationLength:    essayWords >= 150 ? 20 : essayWords >= 100 ? 13 : essayWords >= 50 ? 7 : 0,
+      motivationLength:    essayWords >= 150 ? 20 : essayWords >= 100 ? 13 : essayWords >= 20 ? 7 : 0,
       // Essay quality (OpenAI 0–12, scaled to 20): rewards substance and clarity
       motivationQuality:   Math.round((essayQuality / 12) * 20),
       // Social ownership proof is a bonus — skipping is not penalised
