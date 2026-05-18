@@ -1,11 +1,12 @@
 /**
- * Vercel serverless function — handles all /api/dev/* routes for the DevPortal.
+ * Shared DevPortal handler. Production reaches this through api/utils/[action].js
+ * to stay within Vercel's Hobby serverless function limit.
  * Requires DEV_ACCESS_CODE env var (server-side, matches VITE_DEV_ACCESS_CODE on the client).
  * Uses SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY for service-role DB access.
  */
 
-import supabase from '../_lib/supabase.js';
-import { applyCors } from '../_lib/allowedOrigins.js';
+import supabase from './supabase.js';
+import { applyCors } from './allowedOrigins.js';
 
 function devAuth(req) {
   const key = req.headers['x-dev-key'];
