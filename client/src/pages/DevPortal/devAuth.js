@@ -35,5 +35,13 @@ export function devFetch(path, options = {}) {
     'x-dev-key': getDevKey(),
     ...(options.headers || {}),
   };
-  return fetch(`${SERVER_URL}/api/dev${path}`, { ...options, headers });
+
+  if (SERVER_URL) {
+    return fetch(`${SERVER_URL}/api/dev${path}`, { ...options, headers });
+  }
+
+  const [routePath, query = ''] = path.split('?');
+  const params = new URLSearchParams(query);
+  params.set('path', routePath.replace(/^\/+/, ''));
+  return fetch(`/api/utils/dev?${params.toString()}`, { ...options, headers });
 }

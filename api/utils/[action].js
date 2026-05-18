@@ -3,6 +3,7 @@ import { verifyAuthUser } from '../_lib/auth.js';
 import { applyCors } from '../_lib/allowedOrigins.js';
 import { applySecurityHeaders, jsonError } from '../_lib/security.js';
 import { finalizeRun, recomputeRun } from '../_lib/verification/orchestrator.js';
+import devPortalHandler from '../_lib/devPortal.js';
 import { randomBytes, createHmac } from 'node:crypto';
 
 // bodyParser disabled so the Checkr webhook can read raw body for HMAC.
@@ -32,6 +33,7 @@ export default async function handler(req, res) {
   if (action === 'user-names') return handleUserNames(req, res);
   if (action === 'mentor-room-slug') return handleMentorRoomSlug(req, res);
   if (action === 'verification-retry') return handleVerificationRetry(req, res);
+  if (action === 'dev') return devPortalHandler(req, res);
   return jsonError(res, 404, 'Unknown util action');
 }
 
