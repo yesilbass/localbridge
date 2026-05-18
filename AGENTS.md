@@ -1,25 +1,16 @@
 <claude-mem-context>
 # Memory Context
 
-# [bridge] recent context, 2026-05-07 10:46pm EDT
+# [bridge] recent context, 2026-05-18 12:22pm EDT
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision 🚨security_alert 🔐security_note
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (19,072t read) | 552,058t work | 97% savings
+Stats: 50 obs (18,833t read) | 671,583t work | 97% savings
 
 ### May 6, 2026
-1 2:24a 🔵 Bridge Platform — Full Backend Security & Reliability Audit Initiated
-7 2:25a 🔵 vercel.json Confirmed: Three Wildcard Routes Point to Dead api/server, Not Just One
-8 " 🔵 api/google-callback.js Bug: calendar_connected Set Before refresh_token Guard
-9 " 🔵 Both Calendar Endpoints Confirmed: Wildcard CORS, No Auth, Error Message Leakage
-10 2:26a 🔵 finalize-checkout.js All Four Bugs Confirmed in Exact Code Locations
-11 " 🔵 create-subscription-checkout Prices Are Server-Side; Only Booking Checkout Has Price Manipulation Risk
-12 " 🔵 api/realtime-session.js: sessionId Destructured but Never Used; OpenAI Error Text Leaked
-13 2:27a 🔵 api/_lib/oauth.js: Auto-Refreshes and Persists Google Tokens via 'tokens' Event Listener
-14 " 🔵 Bridge Production Domain and CORS Allowlist Confirmed in allowedOrigins.js
-15 " 🔵 Client API Calls to Calendar and Auth Endpoints Send No Authorization Headers — Will Break After Auth Fix
+15 2:27a 🔵 Client API Calls to Calendar and Auth Endpoints Send No Authorization Headers — Will Break After Auth Fix
 16 " 🔵 getFeaturedMentors() Also Missing onboarding_complete Filter — Not Covered by Audit
 17 " 🔵 client.js Confirmed Completely Orphaned — Zero Imports Anywhere in Codebase
 18 " 🔵 cancellation_requests Table Confirmed to Exist; requestCancellation() Will 404 in Production
@@ -63,6 +54,16 @@ S3 Full backend security and reliability audit of Bridge — 13 issues fixed acr
 53 2:01p 🔵 HeroSection.jsx Full Content Mapped — Ready for Redesign
 54 " ⚖️ New Design Request: Floating Transparent Navbar + Typewriter Animation Confirmation
 55 2:05p ⚖️ User Reverted Landing Page Redesign and Pulled from Remote
+### May 18, 2026
+246 12:11p ⚖️ Remove Google Calendar Serverless Functions in Favor of Calendly
+247 " 🔵 Bridge Project Serverless Function Inventory and Google Calendar Remnant Audit
+248 12:12p 🔵 Additional Dead Google Calendar References: vite.config.js Proxy and Missing server/routes Files
+249 12:20p ⚖️ User Approved Full Google Calendar Dead-Reference Cleanup
+250 " ✅ Removed Dead Google Calendar Rewrites from client/vercel.json
+251 " ✅ Removed Dead /auth and /calendar Dev Proxy Rules from vite.config.js
+252 " 🔴 Removed Dead Google Calendar Imports and Test Case from tests/api-validation.test.js
+253 " 🔴 Test Suite Passes 7/7 After Google Calendar Import Removal
+254 12:21p ✅ Google Calendar Dead-Reference Cleanup Complete — Build and Tests Verified
 
-Access 552k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 672k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>

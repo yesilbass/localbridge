@@ -36,32 +36,6 @@ export default defineConfig({
           });
         },
       },
-      '/auth': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-        configure(proxy) {
-          proxy.on('error', (err, req, res) => {
-            const code = err?.code || err?.cause?.code;
-            if (code === 'ECONNREFUSED' && res && !res.headersSent) {
-              res.writeHead(502, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'API not running on port 3001.' }));
-            }
-          });
-        },
-      },
-      '/calendar': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-        configure(proxy) {
-          proxy.on('error', (err, _req, res) => {
-            const code = err?.code || err?.cause?.code;
-            if (code === 'ECONNREFUSED' && res && !res.headersSent) {
-              res.writeHead(502, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'API not running on port 3001.' }));
-            }
-          });
-        },
-      },
     },
   },
 })
