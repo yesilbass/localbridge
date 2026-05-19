@@ -611,10 +611,12 @@ export default function MentorOnboarding() {
       }
       go('app-1');
     } catch {
-      go('app-1');
-    } finally {
-      setResumeUploading(false);
       setResumeExtracting(false);
+      setResumeUploading(false);
+      setError('Could not extract resume data automatically. Review the uploaded file and continue manually.');
+    } finally {
+      setResumeExtracting(false);
+      setResumeUploading(false);
     }
   }
 
@@ -893,7 +895,40 @@ export default function MentorOnboarding() {
               Upload your resume PDF and we'll extract your work history, education, and skills automatically. You can review and edit everything before submitting.
             </p>
 
-            {!resumeUploading && !resumeExtracting ? (
+            {resumeUploading || resumeExtracting ? (
+              <div className="flex flex-col items-center gap-4 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-6 py-12 text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+                <div>
+                  <p className="text-sm font-semibold text-[var(--bridge-text)]">
+                    {resumeUploading ? 'Uploading your resume…' : 'Reading your resume with AI…'}
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--bridge-text-muted)]">
+                    {resumeUploading ? 'Saving securely to Bridge' : 'Extracting work history, education, and skills'}
+                  </p>
+                </div>
+              </div>
+            ) : resumeStoragePath ? (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-3">
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-green-500" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-[var(--bridge-text)]">{resumeStoragePath.split('/').pop()}</p>
+                    <p className="text-xs text-[var(--bridge-text-muted)]">Resume uploaded</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => go('app-1')}
+                  className={`w-full rounded-xl bg-amber-500 py-3 text-sm font-bold text-white transition hover:bg-amber-600 ${focusRing}`}
+                >
+                  Continue to application →
+                </button>
+                <label className={`cursor-pointer text-center text-xs text-[var(--bridge-text-muted)] underline underline-offset-2 hover:text-[var(--bridge-text)] transition ${focusRing} rounded-sm`}>
+                  Replace resume
+                  <input type="file" accept=".pdf" className="hidden" onChange={handleResumeUpload} />
+                </label>
+              </div>
+            ) : (
               <label className={`flex cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-6 py-12 text-center transition hover:border-amber-400 hover:bg-[var(--bridge-surface)] ${focusRing}`}>
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 border border-amber-100">
                   <Upload className="h-6 w-6 text-amber-500" />
@@ -909,18 +944,6 @@ export default function MentorOnboarding() {
                   onChange={handleResumeUpload}
                 />
               </label>
-            ) : (
-              <div className="flex flex-col items-center gap-4 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-6 py-12 text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
-                <div>
-                  <p className="text-sm font-semibold text-[var(--bridge-text)]">
-                    {resumeUploading ? 'Uploading your resume…' : 'Reading your resume with AI…'}
-                  </p>
-                  <p className="mt-1 text-xs text-[var(--bridge-text-muted)]">
-                    {resumeUploading ? 'Saving securely to Bridge' : 'Extracting work history, education, and skills'}
-                  </p>
-                </div>
-              </div>
             )}
 
             <div className="rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-3">
