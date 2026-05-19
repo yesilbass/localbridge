@@ -483,10 +483,25 @@ async function handleResume(req, res) {
     return shortcut(res, body.data.runId, 'resume_ai', 'manual_review', Math.round(COMPONENT_WEIGHTS.resume_ai / 2), { filename: fname }, { reason: 'Filename forces review' }, body.data.idempotencyKey);
   }
 
+  // Pull education entries from the mentor's saved verification_data for diploma/degree scoring
+  const { data: mentorRow } = await supabase
+    .from('mentor_profiles')
+    .select('verification_data')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  const rawEdu = mentorRow?.verification_data?.education || [];
+  const educationEntries = rawEdu.map((e) => ({
+    degree_level: e.degree_level || null,
+    school: e.school || null,
+    year: e.year || null,
+    hasDiploma: Boolean(e.diplomaFileName),
+  }));
+
   const result = await evaluateResume({
     resumeText: body.data.resumeText,
     claimedTitle: body.data.claimedTitle,
     claimedCompany: body.data.claimedCompany,
+    educationEntries,
     ownerUserId: user.id,
   });
 

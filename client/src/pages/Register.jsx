@@ -67,7 +67,7 @@ export default function Register() {
   const pwMeta = passwordStrength(password);
 
   function validate() {
-    if (!fullName.trim()) return t('auth.fullNameRequired', 'Please enter your full name.');
+    if (role !== 'mentor' && !fullName.trim()) return t('auth.fullNameRequired', 'Please enter your full name.');
     if (!EMAIL_RE.test(email.trim())) return t('auth.validEmailRequired', 'Please enter a valid email address.');
     if (password.length < 6) return t('auth.shortPassword', 'Password must be at least 6 characters.');
     if (password !== confirmPassword) return t('auth.passwordsDoNotMatch', 'Passwords do not match.');
@@ -104,7 +104,9 @@ export default function Register() {
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         {error ? <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><span>{error}</span></div> : null}
-        <div className="group"><label htmlFor="register-name" className={labelClass}>{t('auth.fullName', 'Full name')}</label><div className="relative"><UserIcon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-300 group-focus-within:text-amber-600" /><input id="register-name" type="text" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Alex Rivera" className={inputClass} /></div></div>
+        {role !== 'mentor' && (
+          <div className="group"><label htmlFor="register-name" className={labelClass}>{t('auth.fullName', 'Full name')}</label><div className="relative"><UserIcon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-300 group-focus-within:text-amber-600" /><input id="register-name" type="text" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Alex Rivera" className={inputClass} /></div></div>
+        )}
         <div className="group"><label htmlFor="register-email" className={labelClass}>{t('auth.emailAddress', 'Email address')}</label><div className="relative"><Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-300 group-focus-within:text-amber-600" /><input id="register-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className={inputClass} /></div></div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="group"><label htmlFor="register-password" className={labelClass}>{t('auth.password', 'Password')}</label><div className="relative"><Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-300 group-focus-within:text-amber-600" /><input id="register-password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('auth.passwordStrongPlaceholder', 'Strong password')} className={inputClass} /><button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-stone-400 transition hover:bg-stone-100 hover:text-stone-950" aria-label={showPassword ? t('auth.hidePassword', 'Hide password') : t('auth.showPassword', 'Show password')}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div></div>

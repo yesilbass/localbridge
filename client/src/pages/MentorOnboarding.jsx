@@ -191,8 +191,15 @@ function WorkExpRow({ job, onChange, onRemove }) {
         </div>
       </div>
       <div>
-        <label className={labelCls}>{s.onboarding.oneLineDescription}</label>
-        <input type="text" value={job.description} onChange={(e) => onChange({ ...job, description: e.target.value })} className={inputCls} placeholder="Led a team of 8 engineers to ship the payments platform…" />
+        <label className={labelCls}>Responsibilities &amp; achievements</label>
+        <textarea
+          rows={4}
+          value={job.description}
+          onChange={(e) => onChange({ ...job, description: e.target.value })}
+          className={`${inputCls} resize-none leading-relaxed`}
+          placeholder={'• Led a team of 8 engineers to deliver the payments platform on time\n• Reduced API latency by 40% through query optimization\n• Mentored 3 junior engineers to mid-level promotion'}
+        />
+        <p className="mt-1 text-[11px] text-[var(--bridge-text-faint)]">Use bullet points. Specific achievements and numbers score higher.</p>
       </div>
     </div>
   );
@@ -596,9 +603,11 @@ export default function MentorOnboarding() {
               }))
             : appForm.education,
         });
-        if (parsed.linkedin_url || parsed.linkedinUrl) {
-          setVerifyData((v) => ({ ...v, linkedinUrl: parsed.linkedin_url || parsed.linkedinUrl || '' }));
-        }
+        setVerifyData((v) => ({
+          ...v,
+          ...(parsed.linkedin_url ? { linkedinUrl: parsed.linkedin_url } : {}),
+          ...(parsed.github_url ? { githubUrl: parsed.github_url } : {}),
+        }));
         patchProfile({
           title: parsed.title || profileForm.title,
           company: parsed.company || profileForm.company,
