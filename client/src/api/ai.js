@@ -24,39 +24,8 @@ export async function callAIProxy(action, payload) {
   return data.result;
 }
 
-export async function extractResumeData(resumeText) {
-  const system =
-    'You are a resume parser. Extract structured data from raw resume text. ' +
-    'Respond ONLY with valid JSON — no markdown, no preamble.';
-
-  const prompt = `Extract the following from this resume text and return ONLY valid JSON with these exact keys:
-{
-  "name": "Full name",
-  "title": "Current or most recent job title",
-  "company": "Current or most recent company",
-  "industry": "One of: technology, finance, healthcare, education, marketing, design, other",
-  "bio": "2-3 sentence professional story in first person",
-  "years_experience": <integer>,
-  "expertise": ["5-8 concise skill tag strings, Title Case"],
-  "work_experience": [
-    { "title": "...", "company": "...", "start_year": <int>, "end_year": <int or null for present>, "description": "one sentence" }
-  ],
-  "education": [
-    { "school": "...", "degree": "...", "year": <int> }
-  ],
-  "languages": ["English", ...],
-  "location": "City, Country"
-}
-
-Resume text:
-${resumeText.slice(0, 8000)}`;
-
-  return callAIProxy('onboarding_ai', {
-    systemPrompt: system,
-    prompt,
-    maxTokens: 2000,
-    json: true,
-  });
+export async function extractResumeData(resumeBase64) {
+  return callAIProxy('resume_extract', { resumeBase64 });
 }
 
 export async function polishMentorProfile(rawData) {
