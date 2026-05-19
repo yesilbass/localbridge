@@ -22,6 +22,7 @@ import calendlyWebhookHandler from '../api/calendly-webhook.js';
 import utilsDispatcher from '../api/utils/[action].js';
 import verificationDispatcher from '../api/verification/[action].js';
 import adminReviewDispatcher from '../api/admin/review/[action].js';
+import aiProxyHandler from '../api/ai-proxy.js';
 
 const app = express();
 
@@ -111,6 +112,9 @@ app.use('/api/dev', devRoutes);
 
 // Cancellation requests
 app.use('/api/cancellations', cancellationsRoute);
+
+// AI proxy — mirrors Vercel api/ai-proxy.js
+app.post('/api/ai-proxy', wrapApiHandler(aiProxyHandler));
 
 // Health check
 app.get('/api', (_req, res) => res.json({ ok: true, service: 'Bridge API' }));
