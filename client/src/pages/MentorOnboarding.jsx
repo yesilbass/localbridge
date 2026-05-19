@@ -7,6 +7,7 @@ import {
   Upload, FileText,
 } from 'lucide-react';
 import { uploadResumeFile } from '../api/resumeStorage';
+import { devFetch } from './DevPortal/devAuth';
 import { extractResumeData } from '../api/ai';
 import { useAuth } from '../context/useAuth';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -554,8 +555,8 @@ export default function MentorOnboarding() {
   async function handleResumeUpload(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { setResumeError('File must be under 10 MB.'); return; }
-    setResumeError('');
+    if (file.size > 10 * 1024 * 1024) { setError('File must be under 10 MB.'); return; }
+    setError('');
     setResumeUploading(true);
     try {
       const uploaded = await uploadResumeFile(user.id, file);
@@ -637,11 +638,9 @@ export default function MentorOnboarding() {
       }).catch(() => {});
 
       // Trigger background check simulation (auto-verify scores the application)
-      const devCode = import.meta.env.VITE_DEV_ACCESS_CODE;
-      if (devCode && profileId) {
-        await fetch(`${serverUrl}/api/dev/mentor-queue/auto-verify`, {
+      if (import.meta.env.VITE_DEV_ACCESS_CODE && profileId) {
+        await devFetch('/mentor-queue/auto-verify', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-dev-key': devCode },
           body: JSON.stringify({ mentorProfileId: profileId }),
         }).catch(() => {});
       }
