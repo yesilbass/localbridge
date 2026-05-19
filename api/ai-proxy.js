@@ -579,11 +579,20 @@ export default async function handler(req, res) {
   const { action, payload } = parsed.data;
 
   try {
-    const allowed = await assertWithinLimit(user.id, action);
+    let allowed = true;
+    try {
+      allowed = await assertWithinLimit(user.id, action);
+    } catch (usageErr) {
+      console.error('[ai-proxy] usage check failed (non-fatal)', { action, error: usageErr?.message });
+    }
     if (!allowed) return jsonError(res, 429, 'AI usage limit reached');
 
     const result = await runAction(action, payload);
-    await recordUsage(user.id, action);
+    try {
+      await recordUsage(user.id, action);
+    } catch (usageErr) {
+      console.error('[ai-proxy] usage record failed (non-fatal)', { action, error: usageErr?.message });
+    }
 
     return res.status(200).json({ result });
   } catch (error) {

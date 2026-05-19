@@ -636,11 +636,15 @@ export default function MentorOnboarding() {
       const authHeader = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
 
       // Submit application — sets mentor_status='pending' and application_submitted_at
-      await fetch(`${serverUrl}/api/verification/apply`, {
+      const applyRes = await fetch(`${serverUrl}/api/verification/apply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeader },
         body: JSON.stringify({ verificationData: { ...verifyData, resumeStoragePath } }),
-      }).catch(() => {});
+      });
+      if (!applyRes.ok) {
+        const body = await applyRes.json().catch(() => ({}));
+        throw new Error(body.error || 'Failed to submit application. Please try again.');
+      }
 
       // Trigger background check simulation (auto-verify scores the application)
       if (import.meta.env.VITE_DEV_ACCESS_CODE && profileId) {

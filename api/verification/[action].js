@@ -115,7 +115,7 @@ async function handleApply(req, res) {
       : (raw || {});
   } catch {}
 
-  await supabase.from('mentor_profiles').update({
+  const { error: updateErr } = await supabase.from('mentor_profiles').update({
     mentor_status: 'pending',
     checkr_candidate_id: candidateId,
     checkr_report_id: reportId,
@@ -123,6 +123,11 @@ async function handleApply(req, res) {
     application_submitted_at: new Date().toISOString(),
     verification_data: bodyData.verificationData || null,
   }).eq('id', profile.id);
+
+  if (updateErr) {
+    console.error('[apply] profile update failed', updateErr);
+    return jsonError(res, 500, `Failed to submit application: ${updateErr.message}`);
+  }
 
   return res.json({ ok: true, reportId });
 }
