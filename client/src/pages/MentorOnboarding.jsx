@@ -563,13 +563,16 @@ export default function MentorOnboarding() {
       setResumeStoragePath(uploaded.path);
       setResumeUploading(false);
       setResumeExtracting(true);
-      const text = await new Promise((resolve, reject) => {
+      const resumeBase64 = await new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = (ev) => resolve(ev.target?.result || '');
+        reader.onload = (ev) => {
+          const result = ev.target?.result || '';
+          resolve(typeof result === 'string' ? result.split(',')[1] || result : '');
+        };
         reader.onerror = () => reject(new Error('Could not read file'));
-        reader.readAsText(file);
+        reader.readAsDataURL(file);
       });
-      const parsed = await extractResumeData(text);
+      const parsed = await extractResumeData(resumeBase64);
       if (parsed) {
         patchApp({
           name: parsed.name || appForm.name,

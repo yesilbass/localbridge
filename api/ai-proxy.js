@@ -23,6 +23,7 @@ const LIMITS = {
   claude_chat: { max: 20, window: 'day' },
   intake_summary: { max: 10, window: 'day' },
   onboarding_ai: { max: 20, window: 'day' },
+  resume_extract: { max: 10, window: 'day' },
 };
 
 const textUnderLimit = (label) =>
@@ -84,11 +85,18 @@ const intakeSummarySchema = z.object({
   }, { message: 'Transcript is too large' }),
 });
 
+const resumeExtractSchema = z.object({
+  resumeBase64: z.string().min(1).refine((value) => {
+    try { return Buffer.from(value, 'base64').byteLength <= MAX_RESUME_BYTES; } catch { return false; }
+  }, { message: 'Resume file is too large' }),
+});
+
 const requestSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('claude_chat'), payload: claudeChatSchema }),
   z.object({ action: z.literal('onboarding_ai'), payload: claudeChatSchema }),
   z.object({ action: z.literal('mentor_match'), payload: mentorMatchSchema }),
   z.object({ action: z.literal('resume_review'), payload: resumeReviewSchema }),
+  z.object({ action: z.literal('resume_extract'), payload: resumeExtractSchema }),
   z.object({ action: z.literal('intake_summary'), payload: intakeSummarySchema }),
 ]);
 
@@ -457,11 +465,59 @@ async function runOnboardingAI({ systemPrompt, prompt, maxTokens = 2000, json })
   return json ? parseJsonResponse(rawText, 'onboarding_ai') : rawText;
 }
 
+async function runResumeExtract({ resumeBase64 }) {
+  let fileId;
+  try {
+    fileId = await uploadResumeFile(resumeBase64);
+    const rawText = await callOpenAIChat({
+      model: 'gpt-4o',
+      maxTokens: 2000,
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a resume parser. Extract structured data from the resume. Respond ONLY with valid JSON — no markdown, no preamble.',
+        },
+        {
+          role: 'user',
+          content: [
+            { type: 'file', file: { file_id: fileId } },
+            {
+              type: 'text',
+              text: `Extract all information from this resume and return ONLY valid JSON with these exact keys:
+{
+  "name": "Full name",
+  "title": "Current or most recent job title",
+  "company": "Current or most recent company",
+  "industry": "One of: technology, finance, healthcare, education, marketing, design, other",
+  "bio": "2-3 sentence professional story in first person",
+  "years_experience": <integer>,
+  "expertise": ["5-8 concise skill tag strings, Title Case"],
+  "work_experience": [
+    { "title": "...", "company": "...", "start_year": <int>, "end_year": <int or null for present>, "description": "one sentence" }
+  ],
+  "education": [
+    { "school": "...", "degree": "...", "degree_level": "phd|masters|bachelors|associate|other", "year": <int> }
+  ],
+  "languages": ["English"],
+  "location": "City, Country"
+}`,
+            },
+          ],
+        },
+      ],
+    });
+    return parseJsonResponse(rawText, 'resume_extract');
+  } finally {
+    await deleteResumeFile(fileId);
+  }
+}
+
 async function runAction(action, payload) {
   if (action === 'claude_chat') return callClaude(payload);
   if (action === 'onboarding_ai') return runOnboardingAI(payload);
   if (action === 'mentor_match') return runMentorMatch(payload);
   if (action === 'resume_review') return runResumeReview(payload);
+  if (action === 'resume_extract') return runResumeExtract(payload);
   if (action === 'intake_summary') return runIntakeSummary(payload);
   throw new Error('Unsupported AI action');
 }
