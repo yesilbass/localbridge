@@ -466,42 +466,72 @@ async function runOnboardingAI({ systemPrompt, prompt, maxTokens = 2000, json })
 }
 
 async function runResumeExtract({ resumeBase64 }) {
+  const CURRENT_YEAR = new Date().getFullYear();
+
+  const extractionPrompt = `You are an expert resume parser with deep knowledge of resume formats worldwide — chronological, functional, hybrid, academic CVs, international formats, and everything in between.
+
+Parse the attached resume completely. Return ONLY a single valid JSON object. No markdown fences, no explanation, no text before or after the JSON.
+
+Required JSON schema:
+{
+  "name": "Full name as written on resume",
+  "title": "Most recent or current job title. If not explicit, infer from most recent role.",
+  "company": "Most recent or current employer name",
+  "industry": "Single best-fit value from: technology | finance | healthcare | education | marketing | design | consulting | legal | engineering | media | government | nonprofit | other",
+  "bio": "2-3 sentence first-person professional summary. If a summary/objective section exists, polish it into first person. If absent, synthesize one from their experience and skills.",
+  "years_experience": <integer — calculate from earliest professional job start year to ${CURRENT_YEAR}; use stated value if explicitly given; minimum 0>,
+  "expertise": ["8-10 specific skill/tool/technology/methodology tags in Title Case — extract from skills sections, job descriptions, certifications, and tools mentioned anywhere"],
+  "work_experience": [
+    {
+      "title": "Exact job title",
+      "company": "Exact company or organization name",
+      "start_year": <4-digit integer>,
+      "end_year": <4-digit integer, or null if current/present/ongoing>,
+      "description": "One sentence summarizing the most important responsibility or achievement"
+    }
+  ],
+  "education": [
+    {
+      "school": "Full institution name",
+      "degree": "Full degree name as written on resume",
+      "degree_level": "phd | masters | bachelors | associate | other",
+      "field": "Field of study or major",
+      "year": <graduation year as 4-digit integer>
+    }
+  ],
+  "languages": ["All languages mentioned; always include English if not listed"],
+  "location": "City, State or City, Country from most recent address or contact info"
+}
+
+Strict rules:
+1. work_experience — extract EVERY role found, sort newest first. Handle any date format: "Jan 2020–Mar 2023", "2020-2023", "2020 to present", "Since 2018", "Current", dashes, en-dashes, em-dashes. "Present/Current/Now/ongoing/—" at end → end_year: null.
+2. degree_level — map exactly:
+   phd: PhD, Ph.D., Doctorate, DPhil, MD, JD, EdD, DDS, PharmD, DBA, ScD, PsyD, LLD, DVM, DO, DrPH
+   masters: Master, MSc, MS, MA, MBA, MEng, MFA, MPA, MPH, LLM, MEd, MTech, MSW, MIM, MIS
+   bachelors: Bachelor, BS, BA, BE, BTech, BEng, BBA, BFA, BArch, BSc, BCom, BEd, LLB, MBBS
+   associate: Associate, AS, AA, AAS, AAT
+   other: Certificate, Diploma, Certification, Bootcamp, High School, GED, or unrecognized
+3. expertise — be thorough: programming languages, frameworks, platforms, tools, methodologies (Agile, Scrum, Lean), soft skills if prominent, certifications. Title Case only.
+4. years_experience — count from earliest professional start year to ${CURRENT_YEAR}. Exclude student internships unless they are the only experience.
+5. bio — first person, warm and specific. Highlight what they do and the value they bring.
+6. Missing fields — null for strings, 0 for numbers, [] for arrays. Never invent data not present.`;
+
   let fileId;
   try {
     fileId = await uploadResumeFile(resumeBase64);
     const rawText = await callOpenAIChat({
       model: 'gpt-4o',
-      maxTokens: 2000,
+      maxTokens: 4000,
       messages: [
         {
           role: 'system',
-          content: 'You are a resume parser. Extract structured data from the resume. Respond ONLY with valid JSON — no markdown, no preamble.',
+          content: 'You are a precise resume parser. Read the attached PDF resume and return structured JSON only. No markdown, no explanation.',
         },
         {
           role: 'user',
           content: [
             { type: 'file', file: { file_id: fileId } },
-            {
-              type: 'text',
-              text: `Extract all information from this resume and return ONLY valid JSON with these exact keys:
-{
-  "name": "Full name",
-  "title": "Current or most recent job title",
-  "company": "Current or most recent company",
-  "industry": "One of: technology, finance, healthcare, education, marketing, design, other",
-  "bio": "2-3 sentence professional story in first person",
-  "years_experience": <integer>,
-  "expertise": ["5-8 concise skill tag strings, Title Case"],
-  "work_experience": [
-    { "title": "...", "company": "...", "start_year": <int>, "end_year": <int or null for present>, "description": "one sentence" }
-  ],
-  "education": [
-    { "school": "...", "degree": "...", "degree_level": "phd|masters|bachelors|associate|other", "year": <int> }
-  ],
-  "languages": ["English"],
-  "location": "City, Country"
-}`,
-            },
+            { type: 'text', text: extractionPrompt },
           ],
         },
       ],
