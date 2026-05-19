@@ -204,6 +204,7 @@ export default function DashboardPage() {
   const { role, isLoading, user } = useDashboardRole();
   const [onboardingComplete, setOnboardingComplete] = useState(true);
   const [mentorStatus, setMentorStatus] = useState('active');
+  const [applicationSubmittedAt, setApplicationSubmittedAt] = useState(null);
   const [checking, setChecking] = useState(role === 'mentor');
   const [errored, setErrored] = useState(false);
   const location = useLocation();
@@ -230,12 +231,13 @@ export default function DashboardPage() {
       try {
         const { data } = await supabase
           .from('mentor_profiles')
-          .select('onboarding_complete, mentor_status')
+          .select('onboarding_complete, mentor_status, application_submitted_at')
           .eq('user_id', user.id)
           .maybeSingle();
         if (cancelled) return;
         setOnboardingComplete(data?.onboarding_complete ?? false);
         setMentorStatus(data?.mentor_status ?? null);
+        setApplicationSubmittedAt(data?.application_submitted_at ?? null);
       } catch {
         if (!cancelled) setErrored(true);
       } finally {
@@ -260,17 +262,17 @@ export default function DashboardPage() {
   if (role === 'mentor' && checking) {
     return <LoadingSpinner label="Loading…" className="min-h-screen" size="lg" />;
   }
-  // In-flight or suspended — show waiting screen; "Edit my application" button navigates to onboarding
-  if (role === 'mentor' && (mentorStatus === 'pending' || mentorStatus === 'under_review' || mentorStatus === 'suspended')) {
+  // Not yet submitted — redirect to application form regardless of status
+  if (role === 'mentor' && !applicationSubmittedAt && mentorStatus !== 'active') {
+    return <Navigate to="/onboarding/mentor" replace />;
+  }
+  // Submitted and in-flight — show waiting screen
+  if (role === 'mentor' && applicationSubmittedAt && (mentorStatus === 'pending' || mentorStatus === 'under_review' || mentorStatus === 'suspended')) {
     return <MentorApplicationPending status={mentorStatus} />;
   }
-  // Rejected — show pending screen with re-apply button
+  // Rejected — show re-apply screen
   if (role === 'mentor' && mentorStatus === 'rejected') {
     return <MentorApplicationPending status="rejected" />;
-  }
-  // No application yet (mentor_status null) — go to onboarding to apply
-  if (role === 'mentor' && !mentorStatus && !onboardingComplete) {
-    return <Navigate to="/onboarding/mentor" replace />;
   }
   // Approved but profile not yet completed — go to onboarding (profile completion phase)
   if (role === 'mentor' && mentorStatus === 'active' && !onboardingComplete) {

@@ -398,15 +398,16 @@ export default function MentorOnboarding() {
   const navigate = useNavigate();
   const isMentor = user?.user_metadata?.role === 'mentor';
   const SCREEN_META = {
+    'checkr':    { title: 'Identity verification',           sub: 'Bridge runs an automated background check on every mentor applicant.' },
     'resume':    { title: 'Start your application',          sub: 'Upload your resume to auto-fill, or fill in manually.' },
     'app-1':     { title: s.onboarding.applyTitle,          sub: s.onboarding.applySub },
-    'app-2':     { title: s.onboarding.verifyTitle,         sub: s.onboarding.verifySub },
+    'app-2':     { title: 'Professional profiles',           sub: 'Step 2 of 3 — your online professional presence.' },
     'app-3':     { title: s.onboarding.motivationTitle,     sub: s.onboarding.motivationSub },
     'profile-1': { title: s.onboarding.completeProfileTitle, sub: s.onboarding.completeProfileSub },
     'profile-2': { title: s.onboarding.skillsTitle,         sub: s.onboarding.skillsSub },
   };
 
-  const [screen, setScreen] = useState('resume');
+  const [screen, setScreen] = useState('checkr');
   const [profileId, setProfileId] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -439,7 +440,8 @@ export default function MentorOnboarding() {
   const [resumeUploading, setResumeUploading] = useState(false);
   const [resumeExtracting, setResumeExtracting] = useState(false);
   const [resumeStoragePath, setResumeStoragePath] = useState(null);
-  const [resumeError, setResumeError] = useState('');
+  const [checkrDone, setCheckrDone] = useState(false);
+  const [checkrRunning, setCheckrRunning] = useState(false);
 
 
   /* ── Load existing profile ── */
@@ -455,10 +457,15 @@ export default function MentorOnboarding() {
           navigate('/dashboard', { replace: true }); return;
         }
 
+        // Already submitted — send back to dashboard (pending/under_review screen)
+        if (profile.application_submitted_at && ['pending', 'under_review'].includes(profile.mentor_status)) {
+          navigate('/dashboard', { replace: true }); return;
+        }
+
         setProfileId(profile.id);
 
         if (profile.mentor_status === 'active' && !profile.onboarding_complete) {
-          // approved — skip resume step, go straight to profile completion
+          // Approved — skip to profile completion
           setProfileForm((p) => ({
             ...p,
             title:         profile.title && profile.title !== 'Mentor' ? profile.title : '',
@@ -474,6 +481,7 @@ export default function MentorOnboarding() {
           setAssignedRate(profile.session_rate ?? null);
           go('profile-1');
         } else {
+          // Not submitted yet (new, rejected reapply, or partial fill) — start application
           setAppForm((p) => ({
             ...p,
             name:             profile.name ?? '',
@@ -495,7 +503,13 @@ export default function MentorOnboarding() {
               motivationEssay: vd.motivationEssay ?? '',
             }));
           }
-          go('resume');
+          // Skip checkr screen if already completed in a previous session
+          if (vd.govIdNumber) {
+            setCheckrDone(true);
+            go('resume');
+          } else {
+            go('checkr');
+          }
         }
       } catch (err) {
         setError(err.message ?? 'Could not load profile.');
@@ -522,6 +536,19 @@ export default function MentorOnboarding() {
 
   function patchApp(patch) { setAppForm((p) => ({ ...p, ...patch })); setError(''); }
   function patchProfile(patch) { setProfileForm((p) => ({ ...p, ...patch })); setError(''); }
+
+  /* ── Checkr background check simulation ── */
+  async function handleRunCheckr() {
+    if (!verifyData.govIdNumber.trim()) {
+      setError('Please enter your government ID number to proceed.');
+      return;
+    }
+    setError('');
+    setCheckrRunning(true);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    setCheckrRunning(false);
+    setCheckrDone(true);
+  }
 
   /* ── Resume upload + AI extraction ── */
   async function handleResumeUpload(e) {
@@ -579,8 +606,8 @@ export default function MentorOnboarding() {
         });
       }
       go('app-1');
-    } catch (err) {
-      setResumeError(err.message || 'Could not process resume. Fill in manually below.');
+    } catch {
+      go('app-1');
     } finally {
       setResumeUploading(false);
       setResumeExtracting(false);
@@ -598,15 +625,27 @@ export default function MentorOnboarding() {
         education:        appForm.education,
       });
       const serverUrl = import.meta.env.VITE_SERVER_URL ?? '';
-      const { data: { session } } = await (await import('../api/supabase')).default.auth.getSession();
+      const supabaseMod = await import('../api/supabase');
+      const { data: { session } } = await supabaseMod.default.auth.getSession();
+      const authHeader = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+
+      // Submit application — sets mentor_status='pending' and application_submitted_at
       await fetch(`${serverUrl}/api/verification/apply`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
-        },
+        headers: { 'Content-Type': 'application/json', ...authHeader },
         body: JSON.stringify({ verificationData: { ...verifyData, resumeStoragePath } }),
       }).catch(() => {});
+
+      // Trigger background check simulation (auto-verify scores the application)
+      const devCode = import.meta.env.VITE_DEV_ACCESS_CODE;
+      if (devCode && profileId) {
+        await fetch(`${serverUrl}/api/dev/mentor-queue/auto-verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-dev-key': devCode },
+          body: JSON.stringify({ mentorProfileId: profileId }),
+        }).catch(() => {});
+      }
+
       navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message ?? 'Failed to submit. Please try again.');
@@ -670,14 +709,14 @@ export default function MentorOnboarding() {
     (yearsOk ? 8 : (workDatesOk && appForm.work_experience.length > 0) ? 3 : 0) +
     (eduSane && appForm.education.length >= 1 ? 8 : 0) +
     (profileForm.expertise.length >= 5 ? 5 : profileForm.expertise.length >= 3 ? 3 : profileForm.expertise.length >= 1 ? 1 : 0) +
-    (essayWords >= 150 ? 12 : essayWords >= 100 ? 8 : essayWords >= 50 ? 4 : 0) +
+    (essayWords >= 150 ? 12 : essayWords >= 100 ? 8 : essayWords >= 20 ? 4 : 0) +
     ((!yearsOk && appForm.work_experience.length > 0 && yearDelta > claimedYrs * 0.6) ? -10 : (!yearsOk && appForm.work_experience.length > 0) ? -5 : 0) +
     ((!eduSane && appForm.education.length > 0) ? -5 : 0)
   );
   const scoreColor = liveScore >= 75 ? '#22c55e' : liveScore >= 50 ? '#f59e0b' : '#ef4444';
   const scoreLabel = liveScore >= 75 ? s.onboarding.likelyApproved : liveScore >= 50 ? s.onboarding.mayNeedReview : s.onboarding.lowAddMoreInfo;
 
-  const canSubmitApp = verifyData.govIdNumber.trim() && (verifyData.socialVerified || verifyData.socialSkipped) && essayWords >= 50;
+  const canSubmitApp = checkrDone && (verifyData.socialVerified || verifyData.socialSkipped) && essayWords >= 20;
 
   const meta = SCREEN_META[screen];
 
@@ -705,8 +744,8 @@ export default function MentorOnboarding() {
 
         {/* Step dots */}
         <div className="mb-8 flex items-center justify-center gap-2">
-          {(['resume', 'app-1', 'app-2', 'app-3'].includes(screen)
-            ? ['resume', 'app-1', 'app-2', 'app-3']
+          {(['checkr', 'resume', 'app-1', 'app-2', 'app-3'].includes(screen)
+            ? ['checkr', 'resume', 'app-1', 'app-2', 'app-3']
             : ['profile-1', 'profile-2']
           ).map((s) => (
             <div
@@ -722,9 +761,9 @@ export default function MentorOnboarding() {
         {error && <div className="mb-4" />}
 
         {/* ══════════════════════════════════════════════════════
-            RESUME: Upload & AI extraction (optional entry)
+            CHECKR: Background check initiation (first step)
         ══════════════════════════════════════════════════════ */}
-        {screen === 'resume' && (
+        {screen === 'checkr' && (
           <Card
             footer={
               <div className="flex items-center justify-between">
@@ -735,6 +774,107 @@ export default function MentorOnboarding() {
                 >
                   <ArrowLeft className="h-4 w-4" /> Back to dashboard
                 </button>
+                {checkrDone ? (
+                  <button
+                    type="button"
+                    onClick={() => go('resume')}
+                    className={`flex items-center gap-2 rounded-full bg-amber-500 hover:bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition ${focusRing}`}
+                  >
+                    Continue to application <ArrowRight className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleRunCheckr}
+                    disabled={checkrRunning || !verifyData.govIdNumber.trim()}
+                    className={`flex items-center gap-2 rounded-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition ${focusRing}`}
+                  >
+                    {checkrRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                    {checkrRunning ? 'Running check…' : 'Run background check'}
+                  </button>
+                )}
+              </div>
+            }
+          >
+            <SectionHeader icon={ShieldCheck} label="Background check" sub="Step 1 of 5 — required before applying" />
+
+            <div className="rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-4 text-sm leading-relaxed text-[var(--bridge-text-secondary)]">
+              Bridge runs an automated identity and background check on every mentor applicant to protect our mentees. This check is performed before you complete your application.
+            </div>
+
+            {/* Gov ID */}
+            <div>
+              <label className={labelCls}>Government ID number *</label>
+              <input
+                type="text"
+                value={verifyData.govIdNumber}
+                onChange={(e) => setVerifyData((v) => ({ ...v, govIdNumber: e.target.value }))}
+                className={inputCls}
+                placeholder="Driver's licence, passport, or state ID number"
+              />
+              <p className="mt-1 text-xs text-[var(--bridge-text-faint)]">Reviewed by Bridge admins only. Never shared publicly.</p>
+            </div>
+
+            {/* ID + selfie uploads */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelCls}><CreditCard className="inline h-3 w-3 mr-1" />Photo of ID</label>
+                <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-3 py-4 text-center transition hover:border-amber-400">
+                  <CreditCard className="h-5 w-5 text-[var(--bridge-text-faint)]" />
+                  <span className="text-xs text-[var(--bridge-text-muted)]">
+                    {verifyData.govIdFileName
+                      ? <span className="font-semibold text-[var(--bridge-text)] break-all">{verifyData.govIdFileName}</span>
+                      : 'JPEG, PNG, PDF'}
+                  </span>
+                  <input type="file" accept="image/*,.pdf" className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) setVerifyData((v) => ({ ...v, govIdFileName: f.name })); }} />
+                </label>
+              </div>
+              <div>
+                <label className={labelCls}><Camera className="inline h-3 w-3 mr-1" />Selfie</label>
+                <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-3 py-4 text-center transition hover:border-amber-400">
+                  <Camera className="h-5 w-5 text-[var(--bridge-text-faint)]" />
+                  <span className="text-xs text-[var(--bridge-text-muted)]">
+                    {verifyData.faceFileName
+                      ? <span className="font-semibold text-[var(--bridge-text)] break-all">{verifyData.faceFileName}</span>
+                      : 'Clear face photo'}
+                  </span>
+                  <input type="file" accept="image/*" className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) setVerifyData((v) => ({ ...v, faceFileName: f.name })); }} />
+                </label>
+              </div>
+            </div>
+
+            {/* Status indicator */}
+            {checkrRunning && (
+              <div className="flex items-center gap-3 rounded-xl border border-amber-200/80 bg-amber-50/80 px-4 py-3">
+                <Loader2 className="h-5 w-5 animate-spin text-amber-500 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-900">Running background check…</p>
+                  <p className="text-xs text-amber-700">Verifying your identity. This takes a moment.</p>
+                </div>
+              </div>
+            )}
+            {checkrDone && (
+              <div className="flex items-center gap-3 rounded-xl border border-emerald-200/80 bg-emerald-50/80 px-4 py-3">
+                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-emerald-900">Identity verified</p>
+                  <p className="text-xs text-emerald-700">Background check complete. Continue to your application.</p>
+                </div>
+              </div>
+            )}
+          </Card>
+        )}
+
+        {/* ══════════════════════════════════════════════════════
+            RESUME: Upload & AI extraction (optional entry)
+        ══════════════════════════════════════════════════════ */}
+        {screen === 'resume' && (
+          <Card
+            footer={
+              <div className="flex items-center justify-between">
+                <BackBtn onClick={() => go('checkr')} />
                 <button
                   type="button"
                   onClick={() => go('app-1')}
@@ -780,8 +920,6 @@ export default function MentorOnboarding() {
                 </div>
               </div>
             )}
-
-            {resumeError && <ErrorBanner msg={resumeError} />}
 
             <div className="rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-3">
               <p className="text-xs text-[var(--bridge-text-muted)]">
@@ -903,7 +1041,7 @@ export default function MentorOnboarding() {
         )}
 
         {/* ══════════════════════════════════════════════════════
-            APP-2: Identity proof
+            APP-2: Professional profiles
         ══════════════════════════════════════════════════════ */}
         {screen === 'app-2' && (
           <Card
@@ -912,7 +1050,6 @@ export default function MentorOnboarding() {
                 <BackBtn onClick={() => go('app-1')} />
                 <NextBtn
                   onClick={() => {
-                    if (!verifyData.govIdNumber.trim()) { setError('Please enter your government ID number.'); return; }
                     const li = (verifyData.linkedinUrl ?? '').trim();
                     if (!li) { setError('Please enter your LinkedIn profile URL.'); return; }
                     if (!/linkedin\.com\/in\//i.test(li)) { setError('LinkedIn URL must be in the format linkedin.com/in/your-name.'); return; }
@@ -927,82 +1064,38 @@ export default function MentorOnboarding() {
               </div>
             }
           >
-            <SectionHeader icon={ShieldCheck} label="Identity proof" sub="Step 2 of 3" />
+            <SectionHeader icon={ShieldCheck} label="Professional profiles" sub="Step 2 of 3" />
 
-            {/* Gov ID number */}
+            <p className="text-xs text-[var(--bridge-text-muted)]">
+              Your LinkedIn profile URL is required. GitHub is optional but strengthens your application. Profiles must be publicly visible.
+            </p>
+
             <div>
-              <label className={labelCls}>Government ID number *</label>
+              <label className={labelCls}>
+                <svg className="inline h-3 w-3 mr-1 -mt-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                LinkedIn profile URL *
+              </label>
               <input
-                type="text"
-                value={verifyData.govIdNumber}
-                onChange={(e) => setVerifyData((v) => ({ ...v, govIdNumber: e.target.value }))}
+                type="url"
+                value={verifyData.linkedinUrl ?? ''}
+                onChange={(e) => setVerifyData((v) => ({ ...v, linkedinUrl: e.target.value }))}
                 className={inputCls}
-                placeholder="Driver's licence, passport, state ID — e.g. DL-TEST-12345"
+                placeholder="https://linkedin.com/in/your-name"
               />
             </div>
 
-            {/* Photo uploads */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelCls}><CreditCard className="inline h-3 w-3 mr-1" />Photo of ID</label>
-                <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-3 py-4 text-center transition hover:border-amber-400">
-                  <CreditCard className="h-5 w-5 text-[var(--bridge-text-faint)]" />
-                  <span className="text-xs text-[var(--bridge-text-muted)]">
-                    {verifyData.govIdFileName
-                      ? <span className="font-semibold text-[var(--bridge-text)] break-all">{verifyData.govIdFileName}</span>
-                      : 'JPEG, PNG, PDF'}
-                  </span>
-                  <input type="file" accept="image/*,.pdf" className="hidden"
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) setVerifyData((v) => ({ ...v, govIdFileName: f.name })); }} />
-                </label>
-              </div>
-              <div>
-                <label className={labelCls}><Camera className="inline h-3 w-3 mr-1" />Selfie / face scan</label>
-                <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-3 py-4 text-center transition hover:border-amber-400">
-                  <Camera className="h-5 w-5 text-[var(--bridge-text-faint)]" />
-                  <span className="text-xs text-[var(--bridge-text-muted)]">
-                    {verifyData.faceFileName
-                      ? <span className="font-semibold text-[var(--bridge-text)] break-all">{verifyData.faceFileName}</span>
-                      : 'Clear face photo'}
-                  </span>
-                  <input type="file" accept="image/*" className="hidden"
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) setVerifyData((v) => ({ ...v, faceFileName: f.name })); }} />
-                </label>
-              </div>
-            </div>
-
-            {/* Professional profiles */}
-            <div className="space-y-3 pt-1">
-              <p className="text-[11px] font-black uppercase tracking-wider text-[var(--bridge-text-faint)]">Professional profiles</p>
-              <p className="text-xs text-[var(--bridge-text-muted)]">
-                Your LinkedIn profile URL is required. GitHub is optional but strengthens your application. Profiles must be publicly visible.
-              </p>
-              <div>
-                <label className={labelCls}>
-                  <svg className="inline h-3 w-3 mr-1 -mt-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                  LinkedIn profile URL *
-                </label>
-                <input
-                  type="url"
-                  value={verifyData.linkedinUrl ?? ''}
-                  onChange={(e) => setVerifyData((v) => ({ ...v, linkedinUrl: e.target.value }))}
-                  className={inputCls}
-                  placeholder="https://linkedin.com/in/your-name"
-                />
-              </div>
-              <div>
-                <label className={labelCls}>
-                  <svg className="inline h-3 w-3 mr-1 -mt-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                  GitHub profile URL <span className="normal-case font-normal text-[var(--bridge-text-faint)]">(optional, +bonus)</span>
-                </label>
-                <input
-                  type="url"
-                  value={verifyData.githubUrl ?? ''}
-                  onChange={(e) => setVerifyData((v) => ({ ...v, githubUrl: e.target.value }))}
-                  className={inputCls}
-                  placeholder="https://github.com/your-username"
-                />
-              </div>
+            <div>
+              <label className={labelCls}>
+                <svg className="inline h-3 w-3 mr-1 -mt-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                GitHub profile URL <span className="normal-case font-normal text-[var(--bridge-text-faint)]">(optional, +bonus)</span>
+              </label>
+              <input
+                type="url"
+                value={verifyData.githubUrl ?? ''}
+                onChange={(e) => setVerifyData((v) => ({ ...v, githubUrl: e.target.value }))}
+                className={inputCls}
+                placeholder="https://github.com/your-username"
+              />
             </div>
 
             <p className="text-xs text-[var(--bridge-text-faint)]">
@@ -1049,7 +1142,7 @@ export default function MentorOnboarding() {
               <label className={labelCls}>
                 Why do you want to mentor on Bridge? *
                 <span className="normal-case font-normal text-[var(--bridge-text-faint)] ml-2">
-                  min 50 words · {essayWords} so far
+                  min 20 words · {essayWords} so far
                 </span>
               </label>
               <textarea
@@ -1060,8 +1153,8 @@ export default function MentorOnboarding() {
                 placeholder="Describe your motivation to mentor — what experiences shaped you, what impact you hope to make, and why Bridge aligns with your goals. Be specific and genuine."
               />
               <p className="mt-1.5 text-xs text-[var(--bridge-text-faint)]">
-                This essay is scored algorithmically for clarity and relevance. Minimum 50 words required.
-                {essayWords >= 50 && <span className="ml-1 text-emerald-600 font-semibold">✓ Meets minimum</span>}
+                This is scored algorithmically for clarity and relevance. Minimum 20 words required.
+                {essayWords >= 20 && <span className="ml-1 text-emerald-600 font-semibold">✓ Meets minimum</span>}
               </p>
             </div>
 
