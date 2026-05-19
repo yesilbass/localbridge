@@ -97,28 +97,49 @@ const RESUME_SCHEMA = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    years_experience:    { type: 'number' },
-    primary_industry:    { type: 'string' },
-    expertise_signals:   { type: 'array', items: { type: 'string' }, maxItems: 10 },
-    red_flags:           { type: 'array', items: { type: 'string' }, maxItems: 10 },
-    authenticity_score:  { type: 'number', minimum: 0, maximum: 10 },
-    rationale:           { type: 'string' },
-    recommended_score:   { type: 'number', minimum: 0, maximum: 20 },
+    years_experience:        { type: 'number' },
+    primary_industry:        { type: 'string' },
+    expertise_signals:       { type: 'array', items: { type: 'string' }, maxItems: 10 },
+    red_flags:               { type: 'array', items: { type: 'string' }, maxItems: 10 },
+    authenticity_score:      { type: 'number', minimum: 0, maximum: 10 },
+    experience_quality:      { type: 'number', minimum: 0, maximum: 10 },
+    rationale:               { type: 'string' },
+    recommended_score:       { type: 'number', minimum: 0, maximum: 20 },
   },
-  required: ['years_experience', 'primary_industry', 'expertise_signals', 'red_flags', 'authenticity_score', 'rationale', 'recommended_score'],
+  required: ['years_experience', 'primary_industry', 'expertise_signals', 'red_flags', 'authenticity_score', 'experience_quality', 'rationale', 'recommended_score'],
 };
 
-export async function evaluateResume({ resumeText, claimedTitle, claimedCompany, ownerUserId }) {
+export async function evaluateResume({ resumeText, claimedTitle, claimedCompany, educationEntries, ownerUserId }) {
   const w = COMPONENT_WEIGHTS.resume_ai;
+
+  // Build education context for the prompt
+  const eduLines = (educationEntries || []).map((e) => {
+    const diploma = e.hasDiploma ? ' [diploma uploaded]' : '';
+    return `  - ${e.degree_level || 'unknown'} degree at ${e.school || 'unknown school'} (${e.year || '?'})${diploma}`;
+  });
+  const eduContext = eduLines.length
+    ? `\nEDUCATION (from application):\n${eduLines.join('\n')}`
+    : '';
+
   const system = [
-    'You are an experienced senior recruiter evaluating a mentor candidate\'s resume.',
+    'You are an experienced senior recruiter evaluating a mentor candidate\'s resume for a paid mentorship platform.',
     'Return a strict JSON object matching the provided schema.',
     'Score conservatively. A senior IC at a recognizable company with verifiable progression is the upper bar.',
     'Detect AI-generated boilerplate, gaps, fabrications, and inconsistency with the claimed role.',
+    '',
+    'SCORING RULES for recommended_score (0-20):',
+    '- Base: 0-12 from seniority, tenure, and company recognizability.',
+    '- Description quality bonus (0-4): Award 1pt per job entry that has specific quantified achievements, named technologies, team sizes, or measurable impact. Vague one-liners ("managed projects", "worked on features") score 0. Bullet-point entries with numbers (%, $, headcount, latency) score full bonus.',
+    '- Education bonus (0-4): bachelor\'s=+1, master\'s=+2, phd=+3. Add +1 if diploma was uploaded (verified credential).',
+    '- Cap at 20.',
+    '',
+    'experience_quality (0-10): Rate the richness of job descriptions across all entries. 0=all vague one-liners. 10=every entry has quantified impact, specific tech, and scope.',
   ].join(' ');
+
   const user = [
     `Claimed title: ${claimedTitle || 'n/a'}`,
     `Claimed company: ${claimedCompany || 'n/a'}`,
+    eduContext,
     '---',
     'RESUME (truncated to 8KB):',
     String(resumeText || '').slice(0, 8000),
@@ -262,6 +283,7 @@ function deterministicMock(feature, userPrompt) {
         expertise_signals: ['shipped 2+ products', 'mentored junior eng', 'public open-source'],
         red_flags: [],
         authenticity_score: 8,
+        experience_quality: 7,
         rationale: 'Test-mode mock: appears authentic and senior.',
         recommended_score: 16,
       };

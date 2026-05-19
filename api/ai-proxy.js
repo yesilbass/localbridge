@@ -487,7 +487,7 @@ Required JSON schema:
       "company": "Exact company or organization name",
       "start_year": <4-digit integer>,
       "end_year": <4-digit integer, or null if current/present/ongoing>,
-      "description": "One sentence summarizing the most important responsibility or achievement"
+      "description": "2-4 bullet points (each starting with •) covering key responsibilities and quantified achievements"
     }
   ],
   "education": [
@@ -500,7 +500,9 @@ Required JSON schema:
     }
   ],
   "languages": ["All languages mentioned; always include English if not listed"],
-  "location": "City, State or City, Country from most recent address or contact info"
+  "location": "City, State or City, Country from most recent address or contact info",
+  "linkedin_url": "Full LinkedIn profile URL if present anywhere on the resume, else null",
+  "github_url": "Full GitHub profile URL if present anywhere on the resume, else null"
 }
 
 Strict rules:
