@@ -52,7 +52,7 @@ app.use(
     credentials: true,
   }),
 );
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Stripe — same handlers as Vercel `api/*.js` (lightweight; avoids serverless loading full Express + googleapis graph)
 app.post('/api/create-subscription-checkout', wrapApiHandler(createSubscriptionCheckout));
@@ -113,7 +113,7 @@ app.use('/api/dev', devRoutes);
 // Cancellation requests
 app.use('/api/cancellations', cancellationsRoute);
 
-// AI proxy — mirrors Vercel api/ai-proxy.js
+// AI proxy — mirrors Vercel api/ai-proxy.js (large limit for base64 resume payloads)
 app.post('/api/ai-proxy', wrapApiHandler(aiProxyHandler));
 
 // Health check
