@@ -23,7 +23,7 @@ const LIMITS = {
   claude_chat: { max: 20, window: 'day' },
   intake_summary: { max: 10, window: 'day' },
   onboarding_ai: { max: 20, window: 'day' },
-  resume_extract: { max: 10, window: 'day' },
+  resume_extract: { max: 50, window: 'day' },
 };
 
 const textUnderLimit = (label) =>
@@ -588,6 +588,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ result });
   } catch (error) {
     console.error('[ai-proxy] request failed', { action, userId: user.id, error });
-    return jsonError(res, 500, 'AI request failed');
+    const detail = error?.message || String(error);
+    return res.status(500).json({ error: 'AI request failed', detail });
   }
 }

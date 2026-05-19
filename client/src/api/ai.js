@@ -15,9 +15,12 @@ export async function callAIProxy(action, payload) {
   });
 
   if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
     if (res.status === 401) throw new Error('Please sign in to use Bridge AI.');
     if (res.status === 429) throw new Error('You have reached your AI usage limit.');
-    throw new Error('Bridge AI is unavailable right now. Please try again.');
+    const detail = body?.detail || body?.error || 'Bridge AI is unavailable right now. Please try again.';
+    console.error('[ai-proxy] error', { action, status: res.status, body });
+    throw new Error(detail);
   }
 
   const data = await res.json();
