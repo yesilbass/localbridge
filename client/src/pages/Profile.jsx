@@ -28,6 +28,7 @@ import {
 import supabase from '../api/supabase';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { uploadResumeFile, removeResumeFile, getResumeSignedUrl } from '../api/resumeStorage';
+import { extractResumeData } from '../api/ai';
 import { toJsonbSafe } from '../utils/jsonbSafe';
 
 function ResumeDownloadButton({ meta }) {
@@ -189,6 +190,7 @@ export default function Profile() {
   const [mentorProfileId, setMentorProfileId] = useState(null);
   const [savingMentor, setSavingMentor] = useState(false);
   const [resumeUploading, setResumeUploading] = useState(false);
+  const [resumeExtracting, setResumeExtracting] = useState(false);
 
   const sections = isMentor
     ? ['personal', 'resume', 'experience', 'education', 'skills', 'achievements', 'mentor']
@@ -387,15 +389,12 @@ export default function Profile() {
       return;
     }
     setResumeUploading(true);
+    let meta;
     try {
       const prevPath = profileData.personal?.resume?.path;
-      const meta = await uploadResumeFile(user.id, file);
+      meta = await uploadResumeFile(user.id, file);
       if (prevPath && prevPath !== meta.path) {
-        try {
-          await removeResumeFile(prevPath);
-        } catch {
-          /* ignore stale file */
-        }
+        try { await removeResumeFile(prevPath); } catch { /* ignore stale file */ }
       }
       const nextPersonal = toJsonbSafe({ ...profileData.personal, resume: meta });
       setProfileData((prev) => ({ ...prev, personal: nextPersonal }));
@@ -419,8 +418,75 @@ export default function Profile() {
     } catch (err) {
       console.error(err);
       showMsg('error', err.message || 'Upload failed. Run supabase/BRIDGE_PUBLISH.sql if the DB is not set up.');
-    } finally {
       setResumeUploading(false);
+      return;
+    }
+    setResumeUploading(false);
+
+    // Extract and auto-fill profile fields from the resume
+    if (file.type === 'application/pdf') {
+      setResumeExtracting(true);
+      try {
+        const resumeBase64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const result = ev.target?.result || '';
+            resolve(typeof result === 'string' ? result.split(',')[1] || result : '');
+          };
+          reader.onerror = () => reject(new Error('Could not read file'));
+          reader.readAsDataURL(file);
+        });
+        const parsed = await extractResumeData(resumeBase64);
+        if (parsed) {
+          setProfileData((prev) => {
+            const updatedPersonal = {
+              ...prev.personal,
+              full_name: parsed.name || prev.personal.full_name,
+              title: parsed.title || prev.personal.title,
+              bio: parsed.bio || prev.personal.bio,
+              location: parsed.location || prev.personal.location,
+            };
+            const updatedExperience = parsed.work_experience?.length
+              ? parsed.work_experience.slice(0, 5).map((j) => ({
+                  id: Date.now() + Math.random(),
+                  company: j.company || '',
+                  position: j.title || '',
+                  start_date: j.start_year ? `${j.start_year}-01` : '',
+                  end_date: j.end_year ? `${j.end_year}-01` : '',
+                  current: j.end_year == null,
+                  description: j.description || '',
+                }))
+              : prev.experience;
+            const updatedEducation = parsed.education?.length
+              ? parsed.education.slice(0, 3).map((ed) => ({
+                  id: Date.now() + Math.random(),
+                  school: ed.school || '',
+                  degree: ed.degree || '',
+                  field: '',
+                  start_date: '',
+                  end_date: ed.year ? `${ed.year}-06` : '',
+                  current: false,
+                  gpa: '',
+                }))
+              : prev.education;
+            const updatedSkills = parsed.expertise?.length
+              ? parsed.expertise
+              : prev.skills;
+            return {
+              ...prev,
+              personal: updatedPersonal,
+              experience: updatedExperience,
+              education: updatedEducation,
+              skills: updatedSkills,
+            };
+          });
+          showMsg('success', 'Resume parsed — review and save your updated profile.');
+        }
+      } catch {
+        // Silent — profile fields stay as-is, upload already succeeded
+      } finally {
+        setResumeExtracting(false);
+      }
     }
   };
 
@@ -793,8 +859,8 @@ export default function Profile() {
                 <p className="text-sm text-stone-600">{s.profile.noFileUploaded}</p>
               )}
               <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 cursor-pointer text-sm font-medium disabled:opacity-50">
-                <input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" disabled={resumeUploading} onChange={handleResumeUpload} />
-                {resumeUploading ? s.profile.uploading : profileData.personal.resume ? s.profile.replaceFile : s.profile.uploadPdfOrWord}
+                <input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" disabled={resumeUploading || resumeExtracting} onChange={handleResumeUpload} />
+                {resumeUploading ? s.profile.uploading : resumeExtracting ? 'Extracting info…' : profileData.personal.resume ? s.profile.replaceFile : s.profile.uploadPdfOrWord}
               </label>
             </div>
           )}
