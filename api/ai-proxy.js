@@ -466,6 +466,9 @@ async function runOnboardingAI({ systemPrompt, prompt, maxTokens = 2000, json })
 }
 
 async function runResumeExtract({ resumeBase64 }) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error('OpenAI is not configured');
+
   const CURRENT_YEAR = new Date().getFullYear();
 
   const extractionPrompt = `You are an expert resume parser with deep knowledge of resume formats worldwide — chronological, functional, hybrid, academic CVs, international formats, and everything in between.
@@ -516,30 +519,45 @@ Strict rules:
 5. bio — first person, warm and specific. Highlight what they do and the value they bring.
 6. Missing fields — null for strings, 0 for numbers, [] for arrays. Never invent data not present.`;
 
-  let fileId;
-  try {
-    fileId = await uploadResumeFile(resumeBase64);
-    const rawText = await callOpenAIChat({
+  // Use the Responses API which supports inline PDF files natively.
+  // /v1/chat/completions does NOT support { type: 'file' } content blocks.
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
       model: 'gpt-4o',
-      maxTokens: 4000,
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a precise resume parser. Read the attached PDF resume and return structured JSON only. No markdown, no explanation.',
-        },
+      input: [
         {
           role: 'user',
           content: [
-            { type: 'file', file: { file_id: fileId } },
-            { type: 'text', text: extractionPrompt },
+            {
+              type: 'input_file',
+              filename: 'resume.pdf',
+              file_data: `data:application/pdf;base64,${resumeBase64}`,
+            },
+            {
+              type: 'input_text',
+              text: extractionPrompt,
+            },
           ],
         },
       ],
-    });
-    return parseJsonResponse(rawText, 'resume_extract');
-  } finally {
-    await deleteResumeFile(fileId);
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => '');
+    console.error('[ai-proxy] resume_extract Responses API error', response.status, body);
+    throw new Error('Resume extraction failed');
   }
+
+  const data = await response.json();
+  const text = data.output?.[0]?.content?.[0]?.text ?? '';
+  if (!text) throw new Error('Empty response from resume extraction');
+  return parseJsonResponse(text, 'resume_extract');
 }
 
 async function runAction(action, payload) {
