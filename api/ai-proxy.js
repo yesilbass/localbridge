@@ -466,14 +466,11 @@ async function runOnboardingAI({ systemPrompt, prompt, maxTokens = 2000, json })
 }
 
 async function runResumeExtract({ resumeBase64 }) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error('OpenAI is not configured');
-
   const CURRENT_YEAR = new Date().getFullYear();
 
   const extractionPrompt = `You are an expert resume parser with deep knowledge of resume formats worldwide — chronological, functional, hybrid, academic CVs, international formats, and everything in between.
 
-Parse the attached resume completely. Return ONLY a single valid JSON object. No markdown fences, no explanation, no text before or after the JSON.
+Parse the attached resume completely. Return a single valid JSON object matching the schema below. No prose outside the JSON.
 
 Required JSON schema:
 {
@@ -483,7 +480,7 @@ Required JSON schema:
   "industry": "Single best-fit value from: technology | finance | healthcare | education | marketing | design | consulting | legal | engineering | media | government | nonprofit | other",
   "bio": "2-3 sentence first-person professional summary. If a summary/objective section exists, polish it into first person. If absent, synthesize one from their experience and skills.",
   "years_experience": <integer — calculate from earliest professional job start year to ${CURRENT_YEAR}; use stated value if explicitly given; minimum 0>,
-  "expertise": ["8-10 specific skill/tool/technology/methodology tags in Title Case — extract from skills sections, job descriptions, certifications, and tools mentioned anywhere"],
+  "expertise": ["8-10 specific skill/tool/technology/methodology tags in Title Case"],
   "work_experience": [
     {
       "title": "Exact job title",
@@ -519,45 +516,43 @@ Strict rules:
 5. bio — first person, warm and specific. Highlight what they do and the value they bring.
 6. Missing fields — null for strings, 0 for numbers, [] for arrays. Never invent data not present.`;
 
-  // Use the Responses API which supports inline PDF files natively.
-  // /v1/chat/completions does NOT support { type: 'file' } content blocks.
-  const response = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
+  let fileId;
+  try {
+    fileId = await uploadResumeFile(resumeBase64);
+    const rawText = await callOpenAIChat({
       model: 'gpt-4o',
-      input: [
+      maxTokens: 3000,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are an expert resume parser. You read the attached PDF and emit a single valid JSON object that conforms exactly to the schema in the user message. Never include prose, markdown fences, or commentary outside the JSON.',
+        },
         {
           role: 'user',
           content: [
-            {
-              type: 'input_file',
-              filename: 'resume.pdf',
-              file_data: `data:application/pdf;base64,${resumeBase64}`,
-            },
-            {
-              type: 'input_text',
-              text: extractionPrompt,
-            },
+            { type: 'file', file: { file_id: fileId } },
+            { type: 'text', text: extractionPrompt },
           ],
         },
       ],
-    }),
-  });
+      responseFormat: { type: 'json_object' },
+    });
 
-  if (!response.ok) {
-    const body = await response.text().catch(() => '');
-    console.error('[ai-proxy] resume_extract Responses API error', response.status, body);
-    throw new Error('Resume extraction failed');
+    const parsed = parseJsonResponse(rawText, 'resume_extract');
+
+    const requiredKeys = ['name', 'title', 'company', 'industry', 'bio', 'years_experience', 'expertise', 'work_experience', 'education', 'languages', 'location'];
+    const missing = requiredKeys.filter((key) => !(key in parsed));
+    if (missing.length) throw new Error(`Resume extraction missing fields: ${missing.join(', ')}`);
+    if (!Array.isArray(parsed.expertise)) throw new Error('Resume extraction: expertise must be an array');
+    if (!Array.isArray(parsed.work_experience)) throw new Error('Resume extraction: work_experience must be an array');
+    if (!Array.isArray(parsed.education)) throw new Error('Resume extraction: education must be an array');
+    if (!Array.isArray(parsed.languages)) throw new Error('Resume extraction: languages must be an array');
+
+    return parsed;
+  } finally {
+    if (fileId) await deleteResumeFile(fileId);
   }
-
-  const data = await response.json();
-  const text = data.output?.[0]?.content?.[0]?.text ?? '';
-  if (!text) throw new Error('Empty response from resume extraction');
-  return parseJsonResponse(text, 'resume_extract');
 }
 
 async function runAction(action, payload) {
