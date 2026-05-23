@@ -468,67 +468,36 @@ async function runOnboardingAI({ systemPrompt, prompt, maxTokens = 2000, json })
 async function runResumeExtract({ resumeBase64 }) {
   const CURRENT_YEAR = new Date().getFullYear();
 
-  const extractionPrompt = `You are an expert resume parser with deep knowledge of resume formats worldwide — chronological, functional, hybrid, academic CVs, international formats, and everything in between.
+  const extractionPrompt = `Parse this resume. Return ONLY a valid JSON object — no prose, no markdown.
 
-Parse the attached resume completely. Return a single valid JSON object matching the schema below. No prose outside the JSON.
-
-Required JSON schema:
 {
-  "name": "Full name as written on resume",
-  "title": "Most recent or current job title. If not explicit, infer from most recent role.",
-  "company": "Most recent or current employer name",
-  "industry": "Single best-fit value from: technology | finance | healthcare | education | marketing | design | consulting | legal | engineering | media | government | nonprofit | other",
-  "bio": "2-3 sentence first-person professional summary. If a summary/objective section exists, polish it into first person. If absent, synthesize one from their experience and skills.",
-  "years_experience": <integer — calculate from earliest professional job start year to ${CURRENT_YEAR}; use stated value if explicitly given; minimum 0>,
-  "expertise": ["8-10 specific skill/tool/technology/methodology tags in Title Case"],
-  "work_experience": [
-    {
-      "title": "Exact job title",
-      "company": "Exact company or organization name",
-      "start_year": <4-digit integer>,
-      "end_year": <4-digit integer, or null if current/present/ongoing>,
-      "description": "2-4 bullet points (each starting with •) covering key responsibilities and quantified achievements"
-    }
-  ],
-  "education": [
-    {
-      "school": "Full institution name",
-      "degree": "Full degree name as written on resume",
-      "degree_level": "phd | masters | bachelors | associate | other",
-      "field": "Field of study or major",
-      "year": <graduation year as 4-digit integer>
-    }
-  ],
-  "languages": ["All languages mentioned; always include English if not listed"],
-  "location": "City, State or City, Country from most recent address or contact info",
-  "linkedin_url": "Full LinkedIn profile URL if present anywhere on the resume, else null",
-  "github_url": "Full GitHub profile URL if present anywhere on the resume, else null"
+  "name": "Full name",
+  "title": "Most recent job title",
+  "company": "Most recent employer",
+  "industry": "technology|finance|healthcare|education|marketing|design|consulting|legal|engineering|media|government|nonprofit|other",
+  "bio": "2-3 sentence first-person summary",
+  "years_experience": <integer, earliest job start to ${CURRENT_YEAR}>,
+  "expertise": ["6-8 skill/tool tags, Title Case"],
+  "work_experience": [{"title":"","company":"","start_year":0,"end_year":null,"description":"2-4 bullets starting with •"}],
+  "education": [{"school":"","degree":"","degree_level":"phd|masters|bachelors|associate|other","field":"","year":0}],
+  "languages": ["English"],
+  "location": "City, Country",
+  "linkedin_url": null,
+  "github_url": null
 }
 
-Strict rules:
-1. work_experience — extract EVERY role found, sort newest first. Handle any date format: "Jan 2020–Mar 2023", "2020-2023", "2020 to present", "Since 2018", "Current", dashes, en-dashes, em-dashes. "Present/Current/Now/ongoing/—" at end → end_year: null.
-2. degree_level — map exactly:
-   phd: PhD, Ph.D., Doctorate, DPhil, MD, JD, EdD, DDS, PharmD, DBA, ScD, PsyD, LLD, DVM, DO, DrPH
-   masters: Master, MSc, MS, MA, MBA, MEng, MFA, MPA, MPH, LLM, MEd, MTech, MSW, MIM, MIS
-   bachelors: Bachelor, BS, BA, BE, BTech, BEng, BBA, BFA, BArch, BSc, BCom, BEd, LLB, MBBS
-   associate: Associate, AS, AA, AAS, AAT
-   other: Certificate, Diploma, Certification, Bootcamp, High School, GED, or unrecognized
-3. expertise — be thorough: programming languages, frameworks, platforms, tools, methodologies (Agile, Scrum, Lean), soft skills if prominent, certifications. Title Case only.
-4. years_experience — count from earliest professional start year to ${CURRENT_YEAR}. Exclude student internships unless they are the only experience.
-5. bio — first person, warm and specific. Highlight what they do and the value they bring.
-6. Missing fields — null for strings, 0 for numbers, [] for arrays. Never invent data not present.`;
+Rules: work_experience newest first; end_year null if current; missing fields → null/0/[].`;
 
   let fileId;
   try {
     fileId = await uploadResumeFile(resumeBase64);
     const rawText = await callOpenAIChat({
-      model: 'gpt-4o',
-      maxTokens: 3000,
+      model: 'gpt-4o-mini',
+      maxTokens: 2000,
       messages: [
         {
           role: 'system',
-          content:
-            'You are an expert resume parser. You read the attached PDF and emit a single valid JSON object that conforms exactly to the schema in the user message. Never include prose, markdown fences, or commentary outside the JSON.',
+          content: 'You are a resume parser. Return only the JSON object specified by the user. No markdown, no commentary.',
         },
         {
           role: 'user',
