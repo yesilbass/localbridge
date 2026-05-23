@@ -76,6 +76,7 @@ function AppContent() {
     location.pathname.startsWith('/settings') ||
     isDashboard ||
     isVideoCall;
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
   const hideNavbar = isVideoCall || isDashboard;
 
   // Scroll to top on route change, but don't fight in-page anchor scrolling.
@@ -94,12 +95,12 @@ function AppContent() {
   return (
     <div className="relative isolate min-h-screen bg-bridge-page text-stone-900 font-sans antialiased flex flex-col" style={{ overflowX: 'clip' }}>
       <BridgeGlobalAtmosphere />
-      {!isVideoCall && <ScrollProgress />}
+      {!isVideoCall && !isAuthPage && <ScrollProgress />}
       {!isVideoCall && <MagneticPointer />}
       {!hideNavbar && <Navbar />}
       <div
         key={location.pathname}
-        className={`relative z-10 flex flex-1 flex-col animate-page-enter ${isLanding || isDashboard ? '' : 'pt-[5.25rem]'}`}
+        className={`relative z-10 flex flex-1 flex-col animate-page-enter ${isLanding || isDashboard || isAuthPage ? '' : 'pt-[5.25rem]'}`}
       >
         <ErrorBoundary>
         <Suspense fallback={<PageLoadingFallback />}>

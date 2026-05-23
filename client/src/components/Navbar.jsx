@@ -76,6 +76,8 @@ export default function Navbar() {
     navigate('/');
   }
 
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+
   const isActive = path =>
     path === '/' ? location.pathname === '/' : location.pathname === path || location.pathname.startsWith(`${path}/`);
 
@@ -113,10 +115,23 @@ export default function Navbar() {
         }}
       >
 
-        {/* Background layer */}
+        {/* Background layer — glass on scroll (non-auth), warm amber on auth */}
         <div
-          className="relative bg-transparent"
-          style={{ border: 0, boxShadow: 'none', outline: 0 }}
+          className="relative transition-all duration-300"
+          style={
+            isAuthPage
+              ? { border: 0, outline: 0, boxShadow: 'none', background: 'transparent' }
+              : scrolled
+              ? {
+                  border: 0,
+                  outline: 0,
+                  background: 'color-mix(in srgb, var(--bridge-canvas) 82%, transparent)',
+                  backdropFilter: 'blur(20px) saturate(1.4)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(1.4)',
+                  boxShadow: '0 1px 0 color-mix(in srgb, var(--color-primary) 8%, transparent), 0 8px 32px -12px color-mix(in srgb, var(--color-secondary) 14%, transparent)',
+                }
+              : { border: 0, outline: 0, boxShadow: 'none', background: 'transparent' }
+          }
         >
           <nav
             className="relative mx-auto flex h-[5.25rem] max-w-[112rem] items-center justify-between gap-5 px-5 sm:px-8 lg:px-12"
@@ -127,10 +142,16 @@ export default function Navbar() {
               {/* ── Wordmark ── */}
               <Link to="/"
                 className="group relative flex shrink-0 items-center rounded-full outline-none transition-opacity duration-200 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)]">
-                <span className="font-display text-[1.22rem] font-black leading-none tracking-[-0.035em] text-[var(--bridge-text)] sm:text-[1.32rem]">
+                <span
+                  className="font-display text-[1.22rem] font-black leading-none tracking-[-0.035em] sm:text-[1.32rem]"
+                  style={{ color: isAuthPage ? '#0c0a09' : 'var(--bridge-text)' }}
+                >
                   {t('brand.bridge', 'Bridge')}
                 </span>
-                <span className="ml-1.5 font-display text-[1.22rem] font-medium leading-none tracking-[-0.04em] text-[var(--bridge-text)] sm:text-[1.32rem]">
+                <span
+                  className="ml-1.5 font-display text-[1.22rem] font-medium leading-none tracking-[-0.04em] sm:text-[1.32rem]"
+                  style={{ color: isAuthPage ? '#0c0a09' : 'var(--bridge-text)' }}
+                >
                   {t('brand.mentorship', 'Mentorship')}
                 </span>
               </Link>
@@ -142,17 +163,20 @@ export default function Navbar() {
                   return (
                     <Link key={item.path} to={item.path}
                       aria-current={active ? 'page' : undefined}
-                      className={`group relative inline-flex items-center gap-1.5 rounded-full py-2 text-[15px] font-medium tracking-[-0.015em] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-3 before:inset-y-1 before:scale-75 before:rounded-full before:bg-[var(--bridge-text)] before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:before:scale-100 hover:before:opacity-[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)] ${
-                        active
-                          ? 'text-[var(--bridge-text)]'
-                          : 'text-[var(--bridge-text-secondary)] hover:text-[var(--bridge-text)]'
+                      className={`group relative inline-flex items-center gap-1.5 rounded-full py-2 text-[15px] font-medium tracking-[-0.015em] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-3 before:inset-y-1 before:scale-75 before:rounded-full before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:before:scale-100 hover:before:opacity-[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)] ${
+                        isAuthPage
+                          ? active ? 'text-[#0c0a09] before:bg-[#0c0a09]' : 'text-[#78716c] before:bg-[#0c0a09] hover:text-[#0c0a09]'
+                          : active
+                          ? 'text-[var(--bridge-text)] before:bg-[var(--bridge-text)]'
+                          : 'text-[var(--bridge-text-secondary)] before:bg-[var(--bridge-text)] hover:text-[var(--bridge-text)]'
                       }`}
                     >
                       <span
                         aria-hidden
-                        className={`absolute -bottom-0.5 left-1/2 h-px w-full -translate-x-1/2 rounded-full bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent transition-all duration-300 ease-out ${
+                        className={`absolute -bottom-0.5 left-1/2 h-px w-full -translate-x-1/2 rounded-full bg-gradient-to-r from-transparent to-transparent transition-all duration-300 ease-out ${
                           active ? 'scale-x-100 opacity-80' : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-70'
                         }`}
+                        style={{ backgroundImage: isAuthPage ? 'linear-gradient(to right, transparent, #0c0a09, transparent)' : 'linear-gradient(to right, transparent, var(--color-primary), transparent)' }}
                       />
                       <span className="relative z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-px">{item.label}</span>
                       {item.ai && (
@@ -172,7 +196,14 @@ export default function Navbar() {
             <div className="flex shrink-0 items-center gap-2">
 
               {loading ? (
-                <div className="hidden h-9 w-28 animate-pulse rounded-full bg-[var(--bridge-surface-muted)] ring-1 ring-[var(--bridge-border)] sm:block" aria-hidden />
+                <div
+                  className="hidden h-9 w-28 animate-pulse rounded-full ring-1 sm:block"
+                  style={{
+                    backgroundColor: isAuthPage ? 'rgba(120,79,43,0.08)' : 'var(--bridge-surface-muted)',
+                    boxShadow: isAuthPage ? '0 0 0 1px rgba(120,79,43,0.12)' : '0 0 0 1px var(--bridge-border)',
+                  }}
+                  aria-hidden
+                />
               ) : user ? (
                 <div className="hidden items-center gap-2 sm:flex">
 
@@ -317,14 +348,26 @@ export default function Navbar() {
               ) : (
                 <div className="hidden items-center gap-2 sm:flex">
                   <Link to="/login"
-                    className="group relative rounded-full px-4 py-2 text-[14px] font-medium text-[var(--bridge-text-secondary)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-1 before:inset-y-1 before:scale-75 before:rounded-full before:bg-[var(--bridge-text)] before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:text-[var(--bridge-text)] hover:before:scale-100 hover:before:opacity-[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)]">
-                    <span className="relative z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-px">{t('nav.login', 'Log in')}</span>
-                    <span aria-hidden className="absolute -bottom-0.5 left-1/2 h-px w-[calc(100%-2rem)] -translate-x-1/2 scale-x-0 rounded-full bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent opacity-0 transition-all duration-300 ease-out group-hover:scale-x-100 group-hover:opacity-70" />
+                    className="group relative rounded-full px-4 py-2 text-[14px] font-medium transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-1 before:inset-y-1 before:scale-75 before:rounded-full before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:before:scale-100 hover:before:opacity-[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)]"
+                    style={{ color: isAuthPage ? '#78716c' : 'var(--bridge-text-secondary)' }}
+                  >
+                    <span
+                      className="absolute before:bg-current"
+                      style={{ '--tw-content': '""' }}
+                    />
+                    <span className="relative z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-px" style={{ color: 'inherit' }}>{t('nav.login', 'Log in')}</span>
+                    <span
+                      aria-hidden
+                      className="absolute -bottom-0.5 left-1/2 h-px w-[calc(100%-2rem)] -translate-x-1/2 scale-x-0 rounded-full opacity-0 transition-all duration-300 ease-out group-hover:scale-x-100 group-hover:opacity-70"
+                      style={{ backgroundImage: isAuthPage ? 'linear-gradient(to right, transparent, #0c0a09, transparent)' : 'linear-gradient(to right, transparent, var(--color-primary), transparent)' }}
+                    />
                   </Link>
                   <Link to="/register" data-magnet="6"
-                    className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full bg-[var(--bridge-text)] px-5 py-2.5 text-[14px] font-medium text-[var(--bridge-canvas)] transition hover:-translate-y-0.5 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4"
+                    className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 text-[14px] font-medium transition hover:-translate-y-0.5 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4"
                     style={{
-                      boxShadow: '0 16px 34px -22px color-mix(in srgb, var(--bridge-text) 80%, transparent)',
+                      backgroundColor: isAuthPage ? '#0c0a09' : 'var(--bridge-text)',
+                      color: isAuthPage ? '#ffffff' : 'var(--bridge-canvas)',
+                      boxShadow: isAuthPage ? '0 16px 34px -22px rgba(12,10,9,0.65)' : '0 16px 34px -22px color-mix(in srgb, var(--bridge-text) 80%, transparent)',
                     }}
                   >
                     {t('nav.getStarted', 'Get started')}
@@ -337,9 +380,10 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(v => !v)}
                 aria-expanded={mobileOpen}
                 aria-label={mobileOpen ? t('nav.closeMenu', 'Close menu') : t('nav.openMenu', 'Open menu')}
-                className="relative flex h-10 w-10 items-center justify-center rounded-full text-[var(--bridge-text)] transition hover:bg-[var(--bridge-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] md:hidden"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-[var(--bridge-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] md:hidden"
                 style={{
-                  backgroundColor: mobileOpen || scrolled ? 'color-mix(in srgb, var(--bridge-surface) 76%, transparent)' : 'transparent',
+                  color: isAuthPage ? '#0c0a09' : 'var(--bridge-text)',
+                  backgroundColor: mobileOpen || scrolled ? (isAuthPage ? 'rgba(120,79,43,0.08)' : 'color-mix(in srgb, var(--bridge-surface) 76%, transparent)') : 'transparent',
                   backdropFilter: mobileOpen || scrolled ? 'blur(16px)' : 'none',
                 }}
               >
