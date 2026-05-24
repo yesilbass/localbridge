@@ -1,4 +1,5 @@
 import { formatRelativeReview } from './profileHooks';
+import { badgeClass, bodyClass, metaClass } from './profileType';
 
 function Stars({ rating }) {
   return (
@@ -6,7 +7,7 @@ function Stars({ rating }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <svg
           key={i}
-          className="h-3.5 w-3.5"
+          className="h-4 w-4"
           viewBox="0 0 20 20"
           aria-hidden
           style={{
@@ -33,7 +34,7 @@ export default function ReviewCard({ review }) {
 
   return (
     <article
-      className="rounded-2xl p-5"
+      className="rounded-2xl p-6 sm:p-7"
       style={{
         backgroundColor: 'var(--bridge-surface)',
         boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
@@ -44,15 +45,15 @@ export default function ReviewCard({ review }) {
           <img
             src={review.reviewer_avatar_url}
             alt={review.reviewer_name ?? 'Reviewer'}
-            width={40}
-            height={40}
+            width={48}
+            height={48}
             loading="lazy"
-            className="h-10 w-10 rounded-full object-cover shrink-0"
+            className="h-12 w-12 rounded-full object-cover shrink-0"
           />
         ) : (
           <div
-            className="h-10 w-10 rounded-full shrink-0 flex items-center justify-center font-bold"
-            style={{ background: 'var(--bridge-surface-muted)', color: 'var(--bridge-text-secondary)', fontSize: '14px' }}
+            className="h-12 w-12 rounded-full shrink-0 flex items-center justify-center text-base font-bold"
+            style={{ background: 'var(--bridge-surface-muted)', color: 'var(--bridge-text-secondary)' }}
           >
             {(review.reviewer_name ?? 'A')[0].toUpperCase()}
           </div>
@@ -61,28 +62,24 @@ export default function ReviewCard({ review }) {
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-3">
             <Stars rating={rating} />
-            <span style={{ fontSize: '12px', color: 'var(--bridge-text-muted)' }}>{attribution}</span>
-            <span style={{ fontSize: '11px', color: 'var(--bridge-text-faint)' }}>
+            <span className={metaClass} style={{ color: 'var(--bridge-text-muted)' }}>{attribution}</span>
+            <span className="text-sm" style={{ color: 'var(--bridge-text-faint)' }}>
               · {formatRelativeReview(review.created_at)}
             </span>
           </div>
 
           {comment && (
-            <p
-              className="mt-2"
-              style={{ fontSize: '14px', color: 'var(--bridge-text)', lineHeight: 1.55 }}
-            >
-              "{comment}"
+            <p className={`mt-3 ${bodyClass}`} style={{ color: 'var(--bridge-text)' }}>
+              &ldquo;{comment}&rdquo;
             </p>
           )}
 
           {(review.topic || review.metric) && (
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center gap-2">
               {review.topic && (
                 <span
-                  className="px-2 py-0.5 rounded-full font-semibold"
+                  className={badgeClass}
                   style={{
-                    fontSize: '10px',
                     background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
                     color: 'var(--color-primary)'
                   }}
@@ -92,9 +89,8 @@ export default function ReviewCard({ review }) {
               )}
               {review.metric && (
                 <span
-                  className="px-2 py-0.5 rounded-full font-bold"
+                  className={badgeClass}
                   style={{
-                    fontSize: '10px',
                     background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)',
                     color: 'var(--color-primary)'
                   }}

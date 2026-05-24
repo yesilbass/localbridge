@@ -24,6 +24,9 @@
           else if (pref === 'system')
             resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
           var el = document.documentElement;
+          el.dataset.themePreference = pref || 'light';
+          el.dataset.colorScheme = resolved;
+          el.style.colorScheme = resolved;
           el.classList.remove('theme-light', 'theme-dark');
           el.classList.add('theme-' + resolved);
           if (resolved === 'dark') el.classList.add('dark');

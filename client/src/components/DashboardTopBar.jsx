@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LogOut, User, Settings, Menu, X, Search, CalendarCheck, Clock,
-  DollarSign, Star, Heart, FileText, CreditCard, Sparkles,
+  DollarSign, Star, Heart, FileText, CreditCard, Sparkles, MessageSquare,
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import NotificationPanel from './NotificationPanel';
+import ThemeToggle from './ThemeToggle';
 import { useI18n } from '../i18n';
+import { DASHBOARD_NAVBAR_H } from '../pages/dashboard/dashboardLayout.js';
+import { isDashboardMentorProfileDetail } from '../utils/mentorProfileRoute.js';
+import { useMentorProfileNavHidden } from '../hooks/useMentorProfileNavHidden.js';
 
 function getInitials(name = '') {
   return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
@@ -14,6 +18,7 @@ function getInitials(name = '') {
 
 const MENTEE_LINKS = [
   { to: '/dashboard/mentors', labelKey: 'nav.mentors', fallback: 'Mentors', icon: Search },
+  { to: '/dashboard/messages', labelKey: 'nav.messages', fallback: 'Messages', icon: MessageSquare },
   { to: '/dashboard/sessions', labelKey: 'common.sessions', fallback: 'Sessions', icon: CalendarCheck },
   { to: '/dashboard/saved', labelKey: 'common.saved', fallback: 'Saved', icon: Heart },
   { to: '/dashboard/resume', labelKey: 'nav.resume', fallback: 'Resume', icon: FileText },
@@ -21,6 +26,7 @@ const MENTEE_LINKS = [
 
 const MENTOR_LINKS = [
   { to: '/dashboard/sessions', labelKey: 'common.sessions', fallback: 'Sessions', icon: CalendarCheck },
+  { to: '/dashboard/messages', labelKey: 'nav.messages', fallback: 'Messages', icon: MessageSquare },
   { to: '/dashboard/availability', labelKey: 'common.availability', fallback: 'Availability', icon: Clock },
   { to: '/dashboard/earnings', labelKey: 'common.earnings', fallback: 'Earnings', icon: DollarSign },
   { to: '/dashboard/reviews', labelKey: 'common.reviews', fallback: 'Reviews', icon: Star },
@@ -32,18 +38,12 @@ function NavItem({ to, end, label, icon: Icon }) {
       to={to}
       end={end}
       className={({ isActive }) =>
-        `bridge-focus inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-[14px] font-semibold transition-colors sm:px-4 ${
-          isActive ? 'is-active' : ''
+        `inline-flex items-center gap-2 px-3 py-2 text-[15px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] ${
+          isActive ? 'text-[var(--color-primary)]' : 'text-[var(--bridge-text-secondary)] hover:text-[var(--bridge-text)]'
         }`
       }
-      style={({ isActive }) => ({
-        color: isActive ? 'var(--color-primary)' : 'var(--bridge-text-secondary)',
-        backgroundColor: isActive
-          ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)'
-          : 'transparent',
-      })}
     >
-      <Icon className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+      <Icon className="h-[18px] w-[18px] shrink-0 opacity-80" aria-hidden />
       <span className="whitespace-nowrap">{label}</span>
     </NavLink>
   );
@@ -51,7 +51,7 @@ function NavItem({ to, end, label, icon: Icon }) {
 
 export default function DashboardTopBar({
   activeRole = 'mentee',
-  navbarH = '3.5rem',
+  navbarH = DASHBOARD_NAVBAR_H,
 }) {
   const { user, logout } = useAuth();
   const { t } = useI18n();
@@ -66,6 +66,9 @@ export default function DashboardTopBar({
     ...item,
     label: t(item.labelKey, item.fallback),
   }));
+
+  const isProfileDetail = isDashboardMentorProfileDetail(location.pathname);
+  const barHidden = useMentorProfileNavHidden(isProfileDetail);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -89,18 +92,15 @@ export default function DashboardTopBar({
   return (
     <>
       <header
-        className="fixed inset-x-0 top-0 z-50"
-        style={{
-          height: navbarH,
-          backgroundColor: 'color-mix(in srgb, var(--bridge-canvas) 96%, transparent)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid var(--bridge-border)',
-        }}
+        className={`fixed inset-x-0 top-0 z-50 bg-[var(--bridge-canvas)] transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          barHidden && !mobileOpen ? 'pointer-events-none -translate-y-full opacity-0' : 'translate-y-0 opacity-100'
+        }`}
+        style={{ height: navbarH }}
       >
-        <div className="flex h-full w-full items-center gap-6 px-5 sm:px-8 lg:px-10">
+        <div className="mx-auto flex h-full w-full max-w-[100rem] items-center gap-6 px-5 sm:px-8 lg:px-12">
           <Link
             to="/dashboard"
-            className="bridge-focus shrink-0 font-display text-[1.05rem] font-black tracking-[-0.04em] sm:text-[1.12rem]"
+            className="shrink-0 font-display text-[1.12rem] font-black tracking-[-0.04em] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] sm:text-[1.22rem]"
             style={{ color: 'var(--bridge-text)', lineHeight: 1 }}
           >
             mentorshipbridge
@@ -115,8 +115,9 @@ export default function DashboardTopBar({
             ))}
           </nav>
 
-          <div className="flex shrink-0 items-center gap-2 sm:gap-3 md:ml-auto">
-            <NotificationPanel />
+          <div className="flex shrink-0 items-center gap-2.5 sm:gap-3.5 md:ml-auto">
+            <ThemeToggle variant="plain" className="hidden sm:inline-flex" />
+            <NotificationPanel size="lg" plain />
 
             <div className="relative hidden sm:block">
               <button
@@ -126,7 +127,7 @@ export default function DashboardTopBar({
                 aria-expanded={menuOpen}
                 aria-haspopup="menu"
                 aria-label="Account menu"
-                className="bridge-focus flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-[10px] font-bold text-white"
+                className="bridge-focus flex h-10 w-10 items-center justify-center overflow-hidden rounded-full text-[11px] font-bold text-white sm:h-11 sm:w-11"
                 style={{
                   background: 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
                 }}
@@ -192,8 +193,8 @@ export default function DashboardTopBar({
               onClick={() => setMobileOpen(v => !v)}
               aria-expanded={mobileOpen}
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-              className="bridge-focus flex h-9 w-9 items-center justify-center rounded-lg md:hidden"
-              style={{ color: 'var(--bridge-text)', backgroundColor: 'var(--bridge-surface-muted)' }}
+              className="flex h-10 w-10 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] md:hidden"
+              style={{ color: 'var(--bridge-text)' }}
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -210,19 +211,23 @@ export default function DashboardTopBar({
             onClick={() => setMobileOpen(false)}
           />
           <div
-            className="absolute inset-x-0 top-0 flex max-h-[85vh] flex-col overflow-y-auto rounded-b-2xl border-b px-4 pb-6 pt-[calc(var(--navbar-h,3.5rem)+12px)]"
-            style={{
-              backgroundColor: 'var(--bridge-surface)',
-              borderColor: 'var(--bridge-border)',
-              boxShadow: '0 24px 48px -20px color-mix(in srgb, var(--bridge-text) 25%, transparent)',
-            }}
+            className="absolute inset-x-0 top-0 flex max-h-[85vh] flex-col overflow-y-auto bg-[var(--bridge-canvas)] px-4 pb-6 pt-[calc(var(--navbar-h,4.75rem)+12px)]"
           >
             <nav aria-label="Dashboard mobile" className="flex flex-col gap-0.5">
               {navLinks.map(({ to, end, label, icon }) => (
                 <NavItem key={to} to={to} end={end} label={label} icon={icon} />
               ))}
             </nav>
-            <div className="mt-4 flex flex-col gap-0.5 border-t pt-4" style={{ borderColor: 'var(--bridge-border)' }}>
+            <div
+              className="mt-4 flex items-center justify-between gap-3 border-t pt-4 sm:hidden"
+              style={{ borderColor: 'var(--bridge-border)' }}
+            >
+              <span className="text-[13px] font-medium" style={{ color: 'var(--bridge-text-secondary)' }}>
+                {t('footer.theme', 'Theme')}
+              </span>
+              <ThemeToggle variant="pill" />
+            </div>
+            <div className="mt-4 flex flex-col gap-0.5 pt-4 sm:mt-0 sm:pt-0">
               <Link
                 to="/dashboard/profile"
                 onClick={() => setMobileOpen(false)}

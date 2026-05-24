@@ -111,7 +111,7 @@ function AvailabilityPanel({ availability, nextAvailableIso, availStyle }) {
   );
 }
 
-function CardActionRail({ mentor, availability, slotIso, availStyle, mentorsBase }) {
+function CardActionRail({ mentor, availability, slotIso, availStyle, mentorsBase, onBookSession, canBook, subscriptionLoading }) {
   const sessionLabel = mentor.total_sessions === 1 ? '1 session completed' : `${mentor.total_sessions} sessions completed`;
 
   return (
@@ -145,13 +145,17 @@ function CardActionRail({ mentor, availability, slotIso, availStyle, mentorsBase
         >
           View profile
         </AppLink>
-        <AppLink
-          to={`${mentorsBase}/${mentor.id}`}
-          className={`inline-flex w-full items-center justify-center rounded-full border px-5 py-2.5 text-[14px] font-bold text-[var(--bridge-text)] transition hover:bg-[var(--bridge-surface)] ${focusRing}`}
-          style={{ borderColor: 'var(--bridge-border-strong)', backgroundColor: 'var(--bridge-surface)' }}
-        >
-          Book a session
-        </AppLink>
+        {canBook && (
+          <button
+            type="button"
+            onClick={() => onBookSession?.(mentor)}
+            disabled={subscriptionLoading}
+            className={`inline-flex w-full items-center justify-center rounded-full border px-5 py-2.5 text-[14px] font-bold text-[var(--bridge-text)] transition hover:bg-[var(--bridge-surface)] disabled:cursor-wait disabled:opacity-60 ${focusRing}`}
+            style={{ borderColor: 'var(--bridge-border-strong)', backgroundColor: 'var(--bridge-surface)' }}
+          >
+            {subscriptionLoading ? 'Checking plan…' : 'Book a session'}
+          </button>
+        )}
       </div>
     </aside>
   );
@@ -188,7 +192,20 @@ export function MentorGridSkeleton() {
   );
 }
 
-export default function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favoriteBusy, favoritesEnabled, nextAvailableIso = null }) {
+export default function MentorCard({
+  mentor,
+  isFavorite,
+  onToggleFavorite,
+  user,
+  navigate,
+  favoriteBusy,
+  favoritesEnabled,
+  nextAvailableIso = null,
+  availabilityMeta = {},
+  onBookSession,
+  canBook = true,
+  subscriptionLoading = false,
+}) {
   const location = useLocation();
   const mentorsBase = location.pathname.startsWith('/dashboard') ? '/dashboard/mentors' : '/mentors';
 
@@ -200,7 +217,7 @@ export default function MentorCard({ mentor, isFavorite, onToggleFavorite, user,
   const industryLabel = mentor.industry
     ? mentor.industry.charAt(0).toUpperCase() + mentor.industry.slice(1)
     : null;
-  const availability = getNextAvailability(mentor, nextAvailableIso);
+  const availability = getNextAvailability(mentor, nextAvailableIso, availabilityMeta);
   const availStyle = availabilityToneStyle(availability.tone);
   const slotIso = typeof nextAvailableIso === 'string' ? nextAvailableIso : null;
 
@@ -288,6 +305,9 @@ export default function MentorCard({ mentor, isFavorite, onToggleFavorite, user,
         slotIso={slotIso}
         availStyle={availStyle}
         mentorsBase={mentorsBase}
+        onBookSession={onBookSession}
+        canBook={canBook}
+        subscriptionLoading={subscriptionLoading}
       />
     </article>
   );

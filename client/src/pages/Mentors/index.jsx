@@ -15,6 +15,9 @@ import { DASHBOARD_EMBEDDED_BLEED } from '../dashboard/dashboardLayout.js';
 import MentorCard, { MentorGridSkeleton } from './MentorCard';
 import { AiMatchCard, AiHonorableCard } from './AiMatchCards';
 import { useContent } from '../../content';
+import { useMentorBooking } from '../../hooks/useMentorBooking';
+import HeroBookModal from '../mentor-profile/HeroBookModal';
+import SubscribeUnlockModal from '../mentor-profile/SubscribeUnlockModal';
 
 function FetchErrorBanner({ message, onRetry }) {
   return (
@@ -86,6 +89,16 @@ export default function Mentors({ embedded = false }) {
   const [savedMenteeProfile, setSavedMenteeProfile] = useState(null);
   const [prefillData, setPrefillData]               = useState(null);
   const didAutoOpenRef = useRef(false);
+
+  const {
+    beginBook,
+    bookMentor,
+    closeBook,
+    unlock,
+    closeUnlock,
+    planPath,
+    subscriptionLoading,
+  } = useMentorBooking({ embedded });
 
   // Debounce search input
   useEffect(() => {
@@ -267,8 +280,14 @@ export default function Mentors({ embedded = false }) {
       const entries = await Promise.all(
         ids.map(async (id) => {
           const res = await getCalendlyEventTypeSummary(id);
-          if (!res.ok || !res.ready) return [id, null];
-          return [id, res.next_available ?? null];
+          if (!res.ok || !res.ready) {
+            return [id, { iso: null, calendarSyncFailed: true, totalOpenSlots: 0 }];
+          }
+          return [id, {
+            iso: res.next_available ?? null,
+            calendarSyncFailed: Boolean(res.calendar_sync_failed),
+            totalOpenSlots: res.total_open_slots ?? 0,
+          }];
         }),
       );
       if (cancelled) return;
@@ -384,10 +403,7 @@ export default function Mentors({ embedded = false }) {
     <Root {...rootProps}>
       <div
         className={aiMode ? 'opacity-60 pointer-events-none' : ''}
-        style={{
-          backgroundColor: 'var(--bridge-canvas)',
-          borderBottom: '1px solid var(--bridge-border)',
-        }}
+        style={{ backgroundColor: 'var(--bridge-canvas)' }}
       >
         <div className={`mx-auto w-full ${pageGutter}`} style={pageInnerStyle}>
           {/* Search — full width */}
@@ -771,10 +787,21 @@ export default function Mentors({ embedded = false }) {
                 navigate={navigate}
                 favoriteBusy={favoriteBusyId === normalizeMentorId(mentor.id)}
                 favoritesEnabled={!asMentor}
+                onBookSession={beginBook}
+                canBook={!asMentor}
+                subscriptionLoading={subscriptionLoading}
                 nextAvailableIso={
                   mentor.calendly_connected && mentor.calendly_event_type_uri
-                    ? (mentor.id in calendlySlots ? calendlySlots[mentor.id] : undefined)
+                    ? (mentor.id in calendlySlots ? calendlySlots[mentor.id]?.iso : undefined)
                     : null
+                }
+                availabilityMeta={
+                  mentor.id in calendlySlots
+                    ? {
+                        calendarSyncFailed: calendlySlots[mentor.id]?.calendarSyncFailed,
+                        totalOpenSlots: calendlySlots[mentor.id]?.totalOpenSlots,
+                      }
+                    : {}
                 }
               />
             ))}
@@ -863,6 +890,23 @@ export default function Mentors({ embedded = false }) {
       {wizardOpen && (
         <MentorMatchWizard prefill={prefillData} onComplete={handleWizardComplete} onClose={() => setWizardOpen(false)} />
       )}
+
+      <HeroBookModal
+        open={Boolean(bookMentor)}
+        onClose={closeBook}
+        mentor={bookMentor}
+        user={user}
+        utmMedium="mentors_browse"
+      />
+
+      <SubscribeUnlockModal
+        open={unlock.open}
+        intent={unlock.intent}
+        mentor={unlock.mentor}
+        user={user}
+        pricingPath={planPath}
+        onClose={closeUnlock}
+      />
     </Root>
   );
 }

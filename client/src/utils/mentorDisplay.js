@@ -82,6 +82,22 @@ export function formatNextAvailableSlot(iso) {
   return `${fmtDate.format(d)} · ${fmtTime.format(d)}`;
 }
 
+/** Short lead time for availability chips, e.g. "in 4 days". */
+export function formatAvailabilityLead(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const target = new Date(d);
+  target.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((target - now) / 86400000);
+
+  if (diffDays <= 0) return 'today';
+  if (diffDays === 1) return 'tomorrow';
+  return `in ${diffDays} days`;
+}
+
 /** Date chip parts for browse-card availability blocks. */
 export function getAvailabilityDateParts(iso) {
   const d = new Date(iso);
@@ -99,11 +115,12 @@ function mentorHasCalendly(mentor) {
 }
 
 /**
- * Availability copy for browse cards.
+ * Availability copy for browse cards & profile snapshot.
  * @param {object} mentor
- * @param {string|null|undefined} nextAvailableIso — undefined = Calendly fetch pending
+ * @param {string|null|undefined} nextAvailableIso — undefined = fetch pending
+ * @param {{ calendarSyncFailed?: boolean, totalOpenSlots?: number }} [meta]
  */
-export function getNextAvailability(mentor, nextAvailableIso) {
+export function getNextAvailability(mentor, nextAvailableIso, meta = {}) {
   if (mentor?.available === false) {
     return { headline: 'Availability', detail: 'Not accepting sessions', tone: 'muted' };
   }
@@ -119,7 +136,17 @@ export function getNextAvailability(mentor, nextAvailableIso) {
         tone: 'live',
       };
     }
-    return { headline: 'Next availability', detail: 'No openings in the next 7 days', tone: 'muted' };
+    if (meta.calendarSyncFailed && mentor?.calendly_scheduling_url) {
+      return {
+        headline: 'Next availability',
+        detail: 'Open their calendar to see times',
+        tone: 'open',
+      };
+    }
+    if ((meta.totalOpenSlots ?? 0) === 0) {
+      return { headline: 'Next availability', detail: 'No openings in the next 7 days', tone: 'muted' };
+    }
+    return { headline: 'Next availability', detail: 'Open their calendar to book', tone: 'open' };
   }
 
   if (mentor?.available !== false) {

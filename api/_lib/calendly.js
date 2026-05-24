@@ -175,14 +175,50 @@ export async function getEventType(accessToken, eventTypeUri) {
   return json?.resource ?? null;
 }
 
+/** Calendly requires future start/end within 7 days; strip ms for API compatibility. */
+export function availabilityQueryWindow() {
+  const start = new Date(Date.now() + 2 * 60_000);
+  start.setUTCSeconds(0, 0);
+  const end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000 - 3600_000);
+  const toCalendlyIso = (d) => d.toISOString().replace(/\.\d{3}Z$/, 'Z');
+  return { startIso: toCalendlyIso(start), endIso: toCalendlyIso(end) };
+}
+
+function isAvailableSlot(slot) {
+  if (!slot?.start_time) return false;
+  if (slot.status === 'unavailable') return false;
+  if (slot.invitees_remaining === 0) return false;
+  return slot.status === 'available' || !slot.status;
+}
+
 export async function getAvailableTimes(accessToken, eventTypeUri, startIso, endIso) {
   const params = new URLSearchParams({
     event_type: eventTypeUri,
     start_time: startIso,
     end_time: endIso,
   });
-  const json = await callApi(`/event_type_available_times?${params.toString()}`, { accessToken });
-  return Array.isArray(json?.collection) ? json.collection : [];
+
+  const all = [];
+  let nextPath = `/event_type_available_times?${params.toString()}`;
+
+  for (let page = 0; page < 8 && nextPath; page += 1) {
+    const json = await callApi(nextPath, { accessToken });
+    const batch = Array.isArray(json?.collection) ? json.collection : [];
+    all.push(...batch);
+    const nextPage = json?.pagination?.next_page;
+    if (typeof nextPage === 'string' && nextPage.startsWith('http')) {
+      nextPath = nextPage;
+    } else if (json?.pagination?.next_page_token) {
+      params.set('page_token', json.pagination.next_page_token);
+      nextPath = `/event_type_available_times?${params.toString()}`;
+    } else {
+      nextPath = null;
+    }
+  }
+
+  return all
+    .filter(isAvailableSlot)
+    .sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 }
 
 export async function createSchedulingLink(accessToken, eventTypeUri) {

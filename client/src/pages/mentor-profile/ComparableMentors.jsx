@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
 import AppLink from '../../components/AppLink';
 import { ArrowRight } from 'lucide-react';
 import Reveal from '../../components/Reveal';
+import { metaClass, sectionTitleClass, sectionTitleStyle } from './profileType';
 
 function CompactMentorCard({ m }) {
   const rating = Number(m.rating ?? m.reviews?.average) || 0;
@@ -49,15 +49,15 @@ function CompactMentorCard({ m }) {
           <div className="flex-1 min-w-0">
             <p
               id={`comparable-${m.id}`}
-              className="font-bold truncate"
-              style={{ fontSize: '14px', color: 'var(--bridge-text)' }}
+              className="font-bold truncate text-base"
+              style={{ color: 'var(--bridge-text)' }}
             >
               {m.name}
             </p>
-            <p className="truncate" style={{ fontSize: '12px', color: 'var(--bridge-text-muted)' }}>
+            <p className={`truncate ${metaClass}`} style={{ color: 'var(--bridge-text-muted)' }}>
               {[m.title, m.company].filter(Boolean).join(' · ')}
             </p>
-            <div className="mt-2 flex items-center gap-3" style={{ fontSize: '11px' }}>
+            <div className={`mt-2 flex items-center gap-3 ${metaClass}`}>
               {rating > 0 && (
                 <span className="flex items-center gap-1" style={{ color: 'var(--bridge-text-muted)' }}>
                   <svg className="h-3 w-3" viewBox="0 0 20 20" fill="var(--color-primary)" aria-hidden>
@@ -90,21 +90,7 @@ export default function ComparableMentors({ mentor }) {
       aria-labelledby="similar-heading"
       className="mt-20 lg:col-span-2"
     >
-      <p
-        className="font-black uppercase"
-        style={{ fontSize: '10px', letterSpacing: '0.32em', color: 'var(--color-primary)' }}
-      >
-        More like this
-      </p>
-      <h2
-        id="similar-heading"
-        className="mt-2 font-display font-black"
-        style={{
-          fontSize: 'clamp(1.5rem, 3vw, 2rem)',
-          letterSpacing: '-0.025em',
-          color: 'var(--bridge-text)'
-        }}
-      >
+      <h2 id="similar-heading" className={sectionTitleClass} style={sectionTitleStyle}>
         Other operators with {firstName}'s background
       </h2>
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">

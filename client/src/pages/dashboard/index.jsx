@@ -17,6 +17,7 @@ import ProfilePage from './ProfilePage.jsx';
 import { useI18n } from '../../i18n';
 import Mentors from '../Mentors/index.jsx';
 import MentorProfile from '../mentor-profile/index.jsx';
+import MessagesPage from './MessagesPage.jsx';
 import Pricing from '../Pricing/index.jsx';
 import ResumeReview from '../ResumeReview.jsx';
 
@@ -59,6 +60,10 @@ function DashboardHome({ activeRole }) {
   return activeRole === 'mentor'
     ? <MentorHome activeRole={activeRole} />
     : <MenteeHome activeRole={activeRole} />;
+}
+
+function MessagesRoute() {
+  return <MessagesPage />;
 }
 
 function PlanRoute() {
@@ -222,6 +227,10 @@ export default function DashboardPage() {
         {activeRole === 'mentor' && <Route path="calendar" element={<Navigate to="/dashboard/sessions" replace />} />}
         {activeRole === 'mentor' && <Route path="earnings" element={<EarningsRoute />} />}
         {activeRole === 'mentor' && <Route path="reviews" element={<ReviewsRoute />} />}
+        {activeRole === 'mentee' && <Route path="messages" element={<MessagesRoute />} />}
+        {activeRole === 'mentee' && <Route path="messages/:conversationId" element={<MessagesRoute />} />}
+        {activeRole === 'mentor' && <Route path="messages" element={<MessagesRoute />} />}
+        {activeRole === 'mentor' && <Route path="messages/:conversationId" element={<MessagesRoute />} />}
         {activeRole === 'mentee' && <Route path="plan" element={<PlanRoute />} />}
         {activeRole === 'mentee' && <Route path="billing" element={<BillingRoute />} />}
         <Route path="profile" element={<ProfileRoute isMentor={activeRole === 'mentor'} />} />

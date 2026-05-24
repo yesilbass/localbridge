@@ -265,10 +265,23 @@ html[data-palette="quiet-authority"].theme-dark {
 }
 
 /* Light/dark surface adjustments shared across palettes (uses tokens) */
+html {
+  color-scheme: light;
+}
+
 html.theme-dark {
+  color-scheme: dark;
   /* Slightly different scrollbar tuning in dark mode */
   --bridge-scrollbar:       color-mix(in srgb, var(--color-primary) 22%, transparent);
   --bridge-scrollbar-hover: color-mix(in srgb, var(--color-primary) 38%, transparent);
+}
+
+/* Instant theme swap — suppress transition-all / transition-colors bleed during toggle */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
 }
 
 
@@ -292,7 +305,6 @@ body::before {
     radial-gradient(ellipse 50% 40% at 100% 30%, var(--bridge-mesh-2), transparent 60%),
     radial-gradient(ellipse 60% 50% at 0% 100%, var(--bridge-mesh-3), transparent 60%);
   opacity: 0.85;
-  transition: opacity 400ms ease;
 }
 
 html.theme-dark body::before {
