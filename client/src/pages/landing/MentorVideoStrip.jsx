@@ -15,7 +15,7 @@ const TONE_BG = {
   violet:  'linear-gradient(145deg, #0d0a1a 0%, #150a2e 60%, #5b21b6 100%)',
   teal:    'linear-gradient(145deg, #080e0e 0%, #0a1c1c 60%, #0d9488 100%)',
   orange:  'linear-gradient(145deg, #0c0b18 0%, #181028 60%, #4f46e5 100%)',
-  pink:    'linear-gradient(145deg, #090918 0%, #0a0a2c 60%, #3730a3 100%)',
+  pink:    'linear-gradient(145deg, #090918 0%, #0a0a2c 60%, #3730a3 100%)'
 };
 
 const SESSION_LABELS = ['Career Pivot', 'Interview Prep', 'Salary Negotiation', 'PM Strategy', 'Engineering', 'Design Review', 'Fundraising', 'Growth', 'Leadership', 'Resume Review', 'System Design', 'Data Science'];
@@ -42,7 +42,7 @@ function VideoCard({ mentor, sessionIdx }) {
         transition: 'transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s cubic-bezier(0.16,1,0.3,1)',
         willChange: 'transform',
         backfaceVisibility: 'hidden',
-        boxShadow: '0 4px 20px -8px rgba(0,0,0,0.5)',
+        boxShadow: '0 4px 20px -8px rgba(0,0,0,0.5)'
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
@@ -68,7 +68,7 @@ function VideoCard({ mentor, sessionIdx }) {
           lineHeight: 1,
           pointerEvents: 'none',
           fontFamily: 'var(--font-display, system-ui)',
-          userSelect: 'none',
+          userSelect: 'none'
         }}
       >
         {initialsOf(mentor.name)}
@@ -81,7 +81,7 @@ function VideoCard({ mentor, sessionIdx }) {
           position: 'absolute',
           inset: 0,
           backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 3px)',
-          pointerEvents: 'none',
+          pointerEvents: 'none'
         }}
       />
 
@@ -95,7 +95,7 @@ function VideoCard({ mentor, sessionIdx }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 6,
+          gap: 6
         }}
       >
         <span
@@ -110,7 +110,7 @@ function VideoCard({ mentor, sessionIdx }) {
             color: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(6px)',
             WebkitBackdropFilter: 'blur(6px)',
-            whiteSpace: 'nowrap',
+            whiteSpace: 'nowrap'
           }}
         >
           {session}
@@ -120,7 +120,7 @@ function VideoCard({ mentor, sessionIdx }) {
             fontSize: 9,
             fontWeight: 500,
             color: 'rgba(255,255,255,0.45)',
-            whiteSpace: 'nowrap',
+            whiteSpace: 'nowrap'
           }}
         >
           {duration}
@@ -134,7 +134,7 @@ function VideoCard({ mentor, sessionIdx }) {
           inset: 0,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'center'
         }}
       >
         <div
@@ -149,7 +149,7 @@ function VideoCard({ mentor, sessionIdx }) {
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
             border: '1px solid rgba(255,255,255,0.22)',
-            transition: 'background 0.2s ease, transform 0.2s ease',
+            transition: 'background 0.2s ease, transform 0.2s ease'
           }}
           className="group-hover:bg-white/25 group-hover:scale-110"
         >
@@ -160,7 +160,7 @@ function VideoCard({ mentor, sessionIdx }) {
               height: 13,
               fill: 'white',
               color: 'white',
-              marginLeft: 2,
+              marginLeft: 2
             }}
           />
         </div>
@@ -174,7 +174,7 @@ function VideoCard({ mentor, sessionIdx }) {
           left: 0,
           right: 0,
           padding: '24px 10px 10px',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)'
         }}
       >
         <p
@@ -186,7 +186,7 @@ function VideoCard({ mentor, sessionIdx }) {
             lineHeight: 1.2,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            textOverflow: 'ellipsis'
           }}
         >
           {mentor.name}
@@ -198,7 +198,7 @@ function VideoCard({ mentor, sessionIdx }) {
             marginTop: 1,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            textOverflow: 'ellipsis'
           }}
         >
           {mentor.title}
@@ -217,7 +217,7 @@ function VideoCard({ mentor, sessionIdx }) {
             height: 7,
             borderRadius: '50%',
             background: '#10b981',
-            boxShadow: '0 0 0 2px rgba(16,185,129,0.35)',
+            boxShadow: '0 0 0 2px rgba(16,185,129,0.35)'
           }}
         />
       )}
@@ -237,7 +237,6 @@ export default function MentorVideoStrip() {
     <section
       aria-labelledby="video-strip-heading"
       className="relative py-10 sm:py-12 overflow-hidden"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="mx-auto max-w-7xl px-5 sm:px-8 mb-7">
         <RevealOnScroll variant="up">
@@ -254,7 +253,7 @@ export default function MentorVideoStrip() {
               fontSize: 'clamp(1.35rem, 2.8vw, 2rem)',
               letterSpacing: '-0.028em',
               lineHeight: 1.1,
-              color: 'var(--bridge-text)',
+              color: 'var(--bridge-text)'
             }}
           >
             {t('landing.videoStrip.heading', 'See how Bridge sessions run.')}
@@ -275,7 +274,7 @@ export default function MentorVideoStrip() {
             paddingLeft: 20,
             paddingRight: 20,
             willChange: animate ? 'transform' : 'auto',
-            backfaceVisibility: 'hidden',
+            backfaceVisibility: 'hidden'
           }}
         >
           {CARDS.map(({ mentor, idx }) => (

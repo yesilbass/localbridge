@@ -20,7 +20,7 @@ export default function SessionPreview({ mentor }) {
           className="mt-4 rounded-2xl p-6"
           style={{
             background: 'color-mix(in srgb, var(--color-primary) 5%, var(--bridge-surface))',
-            boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 20%, transparent)',
+            boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 20%, transparent)'
           }}
         >
           <p
@@ -28,7 +28,7 @@ export default function SessionPreview({ mentor }) {
             style={{
               fontSize: 'clamp(1.0625rem, 1.6vw, 1.25rem)',
               lineHeight: 1.55,
-              color: 'var(--bridge-text)',
+              color: 'var(--bridge-text)'
             }}
           >
             {preview}
@@ -38,7 +38,7 @@ export default function SessionPreview({ mentor }) {
             style={{
               fontSize: '12px',
               letterSpacing: '0.18em',
-              color: 'var(--bridge-text-muted)',
+              color: 'var(--bridge-text-muted)'
             }}
           >
             — {firstName}

@@ -39,7 +39,7 @@ export default function Trust() {
     return {
       style: INSET,
       onFocus: () => { el.style.boxShadow = INSET_FOCUS; },
-      onBlur: () => { el.style.boxShadow = INSET.boxShadow; },
+      onBlur: () => { el.style.boxShadow = INSET.boxShadow; }
     };
   }
 
@@ -61,8 +61,8 @@ export default function Trust() {
           Concern: form.type,
           'Reply to': form.contact || '(anonymous)',
           Page: typeof window !== 'undefined' ? window.location.href : '',
-          Submitted: new Date().toISOString(),
-        },
+          Submitted: new Date().toISOString()
+        }
       });
       setTicketId(id);
       setSent(true);
@@ -81,7 +81,7 @@ export default function Trust() {
         style={{
           background: 'radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-primary) 20%, transparent), transparent 70%)',
           filter: 'blur(80px)',
-          opacity: 0.28,
+          opacity: 0.28
         }}
       />
 
@@ -127,7 +127,7 @@ export default function Trust() {
                           letterSpacing: '0.32em',
                           color: 'var(--color-primary)',
                           boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 28%, transparent)',
-                          backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+                          backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)'
                         }}
                       >
                         {p.stat}

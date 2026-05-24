@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { isMentorAccount } from '../utils/accountRole';
 import { appUrl, shouldNavigateToApp } from '../utils/appUrl';
+import { presentAsMarketingGuest, resolveAuthEntryPath } from '../utils/authNav';
 import { LogOut, User, Settings, Sparkles, Menu, X, ChevronRight, Zap } from 'lucide-react';
 import NotificationPanel from './NotificationPanel';
 import { useI18n } from '../i18n';
@@ -22,6 +23,9 @@ export default function Navbar() {
   const [headerHidden, setHeaderHidden] = useState(false);
   const asMentor = user ? isMentorAccount(user) : false;
   const isDashboard = location.pathname.startsWith('/dashboard');
+  const showGuestChrome = presentAsMarketingGuest(user, location.pathname);
+  const loginPath = resolveAuthEntryPath('/login', user);
+  const registerPath = resolveAuthEntryPath('/register', user);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -83,7 +87,14 @@ export default function Navbar() {
   const isActive = path =>
     path === '/' ? location.pathname === '/' : location.pathname === path || location.pathname.startsWith(`${path}/`);
 
-  const navItems = asMentor
+  const navItems = showGuestChrome
+    ? [
+        { path: '/mentors', label: t('nav.mentors', 'Mentors') },
+        { path: '/company', label: t('nav.company', 'Company') },
+        { path: '/resume', label: t('nav.resume', 'Resume'), ai: true },
+        { path: '/pricing', label: t('nav.pricing', 'Pricing') },
+      ]
+    : asMentor
     ? [
         { path: '/dashboard', label: t('nav.dashboard', 'Dashboard') },
         { path: '/company', label: t('nav.company', 'Company') },
@@ -91,7 +102,7 @@ export default function Navbar() {
       ]
     : [
         { path: '/mentors', label: t('nav.mentors', 'Mentors') },
-        ...(user ? [{ path: '/dashboard', label: t('nav.dashboard', 'Dashboard') }] : []),
+        { path: '/dashboard', label: t('nav.dashboard', 'Dashboard') },
         { path: '/company', label: t('nav.company', 'Company') },
         { path: '/resume', label: t('nav.resume', 'Resume'), ai: true },
         { path: '/pricing', label: t('nav.pricing', 'Pricing') },
@@ -206,7 +217,7 @@ export default function Navbar() {
                   }}
                   aria-hidden
                 />
-              ) : user ? (
+              ) : user && !showGuestChrome ? (
                 <div className="hidden items-center gap-2 sm:flex">
 
                   {/* Notification panel */}
@@ -349,8 +360,8 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="hidden items-center gap-2 sm:flex">
-                  {shouldNavigateToApp('/login') ? (
-                  <a href={appUrl('/login')}
+                  {shouldNavigateToApp(loginPath) ? (
+                  <a href={appUrl(loginPath)}
                     className="group relative rounded-full px-4 py-2 text-[14px] font-medium transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-1 before:inset-y-1 before:scale-75 before:rounded-full before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:before:scale-100 hover:before:opacity-[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)]"
                     style={{ color: isAuthPage ? '#78716c' : 'var(--bridge-text-secondary)' }}
                   >
@@ -362,7 +373,7 @@ export default function Navbar() {
                     />
                   </a>
                   ) : (
-                  <Link to="/login"
+                  <Link to={loginPath}
                     className="group relative rounded-full px-4 py-2 text-[14px] font-medium transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-1 before:inset-y-1 before:scale-75 before:rounded-full before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:before:scale-100 hover:before:opacity-[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)]"
                     style={{ color: isAuthPage ? '#78716c' : 'var(--bridge-text-secondary)' }}
                   >
@@ -374,8 +385,8 @@ export default function Navbar() {
                     />
                   </Link>
                   )}
-                  {shouldNavigateToApp('/register') ? (
-                  <a href={appUrl('/register')} data-magnet="6"
+                  {shouldNavigateToApp(registerPath) ? (
+                  <a href={appUrl(registerPath)} data-magnet="6"
                     className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 text-[14px] font-semibold transition hover:-translate-y-0.5 hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4"
                     style={{
                       color: isAuthPage ? '#78716c' : 'var(--bridge-text-secondary)',
@@ -385,7 +396,7 @@ export default function Navbar() {
                     {t('nav.getStarted', 'Get started')}
                   </a>
                   ) : (
-                  <Link to="/register" data-magnet="6"
+                  <Link to={registerPath} data-magnet="6"
                     className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 text-[14px] font-semibold transition hover:-translate-y-0.5 hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4"
                     style={{
                       color: isAuthPage ? '#78716c' : 'var(--bridge-text-secondary)',
@@ -533,7 +544,7 @@ export default function Navbar() {
             {/* Auth bottom */}
             <div className="relative shrink-0 border-t border-[var(--bridge-border)]/80 p-4"
               style={{ backgroundColor: 'color-mix(in srgb, var(--bridge-surface) 40%, transparent)', backdropFilter: 'blur(20px)' }}>
-              {user ? (
+              {user && !showGuestChrome ? (
                 <div className="space-y-1">
                   {/* User card */}
                   <div className="mb-3 flex items-center gap-3 rounded-3xl border p-3"
@@ -582,8 +593,8 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {shouldNavigateToApp('/register') ? (
-                  <a href={appUrl('/register')}
+                  {shouldNavigateToApp(registerPath) ? (
+                  <a href={appUrl(registerPath)}
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center justify-center gap-1.5 rounded-2xl px-4 py-3.5 text-sm font-bold transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     style={{
@@ -594,7 +605,7 @@ export default function Navbar() {
                     {t('nav.getStartedFree', 'Get started free')}
                   </a>
                   ) : (
-                  <Link to="/register"
+                  <Link to={registerPath}
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center justify-center gap-1.5 rounded-2xl px-4 py-3.5 text-sm font-bold transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     style={{
@@ -632,8 +643,8 @@ export default function Navbar() {
                     <ChevronRight className="h-4 w-4" />
                   </Link>
                   )}
-                  {shouldNavigateToApp('/login') ? (
-                  <a href={appUrl('/login')}
+                  {shouldNavigateToApp(loginPath) ? (
+                  <a href={appUrl(loginPath)}
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center justify-center rounded-2xl border px-4 py-3 text-sm font-bold text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     style={{ borderColor: 'var(--bridge-border)' }}
@@ -641,7 +652,7 @@ export default function Navbar() {
                     {t('nav.login', 'Log in')}
                   </a>
                   ) : (
-                  <Link to="/login"
+                  <Link to={loginPath}
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center justify-center rounded-2xl border px-4 py-3 text-sm font-bold text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     style={{ borderColor: 'var(--bridge-border)' }}

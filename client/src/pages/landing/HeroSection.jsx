@@ -8,7 +8,7 @@ import {
   DUR_SHORT,
   DUR_MED,
   DUR_LONG,
-  usePerfTier,
+  usePerfTier
 } from './landingHooks';
 import { useContent } from '../../content';
 
@@ -25,7 +25,7 @@ export default function HeroSection() {
     return {
       initial: { opacity: 0, ...offset },
       animate: { opacity: 1, ...rest },
-      transition: { duration, delay, ease: EASE },
+      transition: { duration, delay, ease: EASE }
     };
   };
 
@@ -34,7 +34,6 @@ export default function HeroSection() {
       id="hero"
       aria-labelledby="hero-heading"
       className="relative flex min-h-[100dvh] items-center overflow-hidden px-5 pb-16 sm:px-8"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       {/* Background depth — decorative only */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -43,7 +42,7 @@ export default function HeroSection() {
           style={{
             backgroundImage:
               'radial-gradient(circle at 1px 1px, var(--bridge-text) 1px, transparent 0)',
-            backgroundSize: '32px 32px',
+            backgroundSize: '32px 32px'
           }}
         />
         <div
@@ -51,7 +50,7 @@ export default function HeroSection() {
           style={{
             background:
               'radial-gradient(ellipse 90% 80% at 40% 45%, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, transparent 72%)',
-            opacity: 0.55,
+            opacity: 0.55
           }}
         />
         <div
@@ -59,21 +58,21 @@ export default function HeroSection() {
           style={{
             background:
               'radial-gradient(ellipse 85% 75% at 55% 40%, color-mix(in srgb, var(--lp-counter) 18%, transparent) 0%, transparent 72%)',
-            opacity: 0.45,
+            opacity: 0.45
           }}
         />
         <div
           className="absolute inset-x-0 bottom-0 h-40"
           style={{
             background:
-              'linear-gradient(to top, var(--bridge-canvas) 0%, transparent 100%)',
+              'linear-gradient(to top, var(--bridge-canvas) 0%, transparent 100%)'
           }}
         />
         <div
           className="absolute inset-x-0 bottom-0 h-px"
           style={{
             background:
-              'linear-gradient(to right, transparent, color-mix(in srgb, var(--color-primary) 30%, transparent), transparent)',
+              'linear-gradient(to right, transparent, color-mix(in srgb, var(--color-primary) 30%, transparent), transparent)'
           }}
         />
       </div>
@@ -90,7 +89,7 @@ export default function HeroSection() {
                 'color-mix(in srgb, var(--bridge-surface) 80%, transparent)',
               color: 'var(--bridge-text-secondary)',
               boxShadow:
-                '0 0 0 1px var(--bridge-border) inset, 0 4px 14px -8px color-mix(in srgb, var(--color-primary) 35%, transparent)',
+                '0 0 0 1px var(--bridge-border) inset, 0 4px 14px -8px color-mix(in srgb, var(--color-primary) 35%, transparent)'
             }}
           >
             <span
@@ -112,7 +111,7 @@ export default function HeroSection() {
               lineHeight: 1.06,
               letterSpacing: '-0.035em',
               color: 'var(--bridge-text)',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             <motion.span
@@ -126,7 +125,7 @@ export default function HeroSection() {
               className="block bg-clip-text text-transparent"
               style={{
                 backgroundImage:
-                  'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)',
+                  'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)'
               }}
             >
               {s.landing.heroHeadline2}
@@ -140,7 +139,7 @@ export default function HeroSection() {
             style={{
               fontSize: 'clamp(1.1rem, 2vw, 1.5rem)',
               lineHeight: 1.3,
-              color: 'color-mix(in srgb, var(--bridge-text) 50%, transparent)',
+              color: 'color-mix(in srgb, var(--bridge-text) 50%, transparent)'
             }}
           >
             {s.landing.heroSubTagline}
@@ -153,7 +152,7 @@ export default function HeroSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 16,
-              lineHeight: 1.65,
+              lineHeight: 1.65
             }}
           >
             {s.landing.heroSubCopy}
@@ -173,7 +172,7 @@ export default function HeroSection() {
                 boxShadow:
                   '0 18px 40px -12px color-mix(in srgb, var(--color-primary) 60%, transparent)',
                 outlineColor: 'var(--color-primary)',
-                transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`,
+                transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
@@ -189,13 +188,13 @@ export default function HeroSection() {
               </span>
             </AppLink>
             <Link
-              to="/#how"
+              to="/how-it-works"
               className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-[14px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{
                 color: 'var(--bridge-text-secondary)',
                 boxShadow: '0 0 0 1px var(--bridge-border) inset',
                 outlineColor: 'var(--color-primary)',
-                transition: `box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), color ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`,
+                transition: `box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), color ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.boxShadow =
@@ -264,7 +263,7 @@ export default function HeroSection() {
             : {
                 initial: { opacity: 0, x: 16 },
                 animate: { opacity: 1, x: 0 },
-                transition: { duration: DUR_LONG, delay: 0.4, ease: EASE },
+                transition: { duration: DUR_LONG, delay: 0.4, ease: EASE }
               })}
           className="relative lg:col-span-6 lg:self-center"
         >

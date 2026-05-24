@@ -40,8 +40,8 @@ export default function Contact() {
           Name: form.name,
           Email: form.email,
           Page: typeof window !== 'undefined' ? window.location.href : '',
-          Submitted: new Date().toISOString(),
-        },
+          Submitted: new Date().toISOString()
+        }
       });
       setTicketId(id);
       setSent(true);
@@ -66,7 +66,7 @@ export default function Contact() {
         style={{
           background:
             'radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent 68%)',
-          filter: 'blur(80px)',
+          filter: 'blur(80px)'
         }}
       />
 
@@ -83,7 +83,7 @@ export default function Contact() {
             style={{
               fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
               lineHeight: 1.02,
-              letterSpacing: '-0.03em',
+              letterSpacing: '-0.03em'
             }}
           >
             Get in touch
@@ -102,7 +102,7 @@ export default function Contact() {
                   className="group relative flex items-start gap-4 overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-0.5"
                   style={{
                     backgroundColor: 'var(--bridge-surface)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                   }}
                 >
                   <div
@@ -110,14 +110,14 @@ export default function Contact() {
                     className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full opacity-0 blur-2xl transition duration-500 group-hover:opacity-100"
                     style={{
                       background:
-                        'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent)',
+                        'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent)'
                     }}
                   />
                   <div
                     className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition duration-300 group-hover:scale-[1.04]"
                     style={{
                       backgroundColor:
-                        'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))',
+                        'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))'
                     }}
                   >
                     <Icon className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
@@ -143,7 +143,7 @@ export default function Contact() {
                   backgroundColor:
                     'color-mix(in srgb, var(--color-error) 6%, var(--bridge-surface))',
                   boxShadow:
-                    'inset 0 0 0 1px color-mix(in srgb, var(--color-error) 28%, transparent)',
+                    'inset 0 0 0 1px color-mix(in srgb, var(--color-error) 28%, transparent)'
                 }}
               >
                 <div
@@ -151,7 +151,7 @@ export default function Contact() {
                   style={{
                     backgroundColor: 'var(--color-error)',
                     boxShadow:
-                      '0 8px 22px -6px color-mix(in srgb, var(--color-error) 45%, transparent)',
+                      '0 8px 22px -6px color-mix(in srgb, var(--color-error) 45%, transparent)'
                   }}
                 >
                   <ShieldAlert className="h-5 w-5" />
@@ -171,7 +171,7 @@ export default function Contact() {
                       style={{
                         color: 'var(--color-error)',
                         textDecorationColor:
-                          'color-mix(in srgb, var(--color-error) 40%, transparent)',
+                          'color-mix(in srgb, var(--color-error) 40%, transparent)'
                       }}
                     >
                       Trust &amp; Safety report form
@@ -189,7 +189,7 @@ export default function Contact() {
               className="relative overflow-hidden rounded-2xl"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
             >
               <div
@@ -202,7 +202,7 @@ export default function Contact() {
                 className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full blur-3xl"
                 style={{
                   background:
-                    'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent)',
+                    'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent)'
                 }}
               />
               <div className="relative p-8 sm:p-10">
@@ -214,7 +214,7 @@ export default function Contact() {
                         backgroundColor:
                           'color-mix(in srgb, var(--color-success) 12%, var(--bridge-surface))',
                         boxShadow:
-                          '0 16px 40px -8px color-mix(in srgb, var(--color-success) 35%, transparent)',
+                          '0 16px 40px -8px color-mix(in srgb, var(--color-success) 35%, transparent)'
                       }}
                     >
                       <CheckCircle2 className="h-10 w-10" style={{ color: 'var(--color-success)' }} />
@@ -230,7 +230,7 @@ export default function Contact() {
                         className="mx-auto mt-6 inline-flex flex-col items-center gap-1 rounded-2xl px-5 py-4"
                         style={{
                           backgroundColor: 'var(--bridge-surface-muted)',
-                          boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                          boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                         }}
                       >
                         <span
@@ -256,7 +256,7 @@ export default function Contact() {
                       className={`mt-8 inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-semibold text-[var(--bridge-text-secondary)] transition hover:-translate-y-0.5 hover:text-[var(--bridge-text)] ${focusRing}`}
                       style={{
                         backgroundColor: 'var(--bridge-surface)',
-                        boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                        boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                       }}
                     >
                       Send another <ArrowRight className="h-4 w-4" />
@@ -286,7 +286,6 @@ export default function Contact() {
                           value={form.name}
                           onChange={(e) => setForm({ ...form, name: e.target.value })}
                           className={`${INPUT_CLASS} ${focusRing}`}
-                          style={{ backgroundColor: 'var(--bridge-surface-muted)' }}
                         />
                       </div>
                       <div>
@@ -299,7 +298,6 @@ export default function Contact() {
                           value={form.email}
                           onChange={(e) => setForm({ ...form, email: e.target.value })}
                           className={`${INPUT_CLASS} ${focusRing}`}
-                          style={{ backgroundColor: 'var(--bridge-surface-muted)' }}
                         />
                       </div>
                     </div>
@@ -312,7 +310,6 @@ export default function Contact() {
                         value={form.topic}
                         onChange={(e) => setForm({ ...form, topic: e.target.value })}
                         className={`${INPUT_CLASS} ${focusRing}`}
-                        style={{ backgroundColor: 'var(--bridge-surface-muted)' }}
                       >
                         <option>General question</option>
                         <option>Billing issue</option>
@@ -333,7 +330,6 @@ export default function Contact() {
                         onChange={(e) => setForm({ ...form, message: e.target.value })}
                         placeholder="Tell us what's up — the more specific, the better."
                         className={`resize-none ${INPUT_CLASS} ${focusRing}`}
-                        style={{ backgroundColor: 'var(--bridge-surface-muted)' }}
                       />
                       <p className="mt-1.5 text-right text-[11px] font-medium text-[var(--bridge-text-muted)]">
                         {form.message.length} characters
@@ -349,7 +345,7 @@ export default function Contact() {
                             'color-mix(in srgb, var(--color-error) 8%, var(--bridge-surface))',
                           boxShadow:
                             'inset 0 0 0 1px color-mix(in srgb, var(--color-error) 35%, transparent)',
-                          color: 'var(--color-error)',
+                          color: 'var(--color-error)'
                         }}
                       >
                         {submitError}
@@ -364,7 +360,7 @@ export default function Contact() {
                         backgroundColor: 'var(--color-primary)',
                         color: 'var(--color-on-primary)',
                         boxShadow:
-                          '0 14px 36px -8px color-mix(in srgb, var(--color-primary) 50%, transparent)',
+                          '0 14px 36px -8px color-mix(in srgb, var(--color-primary) 50%, transparent)'
                       }}
                     >
                       {submitting ? (

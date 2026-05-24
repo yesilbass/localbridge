@@ -17,11 +17,6 @@ export default function CompanyCompareSection() {
       id="vs"
       aria-labelledby="vs-heading"
       className={COMPANY_PAD_TIGHT}
-      style={{
-        backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border-strong)',
-        borderBottom: '1px solid var(--bridge-border-strong)',
-      }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll className="mb-10 flex flex-col gap-6 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
@@ -71,8 +66,7 @@ export default function CompanyCompareSection() {
                   <tr
                     key={row.label}
                     style={{
-                      backgroundColor: i % 2 === 0 ? 'var(--bridge-canvas)' : 'var(--bridge-surface)',
-                      borderTop: '1px solid var(--bridge-border)',
+                      backgroundColor: i % 2 === 0 ? 'var(--bridge-canvas)' : 'var(--bridge-surface)'
                     }}
                   >
                     <th scope="row" className="px-5 py-4 text-[14px] font-semibold text-[var(--bridge-text)]">

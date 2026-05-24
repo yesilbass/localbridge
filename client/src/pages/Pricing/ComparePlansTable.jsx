@@ -8,7 +8,7 @@ import {
   COMPARISON_PLANS,
   COMPARISON_SECTIONS,
   STUDENT_DISCOUNT,
-  tierMonthlyEquivalent,
+  tierMonthlyEquivalent
 } from './constants';
 
 function planPrice(plan, { annual, isStudent }) {
@@ -18,12 +18,12 @@ function planPrice(plan, { annual, isStudent }) {
     return {
       display: Math.round(base * (1 - STUDENT_DISCOUNT)),
       struck: base,
-      note: annual ? `Billed annually · student 50% off` : 'Student 50% off at checkout',
+      note: annual ? `Billed annually · student 50% off` : 'Student 50% off at checkout'
     };
   }
   return {
     display: base,
-    note: annual ? `Billed annually · save ${Math.round(ANNUAL_DISCOUNT * 100)}%` : 'Billed monthly',
+    note: annual ? `Billed annually · save ${Math.round(ANNUAL_DISCOUNT * 100)}%` : 'Billed monthly'
   };
 }
 
@@ -64,7 +64,7 @@ export default function ComparePlansTable({
   annual,
   isStudent,
   user,
-  onChoosePlan,
+  onChoosePlan
 }) {
   const { s } = useContent();
 
@@ -74,14 +74,14 @@ export default function ComparePlansTable({
         aria-hidden
         className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full blur-3xl bd-aurora"
         style={{
-          background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 12%, transparent) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 12%, transparent) 0%, transparent 70%)'
         }}
       />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-50"
         style={{
-          background: 'linear-gradient(to right, transparent, var(--color-primary), transparent)',
+          background: 'linear-gradient(to right, transparent, var(--color-primary), transparent)'
         }}
       />
 
@@ -99,7 +99,7 @@ export default function ComparePlansTable({
             lineHeight: 1.05,
             letterSpacing: '-0.03em',
             color: 'var(--bridge-text)',
-            fontFeatureSettings: '"kern" 1, "ss01" 1',
+            fontFeatureSettings: '"kern" 1, "ss01" 1'
           }}
         >
           {s.pricing.compareHeading}{' '}
@@ -140,7 +140,7 @@ export default function ComparePlansTable({
                             className="bd-status-shine relative overflow-hidden rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.16em]"
                             style={{
                               backgroundColor: 'var(--color-primary)',
-                              color: 'var(--color-on-primary)',
+                              color: 'var(--color-on-primary)'
                             }}
                           >
                             {s.pricing.compareBest}
@@ -228,7 +228,7 @@ export default function ComparePlansTable({
                         style={{
                           border: '1px solid var(--bridge-border-strong)',
                           backgroundColor: 'var(--bridge-surface-raised)',
-                          color: 'var(--bridge-text-secondary)',
+                          color: 'var(--bridge-text-secondary)'
                         }}
                       >
                         {user ? plan.ctaUser : plan.ctaGuest}
@@ -250,11 +250,11 @@ export default function ComparePlansTable({
                       style={featured ? {
                         backgroundColor: 'var(--color-primary)',
                         color: 'var(--color-on-primary)',
-                        boxShadow: '0 10px 28px -8px color-mix(in srgb, var(--color-primary) 60%, transparent)',
+                        boxShadow: '0 10px 28px -8px color-mix(in srgb, var(--color-primary) 60%, transparent)'
                       } : {
                         border: '1px solid var(--bridge-border-strong)',
                         backgroundColor: 'var(--bridge-surface-raised)',
-                        color: 'var(--bridge-text-secondary)',
+                        color: 'var(--bridge-text-secondary)'
                       }}
                     >
                       {plan.cta}

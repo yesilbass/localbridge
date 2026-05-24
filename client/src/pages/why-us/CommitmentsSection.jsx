@@ -8,7 +8,7 @@ const ICON_MAP = {
   BadgeCheck,
   Eye,
   ShieldOff,
-  Handshake,
+  Handshake
 };
 
 const cardEnter = (e) => {
@@ -29,11 +29,6 @@ export default function CommitmentsSection() {
       id="commitments"
       aria-labelledby="commitments-heading"
       className={WHY_US_SECTION_PAD}
-      style={{
-        backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border-strong)',
-        borderBottom: '1px solid var(--bridge-border-strong)',
-      }}
     >
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -44,7 +39,7 @@ export default function CommitmentsSection() {
               fontSize: 'clamp(2rem, 5vw, 4rem)',
               lineHeight: 0.98,
               letterSpacing: '-0.035em',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
@@ -60,7 +55,7 @@ export default function CommitmentsSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 17,
-              lineHeight: 1.6,
+              lineHeight: 1.6
             }}
           >
             If we ever break one of these, the page changes. We will not.
@@ -77,7 +72,7 @@ export default function CommitmentsSection() {
                   style={{
                     backgroundColor: 'var(--bridge-surface)',
                     boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-                    transition: `transform ${DUR_SHORT}s cubic-bezier(${EASE.join(',')}), box-shadow ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`,
+                    transition: `transform ${DUR_SHORT}s cubic-bezier(${EASE.join(',')}), box-shadow ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`
                   }}
                   onMouseEnter={cardEnter}
                   onMouseLeave={cardLeave}
@@ -93,7 +88,7 @@ export default function CommitmentsSection() {
                       style={{
                         color: 'var(--bridge-text)',
                         letterSpacing: '-0.015em',
-                        lineHeight: 1.25,
+                        lineHeight: 1.25
                       }}
                     >
                       {c.title}
@@ -102,7 +97,7 @@ export default function CommitmentsSection() {
                       className="text-[13px] mt-1"
                       style={{
                         color: 'var(--bridge-text-secondary)',
-                        lineHeight: 1.55,
+                        lineHeight: 1.55
                       }}
                     >
                       {c.body}
@@ -111,7 +106,7 @@ export default function CommitmentsSection() {
                       className="mt-3 text-[10px] uppercase font-bold"
                       style={{
                         color: 'var(--bridge-text-muted)',
-                        letterSpacing: '0.22em',
+                        letterSpacing: '0.22em'
                       }}
                     >
                       {c.stamp}

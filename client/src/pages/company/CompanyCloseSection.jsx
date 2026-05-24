@@ -14,7 +14,6 @@ export default function CompanyCloseSection() {
       id="contact"
       aria-labelledby="close-heading"
       className={COMPANY_PAD}
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-12">
@@ -64,7 +63,7 @@ export default function CompanyCloseSection() {
               className="flex h-full flex-col justify-between rounded-2xl p-8 sm:p-10"
               style={{
                 background: 'linear-gradient(145deg, color-mix(in srgb, var(--color-primary) 88%, var(--bridge-text)) 0%, var(--color-primary) 100%)',
-                boxShadow: '0 24px 60px -20px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                boxShadow: '0 24px 60px -20px color-mix(in srgb, var(--color-primary) 55%, transparent)'
               }}
             >
               <div>

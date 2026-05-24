@@ -6,11 +6,11 @@ export default function CheckCell({ included, highlight }) {
         style={highlight ? {
           backgroundColor: 'var(--color-primary)',
           color: 'var(--color-on-primary)',
-          boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-on-primary) 15%, transparent), 0 0 14px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+          boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-on-primary) 15%, transparent), 0 0 14px color-mix(in srgb, var(--color-primary) 55%, transparent)'
         } : {
           backgroundColor: 'color-mix(in srgb, var(--color-success) 12%, transparent)',
           color: 'var(--color-success)',
-          boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-success) 25%, transparent)',
+          boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-success) 25%, transparent)'
         }}
         aria-label="Included"
       >

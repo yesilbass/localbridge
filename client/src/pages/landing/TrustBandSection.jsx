@@ -14,19 +14,19 @@ const STATS = [
     pct: 71,
     label: 'Book a follow-up within 30 days',
     detail: 'Most mentees come back while momentum is still fresh.',
-    Icon: CalendarCheck,
+    Icon: CalendarCheck
   },
   {
     pct: 87,
     label: 'Say their mentor spotted something they\'d missed',
     detail: 'An outside read on blind spots you cannot see alone.',
-    Icon: ScanSearch,
+    Icon: ScanSearch
   },
   {
     pct: 93,
     label: 'Leave their first call with a clear next step',
     detail: 'Not vague advice — one concrete move to make this week.',
-    Icon: Compass,
+    Icon: Compass
   },
 ];
 
@@ -110,7 +110,7 @@ function StatCard({ stat, index, triggered }) {
       className="flex h-full flex-col gap-5 rounded-2xl p-5 sm:p-6"
       style={{
         backgroundColor: 'var(--bridge-surface)',
-        boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+        boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
       }}
     >
       <div className="flex items-start justify-between gap-3">
@@ -118,7 +118,7 @@ function StatCard({ stat, index, triggered }) {
           className="inline-flex h-10 w-10 items-center justify-center rounded-xl"
           style={{
             backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface-muted))',
-            color: 'var(--color-primary)',
+            color: 'var(--color-primary)'
           }}
         >
           <Icon className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
@@ -142,7 +142,7 @@ function StatCard({ stat, index, triggered }) {
             backgroundImage: 'linear-gradient(135deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-to, var(--color-primary)) 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
+            backgroundClip: 'text'
           }}
         >
           {count}%
@@ -183,13 +183,12 @@ export default function TrustBandSection() {
       ref={sectionRef}
       aria-label="Trust indicators"
       className="relative overflow-hidden py-16 lg:py-24"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-1/2 h-[420px] -translate-y-1/2"
         style={{
-          background: 'radial-gradient(ellipse 70% 80% at 50% 50%, color-mix(in srgb, var(--color-primary) 8%, transparent), transparent 70%)',
+          background: 'radial-gradient(ellipse 70% 80% at 50% 50%, color-mix(in srgb, var(--color-primary) 8%, transparent), transparent 70%)'
         }}
       />
 
@@ -215,7 +214,7 @@ export default function TrustBandSection() {
                   fontSize: 'clamp(0.85rem, 1.5vw, 1rem)',
                   letterSpacing: '-0.02em',
                   color: 'var(--bridge-text)',
-                  opacity: 0.22 + (i % 4) * 0.06,
+                  opacity: 0.22 + (i % 4) * 0.06
                 }}
               >
                 {name}
@@ -229,7 +228,7 @@ export default function TrustBandSection() {
           className="overflow-hidden rounded-[1.75rem] p-6 sm:p-8 lg:p-10"
           style={{
             backgroundColor: 'var(--bridge-surface-raised)',
-            boxShadow: '0 0 0 1px var(--bridge-border), 0 28px 72px -40px color-mix(in srgb, var(--bridge-text) 18%, transparent)',
+            boxShadow: '0 0 0 1px var(--bridge-border), 0 28px 72px -40px color-mix(in srgb, var(--bridge-text) 18%, transparent)'
           }}
         >
           <div
@@ -256,7 +255,7 @@ export default function TrustBandSection() {
                 fontSize: 'clamp(2rem, 4.2vw, 3.25rem)',
                 lineHeight: 1.02,
                 letterSpacing: '-0.04em',
-                color: 'var(--bridge-text)',
+                color: 'var(--bridge-text)'
               }}
             >
               What actually
@@ -267,7 +266,7 @@ export default function TrustBandSection() {
                   backgroundImage: 'linear-gradient(135deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-to, var(--color-primary)) 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
+                  backgroundClip: 'text'
                 }}
               >
                 after.
@@ -281,7 +280,7 @@ export default function TrustBandSection() {
               style={{
                 color: 'var(--bridge-text-muted)',
                 backgroundColor: 'var(--bridge-surface-muted)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
             >
               <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: 'var(--color-primary)' }} aria-hidden />

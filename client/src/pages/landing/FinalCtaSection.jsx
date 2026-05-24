@@ -14,30 +14,8 @@ export default function FinalCtaSection({ user }) {
     <section
       id="final"
       aria-labelledby="final-heading"
-      className="relative overflow-hidden py-20 sm:py-24"
-      style={{
-        background:
-          'linear-gradient(180deg, var(--bridge-canvas) 0%, color-mix(in srgb, var(--bridge-canvas) 78%, var(--color-secondary)) 100%)',
-        borderTop: '1px solid var(--bridge-border)',
-      }}
+      className="bg-[var(--bridge-canvas)] py-20 sm:py-24"
     >
-      {/* Ambient primary glow */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]"
-        style={{
-          background: 'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, transparent 70%)',
-        }}
-      />
-      {/* Counter-tone accent */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute right-[8%] bottom-[-10%] h-[420px] w-[420px] rounded-full blur-[140px] opacity-[0.35]"
-        style={{
-          background: 'radial-gradient(closest-side, color-mix(in srgb, var(--lp-counter) 28%, transparent) 0%, transparent 70%)',
-        }}
-      />
-
       <div className="relative z-10 mx-auto max-w-3xl px-5 text-center sm:px-8">
         <RevealOnScroll>
           <div
@@ -45,7 +23,7 @@ export default function FinalCtaSection({ user }) {
             style={{
               backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
               color: 'var(--color-primary)',
-              boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-primary) 30%, transparent) inset',
+              boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-primary) 30%, transparent) inset'
             }}
           >
             <Sparkles className="h-3 w-3" />
@@ -71,7 +49,7 @@ export default function FinalCtaSection({ user }) {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 'clamp(0.95rem, 1.6vw, 1.0625rem)',
-              lineHeight: 1.55,
+              lineHeight: 1.55
             }}
           >
             {t('landing.cta.subCopy', "Stop spinning. Book a session with someone who's walked the exact path you're on — and made it through.")}
@@ -84,7 +62,7 @@ export default function FinalCtaSection({ user }) {
               style={{
                 backgroundColor: 'var(--color-primary)',
                 color: 'var(--color-on-primary)',
-                boxShadow: '0 22px 50px -12px color-mix(in srgb, var(--color-primary) 60%, transparent)',
+                boxShadow: '0 22px 50px -12px color-mix(in srgb, var(--color-primary) 60%, transparent)'
               }}
             >
               <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
@@ -105,14 +83,14 @@ export default function FinalCtaSection({ user }) {
                 className="flex h-full items-center gap-4 rounded-2xl p-4 transition"
                 style={{
                   backgroundColor: 'color-mix(in srgb, var(--bridge-canvas) 60%, var(--bridge-surface))',
-                  boxShadow: '0 0 0 1px var(--bridge-border) inset, 0 12px 28px -22px color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                  boxShadow: '0 0 0 1px var(--bridge-border) inset, 0 12px 28px -22px color-mix(in srgb, var(--color-primary) 30%, transparent)'
                 }}
               >
                 <span
                   className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
                   style={{
                     backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-                    color: 'var(--color-primary)',
+                    color: 'var(--color-primary)'
                   }}
                 >
                   <Icon className="h-5 w-5" />

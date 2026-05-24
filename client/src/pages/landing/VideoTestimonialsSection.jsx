@@ -35,7 +35,7 @@ const VIDEOS = [
 const ACCENT = {
   sky:     '#38bdf8', violet: '#a78bfa', emerald: '#34d399',
   rose:    '#c084fc', teal:   '#2dd4bf', indigo:  '#818cf8',
-  amber:   'var(--color-primary)',
+  amber:   'var(--color-primary)'
 };
 
 function ini(name) {
@@ -55,7 +55,7 @@ function VideoCard({ v, index, revealed }) {
         borderRadius: 14,
         background: v.bg,
         aspectRatio: '3/4',
-        cursor: 'pointer',
+        cursor: 'pointer'
       }}
     >
       {/* Grain */}
@@ -107,7 +107,7 @@ function VideoCard({ v, index, revealed }) {
             display: '-webkit-box',
             WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
+            overflow: 'hidden'
           }}
         >
           {v.quote}
@@ -139,7 +139,6 @@ export default function VideoTestimonialsSection() {
       ref={sectionRef}
       aria-labelledby="testimonials-heading"
       className="relative overflow-hidden py-20 lg:py-28"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       {/* Heading */}
       <div className="mx-auto max-w-3xl px-5 text-center sm:px-8 mb-12">
@@ -180,7 +179,7 @@ export default function VideoTestimonialsSection() {
                 background: 'var(--bridge-surface)',
                 border: '1px solid var(--bridge-border)',
                 color: 'var(--bridge-text-secondary)',
-                cursor: 'pointer',
+                cursor: 'pointer'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'var(--bridge-surface-muted)';

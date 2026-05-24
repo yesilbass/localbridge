@@ -767,3 +767,18 @@ html.theme-dark {
     0 0 22px color-mix(in srgb, var(--color-primary) 28%, transparent);
   border-radius: inherit;
 }
+
+/* Public marketing shell — section rhythm via surface + spacing, not hairline dividers */
+html.is-marketing-route main section,
+html.is-marketing-route .landing-root > section {
+  background-color: var(--bridge-canvas) !important;
+  background-image: none !important;
+  border-top-width: 0 !important;
+  border-bottom-width: 0 !important;
+}
+
+/* No page-level glow bands on marketing routes */
+html.is-marketing-route .landing-root > div[aria-hidden],
+html.is-marketing-route main section > div[aria-hidden].pointer-events-none {
+  display: none !important;
+}

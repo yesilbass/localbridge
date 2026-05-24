@@ -16,7 +16,7 @@ function CompanyAvatar({ company }) {
         background: 'color-mix(in srgb, var(--color-primary) 10%, var(--bridge-surface-muted))',
         boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 22%, transparent)',
         color: 'var(--color-primary)',
-        fontFeatureSettings: '"kern" 1',
+        fontFeatureSettings: '"kern" 1'
       }}
       aria-hidden
     >
@@ -76,7 +76,7 @@ export default function TrackRecord({ mentor }) {
                           : 'var(--bridge-surface-muted)',
                         color: isCurrent ? 'var(--color-primary)' : 'var(--bridge-text-muted)',
                         boxShadow: isCurrent ? 'none' : 'inset 0 0 0 1px var(--bridge-border)',
-                        fontFeatureSettings: '"tnum" 1',
+                        fontFeatureSettings: '"tnum" 1'
                       }}
                     >
                       {entry.startYear}–{entry.endYear ?? 'Present'}

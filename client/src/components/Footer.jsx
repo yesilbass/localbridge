@@ -111,22 +111,9 @@ export default function Footer() {
   }
 
   return (
-    <footer className="relative z-10 mt-auto px-4 pb-6 pt-12 sm:px-6 sm:pb-8 lg:px-8 lg:pt-16">
-      <div
-        className="mx-auto max-w-[min(1320px,calc(100vw-2rem))] overflow-hidden rounded-[1.85rem]"
-        style={{
-          backgroundColor: 'var(--bridge-surface-raised)',
-          boxShadow: '0 0 0 1px var(--bridge-border), 0 32px 80px -36px color-mix(in srgb, var(--bridge-text) 28%, transparent)',
-        }}
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none h-px w-full"
-          style={{ background: 'linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-primary) 45%, transparent), transparent)' }}
-        />
-
-        <div className="p-9 sm:p-11 lg:p-12 xl:p-14">
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:items-start lg:gap-14 xl:gap-16">
+    <footer className="relative z-10 mt-auto bg-[var(--bridge-canvas)] px-6 pb-8 pt-16 sm:px-10 sm:pb-10 lg:px-14 lg:pt-20 xl:px-16">
+      <div className="mx-auto w-full max-w-7xl xl:max-w-[88rem]">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:items-start lg:gap-14 xl:gap-16">
             {/* Newsletter */}
             <div className="flex flex-col gap-8">
               <div>
@@ -151,7 +138,7 @@ export default function Footer() {
                       style={{
                         marginLeft: i === 0 ? 0 : '-0.45rem',
                         zIndex: COMMUNITY_AVATARS.length - i,
-                        borderColor: 'var(--bridge-surface-raised)',
+                        borderColor: 'var(--bridge-canvas)',
                         background: bg,
                         color: 'var(--color-on-primary, #fff)',
                       }}
@@ -233,6 +220,7 @@ export default function Footer() {
                 title={t('footer.platform', 'Platform')}
                 links={[
                   { label: t('footer.browseMentors', 'Browse Mentors'), to: '/mentors', app: true },
+                  { label: t('footer.howItWorks', 'How it works'), to: '/how-it-works' },
                   { label: t('footer.aiMatching', 'AI Matching'), to: '/mentors', app: true },
                   { label: t('footer.resumeReview', 'Resume Review'), to: '/resume', app: true },
                   { label: t('nav.pricing', 'Pricing'), to: '/pricing', app: true },
@@ -252,10 +240,7 @@ export default function Footer() {
           </div>
 
           {/* Meta — legal · copyright · theme · social */}
-          <div
-            className="mt-11 flex flex-col gap-5 border-t pt-8 sm:flex-row sm:items-center sm:justify-between sm:gap-6 lg:mt-12 lg:pt-9"
-            style={{ borderColor: 'var(--bridge-border)' }}
-          >
+          <div className="mt-11 flex flex-col gap-5 pt-8 sm:flex-row sm:items-center sm:justify-between sm:gap-6 lg:mt-14 lg:pt-10">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
               {[
                 { label: t('footer.terms', 'Terms'), to: '/terms' },
@@ -322,10 +307,7 @@ export default function Footer() {
           </div>
 
           {/* Brand strip */}
-          <div
-            className="mt-8 flex flex-col gap-4 pt-8 sm:flex-row sm:items-center sm:justify-between lg:mt-10 lg:pt-9"
-            style={{ borderTop: '1px solid var(--bridge-border)' }}
-          >
+          <div className="mt-8 flex flex-col gap-4 pt-8 sm:flex-row sm:items-center sm:justify-between lg:mt-10 lg:pt-10">
             <Link
               to="/"
               className="font-display text-xl font-black tracking-[-0.04em] transition-opacity hover:opacity-70"
@@ -345,7 +327,6 @@ export default function Footer() {
               <span>San Francisco, CA</span>
             </div>
           </div>
-        </div>
       </div>
     </footer>
   );

@@ -20,9 +20,6 @@ export default function MechanismSection() {
       id="mechanism"
       aria-labelledby="mechanism-heading"
       className={WHY_US_SECTION_PAD}
-      style={{
-        backgroundColor: 'var(--bridge-canvas)',
-      }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -30,7 +27,7 @@ export default function MechanismSection() {
             className="text-[10px] font-black uppercase"
             style={{
               color: 'var(--color-primary)',
-              letterSpacing: '0.32em',
+              letterSpacing: '0.32em'
             }}
           >
             How we enforce it
@@ -43,7 +40,7 @@ export default function MechanismSection() {
               fontSize: 'clamp(2rem, 5vw, 4rem)',
               lineHeight: 0.98,
               letterSpacing: '-0.035em',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
@@ -59,7 +56,7 @@ export default function MechanismSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 17,
-              lineHeight: 1.6,
+              lineHeight: 1.6
             }}
           >
             Three product mechanisms turn the four beliefs above into things we cannot quietly walk back.
@@ -81,7 +78,7 @@ export default function MechanismSection() {
                   className="border-l-2 pl-4 sm:pl-6"
                   style={{
                     borderColor:
-                      'color-mix(in srgb, var(--color-primary) 20%, transparent)',
+                      'color-mix(in srgb, var(--color-primary) 20%, transparent)'
                   }}
                 >
                   <p
@@ -91,7 +88,7 @@ export default function MechanismSection() {
                       color:
                         'color-mix(in srgb, var(--color-primary) 25%, transparent)',
                       letterSpacing: '-0.04em',
-                      fontFeatureSettings: '"tnum" 1',
+                      fontFeatureSettings: '"tnum" 1'
                     }}
                   >
                     {m.num}
@@ -106,7 +103,7 @@ export default function MechanismSection() {
                         fontSize: 'clamp(1.5rem, 3vw, 2rem)',
                         color: 'var(--bridge-text)',
                         letterSpacing: '-0.02em',
-                        lineHeight: 1.1,
+                        lineHeight: 1.1
                       }}
                     >
                       {m.title}
@@ -116,7 +113,7 @@ export default function MechanismSection() {
                       style={{
                         color: 'var(--bridge-text-secondary)',
                         fontSize: 16,
-                        lineHeight: 1.65,
+                        lineHeight: 1.65
                       }}
                     >
                       {m.body}
@@ -128,7 +125,7 @@ export default function MechanismSection() {
                           backgroundColor:
                             'color-mix(in srgb, var(--color-primary) 10%, transparent)',
                           color: 'var(--color-primary)',
-                          letterSpacing: '0.12em',
+                          letterSpacing: '0.12em'
                         }}
                       >
                         Enforces &middot; {m.enforces}
@@ -161,7 +158,7 @@ function VettingPills() {
           style={{
             backgroundColor: 'var(--bridge-surface)',
             boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-            color: 'var(--bridge-text-secondary)',
+            color: 'var(--bridge-text-secondary)'
           }}
         >
           <Check
@@ -185,7 +182,7 @@ function UrlBar() {
         boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
         fontFamily:
           'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-        fontSize: 12,
+        fontSize: 12
       }}
     >
       <Globe
@@ -203,7 +200,7 @@ function UrlBar() {
         className="font-bold tabular-nums"
         style={{
           color: 'var(--color-primary)',
-          fontFeatureSettings: '"tnum" 1',
+          fontFeatureSettings: '"tnum" 1'
         }}
       >
         95
@@ -222,7 +219,7 @@ function ReviewFeed() {
           className="px-3 py-2 rounded-lg flex items-center gap-2"
           style={{
             backgroundColor: 'var(--bridge-surface)',
-            boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+            boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
           }}
         >
           <span className="flex gap-0.5" aria-label={`${r.rating} of 5 stars`}>
@@ -237,7 +234,7 @@ function ReviewFeed() {
                   style={{
                     color: filled
                       ? 'var(--color-primary)'
-                      : 'var(--bridge-text-muted)',
+                      : 'var(--bridge-text-muted)'
                   }}
                   aria-hidden="true"
                 />
@@ -248,7 +245,7 @@ function ReviewFeed() {
             className="ml-auto text-[10px] tabular-nums"
             style={{
               color: 'var(--bridge-text-muted)',
-              fontFeatureSettings: '"tnum" 1',
+              fontFeatureSettings: '"tnum" 1'
             }}
           >
             {r.date}

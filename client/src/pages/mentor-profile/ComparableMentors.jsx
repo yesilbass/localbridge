@@ -18,7 +18,7 @@ function CompactMentorCard({ m }) {
           className="flex items-center gap-4 p-4 rounded-2xl transition-all"
           style={{
             backgroundColor: 'var(--bridge-surface)',
-            boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+            boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.boxShadow = 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 30%, transparent)';
@@ -102,7 +102,7 @@ export default function ComparableMentors({ mentor }) {
         style={{
           fontSize: 'clamp(1.5rem, 3vw, 2rem)',
           letterSpacing: '-0.025em',
-          color: 'var(--bridge-text)',
+          color: 'var(--bridge-text)'
         }}
       >
         Other operators with {firstName}'s background

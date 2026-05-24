@@ -7,7 +7,6 @@ export default function CompanyProofSection() {
       id="proof"
       aria-labelledby="proof-heading"
       className={COMPANY_PAD}
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -28,7 +27,7 @@ export default function CompanyProofSection() {
             style={{
               backgroundColor: 'var(--bridge-surface)',
               boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-              borderRadius: '1rem',
+              borderRadius: '1rem'
             }}
           >
             {COMPANY_RECEIPTS.map(({ number, label, caption }) => (
@@ -50,7 +49,7 @@ export default function CompanyProofSection() {
                 className="flex h-full flex-col rounded-2xl p-6"
                 style={{
                   backgroundColor: 'var(--bridge-surface-muted)',
-                  boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                  boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                 }}
               >
                 <span className="text-[11px] font-bold tabular-nums tracking-[0.2em] text-[var(--color-primary)]">

@@ -34,7 +34,7 @@ function renderBody(body) {
         __html: p.replace(
           /\*\*(.+?)\*\*/g,
           '<strong class="font-semibold text-[var(--bridge-text)]">$1</strong>'
-        ),
+        )
       }}
     />
   ));
@@ -51,7 +51,7 @@ function SidebarLink({ section, isActive }) {
           color: isActive ? 'var(--bridge-text)' : 'var(--bridge-text-secondary)',
           backgroundColor: isActive
             ? 'color-mix(in srgb, var(--color-primary) 9%, transparent)'
-            : 'transparent',
+            : 'transparent'
         }}
       >
         {isActive && (
@@ -133,7 +133,7 @@ export default function Terms() {
         style={{
           background:
             'radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-primary) 15%, transparent), transparent 68%)',
-          filter: 'blur(80px)',
+          filter: 'blur(80px)'
         }}
       />
 
@@ -151,7 +151,7 @@ export default function Terms() {
               fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
               lineHeight: 1.02,
               letterSpacing: '-0.03em',
-              color: 'var(--color-primary)',
+              color: 'var(--color-primary)'
             }}
           >
             Terms of Use
@@ -165,7 +165,7 @@ export default function Terms() {
               className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[12px] font-medium text-[var(--bridge-text-secondary)] transition hover:text-[var(--bridge-text)]"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
             >
               <Printer className="h-3 w-3" />
@@ -179,7 +179,7 @@ export default function Terms() {
             className="rounded-2xl p-6 sm:p-8"
             style={{
               backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
             }}
           >
             <p
@@ -205,7 +205,7 @@ export default function Terms() {
               className="relative overflow-hidden rounded-2xl p-5 pt-6"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
             >
               <div
@@ -214,7 +214,7 @@ export default function Terms() {
                   backgroundColor: 'var(--color-primary)',
                   transform: `scaleX(${progress})`,
                   transition: 'transform 150ms linear',
-                  opacity: 0.65,
+                  opacity: 0.65
                 }}
               />
               <p
@@ -239,7 +239,7 @@ export default function Terms() {
                 className="scroll-mt-24 rounded-2xl p-8 sm:p-10"
                 style={{
                   backgroundColor: 'var(--bridge-surface)',
-                  boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                  boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                 }}
               >
                 <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
@@ -263,7 +263,7 @@ export default function Terms() {
           opacity: pillVisible ? 1 : 0,
           transform: pillVisible ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(8px)',
           pointerEvents: pillVisible ? 'auto' : 'none',
-          transition: 'opacity 200ms, transform 200ms',
+          transition: 'opacity 200ms, transform 200ms'
         }}
       >
         {pillOpen && (
@@ -271,7 +271,7 @@ export default function Terms() {
             className="mb-2 rounded-2xl p-2"
             style={{
               backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 8px 32px rgba(0,0,0,0.12)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 8px 32px rgba(0,0,0,0.12)'
             }}
           >
             <ul className="max-h-72 space-y-0.5 overflow-y-auto">
@@ -288,7 +288,7 @@ export default function Terms() {
                         color: isActive ? 'var(--bridge-text)' : 'var(--bridge-text-secondary)',
                         backgroundColor: isActive
                           ? 'color-mix(in srgb, var(--color-primary) 9%, transparent)'
-                          : 'transparent',
+                          : 'transparent'
                       }}
                     >
                       {isActive && (
@@ -311,7 +311,7 @@ export default function Terms() {
           style={{
             backgroundColor: 'var(--bridge-surface)',
             color: 'var(--bridge-text)',
-            boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 4px 20px rgba(0,0,0,0.10)',
+            boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 4px 20px rgba(0,0,0,0.10)'
           }}
         >
           <List className="h-3.5 w-3.5 flex-shrink-0" style={{ color: 'var(--color-primary)' }} />
@@ -339,7 +339,7 @@ export default function Terms() {
           opacity: showTop ? 1 : 0,
           transform: showTop ? 'translateY(0)' : 'translateY(12px)',
           pointerEvents: showTop ? 'auto' : 'none',
-          transition: 'opacity 200ms, transform 200ms',
+          transition: 'opacity 200ms, transform 200ms'
         }}
       >
         <ArrowUp className="h-4 w-4 text-[var(--bridge-text-secondary)]" />

@@ -9,19 +9,19 @@ export default function ComparisonSection() {
       Icon: MessageCircle,
       label: t('landing.comparison.alt1.label', 'LinkedIn cold DMs'),
       problem: t('landing.comparison.alt1.problem', 'Two replies out of fifty, three weeks later.'),
-      tag: t('landing.comparison.alt1.tag', 'Slow + low signal'),
+      tag: t('landing.comparison.alt1.tag', 'Slow + low signal')
     },
     {
       Icon: Calendar,
       label: t('landing.comparison.alt2.label', 'Six-month coaching packages'),
       problem: t('landing.comparison.alt2.problem', '$1,200 commitment for a relationship that may not fit.'),
-      tag: t('landing.comparison.alt2.tag', 'Expensive + over-committed'),
+      tag: t('landing.comparison.alt2.tag', 'Expensive + over-committed')
     },
     {
       Icon: BookOpen,
       label: t('landing.comparison.alt3.label', 'Career courses and content'),
       problem: t('landing.comparison.alt3.problem', 'Generic advice. No one who has done your exact job.'),
-      tag: t('landing.comparison.alt3.tag', 'Impersonal + abstract'),
+      tag: t('landing.comparison.alt3.tag', 'Impersonal + abstract')
     },
   ];
   return (
@@ -29,10 +29,6 @@ export default function ComparisonSection() {
       id="comparison"
       aria-labelledby="comparison-heading"
       className="relative py-16 lg:py-20"
-      style={{
-        backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border)',
-      }}
     >
       <div className="mx-auto max-w-3xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -50,7 +46,7 @@ export default function ComparisonSection() {
               lineHeight: 1.05,
               letterSpacing: '-0.03em',
               color: 'var(--bridge-text)',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             {t('landing.comparison.heading1', 'What you tried')}
@@ -62,7 +58,7 @@ export default function ComparisonSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 'clamp(0.95rem, 1.6vw, 1.0625rem)',
-              lineHeight: 1.55,
+              lineHeight: 1.55
             }}
           >
             {t('landing.comparison.subCopy', 'Three ways people try to fix their career. Each one wastes more time than it saves.')}
@@ -76,14 +72,14 @@ export default function ComparisonSection() {
                   className="flex items-center gap-4 py-4 px-5 rounded-2xl"
                   style={{
                     backgroundColor: 'var(--bridge-surface)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                   }}
                 >
                   <div
                     className="flex h-9 w-9 items-center justify-center rounded-full shrink-0"
                     style={{
                       backgroundColor: 'var(--bridge-surface-muted)',
-                      color: 'var(--bridge-text-muted)',
+                      color: 'var(--bridge-text-muted)'
                     }}
                   >
                     <Icon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -93,7 +89,7 @@ export default function ComparisonSection() {
                       className="text-[16px] font-bold"
                       style={{
                         color: 'var(--bridge-text-secondary)',
-                        textDecoration: 'line-through',
+                        textDecoration: 'line-through'
                       }}
                     >
                       {label}
@@ -109,7 +105,7 @@ export default function ComparisonSection() {
                     className="text-[11px] uppercase font-bold shrink-0 hidden sm:block"
                     style={{
                       color: 'var(--bridge-text-faint)',
-                      letterSpacing: '0.18em',
+                      letterSpacing: '0.18em'
                     }}
                   >
                     {tag}
@@ -136,7 +132,7 @@ export default function ComparisonSection() {
                   backgroundColor:
                     'color-mix(in srgb, var(--color-primary) 9%, var(--bridge-surface))',
                   boxShadow:
-                    'inset 0 0 0 1.5px color-mix(in srgb, var(--color-primary) 45%, transparent), 0 18px 40px -22px color-mix(in srgb, var(--color-primary) 40%, transparent)',
+                    'inset 0 0 0 1.5px color-mix(in srgb, var(--color-primary) 45%, transparent), 0 18px 40px -22px color-mix(in srgb, var(--color-primary) 40%, transparent)'
                 }}
               >
                 <div
@@ -144,7 +140,7 @@ export default function ComparisonSection() {
                   style={{
                     backgroundColor: 'var(--color-primary)',
                     color: 'var(--color-on-primary)',
-                    boxShadow: '0 10px 24px -10px color-mix(in srgb, var(--color-primary) 60%, transparent)',
+                    boxShadow: '0 10px 24px -10px color-mix(in srgb, var(--color-primary) 60%, transparent)'
                   }}
                 >
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -155,7 +151,7 @@ export default function ComparisonSection() {
                     style={{
                       color: 'var(--bridge-text)',
                       fontSize: 'clamp(1.05rem, 1.4vw, 1.25rem)',
-                      letterSpacing: '-0.01em',
+                      letterSpacing: '-0.01em'
                     }}
                   >
                     {t('landing.comparison.bridge.headline', 'Bridge: one session, the right person.')}
@@ -171,7 +167,7 @@ export default function ComparisonSection() {
                   className="text-[11px] uppercase font-bold shrink-0 hidden sm:block"
                   style={{
                     color: 'var(--color-primary)',
-                    letterSpacing: '0.18em',
+                    letterSpacing: '0.18em'
                   }}
                 >
                   {t('landing.comparison.bridge.tag', 'Direct + decisive')}

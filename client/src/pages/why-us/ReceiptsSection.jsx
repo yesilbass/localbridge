@@ -12,11 +12,6 @@ export default function ReceiptsSection() {
       id="receipts"
       aria-labelledby="receipts-heading"
       className={`scroll-mt-[5.25rem] ${WHY_US_SECTION_PAD}`}
-      style={{
-        backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border-strong)',
-        borderBottom: '1px solid var(--bridge-border-strong)',
-      }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -24,7 +19,7 @@ export default function ReceiptsSection() {
             className="text-[10px] font-black uppercase"
             style={{
               color: 'var(--color-primary)',
-              letterSpacing: '0.32em',
+              letterSpacing: '0.32em'
             }}
           >
             {s.whyUs.receiptsEyebrow}
@@ -37,7 +32,7 @@ export default function ReceiptsSection() {
               fontSize: 'clamp(2rem, 5vw, 4rem)',
               lineHeight: 0.98,
               letterSpacing: '-0.035em',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
@@ -53,7 +48,7 @@ export default function ReceiptsSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 17,
-              lineHeight: 1.6,
+              lineHeight: 1.6
             }}
           >
             Live numbers from the last thirty days. We don&rsquo;t curate, we don&rsquo;t round up, we don&rsquo;t filter.
@@ -67,7 +62,7 @@ export default function ReceiptsSection() {
               style={{
                 backgroundColor: 'var(--bridge-surface)',
                 boxShadow:
-                  'inset 0 0 0 1px var(--bridge-border), 0 1px 2px var(--bridge-shadow-soft), 0 8px 24px -10px var(--bridge-shadow-soft), 0 26px 56px -22px color-mix(in srgb, var(--color-primary) 18%, transparent)',
+                  'inset 0 0 0 1px var(--bridge-border), 0 1px 2px var(--bridge-shadow-soft), 0 8px 24px -10px var(--bridge-shadow-soft), 0 26px 56px -22px color-mix(in srgb, var(--color-primary) 18%, transparent)'
               }}
             >
               <div className="flex items-center gap-2">
@@ -80,7 +75,7 @@ export default function ReceiptsSection() {
                   className="text-[11px] uppercase font-bold"
                   style={{
                     color: 'var(--bridge-text-secondary)',
-                    letterSpacing: '0.22em',
+                    letterSpacing: '0.22em'
                   }}
                 >
                   Live &middot; last 30 days
@@ -93,7 +88,7 @@ export default function ReceiptsSection() {
                   fontSize: 'clamp(1.375rem, 2.4vw, 1.875rem)',
                   lineHeight: 1.35,
                   color: 'var(--bridge-text)',
-                  fontFeatureSettings: '"tnum" 1, "kern" 1',
+                  fontFeatureSettings: '"tnum" 1, "kern" 1'
                 }}
               >
                 &ldquo;1,247 hours booked. 4.91 average. We published every three-star review they wrote.&rdquo;
@@ -111,7 +106,7 @@ export default function ReceiptsSection() {
                   className="ml-auto inline-flex items-center gap-1.5 text-[12px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-full px-1.5 py-0.5"
                   style={{
                     color: 'var(--color-primary)',
-                    outlineColor: 'var(--color-primary)',
+                    outlineColor: 'var(--color-primary)'
                   }}
                 >
                   See every review
@@ -129,7 +124,7 @@ export default function ReceiptsSection() {
                   className="rounded-3xl p-6 flex flex-col gap-2"
                   style={{
                     backgroundColor: 'var(--bridge-surface)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                   }}
                 >
                   <p
@@ -139,7 +134,7 @@ export default function ReceiptsSection() {
                       lineHeight: 1,
                       letterSpacing: '-0.025em',
                       color: 'var(--bridge-text)',
-                      fontFeatureSettings: '"tnum" 1, "kern" 1',
+                      fontFeatureSettings: '"tnum" 1, "kern" 1'
                     }}
                   >
                     {r.number}
@@ -148,7 +143,7 @@ export default function ReceiptsSection() {
                     className="text-[12px] uppercase font-bold"
                     style={{
                       color: 'var(--bridge-text-muted)',
-                      letterSpacing: '0.22em',
+                      letterSpacing: '0.22em'
                     }}
                   >
                     {r.label}

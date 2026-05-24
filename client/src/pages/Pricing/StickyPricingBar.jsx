@@ -27,7 +27,7 @@ export default function StickyPricingBar({ onClick, equivalent, annual }) {
           style={{
             backgroundColor: 'var(--color-primary)',
             color: 'var(--color-on-primary)',
-            boxShadow: '0 0 18px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+            boxShadow: '0 0 18px color-mix(in srgb, var(--color-primary) 55%, transparent)'
           }}
         >
           PRO
@@ -50,7 +50,7 @@ export default function StickyPricingBar({ onClick, equivalent, annual }) {
             style={{
               backgroundColor: 'var(--color-primary)',
               color: 'var(--color-on-primary)',
-              boxShadow: '0 8px 20px -6px color-mix(in srgb, var(--color-primary) 70%, transparent)',
+              boxShadow: '0 8px 20px -6px color-mix(in srgb, var(--color-primary) 70%, transparent)'
             }}
           >
             {s.pricing.choosePro}

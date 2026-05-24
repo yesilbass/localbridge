@@ -52,7 +52,7 @@ function Stat({ stat, triggered, enabled, index }) {
     decimals: stat.decimals ?? 0,
     enabled,
     triggered,
-    delay: index * 110,
+    delay: index * 110
   });
 
   const display = enabled
@@ -67,7 +67,7 @@ function Stat({ stat, triggered, enabled, index }) {
       style={{
         flex: '1 1 0',
         minWidth: 0,
-        borderRight: isLast ? 'none' : '1px solid var(--bridge-border)',
+        borderRight: isLast ? 'none' : '1px solid var(--bridge-border)'
       }}
     >
       {/* Animated number */}
@@ -83,7 +83,7 @@ function Stat({ stat, triggered, enabled, index }) {
           backgroundClip: 'text',
           opacity: triggered ? 1 : 0,
           transform: triggered ? 'translateY(0)' : 'translateY(10px)',
-          transition: `opacity 0.55s ease ${index * 110}ms, transform 0.55s cubic-bezier(0.16,1,0.3,1) ${index * 110}ms`,
+          transition: `opacity 0.55s ease ${index * 110}ms, transform 0.55s cubic-bezier(0.16,1,0.3,1) ${index * 110}ms`
         }}
       >
         {display}
@@ -95,7 +95,7 @@ function Stat({ stat, triggered, enabled, index }) {
         style={{
           color: 'var(--bridge-text-secondary)',
           opacity: triggered ? 1 : 0,
-          transition: `opacity 0.55s ease ${index * 110 + 80}ms`,
+          transition: `opacity 0.55s ease ${index * 110 + 80}ms`
         }}
       >
         {stat.label}
@@ -123,7 +123,6 @@ export default function StatsBentoSection() {
       ref={sectionRef}
       aria-label="Platform statistics"
       className="relative"
-      style={{ backgroundColor: 'var(--bridge-canvas)', borderTop: '1px solid var(--bridge-border)', borderBottom: '1px solid var(--bridge-border)' }}
     >
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-2 lg:grid-cols-4">

@@ -16,7 +16,7 @@ const TONE_GRAD = {
   amber:'linear-gradient(135deg,#4F46E5,#818CF8)', emerald:'linear-gradient(135deg,#059669,#10b981)',
   sky:'linear-gradient(135deg,#0EA5E9,#38BDF8)',   rose:'linear-gradient(135deg,#6D28D9,#A78BFA)',
   violet:'linear-gradient(135deg,#5B21B6,#A78BFA)',teal:'linear-gradient(135deg,#0D9488,#14B8A6)',
-  orange:'linear-gradient(135deg,#4F46E5,#6366F1)',pink:'linear-gradient(135deg,#312E81,#818CF8)',
+  orange:'linear-gradient(135deg,#4F46E5,#6366F1)',pink:'linear-gradient(135deg,#312E81,#818CF8)'
 };
 
 function ini(n) { return n.split(' ').filter(Boolean).map(p=>p[0]).slice(0,2).join('').toUpperCase(); }
@@ -110,7 +110,7 @@ function CardBodyLayer({ active, children }) {
         position: 'absolute',
         inset: 0,
         pointerEvents: active ? 'auto' : 'none',
-        visibility: active ? 'visible' : 'hidden',
+        visibility: active ? 'visible' : 'hidden'
       }}
     >
       {children}
@@ -305,7 +305,7 @@ export default function HeroLiveMatch() {
           backgroundColor:'var(--bridge-surface)',
           border:'1px solid var(--bridge-border)',
           borderRadius:20,
-          boxShadow:'0 8px 32px -12px rgba(0,0,0,0.12),0 2px 8px -4px rgba(0,0,0,0.06)',
+          boxShadow:'0 8px 32px -12px rgba(0,0,0,0.12),0 2px 8px -4px rgba(0,0,0,0.06)'
         }}
       >
         <div style={{ minHeight: 58, padding:'16px 18px 12px', display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative' }}>
@@ -390,7 +390,7 @@ export default function HeroLiveMatch() {
       <div
         style={{
           width:'100%', maxWidth:400, minHeight: STAGE_EXT_MIN_H, flexShrink:0,
-          position:'relative', display:'flex', flexDirection:'column', alignItems:'center',
+          position:'relative', display:'flex', flexDirection:'column', alignItems:'center'
         }}
       >
         <AnimatePresence initial={false} mode="sync">

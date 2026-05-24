@@ -25,8 +25,7 @@ export default function CompanyHero() {
     <section
       id="company-hero"
       aria-labelledby="company-hero-heading"
-      className="relative overflow-hidden border-b border-[var(--bridge-border-strong)] pt-24 sm:pt-28"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
+      className="relative overflow-hidden pt-24 sm:pt-28"
     >
       <div
         aria-hidden
@@ -46,7 +45,7 @@ export default function CompanyHero() {
                 fontSize: 'clamp(2.25rem, 5vw, 3.75rem)',
                 lineHeight: 1.06,
                 letterSpacing: '-0.032em',
-                maxWidth: '16ch',
+                maxWidth: '16ch'
               }}
             >
               One hour with someone who has done your job.
@@ -98,7 +97,7 @@ export default function CompanyHero() {
         </div>
 
         <div
-          className="mt-10 grid grid-cols-1 border-t border-[var(--bridge-border)] sm:grid-cols-3"
+          className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8"
           role="list"
           aria-label="Platform metrics"
         >
@@ -106,7 +105,7 @@ export default function CompanyHero() {
             <div
               key={label}
               role="listitem"
-              className="border-b border-[var(--bridge-border)] px-1 py-5 sm:border-b-0 sm:border-r sm:px-6 sm:py-6 last:border-r-0 last:border-b-0"
+              className="px-1 py-5 sm:px-6 sm:py-6"
             >
               <p className="font-display text-3xl font-black tabular-nums tracking-tight text-[var(--bridge-text)] sm:text-[2rem]">
                 {number}
@@ -119,7 +118,7 @@ export default function CompanyHero() {
 
         <nav
           aria-label="On this page"
-          className="mt-2 flex gap-1 overflow-x-auto border-t border-[var(--bridge-border)] py-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="mt-8 flex gap-1 overflow-x-auto py-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {ANCHORS.map(({ id, label }) => (
             <Link

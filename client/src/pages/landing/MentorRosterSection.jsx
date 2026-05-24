@@ -13,7 +13,7 @@ const TONE_GRAD = {
   violet:  'linear-gradient(135deg,#5B21B6 0%,#A78BFA 100%)',
   teal:    'linear-gradient(135deg,#0D9488 0%,#2dd4bf 100%)',
   orange:  'linear-gradient(135deg,#4338CA 0%,#6366F1 100%)',
-  pink:    'linear-gradient(135deg,#312E81 0%,#818CF8 100%)',
+  pink:    'linear-gradient(135deg,#312E81 0%,#818CF8 100%)'
 };
 
 // Same layout positions as the original orbs — top row + bottom row
@@ -59,13 +59,13 @@ function MentorCard({ mentor, layout, index, triggered, animActive }) {
         transform: triggered ? 'translateY(0)' : 'translateY(20px)',
         transition: `opacity 0.65s ease ${index * 55}ms, transform 0.75s cubic-bezier(0.16,1,0.3,1) ${index * 55}ms`,
         textDecoration: 'none',
-        zIndex: 1,
+        zIndex: 1
       }}
     >
       <div
         className={animActive ? '' : 'lp-anim-paused'}
         style={{
-        animation: triggered && animActive ? `gfloat-${anim} ${dur}s ${delay}s ease-in-out infinite` : 'none',
+        animation: triggered && animActive ? `gfloat-${anim} ${dur}s ${delay}s ease-in-out infinite` : 'none'
       }}>
         <div
           style={{
@@ -74,7 +74,7 @@ function MentorCard({ mentor, layout, index, triggered, animActive }) {
             border: '1px solid var(--bridge-border)',
             borderRadius: 14,
             padding: '12px 14px',
-            boxShadow: '0 8px 24px -8px rgba(0,0,0,0.10)',
+            boxShadow: '0 8px 24px -8px rgba(0,0,0,0.10)'
           }}
         >
           {/* Avatar + name row */}
@@ -117,7 +117,7 @@ function MentorCard({ mentor, layout, index, triggered, animActive }) {
             <span style={{
               fontSize: 9.5, fontWeight: 700, padding: '2px 7px', borderRadius: 999,
               background: 'var(--bridge-surface-muted)', color: 'var(--bridge-text-secondary)',
-              border: '1px solid var(--bridge-border)',
+              border: '1px solid var(--bridge-border)'
             }}>
               {mentor.tags[0]}
             </span>
@@ -223,7 +223,7 @@ export default function MentorRosterSection() {
               fontSize: 15.5,
               padding: '14px 32px',
               boxShadow: '0 18px 40px -12px color-mix(in srgb, var(--color-primary) 55%, transparent)',
-              transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease'
             }}
             onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.backgroundColor = 'var(--color-primary-hover)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.backgroundColor = 'var(--color-primary)'; }}

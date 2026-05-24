@@ -9,7 +9,6 @@ export default function PrinciplesSection() {
       id="principles"
       aria-labelledby="principles-heading"
       className={ABOUT_SECTION_PAD}
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -17,7 +16,7 @@ export default function PrinciplesSection() {
             className="text-[10px] font-black uppercase"
             style={{
               color: 'var(--color-primary)',
-              letterSpacing: '0.32em',
+              letterSpacing: '0.32em'
             }}
           >
             {s.about.principlesEyebrow}
@@ -30,7 +29,7 @@ export default function PrinciplesSection() {
               fontSize: 'clamp(2rem, 5vw, 4rem)',
               lineHeight: 0.98,
               letterSpacing: '-0.035em',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
@@ -46,7 +45,7 @@ export default function PrinciplesSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 17,
-              lineHeight: 1.6,
+              lineHeight: 1.6
             }}
           >
             {s.about.principlesSub}
@@ -72,7 +71,7 @@ export default function PrinciplesSection() {
                       color:
                         'color-mix(in srgb, var(--color-primary) 28%, transparent)',
                       letterSpacing: '-0.03em',
-                      fontFeatureSettings: '"tnum" 1',
+                      fontFeatureSettings: '"tnum" 1'
                     }}
                   >
                     {p.number}
@@ -86,7 +85,7 @@ export default function PrinciplesSection() {
                       fontSize: 'clamp(1.5rem, 3vw, 2.25rem)',
                       color: 'var(--bridge-text)',
                       letterSpacing: '-0.02em',
-                      lineHeight: 1.05,
+                      lineHeight: 1.05
                     }}
                   >
                     {p.title}
@@ -95,7 +94,7 @@ export default function PrinciplesSection() {
                     style={{
                       color: 'var(--bridge-text-secondary)',
                       fontSize: 16,
-                      lineHeight: 1.65,
+                      lineHeight: 1.65
                     }}
                   >
                     {p.body}
@@ -104,7 +103,7 @@ export default function PrinciplesSection() {
                     className="mt-1 text-[12px] uppercase font-bold"
                     style={{
                       color: 'var(--color-primary)',
-                      letterSpacing: '0.22em',
+                      letterSpacing: '0.22em'
                     }}
                   >
                     {p.tag}

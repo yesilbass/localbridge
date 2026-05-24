@@ -34,7 +34,7 @@ export default function Careers() {
                 style={{
                     background: 'radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-primary) 22%, transparent), transparent 70%)',
                     filter: 'blur(80px)',
-                    opacity: 0.3,
+                    opacity: 0.3
                 }}
             />
 
@@ -108,7 +108,7 @@ export default function Careers() {
                                                 letterSpacing: '0.18em',
                                                 color: 'var(--bridge-text-secondary)',
                                                 backgroundColor: 'var(--bridge-canvas)',
-                                                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                                                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                                             }}
                                         >
                                             {job.team}
@@ -136,7 +136,7 @@ export default function Careers() {
                                         style={{
                                             backgroundColor: 'var(--color-primary)',
                                             color: 'var(--color-on-primary)',
-                                            boxShadow: '0 6px 20px -6px color-mix(in srgb, var(--color-primary) 45%, transparent)',
+                                            boxShadow: '0 6px 20px -6px color-mix(in srgb, var(--color-primary) 45%, transparent)'
                                         }}
                                     >
                                         Apply
@@ -191,7 +191,7 @@ export default function Careers() {
                                             style={{
                                                 backgroundColor: 'var(--color-primary)',
                                                 color: 'var(--color-on-primary)',
-                                                boxShadow: '0 6px 18px -4px color-mix(in srgb, var(--color-primary) 40%, transparent)',
+                                                boxShadow: '0 6px 18px -4px color-mix(in srgb, var(--color-primary) 40%, transparent)'
                                             }}
                                         >
                                             <Icon className="h-4 w-4" />

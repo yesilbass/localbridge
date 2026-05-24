@@ -11,7 +11,7 @@ function SlotCard({ slot, isSelected, onSelect, isEmpty }) {
           background: 'transparent',
           boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
           fontSize: '12px',
-          color: 'var(--bridge-text-faint)',
+          color: 'var(--bridge-text-faint)'
         }}
       >
         Times open up weekly
@@ -35,7 +35,7 @@ function SlotCard({ slot, isSelected, onSelect, isEmpty }) {
         boxShadow: isSelected
           ? 'inset 0 0 0 2px var(--color-primary)'
           : 'inset 0 0 0 1px var(--bridge-border)',
-        outlineColor: 'var(--color-primary)',
+        outlineColor: 'var(--color-primary)'
       }}
       onMouseEnter={(e) => {
         if (!isSelected) {
@@ -75,7 +75,7 @@ export default function BookingWidget({
   mode,
   compact,
   onBook,
-  onOpenDrawer,
+  onOpenDrawer
 }) {
   const [selectedSlotId, setSelectedSlotId] = useState(null);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
@@ -101,7 +101,7 @@ export default function BookingWidget({
         className="rounded-3xl p-6"
         style={{
           backgroundColor: 'var(--bridge-surface)',
-          boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 4px 24px -8px rgba(0,0,0,0.12)',
+          boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 4px 24px -8px rgba(0,0,0,0.12)'
         }}
         aria-label="Book a session"
       >
@@ -123,7 +123,7 @@ export default function BookingWidget({
       className="rounded-3xl p-6"
       style={{
         backgroundColor: 'var(--bridge-surface)',
-        boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 4px 24px -8px rgba(0,0,0,0.12)',
+        boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 4px 24px -8px rgba(0,0,0,0.12)'
       }}
       aria-label="Book a session"
     >
@@ -134,7 +134,7 @@ export default function BookingWidget({
           style={{
             fontSize: compact ? '28px' : 'clamp(2.25rem, 4vw, 2.75rem)',
             color: 'var(--bridge-text)',
-            letterSpacing: '-0.025em',
+            letterSpacing: '-0.025em'
           }}
         >
           Free
@@ -223,7 +223,7 @@ export default function BookingWidget({
           fontSize: '14px',
           background: 'var(--color-primary)',
           color: 'var(--color-on-primary)',
-          outlineColor: 'var(--color-primary)',
+          outlineColor: 'var(--color-primary)'
         }}
         onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 24px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)'; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
@@ -243,7 +243,7 @@ export default function BookingWidget({
             style={{
               fontSize: '12px',
               color: isFavorited ? 'var(--color-primary)' : 'var(--bridge-text-secondary)',
-              outlineColor: 'var(--color-primary)',
+              outlineColor: 'var(--color-primary)'
             }}
           >
             <Heart
@@ -260,7 +260,7 @@ export default function BookingWidget({
             style={{
               fontSize: '12px',
               color: 'var(--bridge-text-secondary)',
-              outlineColor: 'var(--color-primary)',
+              outlineColor: 'var(--color-primary)'
             }}
           >
             <Share className="h-4 w-4" aria-hidden />

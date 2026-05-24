@@ -6,14 +6,14 @@ import {
   Clock,
   Receipt,
   Pin,
-  ArrowRight,
+  ArrowRight
 } from 'lucide-react';
 import {
   EASE,
   DUR_SHORT,
   DUR_MED,
   DUR_LONG,
-  usePerfTier,
+  usePerfTier
 } from '../landing/landingHooks';
 import { useContent } from '../../content';
 
@@ -36,7 +36,7 @@ export default function WhyUsHero() {
     return {
       initial: { opacity: 0, ...offset },
       animate: { opacity: 1, ...rest },
-      transition: { duration, delay, ease: EASE },
+      transition: { duration, delay, ease: EASE }
     };
   };
 
@@ -45,7 +45,6 @@ export default function WhyUsHero() {
       id="hero"
       aria-labelledby="hero-heading"
       className="relative flex min-h-0 items-start pb-14 pt-24 sm:min-h-[68vh] sm:pb-20 lg:min-h-[78vh] lg:pt-28 lg:pb-20"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="relative z-10 mx-auto w-full max-w-6xl px-5 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
@@ -58,7 +57,7 @@ export default function WhyUsHero() {
                 backgroundColor:
                   'color-mix(in srgb, var(--color-primary) 10%, transparent)',
                 color: 'var(--color-primary)',
-                letterSpacing: '0.22em',
+                letterSpacing: '0.22em'
               }}
             >
               {s.whyUs.eyebrow}
@@ -71,7 +70,7 @@ export default function WhyUsHero() {
                 fontSize: 'clamp(2.85rem, 7.6vw, 6rem)',
                 lineHeight: 0.98,
                 letterSpacing: '-0.035em',
-                fontFeatureSettings: '"kern" 1, "ss01" 1',
+                fontFeatureSettings: '"kern" 1, "ss01" 1'
               }}
             >
               <motion.span
@@ -86,7 +85,7 @@ export default function WhyUsHero() {
                 className="block bg-clip-text text-transparent"
                 style={{
                   backgroundImage:
-                    'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)',
+                    'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)'
                 }}
               >
                 another marketplace.
@@ -100,7 +99,7 @@ export default function WhyUsHero() {
                 fontSize: 'clamp(1.25rem, 2.6vw, 1.75rem)',
                 lineHeight: 1.25,
                 color:
-                  'color-mix(in srgb, var(--bridge-text) 55%, transparent)',
+                  'color-mix(in srgb, var(--bridge-text) 55%, transparent)'
               }}
             >
               We built the room you wish someone had let you into.
@@ -112,7 +111,7 @@ export default function WhyUsHero() {
               style={{
                 color: 'var(--bridge-text-secondary)',
                 fontSize: 17,
-                lineHeight: 1.6,
+                lineHeight: 1.6
               }}
             >
               Bridge is one hour with the operator who has done your job. No packages, no DMs, no coaches. Here is what that costs us &mdash; and what we will not change.
@@ -131,7 +130,7 @@ export default function WhyUsHero() {
                   boxShadow:
                     '0 18px 40px -12px color-mix(in srgb, var(--color-primary) 60%, transparent)',
                   outlineColor: 'var(--color-primary)',
-                  transition: `transform ${DUR_SHORT}s cubic-bezier(${EASE.join(',')}), box-shadow ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`,
+                  transition: `transform ${DUR_SHORT}s cubic-bezier(${EASE.join(',')}), box-shadow ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
@@ -150,7 +149,7 @@ export default function WhyUsHero() {
                   color: 'var(--bridge-text-secondary)',
                   boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
                   outlineColor: 'var(--color-primary)',
-                  transition: `box-shadow ${DUR_SHORT}s cubic-bezier(${EASE.join(',')}), color ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`,
+                  transition: `box-shadow ${DUR_SHORT}s cubic-bezier(${EASE.join(',')}), color ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.boxShadow =
@@ -194,7 +193,7 @@ export default function WhyUsHero() {
               : {
                   initial: { opacity: 0, x: 16 },
                   animate: { opacity: 1, x: 0 },
-                  transition: { duration: DUR_LONG, delay: 0.4, ease: EASE },
+                  transition: { duration: DUR_LONG, delay: 0.4, ease: EASE }
                 })}
             className="lg:col-span-5"
           >
@@ -203,7 +202,7 @@ export default function WhyUsHero() {
               style={{
                 backgroundColor: 'var(--bridge-surface)',
                 boxShadow:
-                  'inset 0 0 0 1px var(--bridge-border), 0 1px 2px var(--bridge-shadow-soft), 0 8px 24px -10px var(--bridge-shadow-soft), 0 26px 56px -22px color-mix(in srgb, var(--color-primary) 20%, transparent)',
+                  'inset 0 0 0 1px var(--bridge-border), 0 1px 2px var(--bridge-shadow-soft), 0 8px 24px -10px var(--bridge-shadow-soft), 0 26px 56px -22px color-mix(in srgb, var(--color-primary) 20%, transparent)'
               }}
             >
               <div className="flex items-center gap-3">
@@ -216,7 +215,7 @@ export default function WhyUsHero() {
                   className="text-[12px] uppercase font-semibold"
                   style={{
                     color: 'var(--bridge-text-faint)',
-                    letterSpacing: '0.18em',
+                    letterSpacing: '0.18em'
                   }}
                 >
                   The thesis
@@ -225,7 +224,7 @@ export default function WhyUsHero() {
                   className="ml-auto text-[11px] tabular-nums"
                   style={{
                     color: 'var(--bridge-text-muted)',
-                    fontFeatureSettings: '"tnum" 1, "kern" 1',
+                    fontFeatureSettings: '"tnum" 1, "kern" 1'
                   }}
                 >
                   v1 &middot; pinned
@@ -241,7 +240,7 @@ export default function WhyUsHero() {
                       style={{
                         backgroundColor: 'var(--color-primary)',
                         color: 'var(--color-on-primary)',
-                        fontFeatureSettings: '"tnum" 1',
+                        fontFeatureSettings: '"tnum" 1'
                       }}
                     >
                       {i + 1}
@@ -251,7 +250,7 @@ export default function WhyUsHero() {
                       style={{
                         fontSize: 15,
                         lineHeight: 1.4,
-                        color: 'var(--bridge-text)',
+                        color: 'var(--bridge-text)'
                       }}
                     >
                       {stmt}
@@ -268,7 +267,7 @@ export default function WhyUsHero() {
                   className="text-[11px] uppercase font-bold"
                   style={{
                     color: 'var(--bridge-text-muted)',
-                    letterSpacing: '0.18em',
+                    letterSpacing: '0.18em'
                   }}
                 >
                   Last updated this week
@@ -278,7 +277,7 @@ export default function WhyUsHero() {
                   className="inline-flex items-center gap-1.5 text-[12px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-full px-1.5 py-0.5"
                   style={{
                     color: 'var(--color-primary)',
-                    outlineColor: 'var(--color-primary)',
+                    outlineColor: 'var(--color-primary)'
                   }}
                 >
                   Meet the operators

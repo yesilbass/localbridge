@@ -11,25 +11,25 @@ export default function ManifestoSection() {
       number: '01',
       title: t('landing.manifesto.p1.title', “Only people who've done your job.”),
       body: t('landing.manifesto.p1.body', “Every mentor has lived the exact role you're targeting. We filter on outcome, not credentials.”),
-      visual: <P1Chips />,
+      visual: <P1Chips />
     },
     {
       number: '02',
       title: t('landing.manifesto.p2.title', 'One hour, one price.'),
       body: t('landing.manifesto.p2.body', 'No packages. No lock-ins. No “contact us for pricing.” Every rate on every profile, always.'),
-      visual: <P2Pricing />,
+      visual: <P2Pricing />
     },
     {
       number: '03',
       title: t('landing.manifesto.p3.title', 'Booked in the time it takes to make coffee.'),
       body: t('landing.manifesto.p3.body', 'Calendar-native. Real-time availability. No “when are you free” email loops, no scheduling assistants, no waiting two weeks for a reply.'),
-      visual: <P3Calendar weekday={weekday} />,
+      visual: <P3Calendar weekday={weekday} />
     },
     {
       number: '04',
       title: t('landing.manifesto.p4.title', 'All reviews, unfiltered.'),
       body: t('landing.manifesto.p4.body', 'Good and critical, side by side. No curation, no censoring, no removed posts.'),
-      visual: <P4Reviews />,
+      visual: <P4Reviews />
     },
   ];
 
@@ -38,7 +38,6 @@ export default function ManifestoSection() {
       id="manifesto"
       aria-labelledby="manifesto-heading"
       className="relative py-24 lg:py-32"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -56,7 +55,7 @@ export default function ManifestoSection() {
               lineHeight: 0.98,
               letterSpacing: '-0.035em',
               color: 'var(--bridge-text)',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             {t('landing.manifesto.heading1', 'Built differently,')}
@@ -65,7 +64,7 @@ export default function ManifestoSection() {
               className="bg-clip-text text-transparent"
               style={{
                 backgroundImage:
-                  'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)',
+                  'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)'
               }}
             >
               {t('landing.manifesto.heading2', 'by design.')}
@@ -112,7 +111,7 @@ function PrincipleText({ number, title, body }) {
           lineHeight: 1,
           color: 'color-mix(in srgb, var(--color-primary) 20%, transparent)',
           fontFeatureSettings: '"tnum" 1',
-          letterSpacing: '-0.04em',
+          letterSpacing: '-0.04em'
         }}
       >
         {number}
@@ -123,7 +122,7 @@ function PrincipleText({ number, title, body }) {
           fontSize: 'clamp(1.5rem, 3vw, 2.25rem)',
           color: 'var(--bridge-text)',
           letterSpacing: '-0.02em',
-          lineHeight: 1.05,
+          lineHeight: 1.05
         }}
       >
         {title}
@@ -156,7 +155,7 @@ function P1Chips() {
           style={{
             backgroundColor: 'var(--bridge-surface)',
             boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-            color: 'var(--bridge-text-secondary)',
+            color: 'var(--bridge-text-secondary)'
           }}
         >
           {c}
@@ -175,7 +174,7 @@ function P2Pricing() {
         className="rounded-2xl p-5"
         style={{
           backgroundColor: 'var(--bridge-surface)',
-          boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+          boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
         }}
       >
         <p
@@ -188,7 +187,7 @@ function P2Pricing() {
           className="text-[20px] font-bold line-through mt-1"
           style={{
             color: 'var(--bridge-text-muted)',
-            fontFeatureSettings: '"tnum" 1',
+            fontFeatureSettings: '"tnum" 1'
           }}
         >
           $1,200 / 3 months
@@ -200,7 +199,7 @@ function P2Pricing() {
           backgroundColor:
             'color-mix(in srgb, var(--color-primary) 8%, var(--bridge-surface))',
           boxShadow:
-            'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 30%, transparent)',
+            'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 30%, transparent)'
         }}
       >
         <p
@@ -213,7 +212,7 @@ function P2Pricing() {
           className="text-[24px] font-black mt-1"
           style={{
             color: 'var(--bridge-text)',
-            fontFeatureSettings: '"tnum" 1',
+            fontFeatureSettings: '"tnum" 1'
           }}
         >
           $60 / 1 hour
@@ -242,7 +241,7 @@ function P3Calendar({ weekday }) {
       className="rounded-2xl p-5 max-w-md"
       style={{
         backgroundColor: 'var(--bridge-surface)',
-        boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+        boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
       }}
     >
       <div className="flex items-center justify-between mb-4">
@@ -268,14 +267,14 @@ function P3Calendar({ weekday }) {
                     color: 'var(--color-on-primary)',
                     boxShadow:
                       '0 18px 40px -12px color-mix(in srgb, var(--color-primary) 60%, transparent)',
-                    fontFeatureSettings: '"tnum" 1',
+                    fontFeatureSettings: '"tnum" 1'
                   }
                 : {
                     backgroundColor: 'var(--bridge-surface-muted)',
                     boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
                     color: 'var(--bridge-text-muted)',
                     textDecoration: 'line-through',
-                    fontFeatureSettings: '"tnum" 1',
+                    fontFeatureSettings: '"tnum" 1'
                   }
             }
           >
@@ -307,17 +306,17 @@ function P4Reviews() {
     {
       rating: 5,
       quote: 'Got the offer the same week.',
-      attribution: 'Jordan R., Senior PM in B2B SaaS',
+      attribution: 'Jordan R., Senior PM in B2B SaaS'
     },
     {
       rating: 4,
       quote: 'Tough but fair. Reframed my whole pitch.',
-      attribution: 'Priya K., Founder raising seed',
+      attribution: 'Priya K., Founder raising seed'
     },
     {
       rating: 3,
       quote: 'Solid call but not the right match for me.',
-      attribution: 'Sam D., switching from design to PM',
+      attribution: 'Sam D., switching from design to PM'
     },
   ];
   return (
@@ -328,7 +327,7 @@ function P4Reviews() {
           className="rounded-2xl p-4 flex items-start gap-3"
           style={{
             backgroundColor: 'var(--bridge-surface)',
-            boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+            boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
           }}
         >
           <div className="flex gap-0.5 shrink-0">

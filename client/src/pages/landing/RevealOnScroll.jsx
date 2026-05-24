@@ -13,7 +13,7 @@ const VARIANTS = {
   flip:         { h: { rotationX: -26, scale: 0.96, opacity: 0, transformPerspective: 900 }, v: { rotationX: 0, scale: 1, opacity: 1 } },
   'flip-right': { h: { rotationY: -20, x: -36, opacity: 0, transformPerspective: 900 },  v: { rotationY: 0, x: 0, opacity: 1 } },
   'flip-left':  { h: { rotationY:  20, x:  36, opacity: 0, transformPerspective: 900 },  v: { rotationY: 0, x: 0, opacity: 1 } },
-  zoom:         { h: { scale: 0.82, y: 24, opacity: 0 },                                  v: { scale: 1, y: 0, opacity: 1 } },
+  zoom:         { h: { scale: 0.82, y: 24, opacity: 0 },                                  v: { scale: 1, y: 0, opacity: 1 } }
 };
 
 // WeakSet to track which elements have been fully revealed, so the safety
@@ -25,7 +25,7 @@ export default function RevealOnScroll({
   delay    = 0,
   className = '',
   variant  = 'up',
-  duration = 1100,
+  duration = 1100
 }) {
   const ref = useRef(null);
 
@@ -48,12 +48,12 @@ export default function RevealOnScroll({
         trigger: el,
         start:   'top 83%',
         once:    true,
-        onEnter: () => revealed.add(el),
+        onEnter: () => revealed.add(el)
       },
       onComplete: () => {
         gsap.set(el, { willChange: 'auto' });
         revealed.add(el);
-      },
+      }
     });
 
     // Safety net: force full visibility after 4 s + delay if GSAP hasn't
