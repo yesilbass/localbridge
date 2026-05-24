@@ -1,25 +1,33 @@
 import { useId } from 'react';
-import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import AppLink from '../../components/AppLink';
 import MentorAvatar from '../../components/MentorAvatar';
 import { focusRing } from '../../ui';
-import { tierBadge } from './constants';
-import TierBadge from '../onboarding/mentor/verify/components/TierBadge.jsx';
+import TierBadge from '../../components/TierBadge.jsx';
+import MentorTagGroups from '../../components/MentorTagGroups';
+import {
+  getNextAvailability,
+  availabilityToneStyle,
+  getAvailabilityDateParts,
+} from '../../utils/mentorDisplay';
 
-export function StarRating({ rating }) {
+export function StarRating({ rating, size = 'md' }) {
   const uid = useId().replace(/:/g, '');
   const full = Math.floor(rating);
   const partial = rating - full;
+  const starCls = size === 'lg' ? 'h-5 w-5' : 'h-3.5 w-3.5';
+  const textCls = size === 'lg' ? 'text-xl' : 'text-[13px]';
   return (
-    <span className="flex items-center gap-1.5">
+    <span className="inline-flex items-center gap-1.5">
       <span className="flex">
         {Array.from({ length: 5 }).map((_, i) => {
           const fill = i < full ? '100%' : i === full && partial > 0 ? `${Math.round(partial * 100)}%` : '0%';
           const gid = `${uid}-s${i}`;
           return (
-            <svg key={i} className="h-3 w-3" viewBox="0 0 20 20" aria-hidden>
+            <svg key={i} className={starCls} viewBox="0 0 20 20" aria-hidden>
               <defs>
                 <linearGradient id={gid}>
-                  <stop offset={fill} stopColor="#f59e0b" />
+                  <stop offset={fill} stopColor="var(--color-primary)" />
                   <stop offset={fill} stopColor="currentColor" className="text-[var(--bridge-border-strong)]" />
                 </linearGradient>
               </defs>
@@ -28,7 +36,7 @@ export function StarRating({ rating }) {
           );
         })}
       </span>
-      <span className="text-[11px] font-bold text-[var(--bridge-text-secondary)] tabular-nums">{rating.toFixed(1)}</span>
+      <span className={`font-bold tabular-nums text-[var(--bridge-text)] ${textCls}`}>{rating.toFixed(2)}</span>
     </span>
   );
 }
@@ -39,42 +47,140 @@ export function HeartButton({ filled, onClick, label, disabled }) {
       type="button"
       disabled={disabled}
       onClick={e => { e.preventDefault(); e.stopPropagation(); onClick(); }}
-      className={`group/heart relative flex h-7 w-7 items-center justify-center rounded-full bg-[var(--bridge-surface)]/90 text-[var(--bridge-text-faint)] ring-1 ring-[var(--bridge-border)] backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-rose-50 hover:text-rose-500 hover:ring-rose-300/60 hover:shadow-[0_4px_12px_rgba(244,63,94,0.25)] disabled:pointer-events-none disabled:opacity-40 dark:hover:bg-rose-500/10 ${focusRing}`}
+      className={`bridge-focus flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-[var(--bridge-surface-muted)] disabled:pointer-events-none disabled:opacity-40 ${focusRing}`}
+      style={{ color: filled ? '#f43f5e' : 'var(--bridge-text-muted)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}
       aria-label={label}
     >
       {filled
-        ? <svg className="h-3.5 w-3.5 fill-rose-500" viewBox="0 0 24 24" aria-hidden><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
-        : <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+        ? <svg className="h-4 w-4 fill-rose-500" viewBox="0 0 24 24" aria-hidden><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+        : <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
       }
     </button>
   );
 }
 
+function MetaItem({ icon, children }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[13px] text-[var(--bridge-text-muted)]">
+      {icon}
+      {children}
+    </span>
+  );
+}
+
+function AvailabilityPanel({ availability, nextAvailableIso, availStyle }) {
+  const dateParts = nextAvailableIso ? getAvailabilityDateParts(nextAvailableIso) : null;
+
+  const subline = availability.loading
+    ? 'Checking their connected calendar…'
+    : dateParts
+    ? 'Pick a time that works — booking is free.'
+    : availability.tone === 'muted'
+    ? 'Try another mentor or save this one for later.'
+    : 'Open their profile to request a time.';
+
+  return (
+    <div className="py-0.5">
+      <p className="text-[14px] font-bold text-[var(--bridge-text)]">{availability.headline}</p>
+      <div className={`mt-2.5 flex items-start gap-3 ${dateParts ? '' : 'flex-col'}`}>
+        {dateParts && (
+          <div
+            className="flex shrink-0 flex-col items-center rounded-xl px-3 py-2 text-center leading-none"
+            style={{
+              backgroundColor: availStyle.bg,
+              boxShadow: `inset 0 0 0 1px ${availStyle.border}`,
+            }}
+          >
+            <span className="text-[11px] font-bold tracking-wide" style={{ color: availStyle.color }}>{dateParts.dow}</span>
+            <span className="mt-1 text-2xl font-black tabular-nums text-[var(--bridge-text)]">{dateParts.day}</span>
+            <span className="mt-0.5 text-[11px] font-semibold text-[var(--bridge-text-muted)]">{dateParts.mon}</span>
+          </div>
+        )}
+        <div className="min-w-0">
+          <p
+            className={`text-[15px] font-semibold leading-snug text-[var(--bridge-text)] ${availability.loading ? 'animate-pulse' : ''}`}
+          >
+            {dateParts ? dateParts.time : availability.detail}
+          </p>
+          {!availability.loading && (
+            <p className="mt-1 text-[12px] leading-snug text-[var(--bridge-text-muted)]">{subline}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CardActionRail({ mentor, availability, slotIso, availStyle, mentorsBase }) {
+  const sessionLabel = mentor.total_sessions === 1 ? '1 session completed' : `${mentor.total_sessions} sessions completed`;
+
+  return (
+    <aside
+      className="flex w-full shrink-0 flex-col gap-4 rounded-2xl p-5 sm:w-[17.5rem] lg:w-[19.5rem]"
+      style={{
+        backgroundColor: 'color-mix(in srgb, var(--bridge-surface-muted) 88%, var(--bridge-surface))',
+        boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 10px 28px -18px color-mix(in srgb, var(--color-primary) 22%, transparent)',
+      }}
+    >
+      <div className="space-y-1.5">
+        <StarRating rating={mentor.rating} size="lg" />
+        <p className="text-[14px] font-medium text-[var(--bridge-text-secondary)]">{sessionLabel}</p>
+        <p className="font-display text-[1.25rem] font-black leading-none text-emerald-600 dark:text-emerald-400">Free</p>
+      </div>
+
+      <AvailabilityPanel
+        availability={availability}
+        nextAvailableIso={slotIso}
+        availStyle={availStyle}
+      />
+
+      <div className="flex flex-col gap-2.5 sm:mt-auto">
+        <AppLink
+          to={`${mentorsBase}/${mentor.id}`}
+          className={`inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-[15px] font-black text-[var(--color-on-primary)] transition hover:-translate-y-px hover:brightness-110 ${focusRing}`}
+          style={{
+            backgroundColor: 'var(--color-primary)',
+            boxShadow: '0 10px 28px -8px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+          }}
+        >
+          View profile
+        </AppLink>
+        <AppLink
+          to={`${mentorsBase}/${mentor.id}`}
+          className={`inline-flex w-full items-center justify-center rounded-full border px-5 py-2.5 text-[14px] font-bold text-[var(--bridge-text)] transition hover:bg-[var(--bridge-surface)] ${focusRing}`}
+          style={{ borderColor: 'var(--bridge-border-strong)', backgroundColor: 'var(--bridge-surface)' }}
+        >
+          Book a session
+        </AppLink>
+      </div>
+    </aside>
+  );
+}
+
 export function MentorGridSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {Array.from({ length: 12 }).map((_, i) => (
-        <div key={i} className="relative min-h-[310px] overflow-hidden rounded-[1.5rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/86 p-5 shadow-bridge-card backdrop-blur-xl">
-          <div aria-hidden className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-orange-200/10 to-transparent dark:via-orange-400/8"
-            style={{ animation: 'bridge-sheen 2.2s ease-in-out infinite', animationDelay: `${i * 0.15}s` }} />
-          <div className="flex items-center gap-3">
-            <div className="h-14 w-14 shrink-0 rounded-2xl bg-[var(--bridge-surface-muted)] animate-pulse" />
-            <div className="flex-1 space-y-2">
-              <div className="h-3.5 w-3/4 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
-              <div className="h-3 w-1/2 rounded-full bg-[var(--bridge-surface-muted)]/70 animate-pulse" />
+    <div className="flex flex-col gap-4">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex gap-6 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 sm:flex-row"
+        >
+          <div className="h-[8rem] w-[8rem] shrink-0 rounded-xl bg-[var(--bridge-surface-muted)] animate-pulse" />
+          <div className="min-w-0 flex-1 space-y-3 py-0.5">
+            <div className="h-5 w-44 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
+            <div className="h-4 w-64 max-w-full rounded-full bg-[var(--bridge-surface-muted)]/80 animate-pulse" />
+            <div className="h-3.5 w-40 rounded-full bg-[var(--bridge-surface-muted)]/70 animate-pulse" />
+            <div className="h-4 w-full rounded-full bg-[var(--bridge-surface-muted)]/60 animate-pulse" />
+            <div className="space-y-2 pt-1">
+              <div className="h-3.5 w-24 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
+              <div className="h-4 w-56 rounded-full bg-[var(--bridge-surface-muted)]/80 animate-pulse" />
             </div>
           </div>
-          <div className="mt-4 space-y-2">
-            <div className="h-3 w-full rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
-            <div className="h-3 w-4/5 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
-          </div>
-          <div className="mt-4 flex gap-1.5">
-            <div className="h-5 w-16 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
-            <div className="h-5 w-20 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
-          </div>
-          <div className="mt-4 flex items-center justify-between border-t border-[var(--bridge-border)] pt-4">
-            <div className="h-4 w-16 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
-            <div className="h-7 w-24 rounded-lg bg-[var(--bridge-surface-muted)] animate-pulse" />
+          <div className="hidden w-[17.5rem] shrink-0 flex-col gap-4 rounded-2xl p-6 sm:flex lg:w-[19.5rem]">
+            <div className="h-6 w-28 rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
+            <div className="h-24 w-full rounded-2xl bg-[var(--bridge-surface-muted)] animate-pulse" />
+            <div className="h-12 w-full rounded-full bg-[var(--bridge-surface-muted)] animate-pulse" />
+            <div className="h-11 w-full rounded-full bg-[var(--bridge-surface-muted)]/80 animate-pulse" />
           </div>
         </div>
       ))}
@@ -82,90 +188,107 @@ export function MentorGridSkeleton() {
   );
 }
 
-export default function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favoriteBusy, favoritesEnabled }) {
+export default function MentorCard({ mentor, isFavorite, onToggleFavorite, user, navigate, favoriteBusy, favoritesEnabled, nextAvailableIso = null }) {
+  const location = useLocation();
+  const mentorsBase = location.pathname.startsWith('/dashboard') ? '/dashboard/mentors' : '/mentors';
+
   function handleHeart() {
     if (!user) { navigate('/login', { state: { from: '/mentors' } }); return; }
     onToggleFavorite(mentor.id);
   }
 
+  const industryLabel = mentor.industry
+    ? mentor.industry.charAt(0).toUpperCase() + mentor.industry.slice(1)
+    : null;
+  const availability = getNextAvailability(mentor, nextAvailableIso);
+  const availStyle = availabilityToneStyle(availability.tone);
+  const slotIso = typeof nextAvailableIso === 'string' ? nextAvailableIso : null;
+
   return (
-    <div className="group relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-[1.5rem] border border-[var(--bridge-border)] bg-[linear-gradient(145deg,color-mix(in_srgb,var(--bridge-surface-raised)_88%,transparent),color-mix(in_srgb,var(--bridge-surface)_92%,transparent))] shadow-bridge-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-[var(--bridge-border-strong)] hover:shadow-bridge-float">
-      <div aria-hidden className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-orange-400/0 blur-3xl transition-colors duration-300 group-hover:bg-orange-400/10" />
-
-      <div className="relative flex h-full flex-col gap-4 p-5">
-        <div className="flex items-start gap-3">
-          <div className="relative shrink-0">
-            <MentorAvatar name={mentor.name} size="card" className="rounded-2xl ring-2 ring-[var(--bridge-canvas)] shadow-bridge-tile transition-transform duration-300 group-hover:scale-[1.03]" />
-            {mentor.available && (
-              <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-[var(--bridge-surface)] bg-emerald-400">
-                <span aria-hidden className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-              </span>
-            )}
-          </div>
-          <div className="min-w-0 flex-1 pt-0.5">
-            <h3 className="truncate text-[15px] font-extrabold tracking-tight text-[var(--bridge-text)]">{mentor.name}</h3>
-            <p className="mt-0.5 truncate text-[12.5px] font-medium text-[var(--bridge-text-muted)]">{mentor.title}</p>
-            <p className="truncate text-[12px] font-semibold text-[var(--bridge-text-secondary)]">{mentor.company}</p>
-          </div>
-          {favoritesEnabled && (
-            <HeartButton filled={isFavorite} disabled={Boolean(favoriteBusy)} onClick={handleHeart}
-              label={isFavorite ? 'Remove from favorites' : 'Save to favorites'} />
-          )}
-        </div>
-
-        <div className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)]/55 px-3 py-2">
-          <StarRating rating={mentor.rating} />
-          <div className="flex items-center gap-1.5">
-            {mentor.verification_tier && mentor.verification_tier !== 'bronze' ? (
-              <TierBadge tier={mentor.verification_tier} size="sm" showLabel={false} />
-            ) : null}
-            {mentor.tier && (
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tierBadge(mentor.tier)}`}>
-                {mentor.tier}
-              </span>
-            )}
-            {mentor.years_experience > 0 && (
-              <span className="whitespace-nowrap text-[11px] font-medium text-[var(--bridge-text-faint)]">{mentor.years_experience}yr exp</span>
-            )}
-          </div>
-        </div>
-
-        <p className="line-clamp-3 min-h-[3.75rem] text-[12.5px] leading-relaxed text-[var(--bridge-text-secondary)]">{mentor.bio}</p>
-
-        <div className="flex flex-wrap gap-1.5">
-          {mentor.expertise.slice(0, 3).map(tag => (
-            <span key={tag} className="rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/80 px-2.5 py-1 text-[11px] font-semibold text-[var(--bridge-text-secondary)]">
-              {tag}
-            </span>
-          ))}
-          {mentor.expertise.length > 3 && (
-            <span className="rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/80 px-2.5 py-1 text-[11px] font-semibold text-[var(--bridge-text-faint)]">
-              +{mentor.expertise.length - 3}
-            </span>
-          )}
-        </div>
-
-        <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--bridge-border)] pt-4">
-          <div>
-            {mentor.session_rate ? (
-              <p className="font-display text-[18px] font-black tabular-nums tracking-tight text-[var(--bridge-text)]">
-                ${mentor.session_rate}<span className="text-[11px] font-normal text-[var(--bridge-text-faint)]">/session</span>
-              </p>
-            ) : (
-              <p className="font-display text-[17px] font-black text-emerald-600 dark:text-emerald-400">Free</p>
-            )}
-            <p className="text-[10.5px] font-medium text-[var(--bridge-text-faint)]">{mentor.total_sessions} sessions</p>
-          </div>
-          <Link to={`/mentors/${mentor.id}`}
-            className={`inline-flex items-center gap-1.5 rounded-xl bg-[var(--bridge-text)] px-4 py-2.5 text-[12px] font-bold text-[var(--bridge-canvas)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-bridge-accent ${focusRing}`}>
-            View profile
-            <svg className="h-3 w-3 opacity-80 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
-            </svg>
-          </Link>
-        </div>
+    <article
+      className="group relative flex flex-col gap-5 rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface)] p-6 transition-colors duration-200 hover:border-[var(--bridge-border-strong)] sm:flex-row sm:items-stretch sm:gap-6"
+    >
+      <div className="shrink-0">
+        <MentorAvatar
+          name={mentor.name}
+          size="xl"
+          className="!h-[8rem] !w-[8rem] rounded-xl text-xl ring-1 ring-[var(--bridge-border)]"
+        />
       </div>
-    </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1 space-y-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <h3 className="text-[1.35rem] font-bold leading-tight tracking-tight text-[var(--bridge-text)] sm:text-[1.4rem]">
+                {mentor.name}
+              </h3>
+              {mentor.verification_tier && mentor.verification_tier !== 'bronze' ? (
+                <TierBadge tier={mentor.verification_tier} size="sm" showLabel={false} />
+              ) : null}
+            </div>
+
+            <p className="text-[15px] leading-snug text-[var(--bridge-text-secondary)]">
+              {mentor.title}
+              {mentor.company ? (
+                <span className="text-[var(--bridge-text-muted)]">{` · ${mentor.company}`}</span>
+              ) : null}
+            </p>
+
+            {(industryLabel || mentor.years_experience > 0) && (
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-0.5">
+                {industryLabel && (
+                  <MetaItem
+                    icon={(
+                      <svg className="h-3.5 w-3.5 shrink-0 opacity-70" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 .414-.336.75-.75.75h-4.5a.75.75 0 0 1-.75-.75v-4.25m0 0h4.125c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9m12.75 3.015A8.962 8.962 0 0 1 18.75 12H15.75" />
+                      </svg>
+                    )}
+                  >
+                    {industryLabel}
+                  </MetaItem>
+                )}
+                {mentor.years_experience > 0 && (
+                  <MetaItem
+                    icon={(
+                      <svg className="h-3.5 w-3.5 shrink-0 opacity-70" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                      </svg>
+                    )}
+                  >
+                    {mentor.years_experience} years
+                  </MetaItem>
+                )}
+              </div>
+            )}
+          </div>
+
+          {favoritesEnabled && (
+            <HeartButton
+              filled={isFavorite}
+              disabled={Boolean(favoriteBusy)}
+              onClick={handleHeart}
+              label={isFavorite ? 'Remove from favorites' : 'Save to favorites'}
+            />
+          )}
+        </div>
+
+        {mentor.bio && (
+          <p className="mt-3 line-clamp-2 text-[15px] leading-relaxed text-[var(--bridge-text)]">
+            {mentor.bio}
+          </p>
+        )}
+
+        <MentorTagGroups mentor={mentor} layout="browse" limits={{ expertise: 4, industry: 2, tools: 3 }} />
+      </div>
+
+      <CardActionRail
+        mentor={mentor}
+        availability={availability}
+        slotIso={slotIso}
+        availStyle={availStyle}
+        mentorsBase={mentorsBase}
+      />
+    </article>
   );
 }

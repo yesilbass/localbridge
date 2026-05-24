@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import AppLink from '../../components/AppLink';
 import { ArrowRight } from 'lucide-react';
 import RevealOnScroll from '../landing/RevealOnScroll';
 import { RECEIPTS, WHY_US_SECTION_PAD } from './whyUsData';
@@ -105,7 +106,7 @@ export default function ReceiptsSection() {
                 <span className="text-[12px]">
                   Bridge &mdash; public stats, refreshed nightly.
                 </span>
-                <Link
+                <AppLink
                   to="/mentors"
                   className="ml-auto inline-flex items-center gap-1.5 text-[12px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-full px-1.5 py-0.5"
                   style={{
@@ -115,7 +116,7 @@ export default function ReceiptsSection() {
                 >
                   See every review
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                </Link>
+                </AppLink>
               </figcaption>
             </figure>
           </RevealOnScroll>

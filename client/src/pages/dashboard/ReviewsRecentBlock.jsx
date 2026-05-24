@@ -14,7 +14,7 @@ function ReviewCard({ review }) {
     >
       <div className="flex items-center justify-between">
         <span className="inline-flex items-center gap-1 text-[12px] font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
-          <Star aria-hidden className="h-3.5 w-3.5" fill="#F59E0B" stroke="#F59E0B" />
+          <Star aria-hidden className="h-3.5 w-3.5" fill="var(--color-primary)" stroke="var(--color-primary)" />
           {review.rating}
         </span>
         <span className="text-[11px] tabular-nums" style={{ color: 'var(--bridge-text-muted)' }}>

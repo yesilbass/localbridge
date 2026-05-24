@@ -57,16 +57,18 @@ export default function OutcomesSection() {
           </p>
         </RevealOnScroll>
 
-        <RevealOnScroll>
-          <div className="mt-12 grid grid-cols-1 gap-5">
-            <FeaturedCard outcome={featured} index={0} />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              {rest.map((o, i) => (
-                <SupportingCard key={o.name} outcome={o} index={i + 1} />
-              ))}
-            </div>
+        <div className="mt-12 grid grid-cols-1 gap-5">
+          <RevealOnScroll delay={0} variant="up">
+            <FeaturedCard outcome={featured} />
+          </RevealOnScroll>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {rest.map((o, i) => (
+              <RevealOnScroll key={o.name} delay={(i + 1) * 100} variant="up">
+                <SupportingCard outcome={o} />
+              </RevealOnScroll>
+            ))}
           </div>
-        </RevealOnScroll>
+        </div>
       </div>
     </section>
   );
@@ -111,6 +113,15 @@ function FeaturedCard({ outcome }) {
       style={{
         backgroundColor: 'var(--bridge-surface)',
         boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+        transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s cubic-bezier(0.16,1,0.3,1)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-3px)';
+        e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border-strong), 0 14px 40px -12px rgba(0,0,0,0.16)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = '';
+        e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border)';
       }}
     >
       <Avatar outcome={outcome} size={64} fontSize={20} />
@@ -152,6 +163,15 @@ function SupportingCard({ outcome }) {
       style={{
         backgroundColor: 'var(--bridge-surface)',
         boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+        transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s cubic-bezier(0.16,1,0.3,1)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-3px)';
+        e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border-strong), 0 10px 32px -10px rgba(0,0,0,0.14)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = '';
+        e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border)';
       }}
     >
       <Avatar outcome={outcome} size={40} fontSize={14} />

@@ -1,11 +1,26 @@
 export const LANDING_CSS = `
-  /* ── First-paint perf: skip layout/paint of deep-below-fold sections
-       (StatsBento → FinalCta) until they scroll near. Hero / BrandStrip /
-       MentorMarquee are left alone because they're often partially visible
-       on tall screens and their layout feeds into ScrollTrigger refs. */
-  html.is-landing-route .landing-root > section:nth-of-type(n+4){
+  /* ── Scroll perf: isolate paint + defer below-fold layout ───────── */
+  html.is-landing-route .landing-root {
+    isolation: isolate;
+  }
+
+  html.is-landing-route .landing-root > section:nth-of-type(n+2) {
     content-visibility: auto;
-    contain-intrinsic-size: auto 800px;
+    contain-intrinsic-size: auto 720px;
+  }
+
+  html.is-landing-route .landing-root > section {
+    contain: layout style paint;
+  }
+
+  html.is-landing-route .lp-anim-layer {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+  }
+
+  html.is-landing-route .lp-anim-paused,
+  html.is-landing-route .lp-anim-paused * {
+    animation-play-state: paused !important;
   }
 
   /* ── Hero fade-up animation (used in HeroSection) ────────── */

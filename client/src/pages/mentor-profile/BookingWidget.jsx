@@ -80,7 +80,6 @@ export default function BookingWidget({
   const [selectedSlotId, setSelectedSlotId] = useState(null);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
 
-  const rate = mentor?.rate ?? mentor?.session_rate ?? null;
   const selectedSlot = slots?.find((s) => s.id === selectedSlotId) ?? null;
 
   const visibleSlots = compact ? slots?.slice(0, 2) : slots?.slice(0, 4);
@@ -128,20 +127,19 @@ export default function BookingWidget({
       }}
       aria-label="Book a session"
     >
-      {/* Rate row */}
+      {/* Session info */}
       <div className="flex items-baseline gap-2">
         <span
-          className="font-display font-black tabular-nums"
+          className="font-display font-black"
           style={{
             fontSize: compact ? '28px' : 'clamp(2.25rem, 4vw, 2.75rem)',
             color: 'var(--bridge-text)',
             letterSpacing: '-0.025em',
-            fontFeatureSettings: '"tnum" 1',
           }}
         >
-          {rate != null ? `$${rate}` : 'Free'}
+          Free
         </span>
-        <span style={{ fontSize: '14px', color: 'var(--bridge-text-muted)' }}>/session</span>
+        <span style={{ fontSize: '14px', color: 'var(--bridge-text-muted)' }}>volunteer session</span>
       </div>
       <p style={{ fontSize: '12px', color: 'var(--bridge-text-muted)', marginTop: '4px' }}>
         60 minutes · Video · Notes follow-up

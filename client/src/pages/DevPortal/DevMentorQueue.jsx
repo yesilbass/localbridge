@@ -7,7 +7,7 @@ import {
 
 const STATUS_COLORS = {
   clear:     { bg: 'rgba(34,197,94,0.12)',  text: '#22c55e',  label: 'Clear' },
-  consider:  { bg: 'rgba(245,158,11,0.12)', text: '#f59e0b',  label: 'Consider' },
+  consider:  { bg: 'color-mix(in srgb, var(--color-primary) 12%, transparent)', text: 'var(--color-primary)',  label: 'Consider' },
   suspended: { bg: 'rgba(239,68,68,0.12)',  text: '#ef4444',  label: 'Suspended' },
   pending:   { bg: 'rgba(148,163,184,0.1)', text: '#94a3b8',  label: 'Pending' },
 };
@@ -79,7 +79,7 @@ function ApplicationRow({ item, onDecide, onSimulateClear, onAutoVerify, isPendi
           {item.verification_score != null && (
             <span
               className="text-[10px] font-black tabular-nums"
-              style={{ color: item.verification_score >= 75 ? '#22c55e' : item.verification_score >= 50 ? '#f59e0b' : '#ef4444' }}
+              style={{ color: item.verification_score >= 75 ? '#22c55e' : item.verification_score >= 50 ? 'var(--color-primary)' : '#ef4444' }}
             >
               {item.verification_score}/100
             </span>

@@ -66,7 +66,7 @@ function ReasonedCard({ rec }) {
 
       <div className="mt-auto flex min-w-0 items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 truncate text-[11px]">
-          <Star aria-hidden className="h-3 w-3 shrink-0" fill="#F59E0B" stroke="#F59E0B" />
+          <Star aria-hidden className="h-3 w-3 shrink-0" fill="var(--color-primary)" stroke="var(--color-primary)" />
           <span className="font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
             {(m.rating ?? 0).toFixed(1)}
           </span>
@@ -90,7 +90,7 @@ function ReasonedCard({ rec }) {
 export default function RecommendationsBlock({ limit = 3 } = {}) {
   const { s } = useContent();
   const { recommendations, isLoading } = useMentorRecommendations({ limit });
-  const cols = limit <= 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-3';
+  const cols = limit <= 2 ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-3 xl:grid-cols-4';
 
   return (
     <section aria-labelledby="recs-heading">

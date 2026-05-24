@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, ArrowLeft, ChevronRight, LifeBuoy, MessageCircle, Sparkles, CreditCard, Calendar, GraduationCap } from 'lucide-react';
+import { Search, ArrowLeft, ChevronRight, LifeBuoy, MessageCircle, Sparkles, CreditCard, Calendar } from 'lucide-react';
 import Reveal from '../../components/Reveal';
 import { focusRing, pageShell } from '../../ui';
 import { useContent } from '../../content';
@@ -8,11 +8,10 @@ const CATEGORY_META = {
   'Getting Started': { Icon: Sparkles },
   'Billing': { Icon: CreditCard },
   'Sessions': { Icon: Calendar },
-  'For Mentors': { Icon: GraduationCap },
 };
 
 const ARTICLES = {
-  'creating-account': { category: 'Getting Started', title: 'Creating an account', body: `Signing up takes under a minute. Click "Sign up" in the top right, enter your email and a password, and confirm your email when our message hits your inbox.\n\nWe never require phone verification or ID upload for mentees. Only mentors go through extended verification.\n\nIf you don't see the confirmation email within 5 minutes, check your spam folder. Still nothing? Contact mentors.bridge@gmail.com.` },
+  'creating-account': { category: 'Getting Started', title: 'Creating an account', body: `Signing up takes under a minute. Click "Sign up" in the top right, enter your email and a password, and confirm your email when our message hits your inbox.\n\nIf you don't see the confirmation email within 5 minutes, check your spam folder. Still nothing? Contact mentors.bridge@gmail.com.` },
   'finding-mentor': { category: 'Getting Started', title: 'Finding the right mentor', body: `Use the filters on the Mentors page: industry, role, company size, and specific skills. Read the full bio — not just the tagline. The bio is where real mentors distinguish themselves.\n\nCheck their session count and rating, but don't over-weight them. A mentor with 8 sessions and 5.0 rating may be better for your specific situation than one with 200 sessions.\n\nRead at least three reviews before booking.` },
   'first-session': { category: 'Getting Started', title: 'Booking your first session', body: `Click "Book a session" on the mentor's profile. Pick a session format — Career Advice, Interview Prep, Resume Review, or Networking. Choose a date from the calendar, then a time slot.\n\nYou'll see the total price before confirming. Payment is held until 24 hours after the session completes, so if anything goes wrong you get an automatic refund.` },
   'preparing-session': { category: 'Getting Started', title: 'Preparing for a session', body: `Write down the ONE thing you want to walk away knowing. Not five things — one. Share it with the mentor in the booking note 24 hours before.\n\nIf you're sharing documents (resume, code, pitch deck), send them at least 6 hours ahead so the mentor can actually review.\n\nTest your video and audio 10 minutes before. Nothing wastes a session faster than "can you hear me now?"` },
@@ -21,15 +20,12 @@ const ARTICLES = {
   'reschedule': { category: 'Sessions', title: 'Rescheduling a session', body: `Go to your Dashboard → Upcoming Sessions → click the session. Use "Reschedule" to pick a new time from the mentor's availability.\n\nFree up to 24 hours before the session. Inside 24 hours, the mentor may charge a rescheduling fee at their discretion.` },
   'cancel': { category: 'Sessions', title: 'Canceling a session', body: `From your Dashboard, open the session and click "Cancel." Full refund issued if more than 24 hours before the session starts. Inside 24 hours, refunds are at the mentor's discretion.\n\nWe don't penalize occasional cancellations. Repeated last-minute cancellations may limit your ability to book.` },
   'technical': { category: 'Sessions', title: 'Technical issues during a call', body: `If the video call drops, try rejoining from the same link. If problems persist for more than 5 minutes, end the call and message the mentor through the platform — they'll restart or reschedule.\n\nUse Chrome, Safari, or Firefox (latest versions). Mobile works but desktop is more reliable for screen sharing.` },
-  'mentor-apply': { category: 'For Mentors', title: 'Becoming a mentor', body: `Apply at /become-a-mentor. You'll need: 5+ years of relevant professional experience, verifiable work history, and ability to commit to at least 2 sessions per month.\n\nThe application includes a portfolio section and a 30-minute interview with our team. Response time: 10 business days.` },
-  'mentor-rates': { category: 'For Mentors', title: 'Setting your rates', body: `You set your own rates per session format. Most mentors charge $50–$150 per session. Update rates anytime in your dashboard.\n\nBridge takes a 15% platform fee. You keep 85% of every session fee. Payouts are weekly via Stripe Connect.` },
 };
 
 const CATEGORIES = [
   { name: 'Getting Started', keys: ['creating-account', 'finding-mentor', 'first-session', 'preparing-session'] },
   { name: 'Billing', keys: ['payment-methods', 'refund-policy'] },
   { name: 'Sessions', keys: ['reschedule', 'cancel', 'technical'] },
-  { name: 'For Mentors', keys: ['mentor-apply', 'mentor-rates'] },
 ];
 
 export default function Help() {

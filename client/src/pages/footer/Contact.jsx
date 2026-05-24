@@ -317,7 +317,6 @@ export default function Contact() {
                         <option>General question</option>
                         <option>Billing issue</option>
                         <option>Session problem</option>
-                        <option>Mentor application</option>
                         <option>Partnership</option>
                         <option>Other</option>
                       </select>

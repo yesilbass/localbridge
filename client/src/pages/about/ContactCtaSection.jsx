@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import AppLink from '../../components/AppLink';
 import { ArrowRight } from 'lucide-react';
 import RevealOnScroll from '../landing/RevealOnScroll';
 import { mailtoHref } from '../../config/contact';
@@ -8,7 +9,7 @@ import { ABOUT_CONTACT_SECTION_PAD } from './aboutData';
 const PRIMARY_BASE_BG = 'var(--color-primary)';
 
 const foundersMailHref = mailtoHref({
-  subject: 'Hello — from the Bridge About page',
+  subject: 'Hello — from the Bridge Company page',
 });
 
 const primaryEnter = (e) => {
@@ -33,8 +34,8 @@ const secondaryLeave = (e) => {
 export default function ContactCtaSection() {
   return (
     <section
-      id="about-final"
-      aria-labelledby="about-final-heading"
+      id="contact"
+      aria-labelledby="contact-heading"
       className={ABOUT_CONTACT_SECTION_PAD}
       style={{
         background:
@@ -55,7 +56,7 @@ export default function ContactCtaSection() {
           </p>
 
           <h2
-            id="about-final-heading"
+            id="contact-heading"
             className="mt-3 font-display font-black"
             style={{
               fontSize: 'clamp(2rem, 5vw, 4rem)',
@@ -120,7 +121,7 @@ export default function ContactCtaSection() {
               Email the founders
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </a>
-            <Link
+            <AppLink
               to="/mentors"
               className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-[14px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{
@@ -136,7 +137,7 @@ export default function ContactCtaSection() {
               onBlur={secondaryLeave}
             >
               Browse mentors instead
-            </Link>
+            </AppLink>
           </div>
         </RevealOnScroll>
       </div>

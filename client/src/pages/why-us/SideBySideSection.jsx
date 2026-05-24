@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import AppLink from '../../components/AppLink';
 import {
   MessageCircle,
   Briefcase,
@@ -176,7 +177,7 @@ export default function SideBySideSection() {
                 />
               </div>
 
-              <Link
+              <AppLink
                 to="/mentors"
                 className="inline-flex items-center justify-center gap-1.5 px-5 py-3 rounded-full text-[14px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
                 style={{
@@ -189,7 +190,7 @@ export default function SideBySideSection() {
               >
                 Browse the operators
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
+              </AppLink>
             </div>
           </div>
         </RevealOnScroll>

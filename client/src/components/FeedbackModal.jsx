@@ -130,12 +130,12 @@ export default function FeedbackModal({ open, onClose }) {
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-1/2 h-[80vmax] w-[80vmax] -translate-x-1/2 -translate-y-1/2 opacity-40"
         style={{
-          background: 'conic-gradient(from 200deg at 50% 50%, rgba(200,80,10,0.30), rgba(245,158,11,0.22), rgba(120,40,5,0.18), rgba(200,80,10,0.30))',
+          background: 'conic-gradient(from 200deg at 50% 50%, color-mix(in srgb, var(--color-primary) 30%, transparent), color-mix(in srgb, var(--color-primary-hover) 22%, transparent), color-mix(in srgb, var(--color-primary) 18%, transparent), color-mix(in srgb, var(--color-primary) 30%, transparent))',
           filter: 'blur(110px)',
         }}
       />
 
-      <div className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-[2rem] border border-white/10 bg-[#1a100a] shadow-bridge-float sm:rounded-[2rem]">
+      <div className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-[2rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-float sm:rounded-[2rem]">
         {sent ? (
           <div className="relative flex flex-col items-center px-8 py-16 text-center">
             <div aria-hidden className="pointer-events-none absolute -top-16 left-1/2 h-40 w-64 -translate-x-1/2 rounded-full bg-gradient-to-b from-emerald-400/20 to-transparent blur-3xl" />
@@ -170,8 +170,8 @@ export default function FeedbackModal({ open, onClose }) {
           </div>
         ) : (
           <>
-            <header className="relative shrink-0 overflow-hidden px-6 pb-6 pt-7 sm:px-7" style={{ background: 'linear-gradient(135deg, #1e1007 0%, #2a1508 100%)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-              <div aria-hidden className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full blur-3xl" style={{ background: 'rgba(251,191,36,0.14)' }} />
+            <header className="relative shrink-0 overflow-hidden px-6 pb-6 pt-7 sm:px-7" style={{ background: 'linear-gradient(135deg, var(--bridge-canvas) 0%, var(--bridge-surface-muted) 100%)', borderBottom: '1px solid var(--bridge-border)' }}>
+              <div aria-hidden className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full blur-3xl" style={{ background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)' }} />
               <div aria-hidden className="pointer-events-none absolute -left-16 bottom-0 h-40 w-40 rounded-full blur-3xl" style={{ background: 'rgba(249,115,22,0.10)' }} />
               <div className="relative flex items-start justify-between gap-3">
                 <div>
@@ -202,8 +202,8 @@ export default function FeedbackModal({ open, onClose }) {
                     key={n}
                     className="h-1 flex-1 rounded-full transition-all duration-500"
                     style={n <= step ? {
-                      backgroundColor: '#f59e0b',
-                      boxShadow: '0 0 8px rgba(245,158,11,0.45)',
+                      backgroundColor: 'var(--color-primary)',
+                      boxShadow: '0 0 8px color-mix(in srgb, var(--color-primary) 45%, transparent)',
                     } : {
                       backgroundColor: 'rgba(255,255,255,0.10)',
                     }}
@@ -225,9 +225,9 @@ export default function FeedbackModal({ open, onClose }) {
                       }}
                       className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border px-4 py-3.5 text-left transition-all duration-200 ${focusRing}`}
                       style={category?.key === c.key ? {
-                        borderColor: 'rgba(245,158,11,0.55)',
-                        backgroundColor: 'rgba(245,158,11,0.08)',
-                        boxShadow: '0 8px 24px -8px rgba(245,158,11,0.20)',
+                        borderColor: 'color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                        backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+                        boxShadow: '0 8px 24px -8px color-mix(in srgb, var(--color-primary) 20%, transparent)',
                       } : {
                         borderColor: 'rgba(255,255,255,0.08)',
                         backgroundColor: 'rgba(255,255,255,0.04)',
@@ -258,9 +258,9 @@ export default function FeedbackModal({ open, onClose }) {
                       }}
                       className={`group relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border py-6 transition-all duration-200 hover:-translate-y-1 ${focusRing}`}
                       style={sentiment?.key === s.key ? {
-                        borderColor: 'rgba(245,158,11,0.55)',
-                        backgroundColor: 'rgba(245,158,11,0.08)',
-                        boxShadow: '0 8px 24px -8px rgba(245,158,11,0.20)',
+                        borderColor: 'color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                        backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+                        boxShadow: '0 8px 24px -8px color-mix(in srgb, var(--color-primary) 20%, transparent)',
                       } : {
                         borderColor: 'rgba(255,255,255,0.08)',
                         backgroundColor: 'rgba(255,255,255,0.04)',
@@ -283,8 +283,8 @@ export default function FeedbackModal({ open, onClose }) {
 
               {step === 3 && (
                 <div className="space-y-5">
-                  <div className="relative overflow-hidden rounded-2xl p-4" style={{ border: '1px solid rgba(245,158,11,0.25)', backgroundColor: 'rgba(245,158,11,0.07)' }}>
-                    <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full blur-2xl" style={{ background: 'rgba(245,158,11,0.12)' }} />
+                  <div className="relative overflow-hidden rounded-2xl p-4" style={{ border: '1px solid color-mix(in srgb, var(--color-primary) 25%, transparent)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 7%, transparent)' }}>
+                    <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full blur-2xl" style={{ background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)' }} />
                     <p className="relative text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400/60">You&apos;re reporting</p>
                     <p className="relative mt-1.5 text-sm font-semibold text-white">
                       {category?.icon} {category?.label} · {sentiment?.emoji} {sentiment?.label}
@@ -302,7 +302,7 @@ export default function FeedbackModal({ open, onClose }) {
                       placeholder="What happened? What did you expect? The more specific, the better."
                       className="w-full resize-none rounded-2xl px-4 py-3.5 text-sm text-white outline-none transition"
                       style={{ border: '1px solid rgba(255,255,255,0.10)', backgroundColor: 'rgba(255,255,255,0.05)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)' }}
-                      onFocus={e => { e.currentTarget.style.borderColor = 'rgba(245,158,11,0.50)'; e.currentTarget.style.boxShadow = '0 0 0 4px rgba(245,158,11,0.12)'; }}
+                      onFocus={e => { e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-primary) 50%, transparent)'; e.currentTarget.style.boxShadow = '0 0 0 4px color-mix(in srgb, var(--color-primary) 12%, transparent)'; }}
                       onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)'; e.currentTarget.style.boxShadow = 'inset 0 1px 2px rgba(0,0,0,0.2)'; }}
                     />
                     <p className="mt-1.5 text-right text-[10px] font-medium text-white/25 tabular-nums">
@@ -324,7 +324,7 @@ export default function FeedbackModal({ open, onClose }) {
                       placeholder="you@example.com"
                       className="w-full rounded-2xl px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-white/20"
                       style={{ border: '1px solid rgba(255,255,255,0.10)', backgroundColor: 'rgba(255,255,255,0.05)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)' }}
-                      onFocus={e => { e.currentTarget.style.borderColor = 'rgba(245,158,11,0.50)'; e.currentTarget.style.boxShadow = '0 0 0 4px rgba(245,158,11,0.12)'; }}
+                      onFocus={e => { e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-primary) 50%, transparent)'; e.currentTarget.style.boxShadow = '0 0 0 4px color-mix(in srgb, var(--color-primary) 12%, transparent)'; }}
                       onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)'; e.currentTarget.style.boxShadow = 'inset 0 1px 2px rgba(0,0,0,0.2)'; }}
                     />
                   </div>

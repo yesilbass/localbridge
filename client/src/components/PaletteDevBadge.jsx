@@ -3,9 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { paletteLabel, resolvePalette } from '../utils/routePalette';
 
 /**
- * PaletteDevBadge — DEV-only fixed badge in the bottom-right corner showing the
- * active palette name + resolved theme. Used during the 3-palette comparison
- * build so we never have to guess which scope we're looking at.
+ * PaletteDevBadge — DEV-only fixed badge showing active shell + theme.
  *
  * Gated on `import.meta.env.DEV` — never renders in production.
  */

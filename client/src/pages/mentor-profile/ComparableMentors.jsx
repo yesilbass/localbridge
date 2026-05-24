@@ -1,14 +1,14 @@
 import { Link } from 'react-router-dom';
+import AppLink from '../../components/AppLink';
 import { ArrowRight } from 'lucide-react';
 import Reveal from '../../components/Reveal';
 
 function CompactMentorCard({ m }) {
   const rating = Number(m.rating ?? m.reviews?.average) || 0;
-  const rate = m.session_rate ?? m.rate ?? null;
 
   return (
     <Reveal>
-      <Link
+      <AppLink
         to={`/mentors/${m.id}`}
         className="group block rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2"
         style={{ outlineColor: 'var(--color-primary)' }}
@@ -60,18 +60,10 @@ function CompactMentorCard({ m }) {
             <div className="mt-2 flex items-center gap-3" style={{ fontSize: '11px' }}>
               {rating > 0 && (
                 <span className="flex items-center gap-1" style={{ color: 'var(--bridge-text-muted)' }}>
-                  <svg className="h-3 w-3" viewBox="0 0 20 20" fill="#F59E0B" aria-hidden>
+                  <svg className="h-3 w-3" viewBox="0 0 20 20" fill="var(--color-primary)" aria-hidden>
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                   <span className="tabular-nums" style={{ fontFeatureSettings: '"tnum" 1' }}>{rating.toFixed(1)}</span>
-                </span>
-              )}
-              {rating > 0 && rate != null && (
-                <span style={{ color: 'var(--bridge-text-faint)' }}>·</span>
-              )}
-              {rate != null && (
-                <span className="font-bold tabular-nums" style={{ color: 'var(--bridge-text)', fontFeatureSettings: '"tnum" 1' }}>
-                  ${rate}
                 </span>
               )}
             </div>
@@ -82,7 +74,7 @@ function CompactMentorCard({ m }) {
             aria-hidden
           />
         </article>
-      </Link>
+      </AppLink>
     </Reveal>
   );
 }

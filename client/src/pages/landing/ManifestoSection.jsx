@@ -338,7 +338,7 @@ function P4Reviews() {
                 className="h-3.5 w-3.5"
                 style={
                   idx < r.rating
-                    ? { fill: '#F59E0B', color: '#F59E0B' }
+                    ? { fill: 'var(--color-primary)', color: 'var(--color-primary)' }
                     : { color: 'var(--bridge-text-muted)' }
                 }
                 aria-hidden="true"

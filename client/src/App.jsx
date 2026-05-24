@@ -6,11 +6,14 @@ import ScrollProgress from './components/ScrollProgress';
 import MagneticPointer from './components/MagneticPointer';
 import PaletteDevBadge from './components/PaletteDevBadge';
 import { applyPalette } from './utils/appearance';
+import { isMarketingRoute } from './utils/marketingRoute';
 import { resolvePalette } from './utils/routePalette';
 import Footer from './components/Footer';
 import BridgeGlobalAtmosphere from './components/BridgeGlobalAtmosphere';
 import FeedbackFAB from './components/FeedbackFAB';
 import ErrorBoundary from './components/ErrorBoundary';
+import { GuestOnly, AuthPage, AuthenticatedProductRedirect } from './components/routing/RouteGuards';
+import LegacyCompanyRedirect from './components/routing/LegacyCompanyRedirect';
 import DevPortal from './pages/DevPortal/index.jsx';
 
 const Landing          = lazy(() => import('./pages/landing'));
@@ -23,14 +26,11 @@ const Profile          = lazy(() => import('./pages/Profile'));
 const Settings         = lazy(() => import('./pages/Settings'));
 const Pricing          = lazy(() => import('./pages/Pricing'));
 const ResumeReview     = lazy(() => import('./pages/ResumeReview'));
-const About            = lazy(() => import('./pages/about'));
-const WhyUs            = lazy(() => import('./pages/why-us'));
+const Company          = lazy(() => import('./pages/company'));
 const VideoCall        = lazy(() => import('./pages/VideoCall'));
 const MeetLobby        = lazy(() => import('./pages/MeetLobby'));
 const IntakeCall       = lazy(() => import('./pages/IntakeCall'));
-const MentorOnboarding = lazy(() => import('./pages/MentorOnboarding'));
 const BookingFinalize  = lazy(() => import('./pages/booking/finalize.jsx'));
-const VerifyMentorWizard    = lazy(() => import('./pages/onboarding/mentor/verify/index.jsx'));
 const SubmitReferencePage   = lazy(() => import('./pages/refs/SubmitReference.jsx'));
 const AdminVerification     = lazy(() => import('./pages/admin/verification/index.jsx'));
 const AdminBlog             = lazy(() => import('./pages/admin/blog/index.jsx'));
@@ -71,13 +71,17 @@ function AppContent() {
   const isVideoCall = location.pathname.includes('/video') || location.pathname.startsWith('/meet/');
   const isLanding = location.pathname === '/';
   const isDashboard = location.pathname.startsWith('/dashboard');
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  const isMentorsRoute =
+    location.pathname === '/mentors' || location.pathname.startsWith('/mentors/');
   const hideFooter =
     location.pathname.startsWith('/profile') ||
     location.pathname.startsWith('/settings') ||
     isDashboard ||
-    isVideoCall;
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
-  const hideNavbar = isVideoCall || isDashboard;
+    isVideoCall ||
+    isAuthPage ||
+    isMentorsRoute;
+  const hideNavbar = isVideoCall || isDashboard || isAuthPage;
 
   // Scroll to top on route change, but don't fight in-page anchor scrolling.
   useEffect(() => {
@@ -85,18 +89,22 @@ function AppContent() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.pathname, location.hash]);
 
-  // 3-palette comparison build: set <html data-palette="…"> based on the
-  // current route group. Modals/portals inherit via the cascade since they
-  // render below <html>. See utils/routePalette.js for the mapping.
   useEffect(() => {
     applyPalette(resolvePalette(location.pathname));
   }, [location.pathname]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    const marketing = isMarketingRoute(location.pathname);
+    root.classList.toggle('is-marketing-route', marketing);
+    return () => root.classList.remove('is-marketing-route');
+  }, [location.pathname]);
+
   return (
     <div className="relative isolate min-h-screen bg-bridge-page text-stone-900 font-sans antialiased flex flex-col" style={{ overflowX: 'clip' }}>
-      <BridgeGlobalAtmosphere />
+      {!isAuthPage && <BridgeGlobalAtmosphere />}
       {!isVideoCall && !isAuthPage && <ScrollProgress />}
-      {!isVideoCall && <MagneticPointer />}
+      {!isVideoCall && !isAuthPage && <MagneticPointer />}
       {!hideNavbar && <Navbar />}
       <div
         key={location.pathname}
@@ -105,46 +113,42 @@ function AppContent() {
         <ErrorBoundary>
         <Suspense fallback={<PageLoadingFallback />}>
         <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/mentors" element={<Mentors />} />
-          <Route path="/mentors/:id" element={<MentorProfile />} />
+          <Route path="/" element={<GuestOnly><Landing /></GuestOnly>} />
+          <Route path="/login" element={<AuthPage><Login /></AuthPage>} />
+          <Route path="/register" element={<AuthPage><Register /></AuthPage>} />
+          <Route path="/mentors" element={<AuthenticatedProductRedirect><Mentors /></AuthenticatedProductRedirect>} />
+          <Route path="/mentors/:id" element={<AuthenticatedProductRedirect><MentorProfile /></AuthenticatedProductRedirect>} />
           <Route path="/dashboard/*" element={<Dashboard />} />
-          <Route path="/onboarding" element={<MentorOnboarding />} />
-          <Route path="/onboarding/mentor" element={<MentorOnboarding />} />
-          <Route path="/onboarding/mentor/verify" element={<VerifyMentorWizard />} />
           <Route path="/refs/:token" element={<SubmitReferencePage />} />
           <Route path="/admin/verification" element={<AdminVerification />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/blog/write" element={<WriteBlogPost />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<AuthenticatedProductRedirect><Profile /></AuthenticatedProductRedirect>} />
+          <Route path="/settings" element={<AuthenticatedProductRedirect><Settings /></AuthenticatedProductRedirect>} />
           <Route path="/session/:sessionId/video" element={<VideoCall />} />
           <Route path="/meet/:slug" element={<MeetLobby />} />
           <Route path="/intake/:sessionId" element={<IntakeCall />} />
           <Route path="/booking/finalize" element={<BookingFinalize />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/resume" element={<ResumeReview />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/why-us" element={<WhyUs />} />
-          <Route path="/careers" element={<Careers />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/help" element={<Help />} />
-          <Route path="/trust" element={<Trust />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/cookies" element={<Cookies />} />
-          <Route path="/onboarding" element={<MentorOnboarding />} />
-          <Route path="/onboarding/mentor" element={<MentorOnboarding />} />
+          <Route path="/pricing" element={<AuthenticatedProductRedirect><Pricing /></AuthenticatedProductRedirect>} />
+          <Route path="/resume" element={<AuthenticatedProductRedirect><ResumeReview /></AuthenticatedProductRedirect>} />
+          <Route path="/company" element={<GuestOnly><Company /></GuestOnly>} />
+          <Route path="/about" element={<LegacyCompanyRedirect />} />
+          <Route path="/why-us" element={<LegacyCompanyRedirect />} />
+          <Route path="/careers" element={<GuestOnly><Careers /></GuestOnly>} />
+          <Route path="/blog" element={<GuestOnly><Blog /></GuestOnly>} />
+          <Route path="/faq" element={<GuestOnly><FAQ /></GuestOnly>} />
+          <Route path="/contact" element={<GuestOnly><Contact /></GuestOnly>} />
+          <Route path="/help" element={<GuestOnly><Help /></GuestOnly>} />
+          <Route path="/trust" element={<GuestOnly><Trust /></GuestOnly>} />
+          <Route path="/community" element={<GuestOnly><Community /></GuestOnly>} />
+          <Route path="/privacy" element={<GuestOnly><Privacy /></GuestOnly>} />
+          <Route path="/terms" element={<GuestOnly><Terms /></GuestOnly>} />
+          <Route path="/cookies" element={<GuestOnly><Cookies /></GuestOnly>} />
         </Routes>
         </Suspense>
         </ErrorBoundary>
       </div>
-      {!isVideoCall && <FeedbackFAB />}
+      {!isVideoCall && !isAuthPage && <FeedbackFAB />}
       {!hideFooter && <Footer />}
       <PaletteDevBadge />
     </div>

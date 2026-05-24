@@ -10,7 +10,7 @@ const CATEGORY_COLORS = {
   Craft:   '#6366f1',
   Mentors: '#0ea5e9',
   Stories: '#10b981',
-  Product: '#f59e0b',
+  Product: 'var(--color-primary)',
 };
 
 export default function AdminBlog() {

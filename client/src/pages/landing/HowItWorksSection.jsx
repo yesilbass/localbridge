@@ -309,7 +309,7 @@ function VideoMock() {
         className="relative flex flex-1 flex-col justify-between overflow-hidden rounded-lg p-3"
         style={{
           background:
-            'linear-gradient(160deg, #0A0A14 0%, #1A1A2E 100%)',
+            'linear-gradient(160deg, var(--color-midnight) 0%, var(--color-midnight-raised) 100%)',
         }}
       >
         <div className="flex items-center gap-1.5">

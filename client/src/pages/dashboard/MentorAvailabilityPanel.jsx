@@ -577,23 +577,23 @@ export default function MentorAvailabilityPanel({ mentorProfileId, reloadKey, on
           className="font-display mt-2 font-black tracking-[-0.02em]"
           style={{ fontSize: 'clamp(1.4rem, 2.8vw, 1.9rem)', color: 'var(--bridge-text)' }}
         >
-          Finish onboarding to set availability.
+          Finish your profile to set availability.
         </h2>
         <p
           className="mt-3 max-w-xl text-sm leading-relaxed"
           style={{ color: 'var(--bridge-text-secondary)' }}
         >
-          Your mentor profile isn't ready yet. Complete onboarding to publish your hours and start accepting bookings.
+          Your mentor profile isn&apos;t ready yet. Update your profile to publish your hours and start accepting bookings.
         </p>
         <Link
-          to="/onboarding"
+          to="/dashboard/profile"
           className="bridge-focus mt-6 inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-black"
           style={{
             background: 'var(--color-primary)',
             color: 'var(--color-on-primary)',
           }}
         >
-          Finish onboarding <ArrowRight className="h-4 w-4" aria-hidden />
+          Go to profile <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
       </CardShell>
     );

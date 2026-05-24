@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import AppLink from '../../components/AppLink';
 import { ArrowRight, ShieldCheck, Eye, Receipt } from 'lucide-react';
 import { WHY_US_FINAL_SECTION_PAD } from './whyUsData';
 import RevealOnScroll from '../landing/RevealOnScroll';
@@ -95,7 +96,7 @@ export default function WhyUsFinalCtaSection() {
           </p>
 
           <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
-            <Link
+            <AppLink
               to="/register"
               className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-[14px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{
@@ -111,8 +112,8 @@ export default function WhyUsFinalCtaSection() {
             >
               Book your first hour
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-            <Link
+            </AppLink>
+            <AppLink
               to="/mentors"
               className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-[14px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{
@@ -125,7 +126,7 @@ export default function WhyUsFinalCtaSection() {
               onMouseLeave={secondaryLeave}
             >
               Browse the operators
-            </Link>
+            </AppLink>
           </div>
 
           <div className="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-3">

@@ -21,31 +21,26 @@ export default function PricingFaq({ headingId, items }) {
           style={{ background: 'linear-gradient(to right, transparent, var(--color-primary), transparent)' }}
         />
 
-        <div className="relative flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            <span
-              className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-65"
-              style={{ backgroundColor: 'var(--color-primary)' }}
-            />
-            <span
-              className="relative inline-flex h-2 w-2 rounded-full"
-              style={{ backgroundColor: 'var(--color-primary)' }}
-            />
-          </span>
           <p
-            className="text-[10px] font-black uppercase tracking-[0.24em]"
-            style={{ color: 'var(--color-primary)' }}
+            className="text-[10px] font-black uppercase tracking-[0.32em]"
+            style={{ color: 'var(--bridge-text-muted)' }}
           >
             FAQ
           </p>
-        </div>
 
         <h2
           id={headingId}
-          className="relative mt-2 font-display font-black tracking-[-0.025em] text-[var(--bridge-text)]"
-          style={{ fontSize: 'clamp(1.4rem, 2.4vw, 1.85rem)', lineHeight: '1.05' }}
+          className="relative mt-3 font-display font-black"
+          style={{
+            fontSize: 'clamp(1.75rem, 3.5vw, 2.75rem)',
+            lineHeight: 1.05,
+            letterSpacing: '-0.03em',
+            color: 'var(--bridge-text)',
+            fontFeatureSettings: '"kern" 1, "ss01" 1',
+          }}
         >
-          {s.pricing.faqHeading} <span className="text-gradient-bridge italic">{s.pricing.faqHeadingItalic}</span>
+          {s.pricing.faqHeading}{' '}
+          <span style={{ color: 'var(--color-primary)' }}>{s.pricing.faqHeadingItalic}</span>
         </h2>
 
         <div className="relative mt-5 overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/60 divide-y divide-[var(--bridge-border)]">

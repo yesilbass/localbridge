@@ -1,7 +1,3 @@
-// Client-side mirror of api/_lib/verification/scoring.js — kept tiny on
-// purpose. Used by the wizard for tier math and per-component weight display
-// without round-tripping to the API.
-
 export const COMPONENT_WEIGHTS = Object.freeze({
   identity:             15,
   gov_id:               15,

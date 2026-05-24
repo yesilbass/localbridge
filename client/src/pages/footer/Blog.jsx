@@ -12,7 +12,7 @@ const CATEGORY_COLORS = {
   Craft:   { bg: 'color-mix(in srgb, #6366f1 10%, transparent)',             bar: '#6366f1' },
   Mentors: { bg: 'color-mix(in srgb, #0ea5e9 10%, transparent)',             bar: '#0ea5e9' },
   Stories: { bg: 'color-mix(in srgb, #10b981 10%, transparent)',             bar: '#10b981' },
-  Product: { bg: 'color-mix(in srgb, #f59e0b 10%, transparent)',             bar: '#f59e0b' },
+  Product: { bg: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',             bar: 'var(--color-primary)' },
 };
 
 function BackToTop() {

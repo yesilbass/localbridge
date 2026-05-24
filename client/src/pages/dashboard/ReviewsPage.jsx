@@ -10,8 +10,8 @@ function StarsRow({ rating }) {
         <Star
           key={n}
           className="h-4 w-4"
-          fill={n <= rating ? '#F59E0B' : 'transparent'}
-          stroke={n <= rating ? '#F59E0B' : 'var(--bridge-text-muted)'}
+          fill={n <= rating ? 'var(--color-primary)' : 'transparent'}
+          stroke={n <= rating ? 'var(--color-primary)' : 'var(--bridge-text-muted)'}
         />
       ))}
     </div>
@@ -126,7 +126,7 @@ export default function ReviewsPage() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(280px,320px)_1fr]">
       <aside
         className="self-start rounded-2xl p-6"
         style={{

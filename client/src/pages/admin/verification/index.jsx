@@ -7,9 +7,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronRight, Clock, ShieldCheck, Loader2 } from 'lucide-react';
 import supabase from '../../../api/supabase';
-import TierBadge from '../../onboarding/mentor/verify/components/TierBadge.jsx';
-import TestModeChip from '../../onboarding/mentor/verify/components/TestModeChip.jsx';
-import { COMPONENT_LABELS, COMPONENT_WEIGHTS } from '../../onboarding/mentor/verify/scoring.js';
+import TierBadge from '../../../components/TierBadge.jsx';
+import TestModeChip from '../../../components/TestModeChip.jsx';
+import { COMPONENT_LABELS, COMPONENT_WEIGHTS } from '../../../utils/mentorVerificationScoring.js';
 import { useContent } from '../../../content';
 
 const TABS = ['evidence', 'ai_notes', 'references', 'activity'];

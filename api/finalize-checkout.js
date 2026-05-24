@@ -13,7 +13,7 @@ import { getPublicOrigin } from './_lib/publicOrigin.js';
 import { z } from 'zod';
 
 const SESSION_TYPES = new Set(['career_advice', 'interview_prep', 'resume_review', 'networking']);
-const PLAN_NAMES = new Set(['Starter', 'Pro', 'Premium']);
+const PLAN_NAMES = new Set(['Plus', 'Pro']);
 const FINALIZE_BODY_SCHEMA = z.object({
   sessionId: z.string().min(1).max(255),
 });
