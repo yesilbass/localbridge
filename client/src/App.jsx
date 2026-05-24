@@ -12,7 +12,8 @@ import Footer from './components/Footer';
 import BridgeGlobalAtmosphere from './components/BridgeGlobalAtmosphere';
 import FeedbackFAB from './components/FeedbackFAB';
 import ErrorBoundary from './components/ErrorBoundary';
-import { AuthPage, PublicPage } from './components/routing/RouteGuards';
+import { AuthPage, PublicPage, AuthenticatedProductRedirect } from './components/routing/RouteGuards';
+import { isPublicMentorProfileDetail } from './utils/mentorProfileRoute';
 import LegacyCompanyRedirect from './components/routing/LegacyCompanyRedirect';
 import DevPortal from './pages/DevPortal/index.jsx';
 
@@ -75,6 +76,7 @@ function AppContent() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
   const isMentorsRoute =
     location.pathname === '/mentors' || location.pathname.startsWith('/mentors/');
+  const isMentorProfileDetail = isPublicMentorProfileDetail(location.pathname);
   const hideFooter =
     location.pathname.startsWith('/profile') ||
     location.pathname.startsWith('/settings') ||
@@ -83,6 +85,7 @@ function AppContent() {
     isAuthPage ||
     isMentorsRoute;
   const hideNavbar = isVideoCall || isDashboard || isAuthPage;
+  const showScrollProgress = !isVideoCall && !isAuthPage && !isDashboard;
 
   // Scroll to top on route change, but don't fight in-page anchor scrolling.
   useEffect(() => {
@@ -104,12 +107,12 @@ function AppContent() {
   return (
     <div className="relative isolate min-h-screen bg-bridge-page text-stone-900 font-sans antialiased flex flex-col" style={{ overflowX: 'clip' }}>
       {!isAuthPage && <BridgeGlobalAtmosphere />}
-      {!isVideoCall && !isAuthPage && <ScrollProgress />}
+      {showScrollProgress && <ScrollProgress />}
       {!isVideoCall && !isAuthPage && <MagneticPointer />}
       {!hideNavbar && <Navbar />}
       <div
         key={location.pathname}
-        className={`relative z-10 flex flex-1 flex-col animate-page-enter ${isLanding || isDashboard || isAuthPage ? '' : 'pt-[5.25rem]'}`}
+        className={`relative z-10 flex flex-1 flex-col animate-page-enter ${isLanding || isDashboard || isAuthPage || isMentorProfileDetail ? '' : 'pt-[5.25rem]'}`}
       >
         <ErrorBoundary>
         <Suspense fallback={<PageLoadingFallback />}>
@@ -117,8 +120,8 @@ function AppContent() {
           <Route path="/" element={<PublicPage><Landing /></PublicPage>} />
           <Route path="/login" element={<AuthPage><Login /></AuthPage>} />
           <Route path="/register" element={<AuthPage><Register /></AuthPage>} />
-          <Route path="/mentors" element={<PublicPage><Mentors /></PublicPage>} />
-          <Route path="/mentors/:id" element={<PublicPage><MentorProfile /></PublicPage>} />
+          <Route path="/mentors" element={<PublicPage><AuthenticatedProductRedirect><Mentors /></AuthenticatedProductRedirect></PublicPage>} />
+          <Route path="/mentors/:id" element={<PublicPage><AuthenticatedProductRedirect><MentorProfile /></AuthenticatedProductRedirect></PublicPage>} />
           <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="/refs/:token" element={<SubmitReferencePage />} />
           <Route path="/admin/verification" element={<AdminVerification />} />

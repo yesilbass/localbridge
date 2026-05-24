@@ -4,6 +4,8 @@ import { useAuth } from '../context/useAuth';
 import { isMentorAccount } from '../utils/accountRole';
 import { appUrl, shouldNavigateToApp } from '../utils/appUrl';
 import { presentAsMarketingGuest, resolveAuthEntryPath } from '../utils/authNav';
+import { isPublicMentorProfileDetail } from '../utils/mentorProfileRoute';
+import { useMentorProfileNavHidden } from '../hooks/useMentorProfileNavHidden';
 import { LogOut, User, Settings, Sparkles, Menu, X, ChevronRight, Zap } from 'lucide-react';
 import NotificationPanel from './NotificationPanel';
 import { useI18n } from '../i18n';
@@ -26,6 +28,12 @@ export default function Navbar() {
   const showGuestChrome = presentAsMarketingGuest(user, location.pathname);
   const loginPath = resolveAuthEntryPath('/login', user);
   const registerPath = resolveAuthEntryPath('/register', user);
+  const mentorsBrowsePath = resolveAuthEntryPath('/mentors', user);
+
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  const isLanding = location.pathname === '/';
+  const isMentorProfileDetail = isPublicMentorProfileDetail(location.pathname);
+  const profileBarHidden = useMentorProfileNavHidden(isMentorProfileDetail);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -44,10 +52,12 @@ export default function Navbar() {
 
       setScrolled(currentY > 12);
 
-      if (currentY < lastY - 4 || currentY <= 24) {
-        setHeaderHidden(false);
-      } else if (currentY > 72 && currentY > lastY + 4) {
-        setHeaderHidden(true);
+      if (!isMentorProfileDetail) {
+        if (currentY < lastY - 4 || currentY <= 24) {
+          setHeaderHidden(false);
+        } else if (currentY > 72 && currentY > lastY + 4) {
+          setHeaderHidden(true);
+        }
       }
 
       lastY = currentY;
@@ -65,7 +75,9 @@ export default function Navbar() {
       window.removeEventListener('scroll', onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [location.pathname]);
+  }, [location.pathname, isMentorProfileDetail]);
+
+  const headerHiddenEffective = isMentorProfileDetail ? profileBarHidden : headerHidden;
 
   useEffect(() => {
     if (mobileOpen) {
@@ -81,15 +93,12 @@ export default function Navbar() {
     navigate('/');
   }
 
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
-  const isLanding = location.pathname === '/';
-
   const isActive = path =>
     path === '/' ? location.pathname === '/' : location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   const navItems = showGuestChrome
     ? [
-        { path: '/mentors', label: t('nav.mentors', 'Mentors') },
+        { path: mentorsBrowsePath, label: t('nav.mentors', 'Mentors') },
         { path: '/company', label: t('nav.company', 'Company') },
         { path: '/resume', label: t('nav.resume', 'Resume'), ai: true },
         { path: '/pricing', label: t('nav.pricing', 'Pricing') },
@@ -101,7 +110,7 @@ export default function Navbar() {
         { path: '/pricing', label: t('nav.pricing', 'Pricing') },
       ]
     : [
-        { path: '/mentors', label: t('nav.mentors', 'Mentors') },
+        { path: mentorsBrowsePath, label: t('nav.mentors', 'Mentors') },
         { path: '/dashboard', label: t('nav.dashboard', 'Dashboard') },
         { path: '/company', label: t('nav.company', 'Company') },
         { path: '/resume', label: t('nav.resume', 'Resume'), ai: true },
@@ -115,14 +124,14 @@ export default function Navbar() {
       ═══════════════════════════════════════════════════ */}
       <header
         className={`fixed inset-x-0 top-0 z-50 isolate transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          headerHidden && !mobileOpen && !isDashboard && !isLanding ? 'pointer-events-none opacity-0' : 'opacity-100'
+          headerHiddenEffective && !mobileOpen && !isDashboard && !isLanding ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
         style={{
           background: 'transparent',
           border: 0,
           boxShadow: 'none',
           outline: 0,
-          transform: headerHidden && !mobileOpen && !isDashboard && !isLanding ? 'translateY(-1.5rem)' : 'translateY(0)',
+          transform: headerHiddenEffective && !mobileOpen && !isDashboard && !isLanding ? 'translateY(-1.5rem)' : 'translateY(0)',
         }}
       >
 
@@ -333,7 +342,7 @@ export default function Navbar() {
                               label: t('nav.settings', 'Settings'),
                             },
                             ...(!asMentor ? [{
-                              to: '/mentors',
+                              to: mentorsBrowsePath,
                               icon: <Sparkles className="h-4 w-4 shrink-0 text-[var(--bridge-text-faint)] transition-colors group-hover:text-[var(--color-primary)]" />,
                               label: t('nav.findMentor', 'Find a Mentor'),
                             }] : []),
@@ -406,8 +415,8 @@ export default function Navbar() {
                     {t('nav.getStarted', 'Get started')}
                   </Link>
                   )}
-                  {shouldNavigateToApp('/mentors') ? (
-                  <a href={appUrl('/mentors')}
+                  {shouldNavigateToApp(mentorsBrowsePath) ? (
+                  <a href={appUrl(mentorsBrowsePath)}
                     className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 text-[14px] font-bold transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4"
                     style={{
                       backgroundColor: '#ffffff',
@@ -418,7 +427,7 @@ export default function Navbar() {
                     {t('auth.browseMentors', 'Browse mentors')}
                   </a>
                   ) : (
-                  <Link to="/mentors"
+                  <Link to={mentorsBrowsePath}
                     className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 text-[14px] font-bold transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4"
                     style={{
                       backgroundColor: '#ffffff',
@@ -616,8 +625,8 @@ export default function Navbar() {
                     {t('nav.getStartedFree', 'Get started free')}
                   </Link>
                   )}
-                  {shouldNavigateToApp('/mentors') ? (
-                  <a href={appUrl('/mentors')}
+                  {shouldNavigateToApp(mentorsBrowsePath) ? (
+                  <a href={appUrl(mentorsBrowsePath)}
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center justify-center gap-1.5 rounded-2xl px-4 py-3.5 text-sm font-black transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     style={{
@@ -630,7 +639,7 @@ export default function Navbar() {
                     <ChevronRight className="h-4 w-4" />
                   </a>
                   ) : (
-                  <Link to="/mentors"
+                  <Link to={mentorsBrowsePath}
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center justify-center gap-1.5 rounded-2xl px-4 py-3.5 text-sm font-black transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     style={{

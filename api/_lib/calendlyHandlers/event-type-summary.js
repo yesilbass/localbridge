@@ -6,6 +6,7 @@ import {
   getValidAccessToken,
   getEventType,
   getAvailableTimes,
+  availabilityQueryWindow,
 } from '../calendly.js';
 
 const QUERY = z.object({ mentor_profile_id: z.string().uuid() });
@@ -34,16 +35,15 @@ export default async function handler(req, res) {
     const accessToken = await getValidAccessToken(mentor_profile_id);
     const eventType = await getEventType(accessToken, profile.calendly_event_type_uri);
 
-    const start = new Date();
-    const end = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const { startIso, endIso } = availabilityQueryWindow();
     const times = await getAvailableTimes(
       accessToken,
       profile.calendly_event_type_uri,
-      start.toISOString(),
-      end.toISOString(),
+      startIso,
+      endIso,
     );
 
-    const next = times.find((t) => t.status === 'available' || !t.status);
+    const next = times[0] ?? null;
     return res.json({
       ready: true,
       duration: eventType?.duration ?? null,
@@ -51,9 +51,16 @@ export default async function handler(req, res) {
       scheduling_url: profile.calendly_scheduling_url,
       next_available: next?.start_time ?? null,
       total_open_slots: times.length,
+      calendar_sync_failed: false,
     });
   } catch (err) {
     console.error('[calendly-event-type-summary] failed', { message: err?.message, status: err?.status });
-    return res.json({ ready: true, scheduling_url: profile.calendly_scheduling_url, next_available: null, total_open_slots: 0 });
+    return res.json({
+      ready: true,
+      scheduling_url: profile.calendly_scheduling_url,
+      next_available: null,
+      total_open_slots: 0,
+      calendar_sync_failed: true,
+    });
   }
 }

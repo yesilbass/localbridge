@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { isMentorAccount } from '../utils/accountRole';
 import supabase from '../api/supabase';
+import { isActiveSubscription } from '../utils/subscription';
 import { updateSessionStatus } from '../api/sessions';
 import { useContent } from '../content';
 import {
@@ -675,6 +676,17 @@ export default function VideoCall() {
         if (!isMentee && !isMentorRow) {
           if (!cancelled) setAccessError('You do not have access to this session.');
           return;
+        }
+        if (isMentee) {
+          const { data: settingsRow } = await supabase
+            .from('user_settings')
+            .select('settings')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          if (!isActiveSubscription(settingsRow?.settings)) {
+            if (!cancelled) setAccessError('An active Plus or Pro subscription is required to join calls.');
+            return;
+          }
         }
         if (data.status === 'completed') {
           if (!cancelled) setAccessError('This session has already ended.');

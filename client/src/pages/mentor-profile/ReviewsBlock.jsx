@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ReviewCard from './ReviewCard';
 import { useMentorReviews } from './profileHooks';
+import { bodyClass, metaClass, sectionTitleClass, sectionTitleStyle } from './profileType';
 
 function Stars({ rating }) {
   return (
@@ -46,7 +47,6 @@ function SkeletonCard() {
 
 export default function ReviewsBlock({ mentor }) {
   const mentorId = mentor?.id;
-  const firstName = mentor?.firstName ?? mentor?.name?.split(/\s+/)[0] ?? '';
 
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedSort, setSelectedSort] = useState('relevant');
@@ -81,40 +81,26 @@ export default function ReviewsBlock({ mentor }) {
   const end = Math.min(reviewsPage * pageSize, total);
 
   return (
-    <section aria-labelledby="reviews-heading" className="mt-16 pt-14" style={{ borderTop: '1px solid var(--bridge-border)' }}>
+    <section id="reviews" aria-labelledby="reviews-heading" className="mt-28 scroll-mt-[calc(var(--profile-primary-nav-h,5.25rem)+3.5rem)]">
       {/* Heading */}
-      <p
-        className="font-black uppercase"
-        style={{ fontSize: '10px', letterSpacing: '0.32em', color: 'var(--color-primary)' }}
-      >
+      <h2 id="reviews-heading" className={sectionTitleClass} style={sectionTitleStyle}>
         Reviews
-      </p>
-      <h2
-        id="reviews-heading"
-        className="mt-2 font-display font-black"
-        style={{
-          fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)',
-          letterSpacing: '-0.025em',
-          color: 'var(--bridge-text)'
-        }}
-      >
-        What {firstName} is like to work with
       </h2>
 
       {/* Summary row */}
-      <div className="mt-3 flex flex-wrap items-center gap-4">
+      <div className="mt-4 flex flex-wrap items-center gap-4">
         {rating > 0 && (
           <span className="flex items-center gap-2">
             <Stars rating={rating} />
             <span
-              className="font-bold tabular-nums"
-              style={{ fontSize: '20px', color: 'var(--bridge-text)', fontFeatureSettings: '"tnum" 1' }}
+              className="font-bold tabular-nums text-2xl"
+              style={{ color: 'var(--bridge-text)', fontFeatureSettings: '"tnum" 1' }}
             >
               {rating.toFixed(1)}
             </span>
           </span>
         )}
-        <span style={{ fontSize: '13px', color: 'var(--bridge-text-muted)' }}>
+        <span className={metaClass} style={{ color: 'var(--bridge-text-muted)' }}>
           · {allTotal} review{allTotal !== 1 ? 's' : ''}
           {rebookRate != null ? ` · ${rebookRate}% rebook rate` : ''}
         </span>
@@ -132,9 +118,8 @@ export default function ReviewsBlock({ mentor }) {
               type="button"
               aria-pressed={selectedTopic === null}
               onClick={() => { setSelectedTopic(null); setReviewsPage(1); }}
-              className="px-3 py-1.5 rounded-full font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 transition-all shrink-0"
+              className="px-4 py-2 rounded-full font-semibold whitespace-nowrap text-sm focus-visible:outline-2 focus-visible:outline-offset-2 transition-all shrink-0"
               style={{
-                fontSize: '12px',
                 background: selectedTopic === null ? 'var(--color-primary)' : 'var(--bridge-surface)',
                 color: selectedTopic === null ? 'var(--color-on-primary)' : 'var(--bridge-text-secondary)',
                 boxShadow: selectedTopic === null ? 'none' : 'inset 0 0 0 1px var(--bridge-border)',
@@ -149,9 +134,8 @@ export default function ReviewsBlock({ mentor }) {
                 type="button"
                 aria-pressed={selectedTopic === t.slug}
                 onClick={() => handleTopicClick(t.slug)}
-                className="px-3 py-1.5 rounded-full font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 transition-all shrink-0"
+                className="px-4 py-2 rounded-full font-semibold whitespace-nowrap text-sm focus-visible:outline-2 focus-visible:outline-offset-2 transition-all shrink-0"
                 style={{
-                  fontSize: '12px',
                   background: selectedTopic === t.slug ? 'var(--color-primary)' : 'var(--bridge-surface)',
                   color: selectedTopic === t.slug ? 'var(--color-on-primary)' : 'var(--bridge-text-secondary)',
                   boxShadow: selectedTopic === t.slug ? 'none' : 'inset 0 0 0 1px var(--bridge-border)',
@@ -167,9 +151,8 @@ export default function ReviewsBlock({ mentor }) {
             aria-label="Sort reviews"
             value={selectedSort}
             onChange={(e) => { setSelectedSort(e.target.value); setReviewsPage(1); }}
-            className="px-3 py-2 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 shrink-0"
+            className="px-4 py-2.5 rounded-lg text-sm focus-visible:outline-2 focus-visible:outline-offset-2 shrink-0"
             style={{
-              fontSize: '13px',
               color: 'var(--bridge-text)',
               background: 'var(--bridge-surface)',
               boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
@@ -184,7 +167,7 @@ export default function ReviewsBlock({ mentor }) {
       )}
 
       {/* Reviews list */}
-      <div className="mt-6 flex flex-col gap-4">
+      <div className="mt-8 flex flex-col gap-6">
         {isLoading && reviews.length === 0 ? (
           Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
         ) : !isLoading && reviews.length === 0 && allTotal === 0 ? (
@@ -192,7 +175,7 @@ export default function ReviewsBlock({ mentor }) {
             className="rounded-2xl p-12 text-center"
             style={{ backgroundColor: 'var(--bridge-surface-muted)' }}
           >
-            <p style={{ fontSize: '14px', color: 'var(--bridge-text-secondary)' }}>
+            <p className={bodyClass} style={{ color: 'var(--bridge-text-secondary)' }}>
               No reviews yet. After a session, mentees can leave feedback here.
             </p>
           </div>
@@ -201,14 +184,14 @@ export default function ReviewsBlock({ mentor }) {
             className="rounded-2xl p-6 text-center"
             style={{ backgroundColor: 'var(--bridge-surface-muted)' }}
           >
-            <p style={{ fontSize: '14px', color: 'var(--bridge-text-secondary)' }}>
+            <p className={bodyClass} style={{ color: 'var(--bridge-text-secondary)' }}>
               No reviews tagged "{topicLabel}" yet.
             </p>
             <button
               type="button"
               onClick={() => { setSelectedTopic(null); setReviewsPage(1); }}
-              className="mt-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
-              style={{ fontSize: '13px', color: 'var(--color-primary)', outlineColor: 'var(--color-primary)' }}
+              className="mt-3 font-semibold text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+              style={{ color: 'var(--color-primary)', outlineColor: 'var(--color-primary)' }}
             >
               Show all reviews
             </button>
@@ -223,8 +206,8 @@ export default function ReviewsBlock({ mentor }) {
         <button
           type="button"
           onClick={() => { setIsExpanded(true); }}
-          className="mt-6 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
-          style={{ fontSize: '14px', color: 'var(--color-primary)', outlineColor: 'var(--color-primary)' }}
+          className="mt-6 font-semibold text-base focus-visible:outline-2 focus-visible:outline-offset-2"
+          style={{ color: 'var(--color-primary)', outlineColor: 'var(--color-primary)' }}
           onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline'; }}
           onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'none'; }}
         >
@@ -237,7 +220,7 @@ export default function ReviewsBlock({ mentor }) {
           className="mt-8 pt-6 flex items-center justify-between gap-4 flex-wrap"
           style={{ borderTop: '1px solid var(--bridge-border)' }}
         >
-          <span style={{ fontSize: '12px', color: 'var(--bridge-text-muted)' }}>
+          <span className={`${metaClass}`} style={{ color: 'var(--bridge-text-muted)' }}>
             Showing {start}–{end} of {total}
           </span>
           <div className="flex items-center gap-2">
@@ -245,9 +228,8 @@ export default function ReviewsBlock({ mentor }) {
               type="button"
               onClick={() => setReviewsPage((p) => Math.max(1, p - 1))}
               disabled={reviewsPage === 1}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="inline-flex items-center gap-1 px-4 py-2 rounded-lg font-semibold text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{
-                fontSize: '13px',
                 color: 'var(--bridge-text-secondary)',
                 background: 'var(--bridge-surface)',
                 boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
@@ -263,9 +245,8 @@ export default function ReviewsBlock({ mentor }) {
               type="button"
               onClick={() => setReviewsPage((p) => Math.min(totalPages, p + 1))}
               disabled={reviewsPage === totalPages}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="inline-flex items-center gap-1 px-4 py-2 rounded-lg font-semibold text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{
-                fontSize: '13px',
                 color: 'var(--bridge-text-secondary)',
                 background: 'var(--bridge-surface)',
                 boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
@@ -280,8 +261,8 @@ export default function ReviewsBlock({ mentor }) {
             <button
               type="button"
               onClick={() => { setIsExpanded(false); setReviewsPage(1); }}
-              className="focus-visible:outline-2 focus-visible:outline-offset-2"
-              style={{ fontSize: '12px', color: 'var(--bridge-text-muted)', outlineColor: 'var(--color-primary)' }}
+              className="text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+              style={{ color: 'var(--bridge-text-muted)', outlineColor: 'var(--color-primary)' }}
               onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline'; }}
               onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'none'; }}
             >

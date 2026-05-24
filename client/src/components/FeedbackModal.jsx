@@ -5,9 +5,6 @@ import { generateTicketId } from '../config/contact';
 import { sendSupportEmail } from '../api/supportEmail';
 import { useContent } from '../content';
 
-const focusRingWhite =
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900';
-
 const CATEGORIES = [
   { key: 'bug', label: 'Bug report', icon: '🐛', desc: "Something broken or not working" },
   { key: 'ux', label: 'User experience', icon: '✨', desc: 'Confusing, slow, or could be smoother' },
@@ -24,6 +21,15 @@ const SENTIMENTS = [
   { key: 'meh', emoji: '😐', label: 'Meh', tint: 'from-amber-400 to-orange-400' },
   { key: 'bad', emoji: '😞', label: 'Frustrated', tint: 'from-rose-400 to-red-400' },
 ];
+
+const fieldClass =
+  'w-full rounded-2xl border px-4 py-3.5 text-sm outline-none transition placeholder:text-[var(--bridge-text-faint)] focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]';
+
+const fieldStyle = {
+  borderColor: 'var(--bridge-border-strong)',
+  backgroundColor: 'var(--bridge-surface-muted)',
+  color: 'var(--bridge-text)',
+};
 
 export default function FeedbackModal({ open, onClose }) {
   const { s } = useContent();
@@ -121,64 +127,91 @@ export default function FeedbackModal({ open, onClose }) {
     >
       <button
         type="button"
-        className="absolute inset-0 bg-stone-950/60 backdrop-blur-xl"
+        className="absolute inset-0 backdrop-blur-xl"
+        style={{ backgroundColor: 'color-mix(in srgb, var(--bridge-text) 52%, transparent)' }}
         aria-label="Close"
         onClick={handleClose}
       />
-      {/* Aurora behind modal */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[80vmax] w-[80vmax] -translate-x-1/2 -translate-y-1/2 opacity-40"
-        style={{
-          background: 'conic-gradient(from 200deg at 50% 50%, color-mix(in srgb, var(--color-primary) 30%, transparent), color-mix(in srgb, var(--color-primary-hover) 22%, transparent), color-mix(in srgb, var(--color-primary) 18%, transparent), color-mix(in srgb, var(--color-primary) 30%, transparent))',
-          filter: 'blur(110px)',
-        }}
-      />
 
-      <div className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-[2rem] border border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-float sm:rounded-[2rem]">
+      <div
+        className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-[2rem] border shadow-bridge-float sm:rounded-[2rem]"
+        style={{
+          borderColor: 'var(--bridge-border)',
+          backgroundColor: 'var(--bridge-surface-raised)',
+          boxShadow: '0 32px 80px -24px color-mix(in srgb, var(--bridge-text) 28%, transparent), inset 0 0 0 1px var(--bridge-border)',
+        }}
+      >
         {sent ? (
           <div className="relative flex flex-col items-center px-8 py-16 text-center">
-            <div aria-hidden className="pointer-events-none absolute -top-16 left-1/2 h-40 w-64 -translate-x-1/2 rounded-full bg-gradient-to-b from-emerald-400/20 to-transparent blur-3xl" />
-            <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 shadow-[0_18px_48px_-8px_rgba(16,185,129,0.55)]">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -top-16 left-1/2 h-40 w-64 -translate-x-1/2 rounded-full blur-3xl"
+              style={{ background: 'color-mix(in srgb, var(--color-success) 18%, transparent)' }}
+            />
+            <div
+              className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-full"
+              style={{
+                background: 'linear-gradient(135deg, var(--color-success), color-mix(in srgb, var(--color-success) 70%, var(--color-primary)))',
+                boxShadow: '0 18px 48px -8px color-mix(in srgb, var(--color-success) 45%, transparent)',
+              }}
+            >
               <CheckCircle2 className="h-10 w-10 text-white" />
             </div>
-            <h2 className="font-display text-3xl font-bold text-white">
+            <h2 className="font-display text-3xl font-bold text-[var(--bridge-text)]">
               {category?.key === 'bug' ? 'Bug report received' : 'Thanks for the feedback'}
             </h2>
-            <p className="mt-3 max-w-sm leading-relaxed text-white/55">
+            <p className="mt-3 max-w-sm leading-relaxed text-[var(--bridge-text-secondary)]">
               {category?.key === 'bug'
                 ? 'Engineering triages every bug. If you left your email, we\u2019ll follow up with status updates.'
                 : 'Every piece of feedback gets read. If you left your email, we\u2019ll follow up when relevant.'}
             </p>
             {ticketId && (
-              <div className="mt-5 inline-flex flex-col items-center gap-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-3">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+              <div
+                className="mt-5 inline-flex flex-col items-center gap-1 rounded-2xl px-5 py-3"
+                style={{
+                  border: '1px solid var(--bridge-border)',
+                  backgroundColor: 'var(--bridge-surface-muted)',
+                }}
+              >
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-faint)]">
                   {category?.key === 'bug' ? 'Bug ticket' : 'Ticket number'}
                 </span>
-                <code className="font-mono text-base font-semibold tracking-wide text-amber-300">#{ticketId}</code>
-                <span className="text-[11px] text-white/35">Keep this for replies.</span>
+                <code className="font-mono text-base font-semibold tracking-wide text-[var(--color-primary)]">#{ticketId}</code>
+                <span className="text-[11px] text-[var(--bridge-text-muted)]">Keep this for replies.</span>
               </div>
             )}
             <button
               type="button"
               onClick={handleClose}
-              className={`mt-9 inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold transition hover:-translate-y-0.5 hover:bg-stone-800 ${focusRing}`}
-              style={{ backgroundColor: '#0c0a09', color: '#ffffff', boxShadow: '0 12px 30px -8px rgba(12,10,9,0.70)' }}
+              className={`mt-9 inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold text-[var(--color-on-primary)] transition hover:-translate-y-0.5 hover:brightness-110 ${focusRing}`}
+              style={{
+                backgroundColor: 'var(--color-primary)',
+                boxShadow: '0 12px 30px -8px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+              }}
             >
               {s.common.done}
             </button>
           </div>
         ) : (
           <>
-            <header className="relative shrink-0 overflow-hidden px-6 pb-6 pt-7 sm:px-7" style={{ background: 'linear-gradient(135deg, var(--bridge-canvas) 0%, var(--bridge-surface-muted) 100%)', borderBottom: '1px solid var(--bridge-border)' }}>
-              <div aria-hidden className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full blur-3xl" style={{ background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)' }} />
-              <div aria-hidden className="pointer-events-none absolute -left-16 bottom-0 h-40 w-40 rounded-full blur-3xl" style={{ background: 'rgba(249,115,22,0.10)' }} />
+            <header
+              className="relative shrink-0 overflow-hidden px-6 pb-6 pt-7 sm:px-7"
+              style={{
+                background: 'linear-gradient(135deg, var(--bridge-surface) 0%, var(--bridge-surface-muted) 100%)',
+                borderBottom: '1px solid var(--bridge-border)',
+              }}
+            >
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full blur-3xl"
+                style={{ background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)' }}
+              />
               <div className="relative flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400/80">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-primary)]">
                     Share feedback · Step {step} of 3
                   </p>
-                  <h2 id="feedback-title" className="mt-1.5 font-display text-2xl font-semibold text-white">
+                  <h2 id="feedback-title" className="mt-1.5 font-display text-2xl font-semibold text-[var(--bridge-text)]">
                     {step === 1 && 'What kind of feedback?'}
                     {step === 2 && "How's it going overall?"}
                     {step === 3 && 'Tell us more'}
@@ -187,10 +220,12 @@ export default function FeedbackModal({ open, onClose }) {
                 <button
                   type="button"
                   onClick={handleClose}
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition hover:bg-white/10 ${focusRing}`}
-                  style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.10)' }}
-                  onMouseEnter={e => { e.currentTarget.style.color = '#fff'; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; }}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition hover:bg-[var(--bridge-surface-muted)] ${focusRing}`}
+                  style={{
+                    backgroundColor: 'var(--bridge-surface)',
+                    color: 'var(--bridge-text-muted)',
+                    border: '1px solid var(--bridge-border)',
+                  }}
                   aria-label="Close"
                 >
                   <X className="h-4 w-4" />
@@ -201,12 +236,14 @@ export default function FeedbackModal({ open, onClose }) {
                   <div
                     key={n}
                     className="h-1 flex-1 rounded-full transition-all duration-500"
-                    style={n <= step ? {
-                      backgroundColor: 'var(--color-primary)',
-                      boxShadow: '0 0 8px color-mix(in srgb, var(--color-primary) 45%, transparent)',
-                    } : {
-                      backgroundColor: 'rgba(255,255,255,0.10)',
-                    }}
+                    style={
+                      n <= step
+                        ? {
+                            backgroundColor: 'var(--color-primary)',
+                            boxShadow: '0 0 8px color-mix(in srgb, var(--color-primary) 45%, transparent)',
+                          }
+                        : { backgroundColor: 'var(--bridge-border)' }
+                    }
                   />
                 ))}
               </div>
@@ -215,84 +252,111 @@ export default function FeedbackModal({ open, onClose }) {
             <div className="flex-1 overflow-y-auto px-6 py-6 sm:px-7">
               {step === 1 && (
                 <div className="space-y-2">
-                  {CATEGORIES.map((c) => (
-                    <button
-                      key={c.key}
-                      type="button"
-                      onClick={() => {
-                        setCategory(c);
-                        setStep(2);
-                      }}
-                      className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border px-4 py-3.5 text-left transition-all duration-200 ${focusRing}`}
-                      style={category?.key === c.key ? {
-                        borderColor: 'color-mix(in srgb, var(--color-primary) 55%, transparent)',
-                        backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
-                        boxShadow: '0 8px 24px -8px color-mix(in srgb, var(--color-primary) 20%, transparent)',
-                      } : {
-                        borderColor: 'rgba(255,255,255,0.08)',
-                        backgroundColor: 'rgba(255,255,255,0.04)',
-                      }}
-                    >
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl" style={{ backgroundColor: 'rgba(255,255,255,0.06)', boxShadow: '0 0 0 1px rgba(255,255,255,0.08)' }}>
-                        {c.icon}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-white">{c.label}</p>
-                        <p className="text-xs text-white/45">{c.desc}</p>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-white/25 transition group-hover:translate-x-0.5 group-hover:text-white/50" />
-                    </button>
-                  ))}
+                  {CATEGORIES.map((c) => {
+                    const selected = category?.key === c.key;
+                    return (
+                      <button
+                        key={c.key}
+                        type="button"
+                        onClick={() => {
+                          setCategory(c);
+                          setStep(2);
+                        }}
+                        className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border px-4 py-3.5 text-left transition-all duration-200 ${focusRing}`}
+                        style={
+                          selected
+                            ? {
+                                borderColor: 'color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                                backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, var(--bridge-surface))',
+                                boxShadow: '0 8px 24px -8px color-mix(in srgb, var(--color-primary) 20%, transparent)',
+                              }
+                            : {
+                                borderColor: 'var(--bridge-border)',
+                                backgroundColor: 'var(--bridge-surface)',
+                              }
+                        }
+                      >
+                        <span
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl"
+                          style={{
+                            backgroundColor: 'var(--bridge-surface-muted)',
+                            boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                          }}
+                        >
+                          {c.icon}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-[var(--bridge-text)]">{c.label}</p>
+                          <p className="text-xs text-[var(--bridge-text-muted)]">{c.desc}</p>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-[var(--bridge-text-faint)] transition group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]" />
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 
               {step === 2 && (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {SENTIMENTS.map((s) => (
-                    <button
-                      key={s.key}
-                      type="button"
-                      onClick={() => {
-                        setSentiment(s);
-                        setStep(3);
-                      }}
-                      className={`group relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border py-6 transition-all duration-200 hover:-translate-y-1 ${focusRing}`}
-                      style={sentiment?.key === s.key ? {
-                        borderColor: 'color-mix(in srgb, var(--color-primary) 55%, transparent)',
-                        backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
-                        boxShadow: '0 8px 24px -8px color-mix(in srgb, var(--color-primary) 20%, transparent)',
-                      } : {
-                        borderColor: 'rgba(255,255,255,0.08)',
-                        backgroundColor: 'rgba(255,255,255,0.04)',
-                      }}
-                    >
-                      <span
-                        aria-hidden
-                        className={`pointer-events-none absolute -top-6 left-1/2 h-16 w-24 -translate-x-1/2 rounded-full bg-gradient-to-b ${s.tint} opacity-0 blur-2xl transition group-hover:opacity-30`}
-                      />
-                      <span className="relative text-4xl transition-transform duration-500 group-hover:scale-110">
-                        {s.emoji}
-                      </span>
-                      <span className="relative text-xs font-bold uppercase tracking-wide text-white/55">
-                        {s.label}
-                      </span>
-                    </button>
-                  ))}
+                  {SENTIMENTS.map((item) => {
+                    const selected = sentiment?.key === item.key;
+                    return (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() => {
+                          setSentiment(item);
+                          setStep(3);
+                        }}
+                        className={`group relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border py-6 transition-all duration-200 hover:-translate-y-1 ${focusRing}`}
+                        style={
+                          selected
+                            ? {
+                                borderColor: 'color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                                backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, var(--bridge-surface))',
+                                boxShadow: '0 8px 24px -8px color-mix(in srgb, var(--color-primary) 20%, transparent)',
+                              }
+                            : {
+                                borderColor: 'var(--bridge-border)',
+                                backgroundColor: 'var(--bridge-surface)',
+                              }
+                        }
+                      >
+                        <span
+                          aria-hidden
+                          className={`pointer-events-none absolute -top-6 left-1/2 h-16 w-24 -translate-x-1/2 rounded-full bg-gradient-to-b ${item.tint} opacity-0 blur-2xl transition group-hover:opacity-30`}
+                        />
+                        <span className="relative text-4xl transition-transform duration-500 group-hover:scale-110">
+                          {item.emoji}
+                        </span>
+                        <span className="relative text-xs font-bold uppercase tracking-wide text-[var(--bridge-text-secondary)]">
+                          {item.label}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 
               {step === 3 && (
                 <div className="space-y-5">
-                  <div className="relative overflow-hidden rounded-2xl p-4" style={{ border: '1px solid color-mix(in srgb, var(--color-primary) 25%, transparent)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 7%, transparent)' }}>
-                    <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full blur-2xl" style={{ background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)' }} />
-                    <p className="relative text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400/60">You&apos;re reporting</p>
-                    <p className="relative mt-1.5 text-sm font-semibold text-white">
+                  <div
+                    className="relative overflow-hidden rounded-2xl p-4"
+                    style={{
+                      border: '1px solid color-mix(in srgb, var(--color-primary) 25%, transparent)',
+                      backgroundColor: 'color-mix(in srgb, var(--color-primary) 7%, var(--bridge-surface-muted))',
+                    }}
+                  >
+                    <p className="relative text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--color-primary)]">
+                      You&apos;re reporting
+                    </p>
+                    <p className="relative mt-1.5 text-sm font-semibold text-[var(--bridge-text)]">
                       {category?.icon} {category?.label} · {sentiment?.emoji} {sentiment?.label}
                     </p>
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-white/45">
+                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">
                       Your feedback
                     </label>
                     <textarea
@@ -300,20 +364,18 @@ export default function FeedbackModal({ open, onClose }) {
                       onChange={(e) => setMessage(e.target.value)}
                       rows={5}
                       placeholder="What happened? What did you expect? The more specific, the better."
-                      className="w-full resize-none rounded-2xl px-4 py-3.5 text-sm text-white outline-none transition"
-                      style={{ border: '1px solid rgba(255,255,255,0.10)', backgroundColor: 'rgba(255,255,255,0.05)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)' }}
-                      onFocus={e => { e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-primary) 50%, transparent)'; e.currentTarget.style.boxShadow = '0 0 0 4px color-mix(in srgb, var(--color-primary) 12%, transparent)'; }}
-                      onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)'; e.currentTarget.style.boxShadow = 'inset 0 1px 2px rgba(0,0,0,0.2)'; }}
+                      className={`${fieldClass} resize-none`}
+                      style={fieldStyle}
                     />
-                    <p className="mt-1.5 text-right text-[10px] font-medium text-white/25 tabular-nums">
+                    <p className="mt-1.5 text-right text-[10px] font-medium tabular-nums text-[var(--bridge-text-faint)]">
                       {message.length} characters
                     </p>
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-white/45">
+                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-muted)]">
                       Email{' '}
-                      <span className="text-[10px] font-medium normal-case text-white/25">
+                      <span className="text-[10px] font-medium normal-case text-[var(--bridge-text-faint)]">
                         (optional — only if you want a reply)
                       </span>
                     </label>
@@ -322,19 +384,31 @@ export default function FeedbackModal({ open, onClose }) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="w-full rounded-2xl px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-white/20"
-                      style={{ border: '1px solid rgba(255,255,255,0.10)', backgroundColor: 'rgba(255,255,255,0.05)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)' }}
-                      onFocus={e => { e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-primary) 50%, transparent)'; e.currentTarget.style.boxShadow = '0 0 0 4px color-mix(in srgb, var(--color-primary) 12%, transparent)'; }}
-                      onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)'; e.currentTarget.style.boxShadow = 'inset 0 1px 2px rgba(0,0,0,0.2)'; }}
+                      className={fieldClass}
+                      style={fieldStyle}
                     />
                   </div>
                 </div>
               )}
             </div>
 
-            <footer className="shrink-0 px-6 py-4 sm:px-7" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+            <footer
+              className="shrink-0 px-6 py-4 sm:px-7"
+              style={{
+                borderTop: '1px solid var(--bridge-border)',
+                backgroundColor: 'var(--bridge-surface-muted)',
+              }}
+            >
               {submitError && step === 3 && (
-                <div role="alert" className="mb-3 rounded-2xl border border-red-500/30 bg-red-900/20 px-3 py-2 text-xs text-red-300">
+                <div
+                  role="alert"
+                  className="mb-3 rounded-2xl px-3 py-2 text-xs"
+                  style={{
+                    border: '1px solid color-mix(in srgb, var(--color-error) 30%, transparent)',
+                    backgroundColor: 'color-mix(in srgb, var(--color-error) 8%, var(--bridge-surface))',
+                    color: 'var(--color-error)',
+                  }}
+                >
                   {submitError}
                 </div>
               )}
@@ -344,7 +418,8 @@ export default function FeedbackModal({ open, onClose }) {
                     type="button"
                     onClick={() => setStep(step - 1)}
                     disabled={submitting}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold text-white/45 transition hover:bg-white/8 hover:text-white/70 disabled:opacity-50 ${focusRing}`}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold transition hover:bg-[var(--bridge-surface)] disabled:opacity-50 ${focusRing}`}
+                    style={{ color: 'var(--bridge-text-secondary)' }}
                   >
                     <ArrowLeft className="h-4 w-4" /> {s.common.back}
                   </button>
@@ -356,8 +431,11 @@ export default function FeedbackModal({ open, onClose }) {
                     type="button"
                     onClick={submit}
                     disabled={!message.trim() || submitting}
-                    className={`group inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition hover:-translate-y-0.5 hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
-                    style={{ backgroundColor: '#0c0a09', color: '#ffffff', boxShadow: '0 12px 30px -6px rgba(12,10,9,0.70)' }}
+                    className={`group inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-[var(--color-on-primary)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
+                    style={{
+                      backgroundColor: 'var(--color-primary)',
+                      boxShadow: '0 12px 30px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                    }}
                   >
                     {submitting ? (
                       <>

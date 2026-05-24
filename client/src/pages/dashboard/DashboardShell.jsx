@@ -1,14 +1,18 @@
+import { useLocation } from 'react-router-dom';
 import DashboardTopBar from '../../components/DashboardTopBar.jsx';
 import { useI18n } from '../../i18n';
-import { DASHBOARD_SHELL_MAX, DASHBOARD_SHELL_PAD } from './dashboardLayout.js';
+import { isDashboardMentorProfileDetail } from '../../utils/mentorProfileRoute.js';
+import { DASHBOARD_SHELL_MAX, DASHBOARD_SHELL_PAD, DASHBOARD_NAVBAR_H } from './dashboardLayout.js';
 
-const NAVBAR_H = '3.5rem';
+const NAVBAR_H = DASHBOARD_NAVBAR_H;
 
 /**
  * Dashboard shell — top bar + main content, no sidebar.
  */
 export default function DashboardShell({ activeRole, children }) {
   const { t } = useI18n();
+  const { pathname } = useLocation();
+  const isMentorProfileDetail = isDashboardMentorProfileDetail(pathname);
 
   return (
     <>
@@ -33,8 +37,12 @@ export default function DashboardShell({ activeRole, children }) {
         <main
           id="dashboard-main"
           role="main"
-          className={`relative mx-auto w-full overflow-x-hidden py-8 sm:py-10 lg:py-12 ${DASHBOARD_SHELL_PAD}`}
-          style={{ maxWidth: DASHBOARD_SHELL_MAX }}
+          className={
+            isMentorProfileDetail
+              ? 'relative mx-auto w-full overflow-x-hidden'
+              : `relative mx-auto w-full overflow-x-hidden py-8 sm:py-10 lg:py-12 ${DASHBOARD_SHELL_PAD}`
+          }
+          style={isMentorProfileDetail ? undefined : { maxWidth: DASHBOARD_SHELL_MAX }}
         >
           {children}
         </main>

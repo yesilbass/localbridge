@@ -40,23 +40,54 @@ export function getResolvedScheme(preference) {
   return preference === 'dark' ? 'dark' : 'light';
 }
 
+const THEME_SWITCH_CLASS = 'theme-switching';
+
+function finishThemeSwitch(root) {
+  void root.offsetHeight;
+  requestAnimationFrame(() => {
+    root.classList.remove(THEME_SWITCH_CLASS);
+    window.dispatchEvent(new Event('bridge-theme-change'));
+  });
+}
+
 /**
  * Applies resolved light/dark to the document (Tailwind `dark` + theme-* classes).
  * @param {'light' | 'dark' | 'system'} preference
+ * @param {{ notify?: boolean, animate?: boolean }} [options]
  */
-export function applyThemePreference(preference) {
+export function applyThemePreference(preference, { notify = true, animate = true } = {}) {
   if (typeof document === 'undefined') return;
   const resolved = getResolvedScheme(preference);
   const root = document.documentElement;
 
+  const unchanged =
+    root.dataset.themePreference === preference
+    && root.dataset.colorScheme === resolved
+    && root.classList.contains(`theme-${resolved}`)
+    && root.classList.contains('dark') === (resolved === 'dark');
+
+  if (unchanged) {
+    if (notify) window.dispatchEvent(new Event('bridge-theme-change'));
+    return;
+  }
+
+  if (animate) root.classList.add(THEME_SWITCH_CLASS);
+
   root.dataset.themePreference = preference;
   root.dataset.colorScheme = resolved;
+  root.style.colorScheme = resolved;
 
   root.classList.remove('theme-light', 'theme-dark');
   root.classList.add(`theme-${resolved}`);
 
   if (resolved === 'dark') root.classList.add('dark');
   else root.classList.remove('dark');
+
+  if (notify) finishThemeSwitch(root);
+  else {
+    void root.offsetHeight;
+    requestAnimationFrame(() => root.classList.remove(THEME_SWITCH_CLASS));
+  }
 }
 
 export function applyFontSize(size) {
@@ -77,22 +108,40 @@ export function saveAppearanceToStorage(appearance) {
     const prev = prevRaw ? JSON.parse(prevRaw) : {};
     const next = { ...prev, ...appearance };
     localStorage.setItem(APPEARANCE_STORAGE_KEY, JSON.stringify(next));
+    return next;
   } catch {
-    /* ignore */
+    return null;
   }
 }
 
-function applyAppearanceVisuals(appearance) {
+function readStoredAppearance() {
+  try {
+    const raw = localStorage.getItem(APPEARANCE_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function applyAppearanceVisuals(appearance, { animateTheme = true } = {}) {
   if (!appearance) return;
-  applyThemePreference(appearance.theme || 'light');
+  applyThemePreference(appearance.theme || 'light', { notify: false, animate: animateTheme });
   applyFontSize(appearance.font_size || 'medium');
   applyHighContrast(appearance.high_contrast || false);
 }
 
 /** Apply theme/font/contrast and persist to localStorage (user changed settings). */
 export function applyAppearance(appearance) {
-  applyAppearanceVisuals(appearance);
-  saveAppearanceToStorage(appearance);
+  if (!appearance || typeof appearance !== 'object') return;
+  const merged = saveAppearanceToStorage(appearance) ?? { ...readStoredAppearance(), ...appearance };
+  applyAppearanceVisuals(merged);
+  window.dispatchEvent(new Event('bridge-theme-change'));
+}
+
+/** Theme-only update — preserves font size, contrast, and other stored prefs. */
+export function applyThemeChange(preference) {
+  saveAppearanceToStorage({ theme: preference });
+  applyThemePreference(preference);
 }
 
 /** Hydrate from localStorage on first paint (no redundant write). */
@@ -110,7 +159,7 @@ export function applyAppearanceFromStorage() {
       applyThemePreference('light');
       return;
     }
-    applyAppearanceVisuals(appearance);
+    applyAppearanceVisuals(appearance, { animateTheme: false });
   } catch {
     applyThemePreference('light');
   }

@@ -3,6 +3,9 @@ export const DASHBOARD_SHELL_MAX = 'min(100rem, calc(100vw - 2rem))';
 
 export const DASHBOARD_SHELL_PAD = 'px-5 sm:px-8 lg:px-10';
 
+/** Fixed dashboard top bar height — keep shell paddingTop in sync. */
+export const DASHBOARD_NAVBAR_H = '4.75rem';
+
 /** Negative margin breakout for embedded routes (mentors browse) inside the shell. */
 export const DASHBOARD_EMBEDDED_BLEED =
   'relative -mx-5 w-[calc(100%+2.5rem)] sm:-mx-8 sm:w-[calc(100%+4rem)] lg:-mx-10 lg:w-[calc(100%+5rem)]';

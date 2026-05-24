@@ -1,5 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
+import { isMenteeAccount } from '../../utils/accountRole';
+import { menteeMentorsDashboardPath } from '../../utils/authNav';
 import LoadingSpinner from '../LoadingSpinner';
 
 /** Public marketing/content pages — available whether or not the user has a session. */
@@ -60,9 +62,9 @@ export function AuthenticatedProductRedirect({ children }) {
   const location = useLocation();
 
   if (loading) return null;
-  if (!user) return children;
+  if (!user || !isMenteeAccount(user)) return children;
 
-  const dest = productDashboardPath(location.pathname);
+  const dest = menteeMentorsDashboardPath(location.pathname);
   if (dest && dest !== location.pathname) {
     return <Navigate to={dest + location.search} replace state={location.state} />;
   }

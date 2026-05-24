@@ -135,7 +135,8 @@ function persistRead(ids) {
   localStorage.setItem('bridge_notif_read', JSON.stringify([...ids]));
 }
 
-export default function NotificationPanel() {
+export default function NotificationPanel({ size = 'md', plain = false }) {
+  const isLarge = size === 'lg';
   const { user } = useAuth();
   const navigate = useNavigate();
   const { s } = useContent();
@@ -242,12 +243,16 @@ export default function NotificationPanel() {
         onClick={() => setOpen(v => !v)}
         aria-label="Notifications"
         aria-expanded={open}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full text-[var(--bridge-text-muted)] transition hover:bg-[var(--bridge-surface)] hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+        className={`relative flex items-center justify-center text-[var(--bridge-text-muted)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
+          plain ? 'hover:text-[var(--bridge-text)]' : 'rounded-full hover:bg-[var(--bridge-surface)] hover:text-[var(--bridge-text)]'
+        } ${isLarge ? 'h-10 w-10 sm:h-11 sm:w-11' : 'h-9 w-9'}`}
       >
-        <Bell className={`h-[18px] w-[18px] transition-transform duration-200 ${open ? 'scale-90' : ''}`} />
+        <Bell className={`transition-transform duration-200 ${open ? 'scale-90' : ''} ${
+          isLarge ? 'h-5 w-5' : 'h-[18px] w-[18px]'
+        }`} />
 
         {unreadCount > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-orange-500 px-0.5 text-[9px] font-black text-white ring-2 ring-[var(--bridge-canvas)]">
+          <span className={`absolute -right-0.5 -top-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-orange-500 px-0.5 text-[9px] font-black text-white ${plain ? '' : 'ring-2 ring-[var(--bridge-canvas)]'}`}>
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -257,7 +262,7 @@ export default function NotificationPanel() {
       {open && (
         <div
           ref={null}
-          className="animate-pop-in absolute right-0 top-11 z-50 flex w-[22rem] flex-col overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)]/97 shadow-[0_24px_64px_-16px_color-mix(in srgb, var(--color-secondary) 30%, transparent),0_0_0_1px_color-mix(in srgb, var(--color-primary) 6%, transparent)] backdrop-blur-2xl dark:shadow-[0_24px_80px_-16px_rgba(0,0,0,0.7),0_0_0_1px_color-mix(in srgb, var(--color-primary) 10%, transparent)]"
+          className={`animate-pop-in absolute right-0 z-50 flex w-[22rem] flex-col overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-raised)]/97 shadow-[0_24px_64px_-16px_color-mix(in srgb, var(--color-secondary) 30%, transparent),0_0_0_1px_color-mix(in srgb, var(--color-primary) 6%, transparent)] backdrop-blur-2xl dark:shadow-[0_24px_80px_-16px_rgba(0,0,0,0.7),0_0_0_1px_color-mix(in srgb, var(--color-primary) 10%, transparent)] ${isLarge ? 'top-[calc(100%+10px)]' : 'top-11'}`}
           style={{ maxHeight: '76vh' }}
           role="dialog"
           aria-label="Notifications"
