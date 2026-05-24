@@ -1,23 +1,9 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Github, MessageSquareQuote, ShieldCheck, Star, UsersRound } from 'lucide-react';
-
-function useIsDark() {
-  const [isDark, setIsDark] = useState(
-    typeof document !== 'undefined' && document.documentElement.classList.contains('theme-dark')
-  );
-  useEffect(() => {
-    const el = document.documentElement;
-    const obs = new MutationObserver(() => setIsDark(el.classList.contains('theme-dark')));
-    obs.observe(el, { attributes: true, attributeFilter: ['class'] });
-    return () => obs.disconnect();
-  }, []);
-  return isDark;
-}
+import { Github, ShieldCheck, Star, UsersRound } from 'lucide-react';
 
 function GoogleIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden>
       <path fill="#EA4335" d="M5.27 9.76A7.08 7.08 0 0112 4.9c1.76 0 3.35.64 4.58 1.68l3.4-3.4A11.94 11.94 0 0012 0 12 12 0 001.08 6.54l4.19 3.22z" />
       <path fill="#34A853" d="M16.04 18.01A7.08 7.08 0 0112 19.1a7.08 7.08 0 01-6.72-4.87L1.07 17.44A12 12 0 0012 24c3.24 0 6.3-1.23 8.6-3.37l-4.56-2.62z" />
       <path fill="#4A90E2" d="M20.6 12.22c0-.76-.07-1.49-.18-2.2H12v4.16h4.84a4.14 4.14 0 01-1.8 2.72l4.56 2.62C21.38 17.5 20.6 15 20.6 12.22z" />
@@ -28,257 +14,254 @@ function GoogleIcon() {
 
 function FacebookIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="#1877F2" aria-hidden>
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="#1877F2" aria-hidden>
       <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.5h-2.79V24C19.61 23.1 24 18.1 24 12.07z" />
     </svg>
   );
 }
 
-export function SocialAuthButtons({ onSocialAuth, isDark }) {
+export function SocialAuthButtons({ onSocialAuth }) {
+  const providers = [
+    { name: 'Google', icon: <GoogleIcon />, label: 'Google' },
+    { name: 'GitHub', icon: <Github className="h-4 w-4 shrink-0" />, label: 'GitHub' },
+    { name: 'Facebook', icon: <FacebookIcon />, label: 'Facebook' },
+  ];
+
   return (
-    <div className="grid grid-cols-3 gap-3">
-      {[
-        { name: 'Google', icon: <GoogleIcon /> },
-        { name: 'GitHub', icon: <Github className="h-4 w-4" /> },
-        { name: 'Facebook', icon: <FacebookIcon /> },
-      ].map((provider) => (
+    <div className="flex flex-col gap-2.5">
+      {providers.map((provider) => (
         <button
           key={provider.name}
           type="button"
           onClick={() => onSocialAuth?.(provider.name)}
-          className={`group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl border px-3 py-3 text-xs font-black transition duration-300 hover:-translate-y-0.5 ${
-            isDark
-              ? 'border-white/10 bg-white/6 text-white/65 hover:border-amber-500/40 hover:bg-white/10 hover:text-white'
-              : 'border-orange-950/10 bg-white/90 text-stone-600 shadow-[0_14px_34px_-28px_color-mix(in srgb, var(--color-secondary) 75%, transparent)] hover:border-orange-300 hover:bg-orange-50 hover:text-stone-950'
-          }`}
+          className="flex w-full items-center justify-center gap-2.5 rounded-xl border px-4 py-3.5 text-[15px] font-semibold transition hover:bg-[var(--bridge-surface-muted)] focus-visible:outline-2 focus-visible:outline-offset-2"
+          style={{
+            borderColor: 'var(--bridge-border)',
+            backgroundColor: 'var(--bridge-surface)',
+            color: 'var(--bridge-text-secondary)',
+            outlineColor: 'var(--color-primary)',
+          }}
         >
-          <span className={`absolute inset-0 opacity-0 transition group-hover:opacity-100 ${isDark ? 'bg-[radial-gradient(circle_at_50%_120%,rgba(255,180,60,0.10),transparent_65%)]' : 'bg-[radial-gradient(circle_at_50%_120%,rgba(249,115,22,0.14),transparent_65%)]'}`} />
-          <span className="relative">{provider.icon}</span>
-          <span className="relative hidden sm:inline">{provider.name}</span>
+          {provider.icon}
+          Continue with {provider.label}
         </button>
       ))}
     </div>
   );
 }
 
-export default function FuturisticAuthFrame({ mode, title, subtitle, children, footer, badge = 'Secured access', onSocialAuth }) {
+function SignupSidePanel() {
+  return (
+    <div className="hidden lg:block">
+      <p
+        className="text-[10px] font-black uppercase tracking-[0.28em]"
+        style={{ color: 'var(--color-primary)' }}
+      >
+        For job seekers
+      </p>
+      <h2
+        className="mt-4 font-display text-[2.5rem] font-black leading-[1.02] tracking-[-0.04em] xl:text-[3.5rem]"
+        style={{ color: 'var(--bridge-text)' }}
+      >
+        Your next move starts<br />with one conversation.
+      </h2>
+      <p className="mt-5 max-w-lg text-[17px] leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
+        Browse 2,400+ mentors from Google, Stripe, and top startups. Book a session, get honest feedback, and leave with a clear next step.
+      </p>
+
+      <div className="mt-8 grid grid-cols-3 gap-3.5 max-w-lg">
+        {[
+          ['2,400+', 'Vetted mentors'],
+          ['4.9/5', 'Avg rating'],
+          ['97%', 'Recommend'],
+        ].map(([value, label]) => (
+          <div
+            key={label}
+            className="rounded-2xl p-4 sm:p-5"
+            style={{
+              backgroundColor: 'var(--bridge-surface)',
+              border: '1px solid var(--bridge-border)',
+            }}
+          >
+            <div className="font-display text-2xl font-black tabular-nums" style={{ color: 'var(--bridge-text)' }}>
+              {value}
+            </div>
+            <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--bridge-text-muted)' }}>
+              {label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div
+        className="mt-8 max-w-lg rounded-2xl p-6"
+        style={{
+          backgroundColor: 'var(--bridge-surface)',
+          border: '1px solid var(--bridge-border)',
+        }}
+      >
+        <div className="flex gap-0.5" style={{ color: 'var(--color-primary)' }}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star key={i} className="h-3.5 w-3.5 fill-current" aria-hidden />
+          ))}
+        </div>
+        <p className="mt-3 text-[15px] font-semibold leading-relaxed" style={{ color: 'var(--bridge-text)' }}>
+          &ldquo;One session saved me six months of guessing. Worth every penny.&rdquo;
+        </p>
+        <p className="mt-3 text-xs" style={{ color: 'var(--bridge-text-muted)' }}>
+          — Product manager, Series B startup
+        </p>
+      </div>
+
+      <div className="mt-8 flex flex-wrap gap-3">
+        {[
+          { Icon: ShieldCheck, text: 'Secure auth' },
+          { Icon: UsersRound, text: 'Vetted mentors' },
+        ].map(({ Icon, text }) => (
+          <span
+            key={text}
+            className="inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold"
+            style={{
+              backgroundColor: 'var(--bridge-surface)',
+              border: '1px solid var(--bridge-border)',
+              color: 'var(--bridge-text-secondary)',
+            }}
+          >
+            <Icon className="h-3.5 w-3.5" style={{ color: 'var(--color-primary)' }} aria-hidden />
+            {text}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AuthCard({
+  title,
+  subtitle,
+  children,
+  footer,
+  onSocialAuth,
+}) {
+  return (
+    <div
+      className="relative z-10 w-full max-w-[540px] rounded-[1.35rem] p-8 sm:p-9 lg:max-w-none lg:rounded-[1.5rem] lg:p-10"
+      style={{
+        backgroundColor: 'var(--bridge-surface-raised)',
+        border: '1px solid var(--bridge-border)',
+        boxShadow: '0 24px 64px -32px color-mix(in srgb, var(--bridge-text) 18%, transparent)',
+      }}
+    >
+      <h1
+        id="auth-heading"
+        className="font-display font-black leading-[1.08] tracking-[-0.03em]"
+        style={{
+          color: 'var(--bridge-text)',
+          fontSize: 'clamp(1.5rem, 2.4vw, 1.875rem)',
+        }}
+      >
+        {title}
+      </h1>
+      {subtitle ? (
+        <p className="mt-2.5 text-[15px] leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
+          {subtitle}
+        </p>
+      ) : null}
+
+      <div className="mt-7">{children}</div>
+
+      {onSocialAuth ? (
+        <>
+          <div
+            className="my-6 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.16em]"
+            style={{ color: 'var(--bridge-text-faint)' }}
+          >
+            <span className="h-px flex-1" style={{ backgroundColor: 'var(--bridge-border)' }} />
+            or continue with
+            <span className="h-px flex-1" style={{ backgroundColor: 'var(--bridge-border)' }} />
+          </div>
+          <SocialAuthButtons onSocialAuth={onSocialAuth} />
+        </>
+      ) : null}
+
+      {footer ? (
+        <div className="mt-7 pt-6" style={{ borderTop: '1px solid var(--bridge-border)' }}>
+          {footer}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export default function FuturisticAuthFrame({
+  mode,
+  title,
+  subtitle,
+  children,
+  footer,
+  onSocialAuth,
+}) {
   const isSignup = mode === 'signup';
-  const isDark = useIsDark();
 
   return (
     <main
-      className="relative z-0 min-h-screen overflow-hidden transition-colors duration-300"
-      style={{ backgroundColor: isDark ? '#0f0906' : '#fff4e3', color: isDark ? '#f7f0e8' : '#0c0a09' }}
+      className={`relative flex min-h-screen flex-col px-4 py-8 sm:px-6 sm:py-10 ${isSignup ? 'justify-start pt-6 lg:pt-8' : 'items-center justify-center'}`}
+      style={{ backgroundColor: 'var(--bridge-canvas)', color: 'var(--bridge-text)' }}
       aria-labelledby="auth-heading"
     >
-      {/* Background gradients */}
       <div
         aria-hidden
-        className="absolute inset-0"
+        className="pointer-events-none absolute inset-0 overflow-hidden"
         style={{
-          background: isDark
-            ? 'radial-gradient(circle at 13% 16%, rgba(200,100,20,0.18), transparent 30%), radial-gradient(circle at 88% 12%, rgba(180,120,30,0.22), transparent 30%), radial-gradient(circle at 78% 88%, rgba(80,40,10,0.18), transparent 36%), linear-gradient(135deg, #140b05 0%, #1e100a 46%, #110906 100%)'
-            : 'radial-gradient(circle at 13% 16%, rgba(255,122,24,0.24), transparent 30%), radial-gradient(circle at 88% 12%, rgba(255,214,128,0.34), transparent 30%), radial-gradient(circle at 78% 88%, rgba(120,79,43,0.12), transparent 36%), linear-gradient(135deg, #fff7ea 0%, #f8dec0 46%, #fffaf2 100%)',
+          background:
+            'radial-gradient(ellipse 70% 55% at 15% 10%, color-mix(in srgb, var(--color-primary) 14%, transparent) 0%, transparent 70%), radial-gradient(ellipse 60% 50% at 85% 15%, color-mix(in srgb, var(--color-accent) 12%, transparent) 0%, transparent 70%), radial-gradient(ellipse 55% 45% at 50% 95%, color-mix(in srgb, var(--color-secondary) 10%, transparent) 0%, transparent 70%)',
         }}
       />
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_76%_70%_at_50%_42%,black_32%,transparent_100%)]"
-        style={{
-          backgroundImage: isDark
-            ? 'linear-gradient(rgba(200,140,60,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(200,140,60,0.05) 1px, transparent 1px)'
-            : 'linear-gradient(rgba(120,79,43,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(120,79,43,0.07) 1px, transparent 1px)',
-        }}
-      />
-      <div aria-hidden className={`absolute -left-24 top-14 h-80 w-80 rounded-full blur-3xl ${isDark ? 'bg-orange-900/20' : 'bg-orange-300/28'}`} />
-      <div aria-hidden className={`absolute bottom-0 right-0 h-96 w-96 rounded-full blur-3xl ${isDark ? 'bg-amber-900/22' : 'bg-amber-200/42'}`} />
-      <div aria-hidden className={`absolute left-1/2 top-10 h-56 w-56 -translate-x-1/2 rounded-full blur-3xl ${isDark ? 'bg-orange-950/30' : 'bg-rose-200/22'}`} />
 
-      <section className="relative z-[1] flex min-h-screen items-center justify-center px-4 pb-12 pt-[7.5rem] sm:px-6 lg:px-8">
-        <div className="grid w-full max-w-7xl items-start gap-8 lg:grid-cols-[1.06fr_34rem] lg:gap-16">
-
-          {/* Left column -- marketing copy */}
-          <div className="hidden lg:block">
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black uppercase tracking-[0.24em] backdrop-blur-xl"
-              style={{
-                border: isDark ? '1px solid rgba(255,200,100,0.12)' : '1px solid rgba(120,79,43,0.10)',
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.72)',
-                color: isDark ? 'rgba(255,200,120,0.85)' : '#57534e',
-                boxShadow: isDark ? 'none' : '0 18px 50px -34px rgba(120,79,43,0.8)',
-              }}
+      {isSignup ? (
+        <div className="relative z-10 mx-auto w-full max-w-[min(1280px,calc(100vw-2rem))]">
+          <header className="mb-8 lg:mb-10">
+            <Link
+              to="/"
+              className="inline-block font-display text-[1.35rem] font-black tracking-[-0.04em] transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-4 sm:text-xl"
+              style={{ color: 'var(--bridge-text)', outlineColor: 'var(--color-primary)' }}
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-orange-500 shadow-[0_0_14px_rgba(249,115,22,0.65)]" />
-              {badge}
-            </div>
-            <h1
-              className="mt-7 max-w-3xl text-5xl font-black leading-[0.92] tracking-[-0.075em] xl:text-7xl"
-              style={{ color: isDark ? '#f7f0e8' : '#0c0a09' }}
-            >
-              Turn expertise into your next{' '}
-              <span
-                className="relative inline-block"
-                style={{ color: isDark ? '#f7f0e8' : '#0c0a09' }}
+              mentorshipbridge
+            </Link>
+          </header>
+          <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,560px)_1fr] lg:gap-14 xl:grid-cols-[minmax(0,580px)_1.12fr] xl:gap-20">
+            <div className="mx-auto w-full max-w-[580px] lg:mx-0 lg:max-w-none lg:justify-self-start">
+              <AuthCard
+                title={title}
+                subtitle={subtitle}
+                footer={footer}
+                onSocialAuth={onSocialAuth}
               >
-                unfair advantage
-                <span
-                  aria-hidden
-                  className="absolute inset-x-0 bottom-2 -z-10 h-5 rounded-full"
-                  style={{ backgroundColor: isDark ? 'rgba(251,191,36,0.28)' : 'rgba(252,211,77,0.70)' }}
-                />
-              </span>
-              .
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg font-medium leading-8" style={{ color: isDark ? 'rgba(247,240,232,0.62)' : '#57534e' }}>
-              Bridge pairs ambitious builders with trusted mentors through a calm, credible, conversion-focused experience that feels hand-crafted instead of generated.
-            </p>
-            <div className="mt-9 grid max-w-2xl grid-cols-3 gap-3">
-              {[
-                ['4.8k+', 'sessions booked'],
-                ['92%', 'return again'],
-                ['2 min', 'to shortlist'],
-              ].map(([value, label]) => (
-                <div
-                  key={label}
-                  className="rounded-[1.65rem] p-5 backdrop-blur-xl"
-                  style={{
-                    border: isDark ? '1px solid rgba(255,200,100,0.10)' : '1px solid rgba(120,79,43,0.10)',
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.72)',
-                    boxShadow: isDark ? 'none' : '0 24px 70px -44px rgba(120,79,43,0.9)',
-                  }}
-                >
-                  <div className="text-2xl font-black tabular-nums" style={{ color: isDark ? '#f7f0e8' : '#0c0a09' }}>{value}</div>
-                  <div className="mt-1 text-xs font-black uppercase tracking-[0.16em]" style={{ color: isDark ? 'rgba(200,150,80,0.70)' : 'rgba(120,79,43,0.45)' }}>{label}</div>
-                </div>
-              ))}
+                {children}
+              </AuthCard>
             </div>
-            <div
-              className="mt-8 max-w-xl rounded-[2rem] p-5 text-white"
-              style={{
-                border: isDark ? '1px solid rgba(255,200,100,0.12)' : '1px solid rgba(12,9,0,0.10)',
-                backgroundColor: '#120c08',
-                boxShadow: '0 30px 90px -44px rgba(120,79,43,0.9)',
-              }}
-            >
-              <div className="flex items-center gap-1 text-orange-300">
-                {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
-              </div>
-              <p className="mt-4 text-lg font-black leading-7 tracking-[-0.02em]">"The sign-up flow makes Bridge feel like a private network, not another marketplace."</p>
-              <div className="mt-4 flex items-center gap-3 text-sm text-white/55">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-300 to-orange-500 font-black text-stone-950">M</span>
-                <span><span className="block font-bold text-white">Maya Chen</span>Product mentor, ex-Series B operator</span>
-              </div>
-            </div>
-            <div className="mt-8 flex flex-wrap gap-3 text-sm">
-              {[
-                { Icon: ShieldCheck, text: 'Secure Supabase auth' },
-                { Icon: UsersRound, text: 'Role-aware onboarding' },
-                { Icon: MessageSquareQuote, text: 'Mentor-grade trust' },
-              ].map(({ Icon, text }) => (
-                <span
-                  key={text}
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-2 backdrop-blur-xl"
-                  style={{
-                    border: isDark ? '1px solid rgba(255,200,100,0.10)' : '1px solid rgba(120,79,43,0.10)',
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.72)',
-                    color: isDark ? 'rgba(247,240,232,0.65)' : '#57534e',
-                    boxShadow: isDark ? 'none' : '0 2px 4px rgba(0,0,0,0.04)',
-                  }}
-                >
-                  <Icon className="h-4 w-4" style={{ color: isDark ? '#f59e0b' : '#ea580c' }} />
-                  {text}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Right column -- form card */}
-          <div className="mx-auto w-full max-w-[34rem] self-center [perspective:1200px]">
-            <div
-              className="group relative overflow-hidden rounded-[2.2rem] backdrop-blur-3xl transition duration-500 hover:-translate-y-1"
-              style={{
-                border: isDark ? '1px solid rgba(255,200,100,0.12)' : '1px solid rgba(255,255,255,0.90)',
-                backgroundColor: isDark ? 'rgba(28,17,9,0.92)' : 'rgba(255,255,255,0.88)',
-                boxShadow: isDark
-                  ? '0 42px 120px -54px rgba(120,60,10,0.70), inset 0 1px 0 rgba(255,200,100,0.08)'
-                  : '0 42px 120px -54px rgba(120,79,43,0.95), inset 0 1px 0 rgba(255,255,255,0.96)',
-              }}
-            >
-              <div
-                aria-hidden
-                className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent to-transparent"
-                style={{ via: isDark ? 'rgba(255,200,80,0.18)' : 'rgba(120,79,43,0.20)' }}
-              />
-              <div aria-hidden className={`absolute -right-24 -top-24 h-56 w-56 rounded-full blur-3xl ${isDark ? 'bg-orange-900/20' : 'bg-orange-200/50'}`} />
-              <div aria-hidden className={`absolute -bottom-24 -left-24 h-56 w-56 rounded-full blur-3xl ${isDark ? 'bg-amber-950/25' : 'bg-amber-100/70'}`} />
-              <div
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                  background: isDark
-                    ? 'linear-gradient(135deg, rgba(255,200,80,0.04) 0%, transparent 42%, rgba(200,80,10,0.04) 100%)'
-                    : 'linear-gradient(135deg, rgba(255,255,255,0.65) 0%, transparent 42%, rgba(249,115,22,0.06) 100%)',
-                }}
-              />
-
-              <div className="relative p-6 sm:p-8">
-                {/* Tab bar */}
-                <div
-                  className="grid grid-cols-2 rounded-2xl p-1"
-                  style={{
-                    border: isDark ? '1px solid rgba(255,200,100,0.10)' : '1px solid rgba(120,79,43,0.10)',
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,237,213,0.70)',
-                  }}
-                >
-                  <Link
-                    className={`rounded-xl px-4 py-2.5 text-center text-xs font-black uppercase tracking-[0.16em] transition ${!isSignup ? 'bg-stone-950 text-white shadow-[0_16px_32px_-20px_rgba(120,60,10,0.85)]' : ''}`}
-                    style={isSignup ? { color: isDark ? 'rgba(247,240,232,0.35)' : 'rgba(120,79,43,0.45)' } : {}}
-                    to="/login"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    className={`rounded-xl px-4 py-2.5 text-center text-xs font-black uppercase tracking-[0.16em] transition ${isSignup ? 'bg-stone-950 text-white shadow-[0_16px_32px_-20px_rgba(120,60,10,0.85)]' : ''}`}
-                    style={!isSignup ? { color: isDark ? 'rgba(247,240,232,0.35)' : 'rgba(120,79,43,0.45)' } : {}}
-                    to="/register"
-                  >
-                    Create Account
-                  </Link>
-                </div>
-
-                {/* Social buttons — above the form so they're always visible */}
-                <div className="mt-6">
-                  <SocialAuthButtons onSocialAuth={onSocialAuth} isDark={isDark} />
-                </div>
-
-                {/* Divider */}
-                <div className="mt-5 flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.18em]" style={{ color: isDark ? 'rgba(247,240,232,0.22)' : '#d6d3d1' }}>
-                  <span
-                    className="h-px flex-1"
-                    style={{ background: isDark ? 'linear-gradient(to right, transparent, rgba(255,200,100,0.18), transparent)' : 'linear-gradient(to right, transparent, #e7e5e4, transparent)' }}
-                  />
-                  or
-                  <span
-                    className="h-px flex-1"
-                    style={{ background: isDark ? 'linear-gradient(to left, transparent, rgba(255,200,100,0.18), transparent)' : 'linear-gradient(to left, transparent, #e7e5e4, transparent)' }}
-                  />
-                </div>
-
-                <div className="mt-5">{children}</div>
-
-                {footer ? (
-                  <div
-                    className="mt-7 pt-6"
-                    style={{ borderTop: isDark ? '1px solid rgba(255,200,100,0.10)' : '1px solid #e7e5e4' }}
-                  >
-                    {footer}
-                  </div>
-                ) : null}
-              </div>
-            </div>
+            <SignupSidePanel />
           </div>
         </div>
-      </section>
+      ) : (
+        <div className="relative z-10 flex w-full max-w-[min(580px,calc(100vw-2rem))] flex-col items-center px-1 sm:px-0">
+          <Link
+            to="/"
+            className="mb-8 font-display text-[1.35rem] font-black tracking-[-0.04em] transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-4 sm:mb-10 sm:text-xl"
+            style={{ color: 'var(--bridge-text)', outlineColor: 'var(--color-primary)' }}
+          >
+            mentorshipbridge
+          </Link>
+          <AuthCard
+            title={title}
+            subtitle={subtitle}
+            footer={footer}
+            onSocialAuth={onSocialAuth}
+          >
+            {children}
+          </AuthCard>
+        </div>
+      )}
     </main>
   );
 }

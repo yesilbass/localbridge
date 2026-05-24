@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 function computePerfTier() {
   if (typeof window === 'undefined') return 'high';
@@ -18,6 +19,8 @@ function computePerfTier() {
  * to avoid GPU thrash from large blurred animated gradients.
  */
 export default function BridgeGlobalAtmosphere() {
+  const { pathname } = useLocation();
+  const isLanding = pathname === '/';
   const [tier, setTier]   = useState(() => computePerfTier());
   const [paused, setPaused] = useState(typeof document !== 'undefined' ? document.hidden : false);
 
@@ -35,7 +38,7 @@ export default function BridgeGlobalAtmosphere() {
   }, []);
 
   const playState = paused ? 'paused' : 'running';
-  const showAurora = tier !== 'low';
+  const showAurora = tier !== 'low' && !isLanding;
 
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -55,7 +58,7 @@ export default function BridgeGlobalAtmosphere() {
             className="absolute right-[-25%] top-[8%] h-[55vmax] w-[55vmax] rounded-full opacity-60 dark:opacity-80"
             style={{
               background:
-                'radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 20%, transparent), color-mix(in srgb, var(--color-accent) 8%, transparent) 50%, transparent 72%)',
+                'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary-hover) 20%, transparent), color-mix(in srgb, var(--color-primary-hover) 8%, transparent) 50%, transparent 72%)',
               filter: tier === 'high' ? 'blur(40px)' : 'blur(22px)',
               animation: 'bridge-aurora 28s ease-in-out infinite reverse',
               animationPlayState: playState,

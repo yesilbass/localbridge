@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import AppLink from '../components/AppLink';
 import { isMentorAccount } from '../utils/accountRole';
 import {
   User,
@@ -450,8 +451,8 @@ export default function Settings() {
           {/* Banners */}
           {!serverSettingsAvailable && (
             <div className="mb-6 flex items-start gap-3 rounded-2xl border p-4 text-sm"
-              style={{ borderColor: 'color-mix(in srgb, var(--color-warning, #f59e0b) 35%, var(--bridge-border))', backgroundColor: 'color-mix(in srgb, var(--color-warning, #f59e0b) 8%, var(--bridge-surface))' }}>
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" style={{ color: 'var(--color-warning, #f59e0b)' }} aria-hidden />
+              style={{ borderColor: 'color-mix(in srgb, var(--color-warning, var(--color-primary)) 35%, var(--bridge-border))', backgroundColor: 'color-mix(in srgb, var(--color-warning, var(--color-primary)) 8%, var(--bridge-surface))' }}>
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" style={{ color: 'var(--color-warning, var(--color-primary))' }} aria-hidden />
               <p style={{ color: 'var(--bridge-text-secondary)' }}>
                 The <code className="rounded px-1.5 py-0.5 text-xs font-mono" style={{ backgroundColor: 'var(--bridge-surface-muted)' }}>user_settings</code> table isn't available. Theme preferences still work in this browser. Run <code className="rounded px-1.5 py-0.5 text-xs font-mono" style={{ backgroundColor: 'var(--bridge-surface-muted)' }}>supabase/ensure_user_settings.sql</code> to enable cloud sync.
               </p>
@@ -535,9 +536,9 @@ export default function Settings() {
                           <p className="mt-1 text-sm leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
                             You're set up to receive requests and run sessions. Create a separate member profile to also book mentors.
                           </p>
-                          <Link to="/dashboard" className={`mt-2 inline-flex text-sm font-semibold underline underline-offset-2 hover:no-underline ${focusRing} rounded-sm`} style={{ color: 'var(--color-primary)' }}>
+                          <AppLink to="/dashboard" className={`mt-2 inline-flex text-sm font-semibold underline underline-offset-2 hover:no-underline ${focusRing} rounded-sm`} style={{ color: 'var(--color-primary)' }}>
                             Open mentor dashboard →
-                          </Link>
+                          </AppLink>
                         </div>
                       ) : (
                         <div className="rounded-xl border p-4" style={{ borderColor: 'var(--bridge-border)', backgroundColor: 'var(--bridge-surface-muted)' }}>

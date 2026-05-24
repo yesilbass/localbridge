@@ -5,10 +5,10 @@ import { useI18n } from '../../i18n';
 
 export default function PricingBand() {
   const { t } = useI18n();
-  const TIERS = [
-    { label: t('landing.pricing.from', 'From'),   amount: '$25',  unit: t('landing.pricing.per30min', 'per 30 min'),       badge: null    },
-    { label: t('landing.pricing.avg', 'Avg'),     amount: '$60',  unit: t('landing.pricing.perSession', 'per session'),    badge: t('landing.pricing.most', 'Most')  },
-    { label: t('landing.pricing.upto', 'Up to'),  amount: '$150', unit: t('landing.pricing.seniorMentors', 'senior mentors'), badge: null },
+  const HIGHLIGHTS = [
+    { label: t('landing.pricing.sessions', 'Sessions'), amount: t('landing.pricing.free', 'Free'), unit: t('landing.pricing.volunteerMentors', 'volunteer mentors') },
+    { label: t('landing.pricing.browse', 'Browse'), amount: t('landing.pricing.free', 'Free'), unit: t('landing.pricing.noPaywall', 'no paywall to explore') },
+    { label: t('landing.pricing.booking', 'Booking'), amount: t('landing.pricing.simple', 'Simple'), unit: t('landing.pricing.pickTime', 'pick a time on their calendar') },
   ];
   return (
     <section
@@ -30,13 +30,12 @@ export default function PricingBand() {
                 'inset 0 0 0 1px var(--bridge-border), 0 18px 50px -28px color-mix(in srgb, var(--color-primary) 25%, transparent)',
             }}
           >
-            {/* Left copy */}
             <div className="lg:col-span-7">
               <p
                 className="text-[10px] font-black uppercase"
                 style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.32em' }}
               >
-                {t('landing.pricing.eyebrow', 'Pricing, clearly')}
+                {t('landing.pricing.eyebrow', 'Mentorship, clearly')}
               </p>
               <h2
                 id="pricing-heading"
@@ -49,8 +48,8 @@ export default function PricingBand() {
                   fontFeatureSettings: '"kern" 1, "ss01" 1',
                 }}
               >
-                {t('landing.pricing.heading1', 'No subscription to unlock mentors.')}{' '}
-                <span style={{ color: 'var(--color-primary)' }}>{t('landing.pricing.heading2', 'You pay per session.')}</span>
+                {t('landing.pricing.heading1', 'Mentors volunteer their time.')}{' '}
+                <span style={{ color: 'var(--color-primary)' }}>{t('landing.pricing.heading2', 'Sessions are free.')}</span>
               </h2>
               <p
                 className="mt-6 max-w-md"
@@ -60,29 +59,26 @@ export default function PricingBand() {
                   lineHeight: 1.55,
                 }}
               >
-                {t('landing.pricing.subCopy', 'Browse free. Book the operator who fits. Pay once, walk away with momentum.')}
+                {t('landing.pricing.subCopy', 'Browse the directory, find the right operator, and book straight from their calendar — no session fees.')}
               </p>
               <Link
                 to="/pricing"
                 className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
                 style={{ color: 'var(--color-primary)', outlineColor: 'var(--color-primary)' }}
               >
-                {t('landing.pricing.seeDetails', 'See pricing details')}
+                {t('landing.pricing.seeDetails', 'Platform plans')}
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </Link>
             </div>
 
-            {/* Right pill cards — vertical stack so $X / per Y / label fit naturally */}
             <div className="flex flex-col gap-3 lg:col-span-5">
-              {TIERS.map((t) => (
+              {HIGHLIGHTS.map((item) => (
                 <div
-                  key={t.amount}
+                  key={item.label}
                   className="flex items-center justify-between gap-4 rounded-2xl px-5 py-4"
                   style={{
                     backgroundColor: 'var(--bridge-surface-muted)',
-                    boxShadow: t.badge
-                      ? 'inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 50%, transparent)'
-                      : 'inset 0 0 0 1px var(--bridge-border)',
+                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
                   }}
                 >
                   <div className="min-w-0">
@@ -90,7 +86,7 @@ export default function PricingBand() {
                       className="text-[10px] font-bold uppercase"
                       style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.22em' }}
                     >
-                      {t.label}
+                      {item.label}
                     </p>
                     <p
                       className="mt-1 font-display font-black"
@@ -98,30 +94,17 @@ export default function PricingBand() {
                         fontSize: 26,
                         color: 'var(--bridge-text)',
                         letterSpacing: '-0.02em',
-                        fontFeatureSettings: '"tnum" 1',
                       }}
                     >
-                      {t.amount}
+                      {item.amount}
                       <span
                         className="ml-2 text-[12px] font-medium"
                         style={{ color: 'var(--bridge-text-muted)' }}
                       >
-                        {t.unit}
+                        {item.unit}
                       </span>
                     </p>
                   </div>
-                  {t.badge && (
-                    <span
-                      className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase"
-                      style={{
-                        backgroundColor: 'var(--color-primary)',
-                        color: 'var(--color-on-primary)',
-                        letterSpacing: '0.18em',
-                      }}
-                    >
-                      {t.badge}
-                    </span>
-                  )}
                 </div>
               ))}
             </div>

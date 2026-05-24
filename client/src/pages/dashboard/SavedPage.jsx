@@ -5,6 +5,7 @@ import { useSavedMentors } from './dashboardHooks.js';
 import { toggleFavorite } from '../../api/favorites';
 import EmptyState from './EmptyState.jsx';
 import { useContent } from '../../content';
+import { DASHBOARD_GRID_SAVED } from './dashboardLayout.js';
 
 function SavedCard({ mentor, onRemove, busy }) {
   const { s } = useContent();
@@ -47,7 +48,7 @@ function SavedCard({ mentor, onRemove, busy }) {
             className="mt-1 flex items-center gap-2 text-[11px]"
             style={{ color: 'var(--bridge-text-muted)' }}
           >
-            <Star aria-hidden className="h-3 w-3" fill="#F59E0B" stroke="#F59E0B" />
+            <Star aria-hidden className="h-3 w-3" fill="var(--color-primary)" stroke="var(--color-primary)" />
             <span className="tabular-nums">{(mentor.rating ?? 0).toFixed(1)}</span>
             <span aria-hidden>•</span>
             <span className="font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
@@ -100,7 +101,7 @@ export default function SavedPage() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className={DASHBOARD_GRID_SAVED}>
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
@@ -144,7 +145,7 @@ export default function SavedPage() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className={DASHBOARD_GRID_SAVED}>
       {mentors.map((m) => (
         <SavedCard key={m.id} mentor={m} onRemove={handleRemove} busy={busyId === m.id} />
       ))}

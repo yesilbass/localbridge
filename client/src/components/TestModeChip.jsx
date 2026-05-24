@@ -1,14 +1,6 @@
 import { FlaskConical } from 'lucide-react';
 
-/**
- * Floating chip rendered in the wizard + admin panel whenever the verification
- * system is running in test mode. Mirrors Stripe's "TEST MODE" banner.
- */
 export default function TestModeChip({ position = 'top-right' }) {
-  // DECISION: client doesn't know server's BRIDGE_VERIFICATION_MODE directly,
-  // so we treat presence of any test_link/test_otp anywhere on the run as
-  // evidence. For simplicity we always show the chip — there is no live mode
-  // wired in yet, and the chip is dismissible-free + low-contrast.
   const positions = {
     'top-right':    'top-3 right-3',
     'top-left':     'top-3 left-3',

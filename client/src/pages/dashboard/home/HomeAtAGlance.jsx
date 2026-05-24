@@ -15,6 +15,7 @@ import {
   useMentorRecommendations,
   formatCurrency,
 } from '../dashboardHooks.js';
+import { DASHBOARD_GRID_STATS } from '../dashboardLayout.js';
 
 // Stable mount-time clock anchor — keeps purity rules happy and is good enough
 // for "this week / last week" framing on the home (re-mounts on route nav).
@@ -39,7 +40,7 @@ function StatCard({ icon, label, value, sub, to, sublineColor }) {
   const interactive = !!to;
   const inner = (
     <article
-      className={`relative flex h-full flex-col gap-1 rounded-3xl p-5 transition-all duration-200 ${
+      className={`relative flex h-full flex-col gap-2 rounded-2xl p-5 transition-all duration-200 sm:p-6 ${
         interactive
           ? 'group-hover:-translate-y-0.5 group-hover:shadow-[0_8px_30px_-12px_rgb(0_0_0_/0.15)]'
           : ''
@@ -133,7 +134,7 @@ function MentorAtAGlance() {
   })();
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+    <div className={DASHBOARD_GRID_STATS}>
       <StatCard
         icon={Calendar}
         label="Hours this week"
@@ -186,7 +187,7 @@ function MenteeAtAGlance() {
   const topRec = recs.recommendations?.[0]?.mentor ?? null;
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+    <div className={DASHBOARD_GRID_STATS}>
       <StatCard
         icon={CalendarCheck}
         label="Sessions completed"
@@ -213,7 +214,7 @@ function MenteeAtAGlance() {
         label="Suggested next"
         value={topRec ? topRec.name?.split(/\s+/)[0] : '—'}
         sub={topRec ? `${topRec.title ?? ''}` : 'Browse to get suggestions'}
-        to={topRec ? `/mentors/${topRec.id}` : '/mentors'}
+        to={topRec ? `/dashboard/mentors/${topRec.id}` : '/dashboard/mentors'}
       />
     </div>
   );

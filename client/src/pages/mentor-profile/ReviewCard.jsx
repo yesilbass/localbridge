@@ -10,8 +10,8 @@ function Stars({ rating }) {
           viewBox="0 0 20 20"
           aria-hidden
           style={{
-            fill: i < rating ? '#F59E0B' : 'none',
-            stroke: i < rating ? '#F59E0B' : 'var(--bridge-text-muted)',
+            fill: i < rating ? 'var(--color-primary)' : 'none',
+            stroke: i < rating ? 'var(--color-primary)' : 'var(--bridge-text-muted)',
             strokeWidth: i < rating ? 0 : 1.5,
           }}
         >

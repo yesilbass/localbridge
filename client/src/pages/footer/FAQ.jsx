@@ -14,7 +14,7 @@ const FAQS = [
     { cat: 'Payment', q: 'How is pricing determined?', a: 'Mentors set their own rates based on experience and demand. Sessions range from $25 to $250+ per hour. The price is shown on every profile before you book.' },
     { cat: 'Payment', q: 'What payment methods do you accept?', a: 'All major credit and debit cards, Apple Pay, Google Pay. We do not store your card details — all payments are processed through Stripe.' },
     { cat: 'Payment', q: 'Do you offer refunds?', a: 'Yes. Full refund anytime before a session begins. Full refund within 48 hours of a completed session if you\u2019re unsatisfied — no questions asked.' },
-    { cat: 'Mentors', q: 'Can I become a mentor?', a: 'Yes. Apply through our mentor application page. We review applications on a rolling basis and typically respond within 10 business days.' },
+    { cat: 'Mentors', q: 'Can I become a mentor?', a: 'Mentors join Bridge by invitation. We are not accepting open applications through the site right now.' },
     { cat: 'Mentors', q: 'How much do mentors earn?', a: 'Mentors keep 85% of every session fee. Top mentors on the platform earn $5,000–$15,000 per month in side income.' },
     { cat: 'Privacy', q: 'Is my data secure?', a: 'All data is encrypted in transit and at rest. We\u2019re SOC 2 Type II compliant and never sell personal information to third parties.' },
     { cat: 'Privacy', q: 'Can I stay anonymous?', a: 'Your real name is only shared with mentors you book. You can use a display name publicly. Session transcripts are private to you.' },

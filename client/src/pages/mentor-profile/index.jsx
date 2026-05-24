@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../context/useAuth';
@@ -8,13 +7,11 @@ import { SESSION_TYPES } from '../../constants/sessionTypes';
 import { addRecentlyViewedMentor } from '../../utils/recentlyViewed';
 import { getMentorById } from '../../api/mentors';
 import { getReviewsForMentor } from '../../api/reviews';
-import { createBookingCheckout } from '../../api/stripe';
-import EmbeddedCheckoutPanel from '../../components/EmbeddedCheckoutPanel';
 import CalendlyInlineWidget from '../../components/CalendlyInlineWidget';
-import { AuroraBg, KineticNumber } from '../dashboard/dashboardCinematic.jsx';
+import { AuroraBg } from '../dashboard/dashboardCinematic.jsx';
 import supabase from '../../api/supabase';
 import { ArrowLeft, BadgeCheck, Heart, Share } from 'lucide-react';
-import TierBadge from '../onboarding/mentor/verify/components/TierBadge';
+import AppLink from '../../components/AppLink';
 import { useContent } from '../../content';
 
 import {
@@ -28,6 +25,9 @@ import TrackRecord from './TrackRecord';
 import ReviewsBlock from './ReviewsBlock';
 import ComparableMentors from './ComparableMentors';
 import BookingDrawer from './BookingDrawer';
+import FeaturedReviewSpotlight from './FeaturedReviewSpotlight';
+import ExpertiseToolkitSection from './ExpertiseToolkitSection';
+import MentorTagGroups from '../../components/MentorTagGroups';
 
 // ─── Constants ───────────────────────────────────────────────────────
 const ring = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
@@ -50,11 +50,9 @@ function SessionTypeIcon({ typeKey, className = 'h-5 w-5' }) {
 // ─── MentorHero ───────────────────────────────────────────────────────
 function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare, shareCopied, onBook, heroCtaRef, flat }) {
   const { s } = useContent();
-  const rate = rawMentor?.session_rate ?? null;
   const joinedLabel = formatJoinedDate(mentor.joinedAt);
   const bio = rawMentor?.bio ?? null;
   const bioExcerpt = bio ? (bio.length > 240 ? bio.slice(0, 237).trimEnd() + '…' : bio) : null;
-  const expertise = Array.isArray(rawMentor?.expertise) ? rawMentor.expertise.slice(0, 9) : [];
 
   return (
     <section aria-labelledby="profile-heading" className="relative overflow-hidden pt-10 pb-20 lg:pb-28">
@@ -155,9 +153,6 @@ function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare,
                   Bridge Verified
                 </span>
               )}
-              {mentor.tier && (
-                <TierBadge tier={mentor.tier} size="sm" />
-              )}
               {joinedLabel && <span>On Bridge since {joinedLabel}</span>}
             </div>
 
@@ -181,7 +176,7 @@ function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare,
             <div className="mt-5 flex flex-wrap items-center gap-4" style={{ fontSize: '14px' }}>
               {mentor.rating > 0 && (
                 <span className="flex items-center gap-1.5">
-                  <svg className="h-4 w-4" viewBox="0 0 20 20" aria-hidden style={{ fill: '#F59E0B' }}>
+                  <svg className="h-4 w-4" viewBox="0 0 20 20" aria-hidden style={{ fill: 'var(--color-primary)' }}>
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                   <span className="font-bold tabular-nums" style={{ color: 'var(--bridge-text)', fontFeatureSettings: '"tnum" 1' }}>{mentor.rating.toFixed(1)}</span>
@@ -227,41 +222,9 @@ function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare,
               </p>
             )}
 
-            {/* Expertise chips */}
-            {expertise.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-8">
-                {expertise.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-3.5 py-1.5 rounded-full text-sm font-medium"
-                    style={{ background: 'var(--bridge-surface)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)', color: 'var(--bridge-text-secondary)' }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Prominent price display */}
-            {rate != null && (
-              <div className="mb-6">
-                <div className="flex items-baseline gap-2">
-                  <span
-                    className="font-display font-black tabular-nums leading-none"
-                    style={{ fontSize: 'clamp(2.25rem, 4vw, 3.25rem)', letterSpacing: '-0.04em', color: 'var(--bridge-text)', fontFeatureSettings: '"tnum" 1' }}
-                  >
-                    ${rate}
-                  </span>
-                  <span style={{ fontSize: '15px', color: 'var(--bridge-text-muted)', fontWeight: 500 }}>/session</span>
-                </div>
-                <p className="mt-1" style={{ fontSize: '12px', color: 'var(--bridge-text-muted)' }}>
-                  60 min · Video call · Notes follow-up
-                </p>
-                <p className="mt-0.5" style={{ fontSize: '11px', color: 'var(--bridge-text-faint)' }}>
-                  Rate assigned by Bridge algorithm
-                </p>
-              </div>
-            )}
+            <div className="mb-8">
+            <MentorTagGroups mentor={rawMentor} layout="stack" limits={{ expertise: 8, industry: 2, tools: 6 }} />
+            </div>
 
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-3">
@@ -372,13 +335,6 @@ function StickyBar({ mentor, rawMentor, isFavorited, onToggleFavorite, onBook, v
                 )}
               </div>
 
-              {rawMentor?.session_rate != null && (
-                <span className="hidden sm:block shrink-0 font-black tabular-nums" style={{ fontSize: '17px', color: 'var(--bridge-text)', fontFeatureSettings: '"tnum" 1' }}>
-                  ${rawMentor.session_rate}
-                  <span className="font-normal text-xs ml-0.5" style={{ color: 'var(--bridge-text-muted)' }}>/session</span>
-                </span>
-              )}
-
               <button
                 type="button"
                 aria-pressed={isFavorited}
@@ -460,97 +416,10 @@ function AboutSection({ mentor, rawMentor }) {
   );
 }
 
-// ─── FocusAreasSection ────────────────────────────────────────────────
-function FocusAreasSection({ mentor, rawMentor }) {
-  const expertise = Array.isArray(rawMentor?.expertise) ? rawMentor.expertise : [];
-  const industry = rawMentor?.industry ?? null;
-  if (!expertise.length && !industry) return null;
-
-  return (
-    <section aria-labelledby="focus-heading" className="mt-16 pt-14" style={{ borderTop: '1px solid var(--bridge-border)' }}>
-      <p className="font-black uppercase" style={{ fontSize: '11px', letterSpacing: '0.28em', color: 'var(--color-primary)' }}>
-        Focus Areas
-      </p>
-      <h2
-        id="focus-heading"
-        className="mt-3 font-display font-black tracking-tight"
-        style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)', letterSpacing: '-0.02em', color: 'var(--bridge-text)' }}
-      >
-        What {mentor.firstName} helps with
-      </h2>
-
-      {/* Expertise chips */}
-      <div className="mt-6 flex flex-wrap gap-2.5">
-        {expertise.map((tag) => (
-          <span
-            key={tag}
-            className="px-4 py-2 rounded-full font-medium"
-            style={{ fontSize: '14px', background: 'var(--bridge-surface)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)', color: 'var(--bridge-text-secondary)' }}
-          >
-            {tag}
-          </span>
-        ))}
-        {industry && !expertise.includes(industry) && (
-          <span
-            className="px-4 py-2 rounded-full font-semibold"
-            style={{
-              fontSize: '14px',
-              background: 'color-mix(in srgb, var(--color-primary) 8%, var(--bridge-surface))',
-              boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 22%, transparent)',
-              color: 'var(--color-primary)',
-            }}
-          >
-            {industry}
-          </span>
-        )}
-      </div>
-
-      {/* Session types */}
-      <div className="mt-8 grid gap-3 sm:grid-cols-2">
-        {SESSION_TYPES.map((type) => (
-          <div
-            key={type.key}
-            className="flex items-start gap-3.5 rounded-2xl p-4"
-            style={{ background: 'var(--bridge-surface)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}
-          >
-            <span
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl"
-              style={{ background: `color-mix(in srgb, ${type.hueVar} 13%, var(--bridge-surface-muted))` }}
-              aria-hidden
-            >
-              {type.icon}
-            </span>
-            <div>
-              <p className="flex items-center gap-2 font-bold" style={{ fontSize: '14px', color: 'var(--bridge-text)' }}>
-                {type.name}
-                {type.popular && (
-                  <span
-                    className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                    style={{ background: `color-mix(in srgb, ${type.hueVar} 12%, transparent)`, color: type.hueVar }}
-                  >
-                    Popular
-                  </span>
-                )}
-              </p>
-              <p className="mt-0.5 text-xs" style={{ color: 'var(--bridge-text-muted)' }}>{type.duration} · Video call</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 // ─── BookingFlow (Calendly) ───────────────────────────────────────────
-function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, navigate, mentorId }) {
+function BookingFlow({ mentor, sessionType, onReset, user, navigate }) {
   const acceptingBookings = mentor.available !== false;
   const calendlyReady = !!(mentor.calendly_connected && mentor.calendly_event_type_uri && mentor.calendly_scheduling_url);
-  const isPaid = Number(mentor.session_rate) > 0;
-
-  function handlePaidClick() {
-    if (!user) { navigate('/login', { state: { from: `/mentors/${mentorId}` } }); return; }
-    onRequestConfirm({ sessionType });
-  }
 
   const prefill = useMemo(() => ({
     name: user?.user_metadata?.full_name || user?.email || undefined,
@@ -573,7 +442,6 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, var(--color-primary), transparent)` }} />
 
       <div className="grid gap-0 lg:grid-cols-12">
-        {/* Left: session summary dark panel */}
         <div className="relative overflow-hidden p-7 text-white lg:col-span-4 lg:p-8" style={{ background: DARK_BG }}>
           <div
             aria-hidden
@@ -597,44 +465,24 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
             </div>
           </div>
 
-          {mentor.session_rate ? (
-            <div
-              className="relative mt-6 overflow-hidden rounded-2xl p-4"
-              style={{
-                border: '1px solid color-mix(in srgb, var(--color-primary) 30%, rgba(255,255,255,0.1))',
-                background: 'color-mix(in srgb, var(--color-primary) 10%, rgba(255,255,255,0.04))',
-              }}
-            >
-              <p className="relative text-[10px] font-black uppercase tracking-[0.22em]" style={{ color: 'color-mix(in srgb, var(--color-primary) 65%, white)' }}>
-                Total
-              </p>
-              <p className="relative mt-1 font-display text-[2.4rem] font-black tabular-nums text-white leading-none">
-                $<KineticNumber to={Number(mentor.session_rate)} ms={900} />
-              </p>
-            </div>
-          ) : null}
-
-          {isPaid && calendlyReady && acceptingBookings && (
-            <button
-              type="button"
-              onClick={handlePaidClick}
-              className={`mt-6 relative w-full rounded-2xl px-6 py-4 text-sm font-black tracking-wide transition-all duration-300 ${ringWhite}`}
-              style={{
-                background: 'var(--color-primary)',
-                color: 'var(--color-on-primary)',
-                boxShadow: '0 12px 32px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = ''; }}
-            >
-              Pay ${mentor.session_rate} → pick a time
-            </button>
-          )}
+          <div
+            className="relative mt-6 overflow-hidden rounded-2xl p-4"
+            style={{
+              border: '1px solid color-mix(in srgb, var(--color-primary) 30%, rgba(255,255,255,0.1))',
+              background: 'color-mix(in srgb, var(--color-primary) 10%, rgba(255,255,255,0.04))',
+            }}
+          >
+            <p className="relative text-[10px] font-black uppercase tracking-[0.22em]" style={{ color: 'color-mix(in srgb, var(--color-primary) 65%, white)' }}>
+              Cost
+            </p>
+            <p className="relative mt-1 font-display text-[2rem] font-black text-white leading-none">Free</p>
+            <p className="relative mt-1 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>Volunteer mentor · no session fee</p>
+          </div>
 
           <button
             type="button"
             onClick={onReset}
-            className={`relative mt-3 w-full rounded-lg py-2 text-center text-xs font-bold transition-colors ${ringWhite}`}
+            className={`relative mt-6 w-full rounded-lg py-2 text-center text-xs font-bold transition-colors ${ringWhite}`}
             style={{ color: 'rgba(255,255,255,0.4)' }}
             onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; }}
@@ -643,7 +491,6 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
           </button>
         </div>
 
-        {/* Right: Calendly inline widget or paid summary */}
         <div className="relative p-7 lg:col-span-8 lg:p-8">
           <div className="relative mb-6">
             <p className="text-[10px] font-black uppercase tracking-[0.28em]" style={{ color: 'var(--color-primary)' }}>Step 2 of 2</p>
@@ -693,31 +540,6 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
                 </Link>
               </div>
             </div>
-          ) : isPaid ? (
-            <div
-              className="rounded-2xl p-6"
-              style={{
-                backgroundColor: 'var(--bridge-surface-muted)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-              }}
-            >
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
-                Pay first, then pick a time that works for both of you. Real-time availability comes straight from {mentor.name?.split(' ')[0] || 'your mentor'}'s calendar.
-              </p>
-              <button
-                type="button"
-                onClick={handlePaidClick}
-                className={`mt-5 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-black ${ring}`}
-                style={{
-                  background: 'var(--color-primary)',
-                  color: 'var(--color-on-primary)',
-                  boxShadow: '0 12px 32px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)',
-                  outlineColor: 'var(--color-primary)',
-                }}
-              >
-                Pay ${mentor.session_rate} → pick a time
-              </button>
-            </div>
           ) : (
             <CalendlyInlineWidget
               url={mentor.calendly_scheduling_url}
@@ -739,162 +561,6 @@ function BookingFlow({ mentor, sessionType, onReset, onRequestConfirm, user, nav
         </div>
       </div>
     </div>
-  );
-}
-
-// ─── ConfirmModal ─────────────────────────────────────────────────────
-function ConfirmModal({ mentor, user, confirmation, onClose }) {
-  const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null);
-  const [message, setMessage] = useState('');
-  const [checkoutClientSecret, setCheckoutClientSecret] = useState(null);
-  const handleClose = useCallback(() => onClose(), [onClose]);
-
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') handleClose(); };
-    window.addEventListener('keydown', onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
-  }, [handleClose]);
-
-  async function handleConfirm() {
-    setSubmitting(true); setResult(null);
-    try {
-      const res = await createBookingCheckout({
-        userEmail: user?.email,
-        menteeName: user?.user_metadata?.full_name ?? user?.email ?? 'Mentee',
-        mentorId: mentor.id, mentorName: mentor.name,
-        sessionTypeName: confirmation.sessionType.name,
-        sessionTypeKey: confirmation.sessionType.key,
-        message,
-      });
-      if (!res.ok) { setResult({ ok: false, message: res.error || 'Could not start booking checkout.' }); return; }
-      setCheckoutClientSecret(res.clientSecret);
-    } catch {
-      setResult({ ok: false, message: 'Could not connect to payment server.' });
-    } finally { setSubmitting(false); }
-  }
-
-  const mentorFirst = mentor.name?.split(/\s+/)[0] ?? 'your mentor';
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[9999] flex items-end justify-center sm:items-center sm:p-6"
-      role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title"
-    >
-      <EmbeddedCheckoutPanel clientSecret={checkoutClientSecret} onClose={() => setCheckoutClientSecret(null)} />
-      <button type="button" className="absolute inset-0 backdrop-blur-md" style={{ background: 'rgba(0,0,0,0.72)' }} aria-label="Close" onClick={handleClose} />
-      <div
-        className="relative flex max-h-[92dvh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl shadow-[0_24px_60px_-12px_rgba(0,0,0,0.45)] sm:rounded-3xl"
-        style={{ backgroundColor: 'var(--bridge-surface)', boxShadow: '0 24px 60px -12px rgba(0,0,0,0.45), inset 0 0 0 1px var(--bridge-border)' }}
-      >
-        {result?.ok ? (
-          <div className="relative flex flex-col items-center px-8 py-14 text-center">
-            <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-full text-4xl text-white" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 18px 44px -8px rgba(16,185,129,0.55)' }}>✓</div>
-            <h2 id="confirm-modal-title" className="relative font-display text-3xl font-black tracking-[-0.025em]" style={{ color: 'var(--bridge-text)' }}>Request sent</h2>
-            <p className="relative mx-auto mt-3 max-w-sm leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
-              Payment cleared. Opening {mentorFirst}'s booking calendar so you can pick a time.
-            </p>
-            <button type="button" onClick={handleClose}
-              className={`relative mt-8 inline-flex items-center gap-2 rounded-full px-10 py-3 text-sm font-black transition-all hover:-translate-y-0.5 ${ring}`}
-              style={{ background: 'var(--color-primary)', color: 'var(--color-on-primary)', boxShadow: '0 8px 28px -6px color-mix(in srgb, var(--color-primary) 65%, transparent)', outlineColor: 'var(--color-primary)' }}
-            >Done</button>
-          </div>
-        ) : (
-          <>
-            <header className="relative shrink-0 overflow-hidden px-6 pb-6 pt-6 sm:px-7" style={{ background: DARK_BG }}>
-              <div aria-hidden className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full blur-3xl" style={{ background: 'color-mix(in srgb, var(--color-primary) 22%, transparent)' }} />
-              <div className="relative flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.28em]" style={{ color: 'color-mix(in srgb, var(--color-primary) 65%, white)' }}>Confirm & pay</p>
-                  <h2 id="confirm-modal-title" className="mt-1.5 font-display text-2xl font-black tracking-[-0.025em] text-white sm:text-[1.7rem]">Ready to book?</h2>
-                </div>
-                <button type="button" onClick={handleClose}
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg text-white transition ${ringWhite}`}
-                  style={{ background: 'rgba(255,255,255,0.1)' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
-                  aria-label="Close"
-                >×</button>
-              </div>
-            </header>
-
-            <div className="flex-1 overflow-y-auto">
-              <div className="space-y-5 px-6 py-5 sm:px-7">
-                <div className="relative overflow-hidden rounded-2xl p-4" style={{ border: '1px solid var(--bridge-border)', backgroundColor: 'var(--bridge-surface-muted)' }}>
-                  <dl className="space-y-3 text-sm">
-                    {[
-                      { label: 'Mentor', value: mentor.name },
-                      { label: 'Format', value: confirmation.sessionType.name },
-                      { label: 'Next', value: 'Pick a time after payment' },
-                    ].map(({ label, value }, i) => (
-                      <div key={label} className={`flex items-start justify-between gap-3 ${i > 0 ? 'pt-3' : ''}`} style={i > 0 ? { borderTop: '1px solid var(--bridge-border)' } : {}}>
-                        <dt className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: 'var(--bridge-text-muted)' }}>{label}</dt>
-                        <dd className="text-right font-bold" style={{ color: 'var(--bridge-text)' }}>{value}</dd>
-                      </div>
-                    ))}
-                    {mentor.session_rate ? (
-                      <div className="flex items-end justify-between gap-3 pt-3" style={{ borderTop: '1px solid var(--bridge-border)' }}>
-                        <dt className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: 'var(--color-primary)' }}>Total</dt>
-                        <dd className="font-display text-2xl font-black tabular-nums" style={{ color: 'var(--bridge-text)' }}>${mentor.session_rate}</dd>
-                      </div>
-                    ) : null}
-                  </dl>
-                </div>
-
-                <div>
-                  <label htmlFor="booking-note" className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: 'var(--bridge-text-muted)' }}>
-                    Add context <span className="font-normal normal-case" style={{ color: 'var(--bridge-text-faint)' }}>(optional)</span>
-                  </label>
-                  <textarea
-                    id="booking-note"
-                    rows={3}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder={`What do you want to get out of this session with ${mentorFirst}?`}
-                    className={`w-full resize-none rounded-xl px-4 py-3 text-sm leading-relaxed transition ${ring}`}
-                    style={{
-                      backgroundColor: 'var(--bridge-surface-muted)',
-                      border: '1px solid var(--bridge-border)',
-                      color: 'var(--bridge-text)',
-                      outlineColor: 'var(--color-primary)',
-                    }}
-                  />
-                </div>
-
-                {result && !result.ok && (
-                  <p className="rounded-xl px-4 py-3 text-sm font-medium" style={{ background: 'color-mix(in srgb, var(--color-error) 8%, var(--bridge-surface-muted))', border: '1px solid color-mix(in srgb, var(--color-error) 25%, transparent)', color: 'var(--color-error)' }}>
-                    {result.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <footer className="shrink-0 px-6 py-4 sm:px-7" style={{ borderTop: '1px solid var(--bridge-border)' }}>
-              <button
-                type="button"
-                onClick={handleConfirm}
-                disabled={submitting}
-                className={`w-full rounded-2xl py-3.5 text-sm font-black tracking-wide transition-all ${ring}`}
-                style={{
-                  background: submitting ? 'var(--bridge-surface-muted)' : 'var(--color-primary)',
-                  color: submitting ? 'var(--bridge-text-faint)' : 'var(--color-on-primary)',
-                  boxShadow: submitting ? 'none' : '0 8px 24px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)',
-                  outlineColor: 'var(--color-primary)',
-                  cursor: submitting ? 'not-allowed' : 'pointer',
-                }}
-                onMouseEnter={(e) => { if (!submitting) e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = ''; }}
-              >
-                {submitting ? 'Opening checkout…' : `Pay $${mentor.session_rate ?? 25} & request`}
-              </button>
-            </footer>
-          </>
-        )}
-      </div>
-    </div>,
-    document.body
   );
 }
 
@@ -929,7 +595,7 @@ function ProfileSkeleton() {
 }
 
 // ─── Main page ────────────────────────────────────────────────────────
-export default function MentorProfilePage() {
+export default function MentorProfilePage({ embedded = false }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -944,7 +610,6 @@ export default function MentorProfilePage() {
   const [loading, setLoading] = useState(true);
 
   const [selectedType, setSelectedType] = useState(null);
-  const [pendingConfirm, setPendingConfirm] = useState(null);
   const [checkoutNotice, setCheckoutNotice] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [stickyVisible, setStickyVisible] = useState(false);
@@ -1035,9 +700,11 @@ export default function MentorProfilePage() {
   if (loading) return <ProfileSkeleton />;
 
   if (loadError || !rawMentor) {
+    const listPath = embedded ? '/dashboard/mentors' : '/mentors';
+    const ErrShell = embedded ? 'div' : 'main';
     return (
-      <main className="relative min-h-screen px-4 py-16 sm:px-6" style={{ backgroundColor: 'var(--bridge-canvas)' }}>
-        <AuroraBg />
+      <ErrShell className={embedded ? 'relative py-10' : 'relative min-h-screen px-4 py-16 sm:px-6'} style={{ backgroundColor: 'var(--bridge-canvas)' }}>
+        {!embedded && <AuroraBg />}
         <div className="relative mx-auto max-w-lg rounded-[2rem] p-14 text-center" style={{ backgroundColor: 'var(--bridge-surface)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}>
           <p className="font-display text-2xl font-black tracking-tight" style={{ color: 'var(--bridge-text)' }}>
             {loadError ? "Couldn't load this profile" : "This mentor isn't here"}
@@ -1046,20 +713,25 @@ export default function MentorProfilePage() {
             {loadError ?? 'The link may be outdated or the profile was removed.'}
           </p>
           <Link
-            to="/mentors"
+            to={listPath}
             className={`mt-7 inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm font-black transition-all hover:-translate-y-0.5 ${ring}`}
             style={{ background: 'var(--color-primary)', color: 'var(--color-on-primary)', boxShadow: '0 8px 28px -6px color-mix(in srgb, var(--color-primary) 65%, transparent)', outlineColor: 'var(--color-primary)' }}
           >
             Browse all mentors
           </Link>
         </div>
-      </main>
+      </ErrShell>
     );
   }
 
+  const Root = embedded ? 'div' : 'main';
   return (
-    <main role="main" className="relative isolate min-h-screen overflow-x-hidden" style={{ backgroundColor: 'var(--bridge-canvas)' }}>
-      <AuroraBg />
+    <Root
+      role={embedded ? undefined : 'main'}
+      className={embedded ? 'relative isolate overflow-x-hidden' : 'relative isolate min-h-screen overflow-x-hidden'}
+      style={{ backgroundColor: 'var(--bridge-canvas)' }}
+    >
+      {!embedded && <AuroraBg />}
 
       {/* Sticky scroll bar */}
       {canBook && (
@@ -1099,8 +771,9 @@ export default function MentorProfilePage() {
 
       {/* Content */}
       <div className="relative max-w-5xl mx-auto px-5 sm:px-8 pb-10">
+        <FeaturedReviewSpotlight review={mentor?.featuredReview} firstName={mentor?.firstName} />
         <AboutSection mentor={mentor} rawMentor={rawMentor} />
-        <FocusAreasSection mentor={mentor} rawMentor={rawMentor} />
+        <ExpertiseToolkitSection mentor={mentor} rawMentor={rawMentor} />
         <TrackRecord mentor={mentor} />
 
         {isOwnMentorProfile && (
@@ -1116,13 +789,13 @@ export default function MentorProfilePage() {
               Session requests and your availability are managed from your dashboard.
             </p>
             <div className="mt-6">
-              <Link
+              <AppLink
                 to="/dashboard"
                 className={`inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-black transition-all hover:-translate-y-0.5 ${ring}`}
                 style={{ background: 'var(--color-primary)', color: 'var(--color-on-primary)', boxShadow: '0 8px 28px -6px color-mix(in srgb, var(--color-primary) 65%, transparent)', outlineColor: 'var(--color-primary)' }}
               >
                 Open mentor dashboard
-              </Link>
+              </AppLink>
             </div>
           </div>
         )}
@@ -1203,8 +876,7 @@ export default function MentorProfilePage() {
                 </div>
 
                 <p className="mt-6 text-sm text-center" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  All sessions include a video call and notes follow-up
-                  {rawMentor?.session_rate != null && ` · $${rawMentor.session_rate}/session`}
+                  All sessions are free · video call and notes follow-up included
                 </p>
               </div>
             </div>
@@ -1213,10 +885,8 @@ export default function MentorProfilePage() {
               mentor={rawMentor}
               sessionType={selectedType}
               onReset={() => setSelectedType(null)}
-              onRequestConfirm={setPendingConfirm}
               user={user}
               navigate={navigate}
-              mentorId={id}
             />
           )}
         </div>
@@ -1257,16 +927,6 @@ export default function MentorProfilePage() {
           </div>
         ) : null}
       </BookingDrawer>
-
-      {/* Confirm modal */}
-      {pendingConfirm && (
-        <ConfirmModal
-          mentor={rawMentor}
-          user={user}
-          confirmation={pendingConfirm}
-          onClose={() => setPendingConfirm(null)}
-        />
-      )}
-    </main>
+    </Root>
   );
 }

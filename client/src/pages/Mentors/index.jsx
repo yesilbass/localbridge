@@ -1,19 +1,19 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getAllMentors } from '../../api/mentors';
 import { getMyFavorites, toggleFavorite } from '../../api/favorites';
 import { useAuth } from '../../context/useAuth';
 import { isMentorAccount } from '../../utils/accountRole';
-import Reveal from '../../components/Reveal';
+import AppLink from '../../components/AppLink';
 import { focusRing } from '../../ui';
 import MentorMatchWizard from '../../components/MentorMatchWizard';
 import { getAIMatchedMentors, saveMenteeAssessment, loadMenteeAssessment } from '../../api/aiMatching';
-import { getRemainingUses, hasReachedLimit, LIMITS } from '../../api/aiUsage';
-import { PAGE_SIZE, INDUSTRIES, TIERS, SORT_OPTIONS, normalizeMentorId } from './constants';
+import { getRemainingUses, hasReachedLimit } from '../../api/aiUsage';
+import { getCalendlyEventTypeSummary } from '../../api/calendly';
+import { PAGE_SIZE, MENTORS_PAGE_MAX, INDUSTRIES, SORT_OPTIONS, normalizeMentorId } from './constants';
+import { DASHBOARD_EMBEDDED_BLEED } from '../dashboard/dashboardLayout.js';
 import MentorCard, { MentorGridSkeleton } from './MentorCard';
 import { AiMatchCard, AiHonorableCard } from './AiMatchCards';
-import MentorTiersModal from './MentorTiersModal';
-import { AuroraBg } from '../dashboard/dashboardCinematic.jsx';
 import { useContent } from '../../content';
 
 function FetchErrorBanner({ message, onRetry }) {
@@ -49,7 +49,7 @@ function FetchErrorBanner({ message, onRetry }) {
   );
 }
 
-export default function Mentors() {
+export default function Mentors({ embedded = false }) {
   const { user } = useAuth();
   const { s } = useContent();
   const navigate  = useNavigate();
@@ -59,7 +59,6 @@ export default function Mentors() {
   const [search, setSearch]                   = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [activeIndustry, setActiveIndustry]   = useState('');
-  const [activeTier, setActiveTier]           = useState('');
   const [sortBy, setSortBy]                   = useState('rating');
   const [page, setPage]                       = useState(0);
   const [mentors, setMentors]                 = useState([]);
@@ -67,18 +66,16 @@ export default function Mentors() {
   const [loading, setLoading]                 = useState(true);
   const [error, setError]                     = useState(null);
   const [reloadKey, setReloadKey]             = useState(0);
+  const [calendlySlots, setCalendlySlots]       = useState({});
   const [favoriteIds, setFavoriteIds]         = useState(() => new Set());
   const [favoriteBusyId, setFavoriteBusyId]   = useState(null);
   const [favoriteMessage, setFavoriteMessage] = useState(null);
   const [filterOpen, setFilterOpen]           = useState(false);
   const [sortOpen, setSortOpen]               = useState(false);
-  const [rateMin, setRateMin]                 = useState('');
-  const [rateMax, setRateMax]                 = useState('');
   const [availableOnly, setAvailableOnly]     = useState(false);
   const gridRef = useRef(null);
   const sortRef = useRef(null);
 
-  const [showTiersModal, setShowTiersModal]         = useState(false);
   const [wizardOpen, setWizardOpen]                 = useState(false);
   const [aiMode, setAiMode]                         = useState(false);
   const [aiLoading, setAiLoading]                   = useState(false);
@@ -99,7 +96,7 @@ export default function Mentors() {
   // Reset to page 0 when any filter/sort changes
   useEffect(() => {
     setPage(0);
-  }, [debouncedSearch, activeIndustry, activeTier, sortBy, rateMin, rateMax, availableOnly]);
+  }, [debouncedSearch, activeIndustry, sortBy, availableOnly]);
 
   // Load favorites for mentee users
   useEffect(() => {
@@ -133,8 +130,8 @@ export default function Mentors() {
     void (async () => {
       const includeUnverified = new URLSearchParams(window.location.search).get('include_unverified') === '1';
       const { data, error: fetchError, totalCount: count } = await getAllMentors({
-        search: debouncedSearch, industry: activeIndustry, tier: activeTier,
-        availableOnly, rateMin, rateMax, sortBy, page, pageSize: PAGE_SIZE,
+        search: debouncedSearch, industry: activeIndustry,
+        availableOnly, sortBy, page, pageSize: PAGE_SIZE,
         includeUnverified,
       });
       if (cancelled) return;
@@ -143,7 +140,7 @@ export default function Mentors() {
       setMentors(data ?? []); setTotalCount(count ?? 0);
     })();
     return () => { cancelled = true; };
-  }, [debouncedSearch, activeIndustry, activeTier, availableOnly, rateMin, rateMax, sortBy, page, reloadKey]);
+  }, [debouncedSearch, activeIndustry, availableOnly, sortBy, page, reloadKey]);
 
   const loadMentors = useCallback(() => { setLoading(true); setError(null); setReloadKey(k => k + 1); }, []);
 
@@ -233,8 +230,8 @@ export default function Mentors() {
   }
 
   function resetFilters() {
-    setSearch(''); setActiveIndustry(''); setActiveTier(''); setSortBy('rating');
-    setRateMin(''); setRateMax(''); setAvailableOnly(false); setPage(0);
+    setSearch(''); setActiveIndustry(''); setSortBy('rating');
+    setAvailableOnly(false); setPage(0);
   }
 
   const startIdx = totalCount === 0 ? 0 : page * PAGE_SIZE + 1;
@@ -243,132 +240,161 @@ export default function Mentors() {
   const canNext  = endIdx < totalCount;
 
   const activeFilterCount =
-    (activeIndustry ? 1 : 0) + (activeTier ? 1 : 0) + (debouncedSearch ? 1 : 0) +
-    (rateMin !== '' || rateMax !== '' ? 1 : 0) + (availableOnly ? 1 : 0);
+    (activeIndustry ? 1 : 0) + (debouncedSearch ? 1 : 0) + (availableOnly ? 1 : 0);
 
   // Only exclude the mentor's own card — all other filters are applied server-side
   const visibleMentors = mentors.filter(m => !(asMentor && user?.id && m.user_id === user.id));
 
-  return (
-    <main role="main" className="relative isolate min-h-screen overflow-x-hidden" style={{ backgroundColor: 'var(--bridge-canvas)' }}>
-      <AuroraBg />
+  const calendlyMentorKey = useMemo(
+    () => visibleMentors
+      .filter(m => m.calendly_connected && m.calendly_event_type_uri)
+      .map(m => m.id)
+      .sort()
+      .join(','),
+    [visibleMentors],
+  );
 
+  useEffect(() => {
+    if (!calendlyMentorKey) {
+      setCalendlySlots({});
+      return;
+    }
 
-      {/* Hero */}
-      {!aiMode && (
-        <section
-          aria-labelledby="mentors-heading"
-          className="relative px-5 pt-10 pb-9 sm:px-8 sm:pt-14 sm:pb-12"
-          style={{
-            background: 'linear-gradient(to bottom, color-mix(in srgb, var(--color-primary) 5%, var(--bridge-canvas)) 0%, var(--bridge-canvas) 100%)',
-          }}
-        >
-          <div className="relative mx-auto max-w-7xl">
-            <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
+    const ids = calendlyMentorKey.split(',');
+    let cancelled = false;
 
-              {/* Left: eyebrow + headline + sub */}
-              <div className="min-w-0">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1"
-                  style={{
-                    backgroundColor: 'color-mix(in srgb, #10b981 10%, transparent)',
-                    boxShadow: 'inset 0 0 0 1px color-mix(in srgb, #10b981 28%, transparent)',
-                  }}>
-                  <span aria-hidden="true" className="bridge-pulse inline-block h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: '#10b981' }} />
-                  <span className="text-[11px] font-bold tracking-wide" style={{ color: '#10b981' }}>
-                    {totalCount > 0 ? `${totalCount.toLocaleString()} mentors live` : s.mentors.heroEyebrowBrowse}
-                  </span>
-                </div>
+    void (async () => {
+      const entries = await Promise.all(
+        ids.map(async (id) => {
+          const res = await getCalendlyEventTypeSummary(id);
+          if (!res.ok || !res.ready) return [id, null];
+          return [id, res.next_available ?? null];
+        }),
+      );
+      if (cancelled) return;
+      setCalendlySlots(Object.fromEntries(entries));
+    })();
 
-                <h1
-                  id="mentors-heading"
-                  className="font-display font-black"
-                  style={{
-                    fontSize: 'clamp(2rem, 4.5vw, 3rem)',
-                    lineHeight: 1.06,
-                    letterSpacing: '-0.03em',
-                    color: 'var(--bridge-text)',
-                  }}
-                >
-                  {s.mentors.heroHeading1}{' '}
-                  <span
-                    className="bg-clip-text text-transparent"
-                    style={{ backgroundImage: 'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)' }}
-                  >
-                    {s.mentors.heroHeading2}
-                  </span>.
-                </h1>
+    return () => { cancelled = true; };
+  }, [calendlyMentorKey]);
 
-                <p className="mt-3 max-w-lg text-[14px] leading-relaxed" style={{ color: 'var(--bridge-text-muted)' }}>
-                  {s.mentors.heroSubCopy}
-                </p>
-              </div>
+  const Root = embedded ? 'div' : 'main';
+  const rootProps = embedded
+    ? { className: DASHBOARD_EMBEDDED_BLEED }
+    : {
+        role: 'main',
+        className: 'relative isolate min-h-screen overflow-x-clip',
+        style: { backgroundColor: 'var(--bridge-canvas)' },
+      };
+  const pageGutter = embedded ? 'px-5 sm:px-8 lg:px-10' : 'px-4 sm:px-6 lg:px-8 xl:px-10';
+  const pageInnerStyle = embedded ? undefined : { maxWidth: MENTORS_PAGE_MAX };
+  const listPad = embedded ? 'pt-4 pb-8' : 'pt-8 pb-24 lg:pb-32';
 
-              {/* Right: action buttons */}
-              <div className="flex shrink-0 flex-wrap items-center gap-3">
-                {!asMentor && remainingUses !== 0 && (
-                  <button
-                    type="button"
-                    onClick={handleAiMatchClick}
-                    className={`group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-3 text-[13px] font-bold transition hover:-translate-y-0.5 active:translate-y-0 ${focusRing}`}
-                    style={{
-                      backgroundColor: 'var(--color-primary)',
-                      color: 'var(--color-on-primary)',
-                      boxShadow: '0 12px 32px -10px color-mix(in srgb, var(--color-primary) 60%, transparent)',
-                    }}
-                  >
-                    <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
-                    <svg className="relative z-10 h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
-                    <span className="relative z-10">{s.mentors.aiMatch}</span>
-                    {remainingUses !== null && remainingUses > 0 && (
-                      <span className="relative z-10 ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-black" style={{ backgroundColor: 'rgba(255,255,255,0.22)' }}>
-                        {remainingUses}
-                      </span>
-                    )}
-                  </button>
-                )}
-                {!asMentor && remainingUses === 0 && (
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-[12px] font-medium"
-                    style={{ boxShadow: 'inset 0 0 0 1px var(--bridge-border)', color: 'var(--bridge-text-faint)' }}
-                  >
-                    <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
-                    {s.mentors.aiMatchUsedUp}
+  const sortControls = (
+    <>
+      <div ref={sortRef} className="relative">
+        <button type="button" onClick={() => setSortOpen(o => !o)} aria-haspopup="listbox" aria-expanded={sortOpen}
+          className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-3.5 text-[12px] font-semibold transition hover:-translate-y-px ${focusRing}`}
+          style={{ backgroundColor: 'var(--bridge-surface)', color: 'var(--bridge-text-secondary)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}>
+          <svg className="h-3.5 w-3.5 shrink-0" style={{ color: 'var(--bridge-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5h18M6 12h12M10 16.5h4" /></svg>
+          <span className="hidden sm:inline">{SORT_OPTIONS.find(o => o.value === sortBy)?.label}</span>
+          <span className="sm:hidden">Sort</span>
+          <svg className={`h-3 w-3 shrink-0 transition-transform ${sortOpen ? 'rotate-180' : ''}`} style={{ color: 'var(--bridge-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+        </button>
+        {sortOpen && (
+          <div
+            role="listbox"
+            className="animate-pop-in absolute right-0 top-full z-20 mt-1.5 w-48 overflow-hidden rounded-xl backdrop-blur-xl"
+            style={{
+              backgroundColor: 'var(--bridge-surface-raised)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 18px 40px -18px color-mix(in srgb, var(--color-primary) 28%, transparent)',
+            }}
+          >
+            {SORT_OPTIONS.map(opt => (
+              <button key={opt.value} type="button" role="option" aria-selected={sortBy === opt.value}
+                onClick={() => { setSortBy(opt.value); setSortOpen(false); }}
+                className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-[13px] transition ${sortBy === opt.value ? 'bg-[var(--bridge-surface-muted)] font-semibold text-[var(--bridge-text)]' : 'text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)]'} ${focusRing}`}>
+                {opt.label}
+                {sortBy === opt.value && (
+                  <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full text-white" style={{ backgroundColor: 'var(--color-primary)' }} aria-hidden>
+                    <svg className="h-2 w-2" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                   </span>
                 )}
-                <button
-                  type="button"
-                  onClick={() => setShowTiersModal(true)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-3 text-[13px] font-semibold transition hover:-translate-y-0.5 ${focusRing}`}
-                  style={{
-                    color: 'var(--bridge-text-secondary)',
-                    backgroundColor: 'var(--bridge-surface)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 2px 8px -4px color-mix(in srgb, var(--bridge-text) 8%, transparent)',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border-strong), 0 2px 8px -4px color-mix(in srgb, var(--bridge-text) 8%, transparent)'; e.currentTarget.style.color = 'var(--bridge-text)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border), 0 2px 8px -4px color-mix(in srgb, var(--bridge-text) 8%, transparent)'; e.currentTarget.style.color = 'var(--bridge-text-secondary)'; }}
-                >
-                  {s.mentors.compareTiers}
-                </button>
-              </div>
-            </div>
+              </button>
+            ))}
           </div>
-        </section>
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={() => setFilterOpen(o => !o)}
+        aria-expanded={filterOpen}
+        className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-3.5 text-[12px] font-semibold transition hover:-translate-y-px ${focusRing}`}
+        style={
+          filterOpen || activeFilterCount > 0
+            ? { backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)', color: 'var(--color-primary)', boxShadow: 'inset 0 0 0 1.5px color-mix(in srgb, var(--color-primary) 50%, transparent)' }
+            : { backgroundColor: 'var(--bridge-surface)', color: 'var(--bridge-text-secondary)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }
+        }
+      >
+        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" /></svg>
+        Filters
+        {activeFilterCount > 0 && (
+          <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold text-white" style={{ backgroundColor: 'var(--color-primary)' }}>
+            {activeFilterCount}
+          </span>
+        )}
+      </button>
+
+      {activeFilterCount > 0 && (
+        <button type="button" onClick={resetFilters}
+          className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition hover:text-[var(--bridge-text)] ${focusRing}`}
+          style={{ color: 'var(--bridge-text-faint)' }}>
+          <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" d="M6 18 18 6M6 6l12 12" /></svg>
+          Clear
+        </button>
       )}
 
-      {/* Sticky control bar */}
+      {!asMentor && remainingUses !== 0 && (
+        <button
+          type="button"
+          onClick={handleAiMatchClick}
+          title={s.mentors.aiMatch}
+          className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-3.5 text-[12px] font-bold transition hover:-translate-y-px ${focusRing}`}
+          style={{
+            backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+            color: 'var(--color-primary)',
+            boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent)',
+          }}
+        >
+          <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
+          <span className="hidden sm:inline">AI match</span>
+          <span className="sm:hidden">AI</span>
+          {remainingUses !== null && remainingUses > 0 && (
+            <span className="rounded-full px-1.5 py-0.5 text-[9px] font-black" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 18%, transparent)' }}>
+              {remainingUses}
+            </span>
+          )}
+        </button>
+      )}
+    </>
+  );
+
+  return (
+    <Root {...rootProps}>
       <div
-        className={`sticky top-[3.75rem] z-30 backdrop-blur-xl sm:top-16 ${aiMode ? 'opacity-60 pointer-events-none' : ''}`}
+        className={aiMode ? 'opacity-60 pointer-events-none' : ''}
         style={{
-          backgroundColor: 'color-mix(in srgb, var(--bridge-canvas) 90%, transparent)',
+          backgroundColor: 'var(--bridge-canvas)',
           borderBottom: '1px solid var(--bridge-border)',
         }}
       >
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="flex items-center gap-2.5 py-3">
-            {/* Search */}
-            <div className="group relative flex-1">
+        <div className={`mx-auto w-full ${pageGutter}`} style={pageInnerStyle}>
+          {/* Search — full width */}
+          <div className="py-4">
+            <div className="group relative">
               <svg
-                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2"
+                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2"
                 style={{ color: 'var(--bridge-text-faint)' }}
                 fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
               >
@@ -379,7 +405,7 @@ export default function Mentors() {
                 placeholder={s.mentors.searchPlaceholder}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="h-11 w-full rounded-2xl py-0 pl-10 pr-9 text-[13px] font-medium transition focus:outline-none"
+                className="h-12 w-full rounded-xl py-0 pl-11 pr-9 text-[15px] font-medium transition focus:outline-none"
                 style={{
                   backgroundColor: 'var(--bridge-surface)',
                   color: 'var(--bridge-text)',
@@ -394,84 +420,36 @@ export default function Mentors() {
               />
               {search && (
                 <button type="button" onClick={() => setSearch('')} aria-label="Clear"
-                  className="absolute right-2.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full transition"
+                  className="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full transition"
                   style={{ color: 'var(--bridge-text-faint)', backgroundColor: 'var(--bridge-surface-muted)' }}>
                   <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" d="M6 18 18 6M6 6l12 12" /></svg>
                 </button>
               )}
             </div>
+          </div>
 
-            {/* Sort */}
-            <div ref={sortRef} className="relative hidden sm:block">
-              <button type="button" onClick={() => setSortOpen(o => !o)} aria-haspopup="listbox" aria-expanded={sortOpen}
-                className={`inline-flex h-11 items-center gap-1.5 rounded-2xl px-3.5 text-[12px] font-semibold transition hover:-translate-y-px ${focusRing}`}
-                style={{ backgroundColor: 'var(--bridge-surface)', color: 'var(--bridge-text-secondary)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}>
-                <svg className="h-3.5 w-3.5 shrink-0" style={{ color: 'var(--bridge-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5h18M6 12h12M10 16.5h4" /></svg>
-                <span className="hidden lg:inline">{SORT_OPTIONS.find(o => o.value === sortBy)?.label}</span>
-                <span className="lg:hidden">Sort</span>
-                <svg className={`h-3 w-3 shrink-0 transition-transform ${sortOpen ? 'rotate-180' : ''}`} style={{ color: 'var(--bridge-text-faint)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
-              </button>
-              {sortOpen && (
-                <div
-                  role="listbox"
-                  className="animate-pop-in absolute right-0 top-full z-20 mt-1.5 w-48 overflow-hidden rounded-xl backdrop-blur-xl"
-                  style={{
-                    backgroundColor: 'var(--bridge-surface-raised)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 18px 40px -18px color-mix(in srgb, var(--color-primary) 28%, transparent)',
-                  }}
-                >
-                  {SORT_OPTIONS.map(opt => (
-                    <button key={opt.value} type="button" role="option" aria-selected={sortBy === opt.value}
-                      onClick={() => { setSortBy(opt.value); setSortOpen(false); }}
-                      className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-[13px] transition ${sortBy === opt.value ? 'bg-[var(--bridge-surface-muted)] font-semibold text-[var(--bridge-text)]' : 'text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)]'} ${focusRing}`}>
-                      {opt.label}
-                      {sortBy === opt.value && (
-                        <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full text-white" style={{ backgroundColor: 'var(--color-primary)' }} aria-hidden>
-                          <svg className="h-2 w-2" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
+          {/* Count + controls */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3">
+            <p className="text-[14px]" style={{ color: 'var(--bridge-text-muted)' }}>
+              {loading ? (
+                'Loading mentors…'
+              ) : (
+                <>
+                  <span className="font-bold tabular-nums" style={{ color: 'var(--bridge-text)' }}>
+                    {totalCount.toLocaleString()}
+                  </span>
+                  {' '}mentor{totalCount === 1 ? '' : 's'} found
+                  {activeFilterCount > 0 && <span className="text-[var(--bridge-text-faint)]"> · filtered</span>}
+                </>
               )}
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              {sortControls}
             </div>
-
-            {/* Filter toggle */}
-            <button
-              type="button"
-              onClick={() => setFilterOpen(o => !o)}
-              aria-expanded={filterOpen}
-              className={`inline-flex h-11 items-center gap-1.5 rounded-2xl px-3.5 text-[12px] font-semibold transition hover:-translate-y-px ${focusRing}`}
-              style={
-                filterOpen || activeFilterCount > 0
-                  ? { backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)', color: 'var(--color-primary)', boxShadow: 'inset 0 0 0 1.5px color-mix(in srgb, var(--color-primary) 50%, transparent)' }
-                  : { backgroundColor: 'var(--bridge-surface)', color: 'var(--bridge-text-secondary)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }
-              }
-            >
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" /></svg>
-              Filters
-              {activeFilterCount > 0 && (
-                <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold text-white" style={{ backgroundColor: 'var(--color-primary)' }}>
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-
-            {activeFilterCount > 0 && (
-              <>
-                <div className="hidden h-5 w-px bg-[var(--bridge-border)] sm:block" />
-                <button type="button" onClick={resetFilters}
-                  className={`hidden items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition hover:text-[var(--bridge-text)] sm:inline-flex ${focusRing}`}
-                  style={{ color: 'var(--bridge-text-faint)' }}>
-                  <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" d="M6 18 18 6M6 6l12 12" /></svg>
-                  Clear
-                </button>
-              </>
-            )}
           </div>
 
           {/* Industry chips */}
-          <div className="flex gap-1.5 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-1.5 overflow-x-auto pb-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {INDUSTRIES.map(({ label, value }) => (
               <button
                 key={value || 'all'}
@@ -500,6 +478,7 @@ export default function Mentors() {
               </button>
             ))}
           </div>
+
         </div>
 
         {/* Advanced filters panel */}
@@ -510,64 +489,8 @@ export default function Mentors() {
               backgroundColor: 'color-mix(in srgb, var(--bridge-surface-muted) 60%, transparent)',
             }}
           >
-            <div className="mx-auto max-w-7xl px-5 py-5 sm:px-8">
+            <div className={`mx-auto w-full ${pageGutter} py-5`} style={pageInnerStyle}>
               <div className="flex flex-wrap items-start gap-x-8 gap-y-5">
-                <div>
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-faint)]">Tier</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {TIERS.map(({ label, value }) => (
-                      <button
-                        key={value || 'all-t'}
-                        type="button"
-                        onClick={() => setActiveTier(value)}
-                        className={`rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${focusRing}`}
-                        style={
-                          activeTier === value
-                            ? {
-                                backgroundColor: 'var(--color-primary)',
-                                color: 'var(--color-on-primary)',
-                                boxShadow: '0 4px 14px -6px color-mix(in srgb, var(--color-primary) 45%, transparent)',
-                              }
-                            : {
-                                backgroundColor: 'var(--bridge-surface)',
-                                color: 'var(--bridge-text-secondary)',
-                                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-                              }
-                        }
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-faint)]">Rate / session</p>
-                  <div className="flex items-center gap-2">
-                    {[['rateMin', rateMin, setRateMin, 'Min'], ['rateMax', rateMax, setRateMax, 'Max']].map(([key, val, set, ph]) => (
-                      <div key={key} className="relative">
-                        <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[12px] text-[var(--bridge-text-faint)]">$</span>
-                        <input
-                          type="number"
-                          min="0"
-                          placeholder={ph}
-                          value={val}
-                          onChange={e => set(e.target.value)}
-                          aria-label={`${ph} rate`}
-                          className="w-24 rounded-xl py-2 pl-5 pr-2.5 text-[13px] font-medium focus:outline-none"
-                          style={{
-                            backgroundColor: 'var(--bridge-surface)',
-                            color: 'var(--bridge-text)',
-                            boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-                          }}
-                          onFocus={(e) => { e.currentTarget.style.boxShadow = `inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 60%, var(--bridge-border))`; }}
-                          onBlur={(e) => { e.currentTarget.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border)'; }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 <div>
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-faint)]">Status</p>
                   <button
@@ -607,7 +530,7 @@ export default function Mentors() {
 
       {/* AI results section — sits on the same canvas, no boxed slabs */}
       {aiMode && (
-        <div className="relative mx-auto max-w-7xl px-5 pt-12 pb-10 sm:px-8 lg:pt-16">
+        <div className={`relative mx-auto w-full ${pageGutter} pt-8 pb-6`} style={pageInnerStyle}>
           {aiLoading && (
             <div
               className="flex flex-col items-center justify-center rounded-3xl py-24 text-center"
@@ -729,7 +652,7 @@ export default function Mentors() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="flex flex-col gap-4">
                 {aiResults.top_matches.map(match => {
                   const mentor = getMentorForMatch(match.mentor_id);
                   if (!mentor) return null;
@@ -754,10 +677,11 @@ export default function Mentors() {
         </div>
       )}
 
-      {/* Mentor grid — flows directly on the page canvas, tight to the sticky bar so cards appear above the fold */}
+      {/* Mentor grid */}
       <div
         ref={gridRef}
-        className={`relative mx-auto max-w-7xl scroll-mt-28 px-5 pt-6 pb-24 sm:px-8 lg:pb-32 ${aiMode ? 'hidden' : ''}`}
+        className={`relative z-0 mx-auto w-full ${pageGutter} ${listPad} ${aiMode ? 'hidden' : ''}`}
+        style={pageInnerStyle}
       >
 
         {asMentor && (
@@ -771,7 +695,7 @@ export default function Mentors() {
             <svg className="mt-0.5 h-4 w-4 shrink-0" style={{ color: 'var(--color-warning)' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
             <p className="text-[13px]" style={{ color: 'color-mix(in srgb, var(--color-warning) 80%, var(--bridge-text))' }}>
               You're signed in as a mentor.{' '}
-              <Link to="/dashboard" className={`font-semibold underline underline-offset-2 hover:no-underline ${focusRing} rounded-sm`}>Open your dashboard →</Link>
+              <AppLink to="/dashboard" className={`font-semibold underline underline-offset-2 hover:no-underline ${focusRing} rounded-sm`}>Open your dashboard →</AppLink>
             </p>
           </div>
         )}
@@ -792,77 +716,71 @@ export default function Mentors() {
 
         {error && <FetchErrorBanner message={error} onRetry={loadMentors} />}
 
-        {!loading && !error && totalCount > 0 && (
-          <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>
-              Showing <span className="font-semibold" style={{ color: 'var(--bridge-text)' }}>{startIdx}–{endIdx}</span> of <span className="font-semibold" style={{ color: 'var(--bridge-text)' }}>{totalCount.toLocaleString()}</span> mentors
-              {activeFilterCount > 0 && <span className="ml-2 text-[11px]" style={{ color: 'var(--bridge-text-faint)' }}>· filtered</span>}
-            </p>
-            {(canPrev || canNext) && (
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  disabled={!canPrev}
-                  onClick={() => changePage(Math.max(0, page - 1))}
-                  className={`rounded-full px-4 py-1.5 text-[12px] font-semibold transition hover:-translate-y-px disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}
-                  style={{
-                    backgroundColor: 'var(--bridge-surface)',
-                    color: 'var(--bridge-text-secondary)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-                  }}
-                >
-                  ← Prev
-                </button>
-                <span
-                  className="rounded-full px-3.5 py-1.5 text-[12px] font-bold tabular-nums"
-                  style={{
-                    backgroundColor: 'var(--bridge-surface-muted)',
-                    color: 'var(--bridge-text-faint)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-                  }}
-                >
-                  {page + 1}
-                </span>
-                <button
-                  type="button"
-                  disabled={!canNext}
-                  onClick={() => changePage(page + 1)}
-                  className={`rounded-full px-4 py-1.5 text-[12px] font-semibold transition hover:-translate-y-px disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}
-                  style={{
-                    backgroundColor: 'var(--bridge-surface)',
-                    color: 'var(--bridge-text-secondary)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-                  }}
-                >
-                  Next →
-                </button>
-              </div>
-            )}
+        {!loading && !error && totalCount > 0 && (canPrev || canNext) && (
+          <div className="mb-5 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              disabled={!canPrev}
+              onClick={() => changePage(Math.max(0, page - 1))}
+              className={`rounded-full px-4 py-1.5 text-[12px] font-semibold transition hover:-translate-y-px disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}
+              style={{
+                backgroundColor: 'var(--bridge-surface)',
+                color: 'var(--bridge-text-secondary)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              }}
+            >
+              ← Prev
+            </button>
+            <span
+              className="rounded-full px-3.5 py-1.5 text-[12px] font-bold tabular-nums"
+              style={{
+                backgroundColor: 'var(--bridge-surface-muted)',
+                color: 'var(--bridge-text-faint)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              }}
+            >
+              {startIdx}–{endIdx} of {totalCount.toLocaleString()}
+            </span>
+            <button
+              type="button"
+              disabled={!canNext}
+              onClick={() => changePage(page + 1)}
+              className={`rounded-full px-4 py-1.5 text-[12px] font-semibold transition hover:-translate-y-px disabled:pointer-events-none disabled:opacity-35 ${focusRing}`}
+              style={{
+                backgroundColor: 'var(--bridge-surface)',
+                color: 'var(--bridge-text-secondary)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              }}
+            >
+              Next →
+            </button>
           </div>
         )}
 
         {loading ? (
           <MentorGridSkeleton />
         ) : visibleMentors.length > 0 ? (
-          <div>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {visibleMentors.map((mentor, i) => (
-                <Reveal key={mentor.id} delay={Math.min(i * 25, 120)} className="h-full">
-                  <MentorCard
-                    mentor={mentor}
-                    isFavorite={favoriteIds.has(normalizeMentorId(mentor.id))}
-                    onToggleFavorite={onToggleFavorite}
-                    user={user}
-                    navigate={navigate}
-                    favoriteBusy={favoriteBusyId === normalizeMentorId(mentor.id)}
-                    favoritesEnabled={!asMentor}
-                  />
-                </Reveal>
-              ))}
-            </div>
+          <div className="flex flex-col gap-4">
+            {visibleMentors.map(mentor => (
+              <MentorCard
+                key={mentor.id}
+                mentor={mentor}
+                isFavorite={favoriteIds.has(normalizeMentorId(mentor.id))}
+                onToggleFavorite={onToggleFavorite}
+                user={user}
+                navigate={navigate}
+                favoriteBusy={favoriteBusyId === normalizeMentorId(mentor.id)}
+                favoritesEnabled={!asMentor}
+                nextAvailableIso={
+                  mentor.calendly_connected && mentor.calendly_event_type_uri
+                    ? (mentor.id in calendlySlots ? calendlySlots[mentor.id] : undefined)
+                    : null
+                }
+              />
+            ))}
 
             {(canPrev || canNext) && (
-              <div className="mt-14 flex items-center justify-center gap-2">
+              <div className="mt-6 flex items-center justify-center gap-2">
                 <button
                   type="button"
                   disabled={!canPrev}
@@ -945,7 +863,6 @@ export default function Mentors() {
       {wizardOpen && (
         <MentorMatchWizard prefill={prefillData} onComplete={handleWizardComplete} onClose={() => setWizardOpen(false)} />
       )}
-      {showTiersModal && <MentorTiersModal onClose={() => setShowTiersModal(false)} />}
-    </main>
+    </Root>
   );
 }

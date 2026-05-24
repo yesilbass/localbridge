@@ -35,9 +35,9 @@ export default function RevealOnScroll({
 
     const vt = VARIANTS[variant] || VARIANTS.up;
 
-    // Set the hidden state synchronously before the browser paints so there
-    // is never a flash of visible content before the animation starts.
-    gsap.set(el, vt.h);
+    // Promote to GPU compositor layer before the animation starts,
+    // then remove the hint when the element is fully revealed to free memory.
+    gsap.set(el, { ...vt.h, willChange: 'transform, opacity' });
 
     const anim = gsap.to(el, {
       ...vt.v,
@@ -50,7 +50,10 @@ export default function RevealOnScroll({
         once:    true,
         onEnter: () => revealed.add(el),
       },
-      onComplete: () => revealed.add(el),
+      onComplete: () => {
+        gsap.set(el, { willChange: 'auto' });
+        revealed.add(el);
+      },
     });
 
     // Safety net: force full visibility after 4 s + delay if GSAP hasn't

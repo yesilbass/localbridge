@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import AppLink from '../../components/AppLink';
 import { motion, useReducedMotion } from 'motion/react';
 import {
   ShieldCheck,
@@ -121,7 +122,7 @@ export default function WhyUsHero() {
               {...enter(0.55, 'y', 14, DUR_MED)}
               className="mt-9 flex flex-wrap gap-4"
             >
-              <Link
+              <AppLink
                 to="/register"
                 className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-[14px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
                 style={{
@@ -141,7 +142,7 @@ export default function WhyUsHero() {
               >
                 Book your first hour
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
+              </AppLink>
               <Link
                 to="/why-us#receipts"
                 className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-[14px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -272,7 +273,7 @@ export default function WhyUsHero() {
                 >
                   Last updated this week
                 </span>
-                <Link
+                <AppLink
                   to="/mentors"
                   className="inline-flex items-center gap-1.5 text-[12px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-full px-1.5 py-0.5"
                   style={{
@@ -282,7 +283,7 @@ export default function WhyUsHero() {
                 >
                   Meet the operators
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                </Link>
+                </AppLink>
               </div>
             </div>
           </motion.div>

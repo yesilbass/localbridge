@@ -104,17 +104,24 @@ export default function BillingPage() {
           className="text-[10px] font-black uppercase tracking-[0.32em]"
           style={{ color: 'var(--color-primary)' }}
         >
-          Billing
+          Billing & receipts
         </p>
         <p
           className="font-display mt-2 text-[22px] font-black tracking-[-0.02em]"
           style={{ color: 'var(--bridge-text)' }}
         >
-          You pay per session, not per month.
+          Session history and subscription billing.
         </p>
         <p className="mt-2 text-[13px]" style={{ color: 'var(--bridge-text-secondary)', lineHeight: 1.55 }}>
-          Bridge charges nothing for browsing, saving, or matching. You only pay when you book — directly to your mentor at their per-session rate. We don't store a card on file.
+          Session history lives here. To upgrade AI tools and platform features — Plus or Pro — go to Plans.
         </p>
+        <Link
+          to="/dashboard/plan"
+          className="bridge-focus mt-4 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] font-bold"
+          style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
+        >
+          View subscription plans <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        </Link>
       </section>
 
       <section
@@ -131,7 +138,7 @@ export default function BillingPage() {
               className="text-[10px] font-black uppercase tracking-[0.32em]"
               style={{ color: 'var(--color-primary)' }}
             >
-              Receipts &amp; purchases
+              Session receipts
             </h2>
           </div>
           {purchases.length > 0 && (

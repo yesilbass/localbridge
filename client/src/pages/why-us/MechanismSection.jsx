@@ -232,11 +232,11 @@ function ReviewFeed() {
                 <Star
                   key={idx}
                   className="h-3 w-3"
-                  fill={filled ? '#F59E0B' : 'none'}
-                  stroke={filled ? '#F59E0B' : 'currentColor'}
+                  fill={filled ? 'var(--color-primary)' : 'none'}
+                  stroke={filled ? 'var(--color-primary)' : 'currentColor'}
                   style={{
                     color: filled
-                      ? '#F59E0B'
+                      ? 'var(--color-primary)'
                       : 'var(--bridge-text-muted)',
                   }}
                   aria-hidden="true"

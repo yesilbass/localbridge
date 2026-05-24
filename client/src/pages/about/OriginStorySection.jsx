@@ -8,8 +8,7 @@ export default function OriginStorySection() {
       aria-labelledby="origin-heading"
       className={ABOUT_SECTION_PAD}
       style={{
-        backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border-strong)',
+        backgroundColor: 'var(--bridge-canvas)',
         borderBottom: '1px solid var(--bridge-border-strong)',
       }}
     >

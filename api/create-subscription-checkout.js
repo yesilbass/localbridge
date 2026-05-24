@@ -3,15 +3,10 @@ import { getPublicOrigin } from './_lib/publicOrigin.js';
 import { verifyAuthUser } from './_lib/auth.js';
 import { applySecurityHeaders, jsonError, validateJsonBody } from './_lib/security.js';
 import { z } from 'zod';
-
-const PLAN_PRICES = {
-  Starter: 1200,
-  Pro: 1900,
-  Premium: 4900,
-};
+import { PLAN_PRICES_CENTS } from '../shared/subscriptionPlans.js';
 
 const CHECKOUT_SCHEMA = z.object({
-  planName: z.enum(['Starter', 'Pro', 'Premium']),
+  planName: z.enum(['Plus', 'Pro']),
   userEmail: z.string().email().max(320).optional().or(z.literal('')),
 });
 
@@ -48,7 +43,7 @@ export default async function handler(req, res) {
               name: `${planName} Plan`,
               description: 'Bridge subscription plan',
             },
-            unit_amount: PLAN_PRICES[planName],
+            unit_amount: PLAN_PRICES_CENTS[planName],
           },
           quantity: 1,
         },
@@ -58,7 +53,7 @@ export default async function handler(req, res) {
         userId: String(user.id),
         planName: String(planName ?? ''),
       },
-      return_url: `${origin}/pricing?session_id={CHECKOUT_SESSION_ID}`,
+      return_url: `${origin}/dashboard/plan?session_id={CHECKOUT_SESSION_ID}`,
     });
 
     res.json({ clientSecret: session.client_secret });

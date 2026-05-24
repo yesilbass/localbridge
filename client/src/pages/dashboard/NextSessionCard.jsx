@@ -62,7 +62,7 @@ function ShellCard({ live, children }) {
           : 'inset 0 0 0 1px var(--bridge-border)',
       }}
     >
-      <div className="p-6 sm:p-8">{children}</div>
+      <div className="p-6 sm:p-8 lg:p-10">{children}</div>
     </section>
   );
 }
@@ -179,9 +179,9 @@ function ScheduledState({ session }) {
     <ShellCard live={live}>
       <h2 id="next-session-heading" className="sr-only">Your next session</h2>
 
-      <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-center">
+      <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         {/* Avatar + name */}
-        <div className="flex min-w-0 items-center gap-4">
+        <div className="flex min-w-0 shrink-0 items-center gap-4 lg:max-w-[34%]">
           {session.otherParty?.avatarUrl ? (
             <img
               src={session.otherParty.avatarUrl}
@@ -220,7 +220,7 @@ function ScheduledState({ session }) {
 
         {/* Time + topic — lg+ only to avoid 3-column squeeze */}
         <div
-          className="hidden min-w-0 flex-col gap-1 px-6 lg:flex"
+          className="hidden min-w-0 flex-1 flex-col gap-1 px-6 lg:flex xl:px-10"
           style={{ borderLeft: '1px solid var(--bridge-border)' }}
         >
           <span className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--bridge-text-muted)' }}>
@@ -243,7 +243,7 @@ function ScheduledState({ session }) {
                 Topic
               </span>
               <span
-                className="line-clamp-2 max-w-[260px] text-[13px]"
+                className="line-clamp-2 text-[13px]"
                 style={{ color: 'var(--bridge-text-secondary)' }}
               >
                 {session.topic}
@@ -401,8 +401,8 @@ function MenteeNoSession() {
   return (
     <ShellCard>
       <h2 id="next-session-heading" className="sr-only">Up next</h2>
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-        <div className="flex flex-col gap-2 sm:max-w-md">
+      <div className="flex w-full flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
           <span className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--bridge-text-muted)' }}>
             Up next
           </span>
@@ -454,8 +454,8 @@ function MentorNoSession() {
   return (
     <ShellCard>
       <h2 id="next-session-heading" className="sr-only">Up next</h2>
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-        <div className="flex flex-col gap-2 sm:max-w-md">
+      <div className="flex w-full flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
           <span className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--bridge-text-muted)' }}>
             Up next
           </span>

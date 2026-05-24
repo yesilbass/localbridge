@@ -1,56 +1,66 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Bridge appearance system — 3-palette comparison build
+   Bridge appearance system — unified brand tokens
    ═══════════════════════════════════════════════════════════════════════════
    Layered architecture:
 
    Layer A — Semantic palette tokens (`--color-*`).
-     Defined per-palette × per-theme via `html[data-palette="…"]` selectors.
-     Three palettes: modern-signal (indigo, default), grounded-guidance (teal),
-     quiet-authority (blue). Each gets a full light + dark variant.
+     `modern-signal` = marketing shell (landing indigo/lavender, default).
+     `quiet-authority` = product shell (calmer surfaces, same primary accent).
+     `grounded-guidance` retained for dev/legacy only — no production routes.
 
    Layer B — Bridge token rebinding (`--bridge-*`).
-     Existing `--bridge-canvas`, `--bridge-surface`, `--bridge-text`, etc. are
-     re-derived from `--color-*` so every existing consumer (atmosphere,
-     gutters, glass surfaces, shadows, gradients) auto-switches per route
-     without touching JSX.
 
-   Layer C — Tailwind orange-N / amber-N re-skin.
-     Overrides `bg-orange-*`, `text-orange-*`, `border-orange-*`, gradient
-     stops, ring/divide/from/to/via for orange + amber utilities, scoped to
-     each `[data-palette]`. Lets the codebase's existing orange-led classes
-     pick up whichever palette is active above them.
+   Layer C — Tailwind orange-N / amber-N re-skin mapped to palette ramps.
 
-   Per-route palette is set on `<html data-palette="…">` from App.jsx so
-   modals, portals, and the navbar/footer chrome all inherit consistently.
+   Per-route palette: `<html data-palette="…">` from App.jsx.
+   Marketing chrome: `<html.is-marketing-route>` (navbar blend, canvas).
+   Landing-only polish: `html.is-landing-route` via landingPalette.js.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 
-/* ── Default tokens (Modern Signal — light) ───────────────────────────────── */
+/* ── Modern Signal — marketing shell (landing indigo/lavender, light) ─────── */
 html,
 html[data-palette="modern-signal"] {
-  /* Layer A — semantic */
-  --color-primary:        #4338CA;
-  --color-primary-hover:  #3730A3;
+  --color-primary:        #4F46E5;
+  --color-primary-hover:  #4338CA;
   --color-on-primary:     #FFFFFF;
-  --color-secondary:      #0F172A;
-  --color-accent:         #06B6D4;
+  --color-secondary:      #0B0F19;
+  --color-accent:         #818CF8;
 
-  --color-bg:             #F8F8FF;
-  --color-surface:        #FFFFFF;
-  --color-surface-raised: #FFFFFF;
-  --color-surface-muted:  #EEF0FB;
+  --color-bg:             #F4F4FA;
+  --color-surface:        #FAFAFF;
+  --color-surface-raised: #FAFAFF;
+  --color-surface-muted:  #EEEEF7;
 
-  --color-border:         #E0E7FF;
-  --color-border-strong:  #C7D2FE;
+  --color-border:         #E0E0EE;
+  --color-border-strong:  #CBCBE0;
 
-  --color-text:           #151521;
-  --color-text-secondary: #374151;
-  --color-text-muted:     #6B7280;
+  --color-text:           #0B0F19;
+  --color-text-secondary: #1A2236;
+  --color-text-muted:     #52596E;
+
+  --color-midnight:       #0B0F19;
+  --color-midnight-raised:#161E30;
 
   --color-success:        #059669;
   --color-warning:        #B45309;
-  --color-error:          #DC2626;
-  --color-info:           #2563EB;
+  --color-error:          #B91C1C;
+  --color-info:           #1D4ED8;
+
+  --lp-bg-top:            #F4F4FA;
+  --lp-bg-bottom:         #EEEEF7;
+  --lp-glow-opacity:      0.28;
+  --lp-glow-opacity-soft: 0.16;
+  --lp-grad-from:         #4F46E5;
+  --lp-grad-mid:          #7C7CFF;
+  --lp-grad-to:           #312E81;
+  --lp-counter:           #818CF8;
+  --lp-chip-bg:           rgba(11,15,25,0.96);
+  --lp-chip-border:       rgba(255,255,255,0.08);
+  --lp-card-bg:           #FFFFFF;
+  --lp-card-shadow:       0 30px 70px -28px rgba(79,70,229,0.28),
+                          0 0 0 1px rgba(224,224,238,0.95) inset;
+  --lp-card-glow:         linear-gradient(135deg, rgba(79,70,229,0.18) 0%, rgba(124,124,255,0.06) 100%);
 
   /* Layer B — bridge tokens (rebound) */
   --bridge-canvas:        var(--color-bg);
@@ -71,11 +81,11 @@ html[data-palette="modern-signal"] {
   --bridge-text-glow:     color-mix(in srgb, var(--color-primary) 0%, transparent);
 
   --bridge-aurora-1:      color-mix(in srgb, var(--color-primary) 22%, transparent);
-  --bridge-aurora-2:      color-mix(in srgb, var(--color-accent)  16%, transparent);
+  --bridge-aurora-2:      color-mix(in srgb, var(--color-primary-hover) 16%, transparent);
   --bridge-aurora-3:      color-mix(in srgb, var(--color-primary) 14%, transparent);
 
   --bridge-mesh-1:        color-mix(in srgb, var(--color-primary) 18%, transparent);
-  --bridge-mesh-2:        color-mix(in srgb, var(--color-accent)  14%, transparent);
+  --bridge-mesh-2:        color-mix(in srgb, var(--color-primary-hover) 14%, transparent);
   --bridge-mesh-3:        color-mix(in srgb, var(--color-primary) 10%, transparent);
 
   --bridge-gutter-l: linear-gradient(
@@ -96,39 +106,57 @@ html[data-palette="modern-signal"] {
 /* Modern Signal — dark */
 html.theme-dark,
 html[data-palette="modern-signal"].theme-dark {
-  --color-primary:        #A5B4FC;
-  --color-primary-hover:  #C7D2FE;
-  --color-on-primary:     #111827;
-  --color-secondary:      #7DD3FC;
-  --color-accent:         #22D3EE;
+  --color-primary:        #818CF8;
+  --color-primary-hover:  #6366F1;
+  --color-on-primary:     #0B0F19;
+  --color-secondary:      #A5B4FC;
+  --color-accent:         #A5B4FC;
 
-  --color-bg:             #0B1020;
-  --color-surface:        #12172A;
-  --color-surface-raised: #1A2040;
-  --color-surface-muted:  #0F1428;
+  --color-midnight:       #101626;
+  --color-midnight-raised:#161E30;
 
-  --color-border:         #29314F;
-  --color-border-strong:  #3B4470;
+  --color-bg:             #0B0F19;
+  --color-surface:        #101626;
+  --color-surface-raised: #161E30;
+  --color-surface-muted:  #0E121C;
 
-  --color-text:           #F8FAFC;
-  --color-text-secondary: #D8DDEF;
-  --color-text-muted:     #A8AEC4;
+  --color-border:         #1E2535;
+  --color-border-strong:  #2A3145;
+
+  --color-text:           #FAFAFA;
+  --color-text-secondary: #D4D4DC;
+  --color-text-muted:     #9090A8;
 
   --color-success:        #34D399;
   --color-warning:        #FBBF24;
   --color-error:          #F87171;
   --color-info:           #93C5FD;
 
+  --lp-bg-top:            #0B0F19;
+  --lp-bg-bottom:         #080B12;
+  --lp-glow-opacity:      0.32;
+  --lp-glow-opacity-soft: 0.18;
+  --lp-grad-from:         #A5B4FC;
+  --lp-grad-mid:          #FFFFFF;
+  --lp-grad-to:           #818CF8;
+  --lp-counter:           #A5B4FC;
+  --lp-chip-bg:           rgba(11,15,25,0.92);
+  --lp-chip-border:       rgba(255,255,255,0.08);
+  --lp-card-bg:           rgba(16,22,38,0.78);
+  --lp-card-shadow:       0 30px 70px -24px rgba(0,0,0,0.7),
+                          0 0 0 1px rgba(255,255,255,0.06) inset;
+  --lp-card-glow:         linear-gradient(135deg, rgba(129,140,248,0.30) 0%, rgba(124,124,255,0.10) 100%);
+
   --bridge-shadow-soft:   color-mix(in srgb, var(--color-primary) 18%, transparent);
   --bridge-shadow-ring:   color-mix(in srgb, var(--color-primary) 22%, transparent);
   --bridge-text-glow:     color-mix(in srgb, var(--color-primary) 25%, transparent);
 
   --bridge-aurora-1:      color-mix(in srgb, var(--color-primary) 28%, transparent);
-  --bridge-aurora-2:      color-mix(in srgb, var(--color-accent)  20%, transparent);
+  --bridge-aurora-2:      color-mix(in srgb, var(--color-primary-hover) 20%, transparent);
   --bridge-aurora-3:      color-mix(in srgb, var(--color-primary) 18%, transparent);
 
   --bridge-mesh-1:        color-mix(in srgb, var(--color-primary) 22%, transparent);
-  --bridge-mesh-2:        color-mix(in srgb, var(--color-accent)  18%, transparent);
+  --bridge-mesh-2:        color-mix(in srgb, var(--color-primary-hover) 18%, transparent);
   --bridge-mesh-3:        color-mix(in srgb, var(--color-primary) 14%, transparent);
 }
 
@@ -184,10 +212,10 @@ html[data-palette="grounded-guidance"].theme-dark {
   --color-info:           #67E8F9;
 }
 
-/* ── Quiet Authority — light ─────────────────────────────────────────────── */
+/* ── Quiet Authority — product shell (light) ─────────────────────────────── */
 html[data-palette="quiet-authority"] {
-  --color-primary:        #175CD3;
-  --color-primary-hover:  #1249A8;
+  --color-primary:        #4F46E5;
+  --color-primary-hover:  #4338CA;
   --color-on-primary:     #FFFFFF;
   --color-secondary:      #0F766E;
   --color-accent:         #14B8A6;
@@ -212,19 +240,19 @@ html[data-palette="quiet-authority"] {
 
 /* Quiet Authority — dark */
 html[data-palette="quiet-authority"].theme-dark {
-  --color-primary:        #60A5FA;
-  --color-primary-hover:  #93C5FD;
-  --color-on-primary:     #031525;
+  --color-primary:        #818CF8;
+  --color-primary-hover:  #6366F1;
+  --color-on-primary:     #0B0F19;
   --color-secondary:      #2DD4BF;
   --color-accent:         #38BDF8;
 
-  --color-bg:             #08111F;
-  --color-surface:        #0F1B2D;
-  --color-surface-raised: #15243C;
-  --color-surface-muted:  #0B1525;
+  --color-bg:             #0B0F19;
+  --color-surface:        #101626;
+  --color-surface-raised: #161E30;
+  --color-surface-muted:  #0E121C;
 
-  --color-border:         #22314A;
-  --color-border-strong:  #324568;
+  --color-border:         #1E2535;
+  --color-border-strong:  #2A3145;
 
   --color-text:           #F8FAFC;
   --color-text-secondary: #D5DEE9;
@@ -271,6 +299,37 @@ html.theme-dark body::before {
   opacity: 1;
 }
 
+/* Marketing shell chrome — shared navbar/canvas blend (landing DNA) */
+html.is-marketing-route body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+html.is-marketing-route header,
+html.is-marketing-route header > div {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+html.is-marketing-route header > div.backdrop-blur-2xl {
+  -webkit-backdrop-filter: saturate(150%) blur(18px);
+  backdrop-filter: saturate(150%) blur(18px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-bg) 80%, transparent) 0%, transparent 100%) !important;
+}
+
+html.is-marketing-route header nav > div > div.rounded-full {
+  background-color: color-mix(in srgb, var(--bridge-surface) 70%, transparent) !important;
+  box-shadow: 0 0 0 1px var(--bridge-border) inset,
+              0 12px 28px -22px color-mix(in srgb, var(--color-primary) 50%, transparent) !important;
+}
+
+html.is-marketing-route .bg-stone-50,
+html.is-marketing-route .bg-gray-50 {
+  background-color: var(--color-surface-muted) !important;
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Stone-* utility re-skin → bridge text/border tokens (auto-palette-aware
@@ -298,10 +357,10 @@ html.theme-dark body::before {
    ramp per palette and use it as overrides.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ─ Modern Signal ramp (default + scoped) ─ */
+/* ─ Modern Signal ramp (marketing — indigo throughout) ─ */
 html, html[data-palette="modern-signal"] {
-  --p-50:  #EEF0FB;
-  --p-100: #DDE2F8;
+  --p-50:  #EEF2FF;
+  --p-100: #E0E7FF;
   --p-200: #C7D2FE;
   --p-300: #A5B4FC;
   --p-400: #818CF8;
@@ -312,16 +371,16 @@ html, html[data-palette="modern-signal"] {
   --p-900: #312E81;
   --p-on:  #FFFFFF;
 
-  --a-50:  #ECFEFF;
-  --a-100: #CFFAFE;
-  --a-200: #A5F3FC;
-  --a-300: #67E8F9;
-  --a-400: #22D3EE;
-  --a-500: #06B6D4;
-  --a-600: #0891B2;
-  --a-700: #0E7490;
-  --a-800: #155E75;
-  --a-900: #164E63;
+  --a-50:  #EEF2FF;
+  --a-100: #E0E7FF;
+  --a-200: #C7D2FE;
+  --a-300: #A5B4FC;
+  --a-400: #818CF8;
+  --a-500: #6366F1;
+  --a-600: #4F46E5;
+  --a-700: #4338CA;
+  --a-800: #3730A3;
+  --a-900: #312E81;
 }
 
 /* ─ Grounded Guidance ramp ─ */
@@ -350,18 +409,18 @@ html[data-palette="grounded-guidance"] {
   --a-900: #713F12;
 }
 
-/* ─ Quiet Authority ramp ─ */
+/* ─ Quiet Authority ramp (product — indigo primary, teal accent) ─ */
 html[data-palette="quiet-authority"] {
-  --p-50:  #EFF6FF;
-  --p-100: #DBEAFE;
-  --p-200: #BFDBFE;
-  --p-300: #93C5FD;
-  --p-400: #60A5FA;
-  --p-500: #3B82F6;
-  --p-600: #2563EB;
-  --p-700: #175CD3;
-  --p-800: #1249A8;
-  --p-900: #1E3A8A;
+  --p-50:  #EEF2FF;
+  --p-100: #E0E7FF;
+  --p-200: #C7D2FE;
+  --p-300: #A5B4FC;
+  --p-400: #818CF8;
+  --p-500: #6366F1;
+  --p-600: #4F46E5;
+  --p-700: #4338CA;
+  --p-800: #3730A3;
+  --p-900: #312E81;
   --p-on:  #FFFFFF;
 
   --a-50:  #F0FDFA;

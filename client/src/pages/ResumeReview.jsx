@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate, Link } from 'react-router-dom';
+import AppLink from '../components/AppLink';
 import { useAuth } from '../context/useAuth';
 import { getAIResumeReview } from '../api/aiResumeReview';
 import { uploadResumeToBucket, saveResumeReview, getResumeReview, deleteResumeReview } from '../api/resumeReview';
@@ -16,7 +17,7 @@ const SECTION_ORDER = ['contact_info', 'summary', 'experience', 'skills', 'educa
 function scoreColors(score) {
   if (score >= 90) return { text: 'text-emerald-600', bar: 'bg-emerald-500', ring: '#10b981', badge: 'bg-emerald-50 text-emerald-800 border-emerald-200' };
   if (score >= 80) return { text: 'text-teal-600', bar: 'bg-teal-500', ring: '#14b8a6', badge: 'bg-teal-50 text-teal-800 border-teal-200' };
-  if (score >= 70) return { text: 'text-amber-600', bar: 'bg-amber-500', ring: '#f59e0b', badge: 'bg-amber-50 text-amber-800 border-amber-200' };
+  if (score >= 70) return { text: 'text-amber-600', bar: 'bg-amber-500', ring: 'var(--color-primary)', badge: 'bg-amber-50 text-amber-800 border-amber-200' };
   if (score >= 60) return { text: 'text-orange-600', bar: 'bg-orange-500', ring: '#f97316', badge: 'bg-orange-50 text-orange-800 border-orange-200' };
   return { text: 'text-red-600', bar: 'bg-red-500', ring: '#ef4444', badge: 'bg-red-50 text-red-800 border-red-200' };
 }
@@ -196,7 +197,7 @@ function LoadingView({ msgIdx }) {
   );
 }
 
-export default function ResumeReview() {
+export default function ResumeReview({ embedded = false }) {
   const { s } = useContent();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -351,13 +352,14 @@ export default function ResumeReview() {
     return null;
   }
 
+  const Root = embedded ? 'div' : 'main';
   return (
-    <main data-route-atmo="resume" className="relative isolate min-h-screen overflow-x-hidden">
-      <PageGutterAtmosphere />
+    <Root data-route-atmo={embedded ? undefined : 'resume'} className={embedded ? 'relative' : 'relative isolate min-h-screen overflow-x-hidden'}>
+      {!embedded && <PageGutterAtmosphere />}
 
-      <div className="relative mx-auto max-w-3xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
+      <div className={`relative mx-auto w-full ${embedded ? '' : 'max-w-3xl'} ${embedded ? 'pb-10' : 'px-4 pb-24 pt-10 sm:px-6 lg:px-8'}`}>
 
-        {/* Breadcrumb */}
+        {!embedded && (
         <nav aria-label="Breadcrumb" className="mb-6">
           <ol className="flex flex-wrap items-center gap-2 text-sm text-stone-500">
             <li>
@@ -373,6 +375,7 @@ export default function ResumeReview() {
             <li className="font-medium text-stone-800">{s.resumeReview.breadcrumbLabel}</li>
           </ol>
         </nav>
+        )}
 
         {/* ── STATE: LOADING ── */}
         {pageState === 'loading' && (
@@ -605,13 +608,13 @@ export default function ResumeReview() {
                 {s.resumeReview.readyToImproveSub}
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Link
-                  to="/mentors"
+                <AppLink
+                  to={embedded ? '/dashboard/mentors' : '/mentors'}
                   state={{ openAIMatch: true }}
                   className={`flex-1 rounded-full bg-gradient-to-r from-violet-600 to-indigo-500 px-5 py-3 text-center text-sm font-semibold text-white shadow-md shadow-violet-500/25 transition hover:from-violet-500 hover:to-indigo-400 ${focusRing}`}
                 >
                   {s.resumeReview.findMentorCta}
-                </Link>
+                </AppLink>
                 <button
                   type="button"
                   onClick={handleUploadNew}
@@ -637,6 +640,6 @@ export default function ResumeReview() {
           </>
         )}
       </div>
-    </main>
+    </Root>
   );
 }

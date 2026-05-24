@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarCheck, Heart, UserRound, CreditCard, Settings,
-  Clock, DollarSign, Star, PanelLeftClose, PanelLeftOpen,
+  Clock, DollarSign, Star, PanelLeftClose, PanelLeftOpen, Search, FileText,
 } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 import { useI18n } from '../../i18n';
@@ -10,9 +10,10 @@ import { usePerfTier, EASE, DUR_SHORT } from '../landing/landingHooks';
 
 const MENTEE_LINKS = [
   { to: '/dashboard',          label: 'Home',     icon: LayoutDashboard, end: true },
+  { to: '/dashboard/mentors',  label: 'Browse',   icon: Search },
   { to: '/dashboard/sessions', label: 'Sessions', icon: CalendarCheck },
   { to: '/dashboard/saved',    label: 'Saved',    icon: Heart },
-  { to: '/dashboard/profile',  label: 'Profile',  icon: UserRound },
+  { to: '/dashboard/resume',   label: 'Resume',   icon: FileText },
   { to: '/dashboard/billing',  label: 'Billing',  icon: CreditCard },
   { to: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
@@ -80,11 +81,12 @@ export default function Sidebar({ activeRole, isCollapsed, onToggleCollapsed }) 
 
   const menteeLinks = [
     { ...MENTEE_LINKS[0], label: t('common.home', 'Home') },
-    { ...MENTEE_LINKS[1], label: t('common.sessions', 'Sessions') },
-    { ...MENTEE_LINKS[2], label: t('common.saved', 'Saved') },
-    { ...MENTEE_LINKS[3], label: t('nav.profile', 'Profile') },
-    { ...MENTEE_LINKS[4], label: t('common.billing', 'Billing') },
-    { ...MENTEE_LINKS[5], label: t('nav.settings', 'Settings') },
+    { ...MENTEE_LINKS[1], label: t('nav.mentors', 'Browse') },
+    { ...MENTEE_LINKS[2], label: t('common.sessions', 'Sessions') },
+    { ...MENTEE_LINKS[3], label: t('common.saved', 'Saved') },
+    { ...MENTEE_LINKS[4], label: t('nav.resume', 'Resume') },
+    { ...MENTEE_LINKS[5], label: t('common.billing', 'Billing') },
+    { ...MENTEE_LINKS[6], label: t('nav.settings', 'Settings') },
   ];
   const mentorLinks = [
     { ...MENTOR_LINKS[0], label: t('common.home', 'Home') },
@@ -114,7 +116,7 @@ export default function Sidebar({ activeRole, isCollapsed, onToggleCollapsed }) 
       }}
     >
       {/* Nav */}
-      <nav aria-label="Dashboard" className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
+      <nav aria-label="Dashboard" className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2.5 py-5">
         {links.map((link, i) => {
           const Icon = link.icon;
           return (
@@ -124,7 +126,7 @@ export default function Sidebar({ activeRole, isCollapsed, onToggleCollapsed }) 
               end={link.end}
               title={isCollapsed ? link.label : undefined}
               className={({ isActive }) =>
-                `bridge-focus group relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-2 text-[14px] font-semibold transition-colors ${
+                `bridge-focus group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors ${
                   isActive ? 'is-active' : ''
                 }`
               }

@@ -34,7 +34,7 @@ const ITEMS = [
 
 export default function SettingsPage() {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {ITEMS.map((item) => {
         const Icon = item.icon;
         return (

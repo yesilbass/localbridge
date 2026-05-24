@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 // Motion language — one set of values for the entire landing page.
 export const EASE      = [0.16, 1, 0.3, 1];
@@ -74,16 +74,40 @@ function computeTier() {
   return 'high';
 }
 
-export function useScrollProgress() {
+export function useScrollProgress(onProgress) {
   const [p, setP] = useState(0);
   useEffect(() => {
     const fn = () => {
       const h = document.documentElement.scrollHeight - window.innerHeight;
-      setP(h > 0 ? Math.min(window.scrollY / h, 1) : 0);
+      const next = h > 0 ? Math.min(window.scrollY / h, 1) : 0;
+      setP(next);
+      onProgress?.(next);
     };
     window.addEventListener('scroll', fn, { passive: true });
     fn();
     return () => window.removeEventListener('scroll', fn);
-  }, []);
+  }, [onProgress]);
   return p;
+}
+
+/** True while element is near/in the viewport — use to pause infinite animations. */
+export function useInViewActive(options = { threshold: 0.05, rootMargin: '120px 0px' }) {
+  const [active, setActive] = useState(false);
+  const observerRef = useRef(null);
+
+  const ref = useCallback((el) => {
+    observerRef.current?.disconnect();
+    observerRef.current = null;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setActive(entry.isIntersecting),
+      options,
+    );
+    obs.observe(el);
+    observerRef.current = obs;
+  }, [options.threshold, options.rootMargin]);
+
+  useEffect(() => () => observerRef.current?.disconnect(), []);
+
+  return { ref, active };
 }

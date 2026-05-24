@@ -172,7 +172,7 @@ export default function Community() {
                         >
                             <div
                                 className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl"
-                                style={{ background: 'linear-gradient(135deg, var(--color-primary), #f59e0b)' }}
+                                style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary))' }}
                             >
                                 <Mail className="h-5 w-5 text-white" />
                             </div>

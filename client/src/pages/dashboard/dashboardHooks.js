@@ -802,13 +802,13 @@ export function useUpcomingSessions({ limit = 5 } = {}) {
 // ─── useProfileHealth (mentor) — derived ──────────────────────────────────────
 
 const PROFILE_HEALTH_ITEMS = [
-  { key: 'photo',        label: 'Add a profile photo',     weight: 14, hrefMissing: '/onboarding' },
-  { key: 'bio',          label: 'Write a 2-line bio',      weight: 16, hrefMissing: '/onboarding' },
-  { key: 'expertise',    label: 'Pick 3+ expertise tags',  weight: 16, hrefMissing: '/onboarding' },
-  { key: 'rate',         label: 'Set your session rate',   weight: 12, hrefMissing: '/onboarding' },
+  { key: 'photo',        label: 'Add a profile photo',     weight: 14, hrefMissing: '/dashboard/profile' },
+  { key: 'bio',          label: 'Write a 2-line bio',      weight: 16, hrefMissing: '/dashboard/profile' },
+  { key: 'expertise',    label: 'Pick 3+ expertise tags',  weight: 16, hrefMissing: '/dashboard/profile' },
+  { key: 'rate',         label: 'Set your session rate',   weight: 12, hrefMissing: '/dashboard/profile' },
   { key: 'calendly',     label: 'Connect your Calendly',   weight: 28, hrefMissing: '/dashboard/availability' },
-  { key: 'links',        label: 'Add LinkedIn or website', weight: 8,  hrefMissing: '/onboarding' },
-  { key: 'company',      label: 'Add company + title',     weight: 6,  hrefMissing: '/onboarding' },
+  { key: 'links',        label: 'Add LinkedIn or website', weight: 8,  hrefMissing: '/dashboard/profile' },
+  { key: 'company',      label: 'Add company + title',     weight: 6,  hrefMissing: '/dashboard/profile' },
 ];
 
 export function useProfileHealth() {

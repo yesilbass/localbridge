@@ -1,7 +1,6 @@
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { LANDING_CSS } from '../landing/landingStyles';
-import { buildLandingPaletteCSS } from '../landing/landingPalette';
 import WhyUsHero from './WhyUsHero';
 import ContrarianBeliefsSection from './ContrarianBeliefsSection';
 import SideBySideSection from './SideBySideSection';
@@ -13,12 +12,6 @@ import WhyUsFinalCtaSection from './WhyUsFinalCtaSection';
 
 export default function WhyUs() {
   const location = useLocation();
-
-  useLayoutEffect(() => {
-    document.documentElement.classList.add('is-whyus-route');
-    return () =>
-      document.documentElement.classList.remove('is-whyus-route');
-  }, []);
 
   useEffect(() => {
     if (location.hash !== '#receipts') return;
@@ -39,7 +32,6 @@ export default function WhyUs() {
       className="landing-root relative overflow-x-hidden bg-[var(--bridge-canvas)] text-[var(--bridge-text)] focus:outline-none"
     >
       <style>{LANDING_CSS}</style>
-      <style>{buildLandingPaletteCSS('html.is-whyus-route')}</style>
 
       <div
         aria-hidden="true"

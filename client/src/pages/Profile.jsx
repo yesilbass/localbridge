@@ -713,7 +713,7 @@ export default function Profile() {
             <div className="mt-7 rounded-2xl border border-[var(--bridge-border)] bg-[color-mix(in_srgb,var(--bridge-surface-muted)_82%,transparent)] p-4 backdrop-blur-sm">
               <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className={`inline-flex h-2 w-2 rounded-full ${completionPct === 100 ? 'bg-emerald-500' : 'bg-amber-500'} shadow-[0_0_0_3px_rgba(245,158,11,0.2)]`} />
+                  <span className={`inline-flex h-2 w-2 rounded-full ${completionPct === 100 ? 'bg-emerald-500' : 'bg-[var(--color-primary)]'} shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]`} />
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--bridge-text-muted)]">{s.profile.profileCompletionLabel}</p>
                 </div>
                 <p className="text-sm font-bold tabular-nums text-[var(--bridge-text)]">{completionPct}%</p>

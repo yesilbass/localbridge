@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import AppLink from '../../components/AppLink';
 import { ArrowRight, Star } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
 import { findMentor } from './landingData';
@@ -78,39 +79,45 @@ export default function MentorShowcaseSection() {
         </RevealOnScroll>
 
         {featured && (
-          <div className="mt-10">
-            <Centerpiece mentor={featured} t={t} />
-          </div>
+          <RevealOnScroll variant="zoom" delay={100}>
+            <div className="mt-10">
+              <Centerpiece mentor={featured} t={t} />
+            </div>
+          </RevealOnScroll>
         )}
 
-        <RevealOnScroll>
-          <div className="mt-14">
-            <p
-              className="text-[10px] font-bold uppercase"
-              style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.22em' }}
-            >
-              {t('landing.showcase.alsoBooking', 'Also booking this week')}
-            </p>
+        <div className="mt-14">
+            <RevealOnScroll variant="up">
+              <p
+                className="text-[10px] font-bold uppercase"
+                style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.22em' }}
+              >
+                {t('landing.showcase.alsoBooking', 'Also booking this week')}
+              </p>
+            </RevealOnScroll>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-              {smalls.map((m) => (
-                <MentorChip key={m.id} mentor={m} />
+              {smalls.map((m, i) => (
+                <RevealOnScroll key={m.id} delay={i * 70} variant="up">
+                  <MentorChip mentor={m} />
+                </RevealOnScroll>
               ))}
             </div>
-            <div className="mt-6 flex items-center justify-between">
-              <p className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>
-                {t('landing.showcase.count', '5 of 2,400+ vetted mentors.')}
-              </p>
-              <Link
-                to="/mentors"
-                className="inline-flex items-center gap-1.5 text-[13px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
-                style={{ color: 'var(--color-primary)', outlineColor: 'var(--color-primary)' }}
-              >
-                {t('landing.showcase.seeEvery', 'See every mentor')}
-                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </Link>
-            </div>
+            <RevealOnScroll delay={smalls.length * 70 + 40} variant="up">
+              <div className="mt-6 flex items-center justify-between">
+                <p className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>
+                  {t('landing.showcase.count', '5 of 2,400+ vetted mentors.')}
+                </p>
+                <AppLink
+                  to="/mentors"
+                  className="inline-flex items-center gap-1.5 text-[13px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style={{ color: 'var(--color-primary)', outlineColor: 'var(--color-primary)' }}
+                >
+                  {t('landing.showcase.seeEvery', 'See every mentor')}
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                </AppLink>
+              </div>
+            </RevealOnScroll>
           </div>
-        </RevealOnScroll>
       </div>
     </section>
   );
@@ -131,7 +138,7 @@ function Centerpiece({ mentor, t }) {
         className="flex flex-col gap-5 p-7 sm:p-9 lg:col-span-5"
         style={{
           background:
-            'linear-gradient(160deg, #0A0A14 0%, #1A1A2E 100%)',
+            'linear-gradient(160deg, var(--color-midnight) 0%, var(--color-midnight-raised) 100%)',
           color: 'color-mix(in srgb, white 92%, transparent)',
         }}
       >
@@ -154,7 +161,7 @@ function Centerpiece({ mentor, t }) {
                 className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full"
                 style={{
                   backgroundColor: 'var(--color-success)',
-                  boxShadow: '0 0 0 2px #0A0A14',
+                  boxShadow: '0 0 0 2px var(--color-midnight)',
                 }}
               />
             )}
@@ -245,7 +252,7 @@ function Centerpiece({ mentor, t }) {
         </div>
 
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <Link
+          <AppLink
             to={`/mentors/${mentor.id}`}
             className="inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[14px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
             style={{
@@ -260,7 +267,7 @@ function Centerpiece({ mentor, t }) {
           >
             {t('landing.showcase.openProfile', 'Open full profile')}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-          </Link>
+          </AppLink>
         </div>
       </div>
     </div>
@@ -296,7 +303,7 @@ function Stat({ label, value, divider }) {
 
 function MentorChip({ mentor }) {
   return (
-    <Link
+    <AppLink
       to={`/mentors/${mentor.id}`}
       className="group flex items-center gap-3 rounded-2xl p-3 focus-visible:outline-2 focus-visible:outline-offset-2"
       style={{
@@ -339,6 +346,6 @@ function MentorChip({ mentor }) {
           {mentor.title}
         </p>
       </div>
-    </Link>
+    </AppLink>
   );
 }

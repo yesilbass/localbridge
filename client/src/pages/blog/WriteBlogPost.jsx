@@ -5,7 +5,7 @@ import { useAuth } from '../../context/useAuth';
 import supabase from '../../api/supabase';
 import { upsertDraft, submitForReview, deleteDraft, getMyPosts, slugify, calcReadTime, fmtDate, BLOG_CATEGORIES } from '../../api/blog';
 import { focusRing } from '../../ui';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import AppLink from '../../components/AppLink';
 import PageGutterAtmosphere from '../../components/PageGutterAtmosphere';
 
 const inputCls = `w-full rounded-xl border border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] px-4 py-3 text-sm text-[var(--bridge-text)] placeholder:text-[var(--bridge-text-faint)] transition focus:border-[var(--color-primary)] focus:bg-[var(--bridge-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 ${focusRing}`;
@@ -13,7 +13,7 @@ const labelCls = 'mb-1.5 block text-xs font-semibold uppercase tracking-wide tex
 
 const STATUS_LABELS = {
   draft:     { label: 'Draft',            color: 'var(--bridge-text-muted)' },
-  pending:   { label: 'Under Review',     color: '#f59e0b' },
+  pending:   { label: 'Under Review',     color: 'var(--color-primary)' },
   published: { label: 'Published',        color: '#22c55e' },
   rejected:  { label: 'Changes Requested', color: '#ef4444' },
 };
@@ -184,7 +184,7 @@ export default function WriteBlogPost() {
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-center px-4">
         <p className="text-[15px] font-semibold" style={{ color: 'var(--bridge-text)' }}>Writing for Bridge is available to verified mentors.</p>
         <p className="text-sm" style={{ color: 'var(--bridge-text-secondary)' }}>Complete your mentor application and profile to get access.</p>
-        <Link to="/dashboard" className={`rounded-full px-5 py-2 text-sm font-bold ${focusRing}`} style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)' }}>Go to dashboard</Link>
+        <AppLink to="/dashboard" className={`rounded-full px-5 py-2 text-sm font-bold ${focusRing}`} style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)' }}>Go to dashboard</AppLink>
       </div>
     );
   }

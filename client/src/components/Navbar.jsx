@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { isMentorAccount } from '../utils/accountRole';
+import { appUrl, shouldNavigateToApp } from '../utils/appUrl';
 import { LogOut, User, Settings, Sparkles, Menu, X, ChevronRight, Zap } from 'lucide-react';
 import NotificationPanel from './NotificationPanel';
 import { useI18n } from '../i18n';
@@ -77,6 +78,7 @@ export default function Navbar() {
   }
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  const isLanding = location.pathname === '/';
 
   const isActive = path =>
     path === '/' ? location.pathname === '/' : location.pathname === path || location.pathname.startsWith(`${path}/`);
@@ -84,17 +86,15 @@ export default function Navbar() {
   const navItems = asMentor
     ? [
         { path: '/dashboard', label: t('nav.dashboard', 'Dashboard') },
-        { path: '/why-us', label: t('nav.whyUs', 'Why Bridge') },
+        { path: '/company', label: t('nav.company', 'Company') },
         { path: '/pricing', label: t('nav.pricing', 'Pricing') },
-        { path: '/about', label: t('nav.about', 'About'), desktopOnly: true },
       ]
     : [
         { path: '/mentors', label: t('nav.mentors', 'Mentors') },
         ...(user ? [{ path: '/dashboard', label: t('nav.dashboard', 'Dashboard') }] : []),
-        { path: '/why-us', label: t('nav.whyUs', 'Why Bridge') },
+        { path: '/company', label: t('nav.company', 'Company') },
         { path: '/resume', label: t('nav.resume', 'Resume'), ai: true },
         { path: '/pricing', label: t('nav.pricing', 'Pricing') },
-        { path: '/about', label: t('nav.about', 'About'), desktopOnly: true },
       ];
 
   return (
@@ -104,14 +104,14 @@ export default function Navbar() {
       ═══════════════════════════════════════════════════ */}
       <header
         className={`fixed inset-x-0 top-0 z-50 isolate transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          headerHidden && !mobileOpen && !isDashboard ? 'pointer-events-none opacity-0' : 'opacity-100'
+          headerHidden && !mobileOpen && !isDashboard && !isLanding ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
         style={{
           background: 'transparent',
           border: 0,
           boxShadow: 'none',
           outline: 0,
-          transform: headerHidden && !mobileOpen && !isDashboard ? 'translateY(-1.5rem)' : 'translateY(0)',
+          transform: headerHidden && !mobileOpen && !isDashboard && !isLanding ? 'translateY(-1.5rem)' : 'translateY(0)',
         }}
       >
 
@@ -143,16 +143,10 @@ export default function Navbar() {
               <Link to="/"
                 className="group relative flex shrink-0 items-center rounded-full outline-none transition-opacity duration-200 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)]">
                 <span
-                  className="font-display text-[1.22rem] font-black leading-none tracking-[-0.035em] sm:text-[1.32rem]"
+                  className="font-display text-[1.22rem] font-black leading-none tracking-[-0.04em] sm:text-[1.32rem]"
                   style={{ color: isAuthPage ? '#0c0a09' : 'var(--bridge-text)' }}
                 >
-                  {t('brand.bridge', 'Bridge')}
-                </span>
-                <span
-                  className="ml-1.5 font-display text-[1.22rem] font-medium leading-none tracking-[-0.04em] sm:text-[1.32rem]"
-                  style={{ color: isAuthPage ? '#0c0a09' : 'var(--bridge-text)' }}
-                >
-                  {t('brand.mentorship', 'Mentorship')}
+                  mentorshipbridge
                 </span>
               </Link>
 
@@ -160,17 +154,16 @@ export default function Navbar() {
               <div className="hidden items-center gap-7 md:flex">
                 {navItems.map(item => {
                   const active = isActive(item.path);
-                  return (
-                    <Link key={item.path} to={item.path}
-                      aria-current={active ? 'page' : undefined}
-                      className={`group relative inline-flex items-center gap-1.5 rounded-full py-2 text-[15px] font-medium tracking-[-0.015em] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-3 before:inset-y-1 before:scale-75 before:rounded-full before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:before:scale-100 hover:before:opacity-[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)] ${
-                        isAuthPage
-                          ? active ? 'text-[#0c0a09] before:bg-[#0c0a09]' : 'text-[#78716c] before:bg-[#0c0a09] hover:text-[#0c0a09]'
-                          : active
-                          ? 'text-[var(--bridge-text)] before:bg-[var(--bridge-text)]'
-                          : 'text-[var(--bridge-text-secondary)] before:bg-[var(--bridge-text)] hover:text-[var(--bridge-text)]'
-                      }`}
-                    >
+                  const useAppHref = shouldNavigateToApp(item.path);
+                  const linkClass = `group relative inline-flex items-center gap-1.5 rounded-full py-2 text-[15px] font-medium tracking-[-0.015em] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-3 before:inset-y-1 before:scale-75 before:rounded-full before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:before:scale-100 hover:before:opacity-[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)] ${
+                    isAuthPage
+                      ? active ? 'text-[#0c0a09] before:bg-[#0c0a09]' : 'text-[#78716c] before:bg-[#0c0a09] hover:text-[#0c0a09]'
+                      : active
+                      ? 'text-[var(--bridge-text)] before:bg-[var(--bridge-text)]'
+                      : 'text-[var(--bridge-text-secondary)] before:bg-[var(--bridge-text)] hover:text-[var(--bridge-text)]'
+                  }`;
+                  const inner = (
+                    <>
                       <span
                         aria-hidden
                         className={`absolute -bottom-0.5 left-1/2 h-px w-full -translate-x-1/2 rounded-full bg-gradient-to-r from-transparent to-transparent transition-all duration-300 ease-out ${
@@ -180,13 +173,22 @@ export default function Navbar() {
                       />
                       <span className="relative z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-px">{item.label}</span>
                       {item.ai && (
-                        <span
-                          className="relative z-10 inline-flex items-center rounded-full bg-[var(--bridge-surface-muted)] px-1.5 py-px text-[8px] font-black uppercase tracking-[0.12em] text-[var(--color-primary)] transition-transform duration-300 group-hover:scale-105"
-                        >
+                        <span className="relative z-10 inline-flex items-center rounded-full bg-[var(--bridge-surface-muted)] px-1.5 py-px text-[8px] font-black uppercase tracking-[0.12em] text-[var(--color-primary)] transition-transform duration-300 group-hover:scale-105">
                           <Zap className="mr-0.5 h-2 w-2" />AI
                         </span>
                       )}
-                    </Link>
+                    </>
+                  );
+                  return useAppHref ? (
+                    <a key={item.path} href={appUrl(item.path)}
+                      aria-current={active ? 'page' : undefined}
+                      className={linkClass}
+                    >{inner}</a>
+                  ) : (
+                    <Link key={item.path} to={item.path}
+                      aria-current={active ? 'page' : undefined}
+                      className={linkClass}
+                    >{inner}</Link>
                   );
                 })}
               </div>
@@ -347,14 +349,23 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="hidden items-center gap-2 sm:flex">
+                  {shouldNavigateToApp('/login') ? (
+                  <a href={appUrl('/login')}
+                    className="group relative rounded-full px-4 py-2 text-[14px] font-medium transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-1 before:inset-y-1 before:scale-75 before:rounded-full before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:before:scale-100 hover:before:opacity-[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)]"
+                    style={{ color: isAuthPage ? '#78716c' : 'var(--bridge-text-secondary)' }}
+                  >
+                    <span className="relative z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-px" style={{ color: 'inherit' }}>{t('nav.login', 'Log in')}</span>
+                    <span
+                      aria-hidden
+                      className="absolute -bottom-0.5 left-1/2 h-px w-[calc(100%-2rem)] -translate-x-1/2 scale-x-0 rounded-full opacity-0 transition-all duration-300 ease-out group-hover:scale-x-100 group-hover:opacity-70"
+                      style={{ backgroundImage: isAuthPage ? 'linear-gradient(to right, transparent, #0c0a09, transparent)' : 'linear-gradient(to right, transparent, var(--color-primary), transparent)' }}
+                    />
+                  </a>
+                  ) : (
                   <Link to="/login"
                     className="group relative rounded-full px-4 py-2 text-[14px] font-medium transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] before:pointer-events-none before:absolute before:-inset-x-1 before:inset-y-1 before:scale-75 before:rounded-full before:opacity-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.16,1,0.3,1)] before:content-[''] hover:-translate-y-0.5 hover:before:scale-100 hover:before:opacity-[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bridge-canvas)]"
                     style={{ color: isAuthPage ? '#78716c' : 'var(--bridge-text-secondary)' }}
                   >
-                    <span
-                      className="absolute before:bg-current"
-                      style={{ '--tw-content': '""' }}
-                    />
                     <span className="relative z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-px" style={{ color: 'inherit' }}>{t('nav.login', 'Log in')}</span>
                     <span
                       aria-hidden
@@ -362,16 +373,51 @@ export default function Navbar() {
                       style={{ backgroundImage: isAuthPage ? 'linear-gradient(to right, transparent, #0c0a09, transparent)' : 'linear-gradient(to right, transparent, var(--color-primary), transparent)' }}
                     />
                   </Link>
-                  <Link to="/register" data-magnet="6"
-                    className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 text-[14px] font-medium transition hover:-translate-y-0.5 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4"
+                  )}
+                  {shouldNavigateToApp('/register') ? (
+                  <a href={appUrl('/register')} data-magnet="6"
+                    className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 text-[14px] font-semibold transition hover:-translate-y-0.5 hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4"
                     style={{
-                      backgroundColor: isAuthPage ? '#0c0a09' : 'var(--bridge-text)',
-                      color: isAuthPage ? '#ffffff' : 'var(--bridge-canvas)',
-                      boxShadow: isAuthPage ? '0 16px 34px -22px rgba(12,10,9,0.65)' : '0 16px 34px -22px color-mix(in srgb, var(--bridge-text) 80%, transparent)',
+                      color: isAuthPage ? '#78716c' : 'var(--bridge-text-secondary)',
+                      boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                    }}
+                  >
+                    {t('nav.getStarted', 'Get started')}
+                  </a>
+                  ) : (
+                  <Link to="/register" data-magnet="6"
+                    className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 text-[14px] font-semibold transition hover:-translate-y-0.5 hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4"
+                    style={{
+                      color: isAuthPage ? '#78716c' : 'var(--bridge-text-secondary)',
+                      boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
                     }}
                   >
                     {t('nav.getStarted', 'Get started')}
                   </Link>
+                  )}
+                  {shouldNavigateToApp('/mentors') ? (
+                  <a href={appUrl('/mentors')}
+                    className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 text-[14px] font-bold transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4"
+                    style={{
+                      backgroundColor: '#ffffff',
+                      color: '#0c0a09',
+                      boxShadow: '0 14px 32px -14px color-mix(in srgb, #ffffff 55%, transparent)',
+                    }}
+                  >
+                    {t('auth.browseMentors', 'Browse mentors')}
+                  </a>
+                  ) : (
+                  <Link to="/mentors"
+                    className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 text-[14px] font-bold transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-4"
+                    style={{
+                      backgroundColor: '#ffffff',
+                      color: '#0c0a09',
+                      boxShadow: '0 14px 32px -14px color-mix(in srgb, #ffffff 55%, transparent)',
+                    }}
+                  >
+                    {t('auth.browseMentors', 'Browse mentors')}
+                  </Link>
+                  )}
                 </div>
               )}
 
@@ -425,8 +471,7 @@ export default function Navbar() {
             {/* Header */}
             <div className="relative flex shrink-0 items-center justify-between border-b border-[var(--bridge-border)]/80 px-5 py-4">
               <Link to="/" onClick={() => setMobileOpen(false)} className="group flex items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]">
-                <span className="font-display text-xl font-black leading-none tracking-[-0.035em] text-[var(--bridge-text)]">{t('brand.bridge', 'Bridge')}</span>
-                <span className="ml-1.5 font-display text-xl font-medium leading-none tracking-[-0.04em] text-[var(--bridge-text)]">{t('brand.mentorship', 'Mentorship')}</span>
+                <span className="font-display text-xl font-black leading-none tracking-[-0.04em] text-[var(--bridge-text)]">mentorshipbridge</span>
               </Link>
               <button type="button" onClick={() => setMobileOpen(false)}
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--bridge-border)]/80 text-[var(--bridge-text-muted)] transition hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
@@ -440,22 +485,17 @@ export default function Navbar() {
               <div className="space-y-1">
                 {navItems.filter(i => !i.desktopOnly).map(item => {
                   const active = isActive(item.path);
-                  return (
-                    <Link key={item.path} to={item.path} onClick={() => setMobileOpen(false)}
-                      className={`group relative flex items-center justify-between overflow-hidden rounded-2xl px-4 py-3.5 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
-                        active
-                          ? 'text-[var(--color-primary)]'
-                          : 'text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)]'
-                      }`}
-                      style={
-                        active
-                          ? {
-                              backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                              boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-primary) 25%, transparent) inset, 0 10px 28px -18px color-mix(in srgb, var(--color-primary) 50%, transparent)',
-                            }
-                          : undefined
-                      }
-                    >
+                  const useAppHref = shouldNavigateToApp(item.path);
+                  const itemClass = `group relative flex items-center justify-between overflow-hidden rounded-2xl px-4 py-3.5 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
+                    active
+                      ? 'text-[var(--color-primary)]'
+                      : 'text-[var(--bridge-text-secondary)] hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)]'
+                  }`;
+                  const itemStyle = active
+                    ? { backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-primary) 25%, transparent) inset, 0 10px 28px -18px color-mix(in srgb, var(--color-primary) 50%, transparent)' }
+                    : undefined;
+                  const itemInner = (
+                    <>
                       {active && (
                         <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-0.5 rounded-r"
                           style={{ backgroundColor: 'var(--color-primary)' }} />
@@ -463,20 +503,24 @@ export default function Navbar() {
                       <span className="flex items-center gap-2.5">
                         {item.label}
                         {item.ai && (
-                          <span
-                            className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-px text-[8px] font-black uppercase tracking-[0.12em] ${
-                              active
-                                ? 'bg-[var(--bridge-surface-muted)] text-[var(--color-primary)]'
-                                : 'bg-[var(--bridge-surface-muted)] text-[var(--color-primary)]'
-                            }`}
-                          >
+                          <span className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-px text-[8px] font-black uppercase tracking-[0.12em] bg-[var(--bridge-surface-muted)] text-[var(--color-primary)]">
                             <Zap className="h-2 w-2" />AI
                           </span>
                         )}
                       </span>
                       <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
                         style={{ color: active ? 'var(--color-primary)' : 'var(--bridge-text-faint)' }} />
-                    </Link>
+                    </>
+                  );
+                  return useAppHref ? (
+                    <a key={item.path} href={appUrl(item.path)}
+                      onClick={() => setMobileOpen(false)}
+                      className={itemClass} style={itemStyle}
+                    >{itemInner}</a>
+                  ) : (
+                    <Link key={item.path} to={item.path} onClick={() => setMobileOpen(false)}
+                      className={itemClass} style={itemStyle}
+                    >{itemInner}</Link>
                   );
                 })}
               </div>
@@ -484,11 +528,6 @@ export default function Navbar() {
               <div className="my-4 h-px"
                 style={{ background: 'linear-gradient(90deg, transparent, var(--bridge-border), transparent)' }} />
 
-              <Link to="/about" onClick={() => setMobileOpen(false)}
-                className="group flex items-center justify-between rounded-2xl px-4 py-3.5 text-sm font-bold text-[var(--bridge-text-muted)] transition hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]">
-                {t('nav.about', 'About')}
-                <ChevronRight className="h-4 w-4 text-[var(--bridge-text-faint)] transition-transform group-hover:translate-x-0.5" />
-              </Link>
             </nav>
 
             {/* Auth bottom */}
@@ -543,22 +582,73 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  <Link to="/register" onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-center gap-1.5 rounded-2xl px-4 py-3.5 text-sm font-black text-white transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                  {shouldNavigateToApp('/register') ? (
+                  <a href={appUrl('/register')}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center gap-1.5 rounded-2xl px-4 py-3.5 text-sm font-bold transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     style={{
-                      background: 'linear-gradient(90deg, var(--color-primary), var(--color-accent))',
-                      boxShadow: '0 12px 30px -12px color-mix(in srgb, var(--color-primary) 70%, transparent)',
+                      color: 'var(--bridge-text-secondary)',
+                      boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
                     }}
                   >
                     {t('nav.getStartedFree', 'Get started free')}
+                  </a>
+                  ) : (
+                  <Link to="/register"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center gap-1.5 rounded-2xl px-4 py-3.5 text-sm font-bold transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    style={{
+                      color: 'var(--bridge-text-secondary)',
+                      boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                    }}
+                  >
+                    {t('nav.getStartedFree', 'Get started free')}
+                  </Link>
+                  )}
+                  {shouldNavigateToApp('/mentors') ? (
+                  <a href={appUrl('/mentors')}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center gap-1.5 rounded-2xl px-4 py-3.5 text-sm font-black transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    style={{
+                      backgroundColor: '#ffffff',
+                      color: '#0c0a09',
+                      boxShadow: '0 12px 30px -12px color-mix(in srgb, #ffffff 50%, transparent)',
+                    }}
+                  >
+                    {t('auth.browseMentors', 'Browse mentors')}
+                    <ChevronRight className="h-4 w-4" />
+                  </a>
+                  ) : (
+                  <Link to="/mentors"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center gap-1.5 rounded-2xl px-4 py-3.5 text-sm font-black transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    style={{
+                      backgroundColor: '#ffffff',
+                      color: '#0c0a09',
+                      boxShadow: '0 12px 30px -12px color-mix(in srgb, #ffffff 50%, transparent)',
+                    }}
+                  >
+                    {t('auth.browseMentors', 'Browse mentors')}
                     <ChevronRight className="h-4 w-4" />
                   </Link>
-                  <Link to="/login" onClick={() => setMobileOpen(false)}
+                  )}
+                  {shouldNavigateToApp('/login') ? (
+                  <a href={appUrl('/login')}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center rounded-2xl border px-4 py-3 text-sm font-bold text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    style={{ borderColor: 'var(--bridge-border)' }}
+                  >
+                    {t('nav.login', 'Log in')}
+                  </a>
+                  ) : (
+                  <Link to="/login"
+                    onClick={() => setMobileOpen(false)}
                     className="flex items-center justify-center rounded-2xl border px-4 py-3 text-sm font-bold text-[var(--bridge-text-secondary)] transition hover:bg-[var(--bridge-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     style={{ borderColor: 'var(--bridge-border)' }}
                   >
                     {t('nav.login', 'Log in')}
                   </Link>
+                  )}
                 </div>
               )}
             </div>

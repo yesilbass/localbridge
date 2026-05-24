@@ -117,7 +117,7 @@ export default function HomeHeader({ activeRole }) {
       action = <PrimaryAction to="/dashboard/availability" icon={Clock}>{s.dashboard.setAvailability}</PrimaryAction>;
     }
   } else {
-    action = <PrimaryAction to="/mentors" icon={Search}>{s.dashboard.browseMentors}</PrimaryAction>;
+    action = <PrimaryAction to="/dashboard/mentors" icon={Search}>{s.dashboard.browseMentors}</PrimaryAction>;
   }
 
   return (

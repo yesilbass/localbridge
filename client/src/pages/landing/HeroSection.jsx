@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import AppLink from '../../components/AppLink';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, ShieldCheck, Calendar, Star } from 'lucide-react';
 import HeroLiveMatch from './HeroLiveMatch';
@@ -32,7 +33,7 @@ export default function HeroSection() {
     <section
       id="hero"
       aria-labelledby="hero-heading"
-      className="relative flex min-h-[100vh] items-start overflow-hidden px-5 pt-24 pb-20 sm:px-8 lg:pt-28"
+      className="relative flex min-h-[100dvh] items-center overflow-hidden px-5 pb-16 sm:px-8"
       style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       {/* Background depth — decorative only */}
@@ -46,19 +47,19 @@ export default function HeroSection() {
           }}
         />
         <div
-          className="absolute -left-[10%] top-[8%] h-[72%] w-[55%] rounded-full blur-[100px]"
+          className="absolute -left-[10%] top-[8%] h-[72%] w-[55%] rounded-full lp-anim-layer"
           style={{
             background:
-              'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 32%, transparent) 0%, transparent 70%)',
-            opacity: 0.38,
+              'radial-gradient(ellipse 90% 80% at 40% 45%, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, transparent 72%)',
+            opacity: 0.55,
           }}
         />
         <div
-          className="absolute -right-[8%] top-[5%] h-[65%] w-[50%] rounded-full blur-[110px]"
+          className="absolute -right-[8%] top-[5%] h-[65%] w-[50%] rounded-full lp-anim-layer"
           style={{
             background:
-              'radial-gradient(closest-side, color-mix(in srgb, var(--lp-counter) 40%, transparent) 0%, transparent 70%)',
-            opacity: 0.22,
+              'radial-gradient(ellipse 85% 75% at 55% 40%, color-mix(in srgb, var(--lp-counter) 18%, transparent) 0%, transparent 72%)',
+            opacity: 0.45,
           }}
         />
         <div
@@ -77,9 +78,9 @@ export default function HeroSection() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-start gap-14 lg:grid-cols-12 lg:gap-12">
+      <div       className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-16 pt-24 lg:grid-cols-12 lg:gap-14 lg:pt-28">
         {/* Left: copy column */}
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-6">
           {/* Eyebrow status pill (t=0.00) */}
           <motion.div
             {...enter(0, 'y', 8, DUR_SHORT)}
@@ -107,8 +108,8 @@ export default function HeroSection() {
             id="hero-heading"
             className="font-display font-black"
             style={{
-              fontSize: 'clamp(2.85rem, 7.6vw, 6rem)',
-              lineHeight: 0.98,
+              fontSize: 'clamp(2.8rem, 6vw, 5rem)',
+              lineHeight: 1.06,
               letterSpacing: '-0.035em',
               color: 'var(--bridge-text)',
               fontFeatureSettings: '"kern" 1, "ss01" 1',
@@ -135,11 +136,11 @@ export default function HeroSection() {
           {/* Italic sub-tagline (t=0.32) */}
           <motion.p
             {...enter(0.32, 'y', 14, DUR_MED)}
-            className="mt-3 italic font-display font-normal"
+            className="mt-4 italic font-display font-normal"
             style={{
-              fontSize: 'clamp(1.25rem, 2.8vw, 1.85rem)',
-              lineHeight: 1.25,
-              color: 'color-mix(in srgb, var(--bridge-text) 55%, transparent)',
+              fontSize: 'clamp(1.1rem, 2vw, 1.5rem)',
+              lineHeight: 1.3,
+              color: 'color-mix(in srgb, var(--bridge-text) 50%, transparent)',
             }}
           >
             {s.landing.heroSubTagline}
@@ -148,11 +149,11 @@ export default function HeroSection() {
           {/* Sub-copy (t=0.45) */}
           <motion.p
             {...enter(0.45, 'y', 14, DUR_MED)}
-            className="mt-6 max-w-xl"
+            className="mt-6 max-w-lg"
             style={{
               color: 'var(--bridge-text-secondary)',
-              fontSize: 17,
-              lineHeight: 1.6,
+              fontSize: 16,
+              lineHeight: 1.65,
             }}
           >
             {s.landing.heroSubCopy}
@@ -163,7 +164,7 @@ export default function HeroSection() {
             {...enter(0.55, 'y', 14, DUR_MED)}
             className="mt-9 flex flex-wrap gap-4"
           >
-            <Link
+            <AppLink
               to="/register"
               className="lp-cta group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full px-7 py-3.5 text-[15px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{
@@ -186,7 +187,7 @@ export default function HeroSection() {
                 {s.landing.heroCtaGetMatched}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </span>
-            </Link>
+            </AppLink>
             <Link
               to="/#how"
               className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-[14px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -228,6 +229,32 @@ export default function HeroSection() {
               }
             />
           </motion.div>
+
+          {/* Stats inline (t=0.75) */}
+          <motion.div
+            {...enter(0.75, 'y', 10, DUR_MED)}
+            className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3"
+            style={{ borderTop: '1px solid var(--bridge-border)', paddingTop: 20 }}
+          >
+            {[
+              { value: '2,400+', label: 'Vetted mentors' },
+              { value: '4.9/5',  label: '1,200+ reviews' },
+              { value: '97%',    label: 'Would recommend' },
+              { value: '$2.1M+', label: 'In comp increases' },
+            ].map(({ value, label }) => (
+              <div key={label} className="flex flex-col gap-0.5">
+                <span
+                  className="font-display font-black tabular-nums"
+                  style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.6rem)', lineHeight: 1, letterSpacing: '-0.03em', backgroundImage: 'linear-gradient(135deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-to, var(--color-primary)) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+                >
+                  {value}
+                </span>
+                <span className="text-[11.5px] font-medium" style={{ color: 'var(--bridge-text-muted)' }}>
+                  {label}
+                </span>
+              </div>
+            ))}
+          </motion.div>
         </div>
 
         {/* Right column: HeroLiveMatch (t=0.40) */}
@@ -239,7 +266,7 @@ export default function HeroSection() {
                 animate: { opacity: 1, x: 0 },
                 transition: { duration: DUR_LONG, delay: 0.4, ease: EASE },
               })}
-          className="relative lg:col-span-5 lg:self-start"
+          className="relative lg:col-span-6 lg:self-center"
         >
           <HeroLiveMatch />
         </motion.div>

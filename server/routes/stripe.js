@@ -1,18 +1,13 @@
 import express from 'express';
 import Stripe from 'stripe';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { PLAN_PRICES_CENTS } from '../../shared/subscriptionPlans.js';
 
 const router = express.Router();
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
   : null;
 const supabaseAdmin = getSupabaseAdmin();
-
-const PLAN_PRICES = {
-  Starter: 1200,
-  Pro: 1900,
-  Premium: 4900,
-};
 
 const SESSION_TYPE_MAP = {
   career_advice: 'Career Advice',
@@ -60,7 +55,7 @@ router.post('/create-subscription-checkout', async (req, res) => {
   try {
     const { planName, userId, userEmail } = req.body;
 
-    if (!PLAN_PRICES[planName]) {
+    if (!PLAN_PRICES_CENTS[planName]) {
       return res.status(400).json({ error: 'Invalid plan selected.' });
     }
 
@@ -80,7 +75,7 @@ router.post('/create-subscription-checkout', async (req, res) => {
               name: `${planName} Plan`,
               description: 'Bridge subscription plan',
             },
-            unit_amount: PLAN_PRICES[planName],
+            unit_amount: PLAN_PRICES_CENTS[planName],
           },
           quantity: 1,
         },

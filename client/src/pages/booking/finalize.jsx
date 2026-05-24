@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import { finalizeCheckout, confirmScheduledBooking } from '../../api/stripe';
 import CalendlyInlineWidget from '../../components/CalendlyInlineWidget';
-import { useContent } from '../../content';
+import AppLink from '../../components/AppLink';
 
 export default function BookingFinalizePage() {
   const { s } = useContent();
@@ -88,7 +88,7 @@ export default function BookingFinalizePage() {
                 <a href="mailto:support@bridge.com" style={{ color: 'var(--color-primary)' }}>support@bridge.com</a>
               </p>
               <p className="mt-3 text-sm" style={{ color: 'var(--bridge-text-muted)' }}>{error}</p>
-              <Link
+              <AppLink
                 to="/dashboard/sessions"
                 className="mt-6 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-black"
                 style={{
@@ -97,7 +97,7 @@ export default function BookingFinalizePage() {
                 }}
               >
                 {s.pricing.openDashboard}
-              </Link>
+              </AppLink>
             </div>
           )}
 

@@ -24,6 +24,7 @@ const TRANSLATIONS = {
     'nav.resume': 'Resume',
     'nav.pricing': 'Pricing',
     'nav.about': 'About',
+    'nav.company': 'Company',
     'nav.login': 'Log in',
     'nav.getStarted': 'Get started',
     'nav.getStartedFree': 'Get started free',
