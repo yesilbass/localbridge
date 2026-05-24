@@ -18,6 +18,7 @@ import { useI18n } from '../../i18n';
 import Mentors from '../Mentors/index.jsx';
 import MentorProfile from '../mentor-profile/index.jsx';
 import Pricing from '../Pricing/index.jsx';
+import ResumeReview from '../ResumeReview.jsx';
 
 import PageHeader from './home/PageHeader.jsx';
 import HomeHeader from './home/HomeHeader.jsx';
