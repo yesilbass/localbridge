@@ -38,7 +38,6 @@ export default function IsThisForYouSection() {
       ref={sectionRef}
       aria-labelledby="fit-heading"
       className="relative overflow-hidden py-24 lg:py-32"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       {/* Subtle ambient */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -65,7 +64,7 @@ export default function IsThisForYouSection() {
               fontSize: 'clamp(2rem, 5vw, 3.4rem)',
               lineHeight: 1.0,
               letterSpacing: '-0.04em',
-              color: 'var(--bridge-text)',
+              color: 'var(--bridge-text)'
             }}
           >
             Is this for you?
@@ -85,7 +84,7 @@ export default function IsThisForYouSection() {
               background: 'linear-gradient(160deg, var(--color-midnight) 0%, var(--color-midnight-raised) 100%)',
               border: '1px solid rgba(255,255,255,0.07)',
               padding: '36px 36px 40px',
-              boxShadow: '0 24px 60px -16px rgba(0,0,0,0.35)',
+              boxShadow: '0 24px 60px -16px rgba(0,0,0,0.35)'
             }}
           >
             <p
@@ -131,7 +130,7 @@ export default function IsThisForYouSection() {
               background: 'var(--bridge-surface)',
               border: '1px solid var(--bridge-border)',
               padding: '36px 36px 40px',
-              boxShadow: '0 12px 40px -10px rgba(0,0,0,0.08)',
+              boxShadow: '0 12px 40px -10px rgba(0,0,0,0.08)'
             }}
           >
             {/* Brand mark */}

@@ -13,7 +13,6 @@ export default function CompanyStorySection() {
       id="origin"
       aria-labelledby="origin-heading"
       className={COMPANY_PAD}
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-5 sm:px-8 lg:grid-cols-12 lg:gap-16">
         <RevealOnScroll className="lg:col-span-5 lg:pt-2">

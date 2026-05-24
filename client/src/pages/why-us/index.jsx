@@ -19,7 +19,7 @@ export default function WhyUs() {
     const run = () => {
       document.getElementById(id)?.scrollIntoView({
         behavior: 'smooth',
-        block: 'start',
+        block: 'start'
       });
     };
     requestAnimationFrame(() => requestAnimationFrame(run));
@@ -41,7 +41,7 @@ export default function WhyUs() {
           className="absolute inset-0"
           style={{
             background:
-              'linear-gradient(180deg, var(--lp-bg-top) 0%, var(--lp-bg-bottom) 100%)',
+              'linear-gradient(180deg, var(--lp-bg-top) 0%, var(--lp-bg-bottom) 100%)'
           }}
         />
         <div
@@ -50,7 +50,7 @@ export default function WhyUs() {
             background:
               'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 55%, transparent) 0%, transparent 70%)',
             opacity: 'var(--lp-glow-opacity)',
-            transform: 'translate3d(0,0,0)',
+            transform: 'translate3d(0,0,0)'
           }}
         />
         <div
@@ -59,7 +59,7 @@ export default function WhyUs() {
             background:
               'radial-gradient(closest-side, color-mix(in srgb, var(--lp-counter) 55%, transparent) 0%, transparent 70%)',
             opacity: 'var(--lp-glow-opacity-soft)',
-            transform: 'translate3d(0,0,0)',
+            transform: 'translate3d(0,0,0)'
           }}
         />
       </div>

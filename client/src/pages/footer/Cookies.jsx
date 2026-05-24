@@ -6,22 +6,22 @@ const TYPES = [
   {
     Icon: Shield,
     title: 'Essential cookies',
-    body: 'Required for authentication, security, and core functionality. These can\u2019t be disabled.',
+    body: 'Required for authentication, security, and core functionality. These can\u2019t be disabled.'
   },
   {
     Icon: Settings,
     title: 'Preference cookies',
-    body: 'Remember your settings like language and theme so you don\u2019t have to reconfigure each visit.',
+    body: 'Remember your settings like language and theme so you don\u2019t have to reconfigure each visit.'
   },
   {
     Icon: BarChart3,
     title: 'Analytics cookies',
-    body: 'Help us understand usage patterns so we can improve the platform. We use aggregated, anonymized data only.',
+    body: 'Help us understand usage patterns so we can improve the platform. We use aggregated, anonymized data only.'
   },
   {
     Icon: Megaphone,
     title: 'Marketing cookies',
-    body: 'Used with your consent to measure ad effectiveness. You can opt out at any time.',
+    body: 'Used with your consent to measure ad effectiveness. You can opt out at any time.'
   },
 ];
 
@@ -34,7 +34,7 @@ export default function Cookies() {
         style={{
           background:
             'radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-primary) 15%, transparent), transparent 68%)',
-          filter: 'blur(80px)',
+          filter: 'blur(80px)'
         }}
       />
 
@@ -52,7 +52,7 @@ export default function Cookies() {
               fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
               lineHeight: 1.02,
               letterSpacing: '-0.03em',
-              color: 'var(--color-primary)',
+              color: 'var(--color-primary)'
             }}
           >
             Cookie policy
@@ -66,7 +66,7 @@ export default function Cookies() {
               className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[12px] font-medium text-[var(--bridge-text-secondary)] transition hover:text-[var(--bridge-text)]"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
             >
               <Printer className="h-3 w-3" />
@@ -80,7 +80,7 @@ export default function Cookies() {
             className="rounded-2xl p-8 sm:p-10"
             style={{
               backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
             }}
           >
             <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
@@ -102,7 +102,7 @@ export default function Cookies() {
                   className="group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5"
                   style={{
                     backgroundColor: 'var(--bridge-surface)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                   }}
                 >
                   <div
@@ -110,14 +110,14 @@ export default function Cookies() {
                     className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full opacity-0 blur-2xl transition duration-500 group-hover:opacity-100"
                     style={{
                       background:
-                        'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 18%, transparent), transparent)',
+                        'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 18%, transparent), transparent)'
                     }}
                   />
                   <div
                     className="relative flex h-10 w-10 items-center justify-center rounded-xl transition duration-300 group-hover:scale-[1.06]"
                     style={{
                       backgroundColor:
-                        'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))',
+                        'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))'
                     }}
                   >
                     <t.Icon
@@ -140,7 +140,7 @@ export default function Cookies() {
             className="rounded-2xl p-8 sm:p-10"
             style={{
               backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
             }}
           >
             <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
@@ -155,7 +155,7 @@ export default function Cookies() {
             className="rounded-2xl p-8 sm:p-10"
             style={{
               backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
             }}
           >
             <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
@@ -170,7 +170,7 @@ export default function Cookies() {
             className="rounded-2xl p-8 sm:p-10"
             style={{
               backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
             }}
           >
             <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">

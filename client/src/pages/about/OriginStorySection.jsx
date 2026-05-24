@@ -7,10 +7,6 @@ export default function OriginStorySection() {
       id="origin"
       aria-labelledby="origin-heading"
       className={ABOUT_SECTION_PAD}
-      style={{
-        backgroundColor: 'var(--bridge-canvas)',
-        borderBottom: '1px solid var(--bridge-border-strong)',
-      }}
     >
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -18,7 +14,7 @@ export default function OriginStorySection() {
             className="text-[10px] font-black uppercase"
             style={{
               color: 'var(--color-primary)',
-              letterSpacing: '0.32em',
+              letterSpacing: '0.32em'
             }}
           >
             Origin
@@ -31,7 +27,7 @@ export default function OriginStorySection() {
               fontSize: 'clamp(2rem, 5vw, 4rem)',
               lineHeight: 0.98,
               letterSpacing: '-0.035em',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
@@ -50,7 +46,7 @@ export default function OriginStorySection() {
               style={{
                 color: 'var(--bridge-text-secondary)',
                 fontSize: 'clamp(1rem, 1.2vw, 1.0625rem)',
-                lineHeight: 1.65,
+                lineHeight: 1.65
               }}
             >
               <p>
@@ -71,7 +67,7 @@ export default function OriginStorySection() {
               style={{
                 backgroundColor: 'var(--bridge-surface)',
                 boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-                borderLeft: '3px solid var(--color-primary)',
+                borderLeft: '3px solid var(--color-primary)'
               }}
             >
               <blockquote
@@ -79,7 +75,7 @@ export default function OriginStorySection() {
                 style={{
                   fontSize: 'clamp(1.125rem, 1.7vw, 1.375rem)',
                   lineHeight: 1.45,
-                  color: 'var(--bridge-text)',
+                  color: 'var(--bridge-text)'
                 }}
               >
                 &ldquo;The right ten minutes with the right person can alter the trajectory of a life. We made those ten minutes bookable.&rdquo;
@@ -89,7 +85,7 @@ export default function OriginStorySection() {
                 style={{
                   color: 'var(--bridge-text-muted)',
                   letterSpacing: '0.22em',
-                  fontFeatureSettings: '"tnum" 1, "kern" 1',
+                  fontFeatureSettings: '"tnum" 1, "kern" 1'
                 }}
               >
                 Founding thesis &middot; 2026

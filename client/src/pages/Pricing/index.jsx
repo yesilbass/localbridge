@@ -91,7 +91,7 @@ export default function Pricing({ embedded = false }) {
         ],
     cta: user ? 'Current plan' : 'Sign up free',
     href: user ? '/dashboard' : '/register',
-    primary: false,
+    primary: false
   };
 
   const menteeTiers = [
@@ -111,7 +111,7 @@ export default function Pricing({ embedded = false }) {
       ],
       cta: 'Choose Plus',
       onClick: () => handlePaidClick('Plus'),
-      primary: false,
+      primary: false
     },
     {
       name: 'Pro',
@@ -128,7 +128,7 @@ export default function Pricing({ embedded = false }) {
       cta: 'Choose Pro',
       onClick: () => handlePaidClick('Pro'),
       primary: true,
-      badge: 'Most popular',
+      badge: 'Most popular'
     },
   ];
 
@@ -176,14 +176,14 @@ export default function Pricing({ embedded = false }) {
               className="absolute -left-[8%] top-[-30%] h-[100%] w-[55%] rounded-full blur-[100px]"
               style={{
                 background: 'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 30%, transparent) 0%, transparent 70%)',
-                opacity: 0.35,
+                opacity: 0.35
               }}
             />
             <div
               className="absolute -right-[10%] top-[-20%] h-[80%] w-[40%] rounded-full blur-[110px]"
               style={{
                 background: 'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary-hover) 36%, transparent) 0%, transparent 70%)',
-                opacity: 0.22,
+                opacity: 0.22
               }}
             />
           </div>
@@ -200,7 +200,7 @@ export default function Pricing({ embedded = false }) {
                     lineHeight: 1.06,
                     letterSpacing: '-0.035em',
                     color: 'var(--bridge-text)',
-                    fontFeatureSettings: '"kern" 1, "ss01" 1',
+                    fontFeatureSettings: '"kern" 1, "ss01" 1'
                   }}
                 >
                   <span className="block">{s.pricing.heroHeading1}</span>
@@ -221,7 +221,7 @@ export default function Pricing({ embedded = false }) {
                     className={`pointer-events-none absolute inset-y-1 w-[calc(50%-4px)] rounded-full transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${annual ? 'left-[calc(50%+0px)]' : 'left-1'}`}
                     style={{
                       backgroundColor: 'var(--color-primary)',
-                      boxShadow: '0 8px 22px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                      boxShadow: '0 8px 22px -6px color-mix(in srgb, var(--color-primary) 55%, transparent)'
                     }}
                   />
                   <button
@@ -250,7 +250,7 @@ export default function Pricing({ embedded = false }) {
                 className="mt-6 flex flex-col gap-4 rounded-2xl p-5 sm:mt-7 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-6"
                 style={{
                   background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 88%, var(--bridge-text)) 0%, var(--color-primary) 100%)',
-                  boxShadow: '0 20px 50px -18px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                  boxShadow: '0 20px 50px -18px color-mix(in srgb, var(--color-primary) 55%, transparent)'
                 }}
               >
                 <div className="flex min-w-0 items-start gap-4">
@@ -277,7 +277,7 @@ export default function Pricing({ embedded = false }) {
                     className="shrink-0 self-start rounded-full px-4 py-2 text-[12px] font-black uppercase tracking-[0.14em] sm:self-center"
                     style={{
                       backgroundColor: 'var(--color-on-primary)',
-                      color: 'var(--color-primary)',
+                      color: 'var(--color-primary)'
                     }}
                   >
                     50% off active
@@ -312,11 +312,11 @@ export default function Pricing({ embedded = false }) {
                       style={tier.primary ? {
                         background: 'linear-gradient(160deg, var(--bridge-surface), var(--bridge-surface) 60%, color-mix(in srgb, var(--color-primary) 5%, transparent))',
                         borderColor: 'color-mix(in srgb, var(--color-primary) 35%, var(--bridge-border))',
-                        boxShadow: '0 24px 60px -22px color-mix(in srgb, var(--color-primary) 45%, transparent)',
+                        boxShadow: '0 24px 60px -22px color-mix(in srgb, var(--color-primary) 45%, transparent)'
                       } : {
                         borderColor: 'var(--bridge-border)',
                         backgroundColor: 'var(--bridge-surface)',
-                        boxShadow: '0 8px 24px -18px color-mix(in srgb, var(--bridge-text) 18%, transparent)',
+                        boxShadow: '0 8px 24px -18px color-mix(in srgb, var(--bridge-text) 18%, transparent)'
                       }}
                     >
                       {tier.primary && (
@@ -324,7 +324,7 @@ export default function Pricing({ embedded = false }) {
                           aria-hidden
                           className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full blur-3xl"
                           style={{
-                            background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, transparent 70%)',
+                            background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, transparent 70%)'
                           }}
                         />
                       )}
@@ -345,7 +345,7 @@ export default function Pricing({ embedded = false }) {
                             style={{
                               backgroundColor: 'var(--color-primary)',
                               color: 'var(--color-on-primary)',
-                              boxShadow: '0 8px 22px -4px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+                              boxShadow: '0 8px 22px -4px color-mix(in srgb, var(--color-primary) 55%, transparent)'
                             }}
                           >
                             <span
@@ -393,11 +393,11 @@ export default function Pricing({ embedded = false }) {
                               style={tier.primary ? {
                                 backgroundColor: 'var(--color-primary)',
                                 color: 'var(--color-on-primary)',
-                                boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-on-primary) 15%, transparent), 0 0 10px color-mix(in srgb, var(--color-primary) 40%, transparent)',
+                                boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-on-primary) 15%, transparent), 0 0 10px color-mix(in srgb, var(--color-primary) 40%, transparent)'
                               } : {
                                 backgroundColor: 'color-mix(in srgb, var(--color-success) 10%, transparent)',
                                 color: 'var(--color-success)',
-                                boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-success) 22%, transparent)',
+                                boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-success) 22%, transparent)'
                               }}
                               aria-hidden
                             >
@@ -423,11 +423,11 @@ export default function Pricing({ embedded = false }) {
                             style={tier.primary ? {
                               backgroundColor: 'var(--color-primary)',
                               color: 'var(--color-on-primary)',
-                              boxShadow: '0 12px 32px -6px color-mix(in srgb, var(--color-primary) 60%, transparent)',
+                              boxShadow: '0 12px 32px -6px color-mix(in srgb, var(--color-primary) 60%, transparent)'
                             } : {
                               border: '1px solid var(--bridge-border-strong)',
                               backgroundColor: 'var(--bridge-surface-raised)',
-                              color: 'var(--bridge-text-secondary)',
+                              color: 'var(--bridge-text-secondary)'
                             }}
                           >
                             {tier.cta}
@@ -441,11 +441,11 @@ export default function Pricing({ embedded = false }) {
                             style={tier.primary ? {
                               backgroundColor: 'var(--color-primary)',
                               color: 'var(--color-on-primary)',
-                              boxShadow: '0 12px 32px -6px color-mix(in srgb, var(--color-primary) 60%, transparent)',
+                              boxShadow: '0 12px 32px -6px color-mix(in srgb, var(--color-primary) 60%, transparent)'
                             } : {
                               border: '1px solid var(--bridge-border-strong)',
                               backgroundColor: 'var(--bridge-surface-raised)',
-                              color: 'var(--bridge-text-secondary)',
+                              color: 'var(--bridge-text-secondary)'
                             }}
                           >
                             {tier.cta}

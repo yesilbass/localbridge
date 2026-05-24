@@ -45,7 +45,7 @@ export default function FAQ() {
                 style={{
                     background:
                         'conic-gradient(from 190deg at 50% 50%, color-mix(in srgb, var(--color-primary) 14%, transparent), color-mix(in srgb, var(--color-accent) 10%, transparent), color-mix(in srgb, var(--color-primary) 18%, transparent), color-mix(in srgb, var(--color-primary) 14%, transparent))',
-                    filter: 'blur(100px)',
+                    filter: 'blur(100px)'
                 }}
             />
 

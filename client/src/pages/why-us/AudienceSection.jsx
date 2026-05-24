@@ -3,7 +3,7 @@ import RevealOnScroll from '../landing/RevealOnScroll';
 import {
   AUDIENCE_FOR,
   AUDIENCE_NOT_FOR,
-  WHY_US_SECTION_PAD,
+  WHY_US_SECTION_PAD
 } from './whyUsData';
 
 export default function AudienceSection() {
@@ -12,9 +12,6 @@ export default function AudienceSection() {
       id="audience"
       aria-labelledby="audience-heading"
       className={WHY_US_SECTION_PAD}
-      style={{
-        backgroundColor: 'var(--bridge-canvas)',
-      }}
     >
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -22,7 +19,7 @@ export default function AudienceSection() {
             className="text-[10px] font-black uppercase"
             style={{
               color: 'var(--color-primary)',
-              letterSpacing: '0.32em',
+              letterSpacing: '0.32em'
             }}
           >
             Who this is for
@@ -35,7 +32,7 @@ export default function AudienceSection() {
               fontSize: 'clamp(2rem, 5vw, 4rem)',
               lineHeight: 0.98,
               letterSpacing: '-0.035em',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
@@ -51,7 +48,7 @@ export default function AudienceSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 17,
-              lineHeight: 1.6,
+              lineHeight: 1.6
             }}
           >
             If your situation is on the right column, we will refund you and point you at someone better. We mean it.
@@ -66,7 +63,7 @@ export default function AudienceSection() {
               style={{
                 backgroundColor: 'var(--bridge-surface)',
                 boxShadow:
-                  'inset 0 0 0 1px var(--bridge-border), 0 1px 2px var(--bridge-shadow-soft), 0 8px 24px -10px var(--bridge-shadow-soft), 0 26px 56px -22px color-mix(in srgb, var(--color-primary) 18%, transparent)',
+                  'inset 0 0 0 1px var(--bridge-border), 0 1px 2px var(--bridge-shadow-soft), 0 8px 24px -10px var(--bridge-shadow-soft), 0 26px 56px -22px color-mix(in srgb, var(--color-primary) 18%, transparent)'
               }}
             >
               <div>
@@ -74,7 +71,7 @@ export default function AudienceSection() {
                   className="text-[10px] uppercase font-bold"
                   style={{
                     color: 'var(--color-primary)',
-                    letterSpacing: '0.28em',
+                    letterSpacing: '0.28em'
                   }}
                 >
                   Built for
@@ -84,7 +81,7 @@ export default function AudienceSection() {
                   style={{
                     color: 'var(--bridge-text)',
                     letterSpacing: '-0.02em',
-                    lineHeight: 1.2,
+                    lineHeight: 1.2
                   }}
                 >
                   Operators with a specific question.
@@ -102,7 +99,7 @@ export default function AudienceSection() {
                       className="text-[14px]"
                       style={{
                         color: 'var(--bridge-text-secondary)',
-                        lineHeight: 1.55,
+                        lineHeight: 1.55
                       }}
                     >
                       {line}
@@ -117,7 +114,7 @@ export default function AudienceSection() {
               className="rounded-3xl p-7 sm:p-8 flex flex-col gap-5 h-full"
               style={{
                 backgroundColor: 'var(--bridge-surface-muted)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
             >
               <div>
@@ -125,7 +122,7 @@ export default function AudienceSection() {
                   className="text-[10px] uppercase font-bold"
                   style={{
                     color: 'var(--bridge-text-muted)',
-                    letterSpacing: '0.28em',
+                    letterSpacing: '0.28em'
                   }}
                 >
                   Not built for
@@ -135,7 +132,7 @@ export default function AudienceSection() {
                   style={{
                     color: 'var(--bridge-text-secondary)',
                     letterSpacing: '-0.02em',
-                    lineHeight: 1.2,
+                    lineHeight: 1.2
                   }}
                 >
                   Open-ended therapy with a stranger.
@@ -153,7 +150,7 @@ export default function AudienceSection() {
                       className="text-[14px]"
                       style={{
                         color: 'var(--bridge-text-muted)',
-                        lineHeight: 1.55,
+                        lineHeight: 1.55
                       }}
                     >
                       {line}
@@ -175,7 +172,7 @@ export default function AudienceSection() {
               className="h-12 w-12 rounded-full font-display font-black text-[16px] flex items-center justify-center shrink-0"
               style={{
                 backgroundColor: 'var(--color-primary)',
-                color: 'var(--color-on-primary)',
+                color: 'var(--color-on-primary)'
               }}
             >
               B
@@ -186,7 +183,7 @@ export default function AudienceSection() {
                 style={{
                   fontSize: 'clamp(1rem, 1.6vw, 1.125rem)',
                   lineHeight: 1.55,
-                  color: 'var(--bridge-text)',
+                  color: 'var(--bridge-text)'
                 }}
               >
                 We will tell you when Bridge isn&rsquo;t the right fit. We would rather lose the booking than waste your hour.
@@ -195,7 +192,7 @@ export default function AudienceSection() {
                 className="mt-3 text-[12px] uppercase font-bold"
                 style={{
                   color: 'var(--bridge-text-muted)',
-                  letterSpacing: '0.18em',
+                  letterSpacing: '0.18em'
                 }}
               >
                 The Bridge team

@@ -12,7 +12,7 @@ import Footer from './components/Footer';
 import BridgeGlobalAtmosphere from './components/BridgeGlobalAtmosphere';
 import FeedbackFAB from './components/FeedbackFAB';
 import ErrorBoundary from './components/ErrorBoundary';
-import { GuestOnly, AuthPage, AuthenticatedProductRedirect } from './components/routing/RouteGuards';
+import { AuthPage, PublicPage } from './components/routing/RouteGuards';
 import LegacyCompanyRedirect from './components/routing/LegacyCompanyRedirect';
 import DevPortal from './pages/DevPortal/index.jsx';
 
@@ -27,6 +27,7 @@ const Settings         = lazy(() => import('./pages/Settings'));
 const Pricing          = lazy(() => import('./pages/Pricing'));
 const ResumeReview     = lazy(() => import('./pages/ResumeReview'));
 const Company          = lazy(() => import('./pages/company'));
+const HowItWorks       = lazy(() => import('./pages/how-it-works'));
 const VideoCall        = lazy(() => import('./pages/VideoCall'));
 const MeetLobby        = lazy(() => import('./pages/MeetLobby'));
 const IntakeCall       = lazy(() => import('./pages/IntakeCall'));
@@ -113,37 +114,38 @@ function AppContent() {
         <ErrorBoundary>
         <Suspense fallback={<PageLoadingFallback />}>
         <Routes>
-          <Route path="/" element={<GuestOnly><Landing /></GuestOnly>} />
+          <Route path="/" element={<PublicPage><Landing /></PublicPage>} />
           <Route path="/login" element={<AuthPage><Login /></AuthPage>} />
           <Route path="/register" element={<AuthPage><Register /></AuthPage>} />
-          <Route path="/mentors" element={<AuthenticatedProductRedirect><Mentors /></AuthenticatedProductRedirect>} />
-          <Route path="/mentors/:id" element={<AuthenticatedProductRedirect><MentorProfile /></AuthenticatedProductRedirect>} />
+          <Route path="/mentors" element={<PublicPage><Mentors /></PublicPage>} />
+          <Route path="/mentors/:id" element={<PublicPage><MentorProfile /></PublicPage>} />
           <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="/refs/:token" element={<SubmitReferencePage />} />
           <Route path="/admin/verification" element={<AdminVerification />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/blog/write" element={<WriteBlogPost />} />
-          <Route path="/profile" element={<AuthenticatedProductRedirect><Profile /></AuthenticatedProductRedirect>} />
-          <Route path="/settings" element={<AuthenticatedProductRedirect><Settings /></AuthenticatedProductRedirect>} />
+          <Route path="/profile" element={<PublicPage><Profile /></PublicPage>} />
+          <Route path="/settings" element={<PublicPage><Settings /></PublicPage>} />
           <Route path="/session/:sessionId/video" element={<VideoCall />} />
           <Route path="/meet/:slug" element={<MeetLobby />} />
           <Route path="/intake/:sessionId" element={<IntakeCall />} />
           <Route path="/booking/finalize" element={<BookingFinalize />} />
-          <Route path="/pricing" element={<AuthenticatedProductRedirect><Pricing /></AuthenticatedProductRedirect>} />
-          <Route path="/resume" element={<AuthenticatedProductRedirect><ResumeReview /></AuthenticatedProductRedirect>} />
-          <Route path="/company" element={<GuestOnly><Company /></GuestOnly>} />
+          <Route path="/pricing" element={<PublicPage><Pricing /></PublicPage>} />
+          <Route path="/resume" element={<PublicPage><ResumeReview /></PublicPage>} />
+          <Route path="/company" element={<PublicPage><Company /></PublicPage>} />
+          <Route path="/how-it-works" element={<PublicPage><HowItWorks /></PublicPage>} />
           <Route path="/about" element={<LegacyCompanyRedirect />} />
           <Route path="/why-us" element={<LegacyCompanyRedirect />} />
-          <Route path="/careers" element={<GuestOnly><Careers /></GuestOnly>} />
-          <Route path="/blog" element={<GuestOnly><Blog /></GuestOnly>} />
-          <Route path="/faq" element={<GuestOnly><FAQ /></GuestOnly>} />
-          <Route path="/contact" element={<GuestOnly><Contact /></GuestOnly>} />
-          <Route path="/help" element={<GuestOnly><Help /></GuestOnly>} />
-          <Route path="/trust" element={<GuestOnly><Trust /></GuestOnly>} />
-          <Route path="/community" element={<GuestOnly><Community /></GuestOnly>} />
-          <Route path="/privacy" element={<GuestOnly><Privacy /></GuestOnly>} />
-          <Route path="/terms" element={<GuestOnly><Terms /></GuestOnly>} />
-          <Route path="/cookies" element={<GuestOnly><Cookies /></GuestOnly>} />
+          <Route path="/careers" element={<PublicPage><Careers /></PublicPage>} />
+          <Route path="/blog" element={<PublicPage><Blog /></PublicPage>} />
+          <Route path="/faq" element={<PublicPage><FAQ /></PublicPage>} />
+          <Route path="/contact" element={<PublicPage><Contact /></PublicPage>} />
+          <Route path="/help" element={<PublicPage><Help /></PublicPage>} />
+          <Route path="/trust" element={<PublicPage><Trust /></PublicPage>} />
+          <Route path="/community" element={<PublicPage><Community /></PublicPage>} />
+          <Route path="/privacy" element={<PublicPage><Privacy /></PublicPage>} />
+          <Route path="/terms" element={<PublicPage><Terms /></PublicPage>} />
+          <Route path="/cookies" element={<PublicPage><Cookies /></PublicPage>} />
         </Routes>
         </Suspense>
         </ErrorBoundary>

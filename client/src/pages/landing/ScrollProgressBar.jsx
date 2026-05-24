@@ -14,7 +14,7 @@ export default function ScrollProgressBar() {
           width: `${progress * 100}%`,
           transition: 'width 90ms linear',
           backgroundImage: 'linear-gradient(90deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 50%, var(--lp-grad-to) 100%)',
-          boxShadow: '0 0 18px color-mix(in srgb, var(--color-primary) 65%, transparent)',
+          boxShadow: '0 0 18px color-mix(in srgb, var(--color-primary) 65%, transparent)'
         }}
       />
     </div>

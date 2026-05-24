@@ -8,7 +8,7 @@ function Chip({ icon: Icon, label }) {
         fontSize: '12px',
         background: 'var(--bridge-surface)',
         boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-        color: 'var(--bridge-text-secondary)',
+        color: 'var(--bridge-text-secondary)'
       }}
     >
       <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />

@@ -9,7 +9,7 @@ import { ABOUT_CONTACT_SECTION_PAD } from './aboutData';
 const PRIMARY_BASE_BG = 'var(--color-primary)';
 
 const foundersMailHref = mailtoHref({
-  subject: 'Hello — from the Bridge Company page',
+  subject: 'Hello — from the Bridge Company page'
 });
 
 const primaryEnter = (e) => {
@@ -37,11 +37,6 @@ export default function ContactCtaSection() {
       id="contact"
       aria-labelledby="contact-heading"
       className={ABOUT_CONTACT_SECTION_PAD}
-      style={{
-        background:
-          'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 12%, var(--bridge-canvas)) 0%, color-mix(in srgb, var(--lp-grad-mid, var(--color-primary-hover)) 14%, var(--bridge-canvas)) 55%, color-mix(in srgb, var(--color-primary) 18%, var(--bridge-canvas)) 100%)',
-        borderTop: '1px solid var(--bridge-border-strong)',
-      }}
     >
       <div className="mx-auto max-w-4xl px-5 sm:px-8 text-center">
         <RevealOnScroll>
@@ -49,7 +44,7 @@ export default function ContactCtaSection() {
             className="text-[10px] font-black uppercase"
             style={{
               color: 'var(--color-primary)',
-              letterSpacing: '0.32em',
+              letterSpacing: '0.32em'
             }}
           >
             Get in touch
@@ -62,7 +57,7 @@ export default function ContactCtaSection() {
               fontSize: 'clamp(2rem, 5vw, 4rem)',
               lineHeight: 0.98,
               letterSpacing: '-0.035em',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
@@ -72,7 +67,7 @@ export default function ContactCtaSection() {
               className="block bg-clip-text text-transparent"
               style={{
                 backgroundImage:
-                  'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)',
+                  'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)'
               }}
             >
               the founders?
@@ -84,7 +79,7 @@ export default function ContactCtaSection() {
               style={{
                 color: 'var(--bridge-text-secondary)',
                 fontSize: 17,
-                lineHeight: 1.6,
+                lineHeight: 1.6
               }}
             >
               We read every email. Mentors, mentees, investors &mdash; same inbox.
@@ -94,7 +89,7 @@ export default function ContactCtaSection() {
               style={{
                 color: 'var(--bridge-text-secondary)',
                 fontSize: 'clamp(0.9375rem, 1.4vw, 1.0625rem)',
-                lineHeight: 1.4,
+                lineHeight: 1.4
               }}
             >
               No calendar link yet — send a note and a founder will reply.
@@ -111,7 +106,7 @@ export default function ContactCtaSection() {
                 boxShadow:
                   '0 18px 40px -12px color-mix(in srgb, var(--color-primary) 60%, transparent)',
                 outlineColor: 'var(--color-on-primary)',
-                transition: `all ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`,
+                transition: `all ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`
               }}
               onMouseEnter={primaryEnter}
               onMouseLeave={primaryLeave}
@@ -129,7 +124,7 @@ export default function ContactCtaSection() {
                 color: 'var(--bridge-text)',
                 boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
                 outlineColor: 'var(--color-primary)',
-                transition: `all ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`,
+                transition: `all ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`
               }}
               onMouseEnter={secondaryEnter}
               onMouseLeave={secondaryLeave}

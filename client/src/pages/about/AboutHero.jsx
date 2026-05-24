@@ -5,7 +5,7 @@ import {
   DUR_SHORT,
   DUR_MED,
   DUR_LONG,
-  usePerfTier,
+  usePerfTier
 } from '../landing/landingHooks';
 import { useContent } from '../../content';
 
@@ -22,7 +22,7 @@ export default function AboutHero() {
     return {
       initial: { opacity: 0, ...offset },
       animate: { opacity: 1, ...rest },
-      transition: { duration, delay, ease: EASE },
+      transition: { duration, delay, ease: EASE }
     };
   };
 
@@ -31,7 +31,6 @@ export default function AboutHero() {
       id="about-hero"
       aria-labelledby="about-hero-heading"
       className="relative flex min-h-0 items-start pb-14 pt-24 sm:min-h-[68vh] sm:pb-20 lg:min-h-[72vh] lg:pb-20 lg:pt-28"
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="relative z-10 mx-auto w-full max-w-6xl px-5 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
@@ -43,7 +42,7 @@ export default function AboutHero() {
               className="mb-7 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
             >
               <span
@@ -55,7 +54,7 @@ export default function AboutHero() {
                 className="text-[11px] font-bold uppercase"
                 style={{
                   color: 'var(--bridge-text-secondary)',
-                  letterSpacing: '0.22em',
+                  letterSpacing: '0.22em'
                 }}
               >
                 {s.about.eyebrow}
@@ -70,7 +69,7 @@ export default function AboutHero() {
                 fontSize: 'clamp(2.85rem, 7.6vw, 6rem)',
                 lineHeight: 0.98,
                 letterSpacing: '-0.035em',
-                fontFeatureSettings: '"kern" 1, "ss01" 1',
+                fontFeatureSettings: '"kern" 1, "ss01" 1'
               }}
             >
               <motion.span
@@ -85,7 +84,7 @@ export default function AboutHero() {
                 className="block bg-clip-text text-transparent"
                 style={{
                   backgroundImage:
-                    'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)',
+                    'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)'
                 }}
               >
                 in courses.
@@ -99,7 +98,7 @@ export default function AboutHero() {
               style={{
                 fontSize: 'clamp(1.25rem, 2.8vw, 1.85rem)',
                 lineHeight: 1.25,
-                color: 'color-mix(in srgb, var(--bridge-text) 55%, transparent)',
+                color: 'color-mix(in srgb, var(--bridge-text) 55%, transparent)'
               }}
             >
               They change in conversation, with someone who&rsquo;s done it.
@@ -112,7 +111,7 @@ export default function AboutHero() {
               style={{
                 color: 'var(--bridge-text-secondary)',
                 fontSize: 17,
-                lineHeight: 1.6,
+                lineHeight: 1.6
               }}
             >
               We built Bridge because the best advice in our careers came from a single hour with someone who&rsquo;d already done the job.
@@ -136,7 +135,7 @@ export default function AboutHero() {
               : {
                   initial: { opacity: 0, x: 16 },
                   animate: { opacity: 1, x: 0 },
-                  transition: { duration: DUR_LONG, delay: 0.4, ease: EASE },
+                  transition: { duration: DUR_LONG, delay: 0.4, ease: EASE }
                 })}
             className="lg:col-span-5"
           >
@@ -145,7 +144,7 @@ export default function AboutHero() {
               style={{
                 backgroundColor: 'var(--bridge-surface)',
                 boxShadow:
-                  'inset 0 0 0 1px var(--bridge-border), 0 1px 2px var(--bridge-shadow-soft), 0 8px 24px -10px var(--bridge-shadow-soft), 0 26px 56px -22px color-mix(in srgb, var(--color-primary) 20%, transparent)',
+                  'inset 0 0 0 1px var(--bridge-border), 0 1px 2px var(--bridge-shadow-soft), 0 8px 24px -10px var(--bridge-shadow-soft), 0 26px 56px -22px color-mix(in srgb, var(--color-primary) 20%, transparent)'
               }}
             >
               <div className="flex items-center gap-3">
@@ -158,7 +157,7 @@ export default function AboutHero() {
                   className="text-[12px] uppercase font-semibold"
                   style={{
                     color: 'var(--bridge-text-faint)',
-                    letterSpacing: '0.18em',
+                    letterSpacing: '0.18em'
                   }}
                 >
                   From the founders
@@ -167,7 +166,7 @@ export default function AboutHero() {
                   className="ml-auto text-[11px] tabular-nums"
                   style={{
                     color: 'var(--bridge-text-muted)',
-                    fontFeatureSettings: '"tnum" 1, "kern" 1',
+                    fontFeatureSettings: '"tnum" 1, "kern" 1'
                   }}
                 >
                   May 2026
@@ -179,7 +178,7 @@ export default function AboutHero() {
                 style={{
                   color: 'var(--bridge-text)',
                   fontSize: 'clamp(1rem, 1.5vw, 1.125rem)',
-                  lineHeight: 1.45,
+                  lineHeight: 1.45
                 }}
               >
                 We spent a decade asking strangers for ten minutes of their time. Some answered. Most didn&rsquo;t. The ones who did changed our trajectories &mdash; and we never paid them. Bridge is the version of that we wish we&rsquo;d had.
@@ -194,7 +193,7 @@ export default function AboutHero() {
                   className="h-9 w-9 rounded-full font-display font-black text-[14px] flex items-center justify-center"
                   style={{
                     backgroundColor: 'var(--color-primary)',
-                    color: 'var(--color-on-primary)',
+                    color: 'var(--color-on-primary)'
                   }}
                 >
                   B

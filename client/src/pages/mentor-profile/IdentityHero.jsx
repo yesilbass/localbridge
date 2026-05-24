@@ -27,7 +27,7 @@ function SecondaryBtn({ onClick, icon: Icon, label, active, activeStyle = {} }) 
         fontWeight: 600,
         color: active ? 'var(--color-primary)' : 'var(--bridge-text-secondary)',
         outlineColor: 'var(--color-primary)',
-        ...activeStyle,
+        ...activeStyle
       }}
     >
       <Icon className="h-4 w-4" style={{ fill: active ? 'currentColor' : 'none' }} />
@@ -47,7 +47,7 @@ export default function IdentityHero({ mentor, isFavorited, onToggleFavorite, on
   const stagger = (i) => flat ? {} : {
     initial: { opacity: 0, y: 12 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: DUR_MED, delay: 0.10 + i * STAGGER, ease: EASE },
+    transition: { duration: DUR_MED, delay: 0.10 + i * STAGGER, ease: EASE }
   };
 
   return (
@@ -65,7 +65,7 @@ export default function IdentityHero({ mentor, isFavorited, onToggleFavorite, on
           style={{
             fontSize: '13px',
             color: 'var(--bridge-text-muted)',
-            outlineColor: 'var(--color-primary)',
+            outlineColor: 'var(--color-primary)'
           }}
           onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--bridge-text-secondary)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--bridge-text-muted)'; }}
@@ -127,7 +127,7 @@ export default function IdentityHero({ mentor, isFavorited, onToggleFavorite, on
                   fontSize: '11px',
                   letterSpacing: '0.18em',
                   background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-                  color: 'var(--color-primary)',
+                  color: 'var(--color-primary)'
                 }}
               >
                 <BadgeCheck className="h-3.5 w-3.5" />
@@ -158,7 +158,7 @@ export default function IdentityHero({ mentor, isFavorited, onToggleFavorite, on
             style={{
               fontSize: 'clamp(2.25rem, 4.5vw, 3.5rem)',
               letterSpacing: '-0.025em',
-              color: 'var(--bridge-text)',
+              color: 'var(--bridge-text)'
             }}
             {...stagger(1)}
           >
@@ -219,7 +219,7 @@ export default function IdentityHero({ mentor, isFavorited, onToggleFavorite, on
               style={{
                 fontSize: 'clamp(1.0625rem, 1.6vw, 1.25rem)',
                 lineHeight: 1.5,
-                color: 'var(--bridge-text-secondary)',
+                color: 'var(--bridge-text-secondary)'
               }}
               {...stagger(4)}
             >

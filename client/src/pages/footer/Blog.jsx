@@ -12,7 +12,7 @@ const CATEGORY_COLORS = {
   Craft:   { bg: 'color-mix(in srgb, #6366f1 10%, transparent)',             bar: '#6366f1' },
   Mentors: { bg: 'color-mix(in srgb, #0ea5e9 10%, transparent)',             bar: '#0ea5e9' },
   Stories: { bg: 'color-mix(in srgb, #10b981 10%, transparent)',             bar: '#10b981' },
-  Product: { bg: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',             bar: 'var(--color-primary)' },
+  Product: { bg: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',             bar: 'var(--color-primary)' }
 };
 
 function BackToTop() {
@@ -32,7 +32,7 @@ function BackToTop() {
         boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 4px 12px color-mix(in srgb, var(--bridge-text) 8%, transparent)',
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(12px)',
-        pointerEvents: visible ? 'auto' : 'none',
+        pointerEvents: visible ? 'auto' : 'none'
       }}
     >
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -60,7 +60,7 @@ function CardSkeleton() {
 function ArticleView({ post, onBack }) {
   const color = CATEGORY_COLORS[post.category] ?? CATEGORY_COLORS.Career;
   return (
-    <main className={`${pageShell} px-4 py-16 sm:px-6 sm:py-20 lg:px-8`} style={{ backgroundColor: 'var(--bridge-canvas)' }}>
+    <main className={`${pageShell} px-4 py-16 sm:px-6 sm:py-20 lg:px-8`}>
       <article className="mx-auto max-w-2xl">
         <Reveal>
           <button
@@ -147,7 +147,7 @@ export default function Blog() {
   if (active) return <ArticleView post={active} onBack={() => setOpen(null)} />;
 
   return (
-    <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`} style={{ backgroundColor: 'var(--bridge-canvas)' }}>
+    <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
       <div className="mx-auto max-w-5xl">
 
         <Reveal className="mb-12 flex items-end justify-between gap-6">
@@ -185,7 +185,7 @@ export default function Blog() {
                   style={{
                     backgroundColor: isActive ? 'var(--color-primary)' : 'var(--bridge-surface)',
                     color: isActive ? 'var(--color-on-primary)' : 'var(--bridge-text-secondary)',
-                    boxShadow: isActive ? 'none' : 'inset 0 0 0 1px var(--bridge-border)',
+                    boxShadow: isActive ? 'none' : 'inset 0 0 0 1px var(--bridge-border)'
                   }}
                 >
                   {c}

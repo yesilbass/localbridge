@@ -5,7 +5,7 @@ import {
   Briefcase,
   PlayCircle,
   Sparkles,
-  ArrowRight,
+  ArrowRight
 } from 'lucide-react';
 import RevealOnScroll from '../landing/RevealOnScroll';
 import { ALTERNATIVES, WHY_US_SECTION_PAD } from './whyUsData';
@@ -13,7 +13,7 @@ import { ALTERNATIVES, WHY_US_SECTION_PAD } from './whyUsData';
 const ICON_MAP = {
   MessageCircle,
   Briefcase,
-  PlayCircle,
+  PlayCircle
 };
 
 export default function SideBySideSection() {
@@ -22,7 +22,6 @@ export default function SideBySideSection() {
       id="vs"
       aria-labelledby="vs-heading"
       className={WHY_US_SECTION_PAD}
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -33,7 +32,7 @@ export default function SideBySideSection() {
               fontSize: 'clamp(2rem, 5vw, 4rem)',
               lineHeight: 0.98,
               letterSpacing: '-0.035em',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
@@ -49,7 +48,7 @@ export default function SideBySideSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 17,
-              lineHeight: 1.6,
+              lineHeight: 1.6
             }}
           >
             Here is what every alternative looks like next to one Bridge hour. Pricing, response time, and what you walk away with.
@@ -62,12 +61,11 @@ export default function SideBySideSection() {
             style={{
               backgroundColor: 'var(--bridge-surface)',
               boxShadow:
-                'inset 0 0 0 1px var(--bridge-border), 0 1px 2px var(--bridge-shadow-soft), 0 8px 24px -10px var(--bridge-shadow-soft), 0 26px 56px -22px color-mix(in srgb, var(--color-primary) 18%, transparent)',
+                'inset 0 0 0 1px var(--bridge-border), 0 1px 2px var(--bridge-shadow-soft), 0 8px 24px -10px var(--bridge-shadow-soft), 0 26px 56px -22px color-mix(in srgb, var(--color-primary) 18%, transparent)'
             }}
           >
             {/* LEFT — alternatives */}
             <div
-              style={{ backgroundColor: 'var(--bridge-surface-muted)' }}
             >
               {ALTERNATIVES.map((alt, i) => {
                 const Icon = ICON_MAP[alt.iconName];
@@ -91,7 +89,7 @@ export default function SideBySideSection() {
                         className="text-[11px] uppercase font-bold"
                         style={{
                           color: 'var(--bridge-text-muted)',
-                          letterSpacing: '0.22em',
+                          letterSpacing: '0.22em'
                         }}
                       >
                         {alt.label}
@@ -103,7 +101,7 @@ export default function SideBySideSection() {
                         color: 'var(--bridge-text-secondary)',
                         textDecoration: 'line-through',
                         textDecorationColor:
-                          'color-mix(in srgb, var(--bridge-text-muted) 55%, transparent)',
+                          'color-mix(in srgb, var(--bridge-text-muted) 55%, transparent)'
                       }}
                     >
                       {alt.headline}
@@ -123,7 +121,7 @@ export default function SideBySideSection() {
               className="p-7 sm:p-9 flex flex-col justify-between gap-6 bridge-column"
               style={{
                 backgroundColor:
-                  'color-mix(in srgb, var(--color-primary) 8%, var(--bridge-surface))',
+                  'color-mix(in srgb, var(--color-primary) 8%, var(--bridge-surface))'
               }}
             >
               <style>{`
@@ -144,7 +142,7 @@ export default function SideBySideSection() {
                   className="inline-flex items-center gap-1.5 text-[11px] uppercase font-bold"
                   style={{
                     color: 'var(--color-primary)',
-                    letterSpacing: '0.22em',
+                    letterSpacing: '0.22em'
                   }}
                 >
                   <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
@@ -156,7 +154,7 @@ export default function SideBySideSection() {
                     fontSize: 'clamp(1.5rem, 2.4vw, 2rem)',
                     lineHeight: 1.05,
                     letterSpacing: '-0.025em',
-                    color: 'var(--bridge-text)',
+                    color: 'var(--bridge-text)'
                   }}
                 >
                   One hour. One operator. Done.
@@ -185,7 +183,7 @@ export default function SideBySideSection() {
                   color: 'var(--color-on-primary)',
                   boxShadow:
                     '0 18px 40px -12px color-mix(in srgb, var(--color-primary) 60%, transparent)',
-                  outlineColor: 'var(--color-on-primary)',
+                  outlineColor: 'var(--color-on-primary)'
                 }}
               >
                 Browse the operators
@@ -206,7 +204,7 @@ function Chip({ children }) {
       style={{
         backgroundColor: 'var(--bridge-surface)',
         boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-        color: 'var(--bridge-text-muted)',
+        color: 'var(--bridge-text-muted)'
       }}
     >
       {children}
@@ -228,7 +226,7 @@ function StatRow({ label, value, small, first }) {
         className="text-[11px] uppercase font-bold shrink-0"
         style={{
           color: 'var(--bridge-text-muted)',
-          letterSpacing: '0.22em',
+          letterSpacing: '0.22em'
         }}
       >
         {label}
@@ -243,7 +241,7 @@ function StatRow({ label, value, small, first }) {
           color: 'var(--bridge-text)',
           fontFeatureSettings: small
             ? undefined
-            : '"tnum" 1, "kern" 1',
+            : '"tnum" 1, "kern" 1'
         }}
       >
         {value}

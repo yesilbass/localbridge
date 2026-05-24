@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { isMarketingRoute } from '../utils/marketingRoute';
 
 function computePerfTier() {
   if (typeof window === 'undefined') return 'high';
@@ -20,7 +21,7 @@ function computePerfTier() {
  */
 export default function BridgeGlobalAtmosphere() {
   const { pathname } = useLocation();
-  const isLanding = pathname === '/';
+  const isMarketing = isMarketingRoute(pathname);
   const [tier, setTier]   = useState(() => computePerfTier());
   const [paused, setPaused] = useState(typeof document !== 'undefined' ? document.hidden : false);
 
@@ -38,7 +39,9 @@ export default function BridgeGlobalAtmosphere() {
   }, []);
 
   const playState = paused ? 'paused' : 'running';
-  const showAurora = tier !== 'low' && !isLanding;
+  const showAurora = tier !== 'low' && !isMarketing;
+
+  if (isMarketing) return null;
 
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">

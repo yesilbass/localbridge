@@ -26,35 +26,15 @@ export default function WhyUsFinalCtaSection() {
     <section
       id="final"
       aria-labelledby="final-heading"
-      className={`relative overflow-hidden ${WHY_US_FINAL_SECTION_PAD}`}
-      style={{
-        borderTop: '1px solid var(--bridge-border-strong)',
-        backgroundImage:
-          'linear-gradient(180deg, var(--bridge-canvas) 0%, color-mix(in srgb, var(--color-primary) 6%, var(--bridge-canvas)) 50%, var(--bridge-canvas) 100%)',
-      }}
+      className={`bg-[var(--bridge-canvas)] ${WHY_US_FINAL_SECTION_PAD}`}
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 flex items-center justify-center"
-      >
-        <div
-          className="h-[60%] w-[60%] rounded-full"
-          style={{
-            background:
-              'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 55%, transparent) 0%, transparent 70%)',
-            filter: 'blur(90px)',
-            opacity: 0.18,
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-4xl px-5 sm:px-8 text-center">
+      <div className="relative z-10 mx-auto max-w-4xl px-5 text-center sm:px-8">
         <RevealOnScroll>
           <p
             className="text-[10px] font-black uppercase"
             style={{
               color: 'var(--color-primary)',
-              letterSpacing: '0.32em',
+              letterSpacing: '0.32em'
             }}
           >
             One ask
@@ -67,7 +47,7 @@ export default function WhyUsFinalCtaSection() {
               fontSize: 'clamp(2.25rem, 6vw, 4.5rem)',
               lineHeight: 0.98,
               letterSpacing: '-0.035em',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
@@ -77,7 +57,7 @@ export default function WhyUsFinalCtaSection() {
               className="block bg-clip-text text-transparent"
               style={{
                 backgroundImage:
-                  'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)',
+                  'linear-gradient(94deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-mid, var(--color-primary-hover)) 55%, var(--lp-grad-to, var(--color-primary)) 100%)'
               }}
             >
               the first hour is enough.
@@ -89,7 +69,7 @@ export default function WhyUsFinalCtaSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 17,
-              lineHeight: 1.6,
+              lineHeight: 1.6
             }}
           >
             Book a single hour. If it doesn&rsquo;t earn the rebook, we refund it and we will tell you who would have.
@@ -105,7 +85,7 @@ export default function WhyUsFinalCtaSection() {
                 boxShadow:
                   '0 18px 40px -12px color-mix(in srgb, var(--color-primary) 60%, transparent)',
                 outlineColor: 'var(--color-on-primary)',
-                transition: `transform ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`,
+                transition: `transform ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`
               }}
               onMouseEnter={primaryEnter}
               onMouseLeave={primaryLeave}
@@ -120,7 +100,7 @@ export default function WhyUsFinalCtaSection() {
                 color: 'var(--bridge-text-secondary)',
                 boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
                 outlineColor: 'var(--color-primary)',
-                transition: `box-shadow ${DUR_SHORT}s cubic-bezier(${EASE.join(',')}), color ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`,
+                transition: `box-shadow ${DUR_SHORT}s cubic-bezier(${EASE.join(',')}), color ${DUR_SHORT}s cubic-bezier(${EASE.join(',')})`
               }}
               onMouseEnter={secondaryEnter}
               onMouseLeave={secondaryLeave}

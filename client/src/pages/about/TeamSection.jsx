@@ -42,9 +42,6 @@ export default function TeamSection() {
       id="team"
       aria-labelledby="team-heading"
       className={ABOUT_SECTION_PAD}
-      style={{
-        backgroundColor: 'var(--bridge-canvas)',
-      }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -52,7 +49,7 @@ export default function TeamSection() {
             className="text-[10px] font-black uppercase"
             style={{
               color: 'var(--color-primary)',
-              letterSpacing: '0.32em',
+              letterSpacing: '0.32em'
             }}
           >
             {s.about.teamEyebrow}
@@ -65,7 +62,7 @@ export default function TeamSection() {
               fontSize: 'clamp(2rem, 5vw, 4rem)',
               lineHeight: 0.98,
               letterSpacing: '-0.035em',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
@@ -81,7 +78,7 @@ export default function TeamSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 17,
-              lineHeight: 1.6,
+              lineHeight: 1.6
             }}
           >
             Operators first, founders second. We hand-vet every mentor and read every review.
@@ -122,7 +119,7 @@ function MonogramBlock({ initials, size = 'large' }) {
       className={`relative w-full shrink-0 overflow-hidden ${aspect}`}
       style={{
         background:
-          'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 92%, var(--bridge-text)) 0%, var(--color-primary) 100%)',
+          'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 92%, var(--bridge-text)) 0%, var(--color-primary) 100%)'
       }}
     >
       <div className="absolute inset-0 flex items-center justify-center">
@@ -133,7 +130,7 @@ function MonogramBlock({ initials, size = 'large' }) {
             color: 'var(--color-on-primary)',
             fontSize,
             letterSpacing: '-0.04em',
-            lineHeight: 1,
+            lineHeight: 1
           }}
         >
           {initials}
@@ -155,7 +152,7 @@ function FeaturedCard({ m }) {
       style={{
         backgroundColor: 'var(--bridge-surface)',
         boxShadow: CARD_BASE_BOX_SHADOW,
-        transition: CARD_TRANSITION,
+        transition: CARD_TRANSITION
       }}
       onMouseEnter={CARD_HOVER}
       onMouseLeave={CARD_RESET}
@@ -166,7 +163,7 @@ function FeaturedCard({ m }) {
           className="text-[11px] uppercase font-bold"
           style={{
             color: 'var(--bridge-text-secondary)',
-            letterSpacing: '0.22em',
+            letterSpacing: '0.22em'
           }}
         >
           Founder &amp; {m.discipline}
@@ -177,7 +174,7 @@ function FeaturedCard({ m }) {
             fontSize: 'clamp(1.625rem, 3vw, 1.875rem)',
             color: 'var(--bridge-text)',
             letterSpacing: '-0.025em',
-            lineHeight: 1.05,
+            lineHeight: 1.05
           }}
         >
           {m.name}
@@ -207,7 +204,7 @@ function SmallCard({ m }) {
       style={{
         backgroundColor: 'var(--bridge-surface)',
         boxShadow: CARD_BASE_BOX_SHADOW,
-        transition: CARD_TRANSITION,
+        transition: CARD_TRANSITION
       }}
       onMouseEnter={CARD_HOVER}
       onMouseLeave={CARD_RESET}
@@ -238,7 +235,7 @@ function SocialRow({ member, size }) {
       ? 'mt-6 flex flex-wrap items-center gap-3'
       : 'mt-2 flex flex-wrap items-center gap-2';
   const mailHref = mailtoHref({
-    subject: `Bridge — note for ${member.name}`,
+    subject: `Bridge — note for ${member.name}`
   });
 
   return (
@@ -288,7 +285,7 @@ function SocialLink({ href, external, size, children, ...rest }) {
         boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
         color: 'var(--bridge-text-secondary)',
         outlineColor: 'var(--color-primary)',
-        transition: SOCIAL_TRANSITION,
+        transition: SOCIAL_TRANSITION
       }}
       onMouseEnter={SOCIAL_HOVER}
       onMouseLeave={SOCIAL_RESET}

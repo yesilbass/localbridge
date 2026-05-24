@@ -85,7 +85,7 @@ function SectionCard({ sectionKey, section }) {
     experience: s.resumeReview.sectionExperience,
     skills: s.resumeReview.sectionSkills,
     education: s.resumeReview.sectionEducation,
-    formatting: s.resumeReview.sectionFormatting,
+    formatting: s.resumeReview.sectionFormatting
   };
 
   return (
@@ -185,7 +185,7 @@ function LoadingView({ msgIdx }) {
               opacity: i === msgIdx ? 1 : 0,
               transform: `translateY(${(i - msgIdx) * 100}%)`,
               position: i === msgIdx ? 'static' : 'absolute',
-              pointerEvents: 'none',
+              pointerEvents: 'none'
             }}
           >
             {msg}
@@ -316,7 +316,7 @@ export default function ResumeReview({ embedded = false }) {
           letter_grade: reviewData.letter_grade,
           sections: reviewData.sections,
           overall_feedback: reviewData.overall_feedback,
-          resume_file_url: fileUrl,
+          resume_file_url: fileUrl
         });
         setSavedDate(new Date().toISOString());
       } catch {
@@ -632,7 +632,7 @@ export default function ResumeReview({ embedded = false }) {
                     day: 'numeric',
                     year: 'numeric',
                     hour: '2-digit',
-                    minute: '2-digit',
+                    minute: '2-digit'
                   })}
                 </p>
               )}

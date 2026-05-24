@@ -2,15 +2,17 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import LoadingSpinner from '../LoadingSpinner';
 
-/** Logged-in users leave the marketing site for the dashboard. */
-export function GuestOnly({ children }) {
-  const { user, loading } = useAuth();
+/** Public marketing/content pages — available whether or not the user has a session. */
+export function PublicPage({ children }) {
+  const { loading } = useAuth();
   if (loading) {
     return <LoadingSpinner label="Loading…" className="min-h-[50vh]" size="lg" />;
   }
-  if (user) return <Navigate to="/dashboard" replace />;
   return children;
 }
+
+/** @deprecated use PublicPage — kept for imports that haven't migrated */
+export const GuestOnly = PublicPage;
 
 /** Login / register — session already active → dashboard (or safe return path). */
 export function AuthPage({ children }) {
@@ -49,7 +51,10 @@ export function productDashboardPath(pathname) {
   return null;
 }
 
-/** Product URLs for signed-in users live under /dashboard/*. */
+/**
+ * Optional helper — redirects signed-in users from product URLs to /dashboard/*.
+ * Not applied globally; use only where embedded dashboard routes are required.
+ */
 export function AuthenticatedProductRedirect({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();

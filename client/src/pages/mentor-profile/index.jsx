@@ -19,7 +19,7 @@ import {
   useShareLink,
   normalizeMentor,
   useProfileReducedMotion,
-  formatJoinedDate,
+  formatJoinedDate
 } from './profileHooks';
 import TrackRecord from './TrackRecord';
 import ReviewsBlock from './ReviewsBlock';
@@ -84,7 +84,7 @@ function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare,
               className="aspect-[3/4] overflow-hidden rounded-[2rem]"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
-                boxShadow: '0 32px 72px -16px rgba(0,0,0,0.22), inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: '0 32px 72px -16px rgba(0,0,0,0.22), inset 0 0 0 1px var(--bridge-border)'
               }}
             >
               {mentor.avatarUrl ? (
@@ -238,7 +238,7 @@ function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare,
                   color: 'var(--color-on-primary)',
                   boxShadow: '0 14px 36px -6px color-mix(in srgb, var(--color-primary) 58%, transparent)',
                   outlineColor: 'var(--color-primary)',
-                  letterSpacing: '0.01em',
+                  letterSpacing: '0.01em'
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 20px 44px -6px color-mix(in srgb, var(--color-primary) 68%, transparent)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 14px 36px -6px color-mix(in srgb, var(--color-primary) 58%, transparent)'; }}
@@ -256,7 +256,7 @@ function MentorHero({ mentor, rawMentor, isFavorited, onToggleFavorite, onShare,
                   background: 'var(--bridge-surface)',
                   boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
                   color: isFavorited ? 'var(--color-primary)' : 'var(--bridge-text-secondary)',
-                  outlineColor: 'var(--color-primary)',
+                  outlineColor: 'var(--color-primary)'
                 }}
               >
                 <Heart className="h-4 w-4" style={{ fill: isFavorited ? 'currentColor' : 'none' }} aria-hidden />
@@ -308,8 +308,7 @@ function StickyBar({ mentor, rawMentor, isFavorited, onToggleFavorite, onBook, v
               background: 'color-mix(in srgb, var(--bridge-surface) 92%, transparent)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
-              borderBottom: '1px solid var(--bridge-border)',
-              boxShadow: '0 4px 24px -8px rgba(0,0,0,0.12)',
+              boxShadow: '0 4px 24px -8px rgba(0,0,0,0.12)'
             }}
           >
             <div className="max-w-7xl mx-auto px-5 sm:px-8 py-3 flex items-center gap-4">
@@ -345,7 +344,7 @@ function StickyBar({ mentor, rawMentor, isFavorited, onToggleFavorite, onBook, v
                   background: 'var(--bridge-surface-muted)',
                   boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
                   color: isFavorited ? 'var(--color-primary)' : 'var(--bridge-text-secondary)',
-                  outlineColor: 'var(--color-primary)',
+                  outlineColor: 'var(--color-primary)'
                 }}
               >
                 <Heart className="h-4 w-4" style={{ fill: isFavorited ? 'currentColor' : 'none' }} aria-hidden />
@@ -359,7 +358,7 @@ function StickyBar({ mentor, rawMentor, isFavorited, onToggleFavorite, onBook, v
                   background: 'var(--color-primary)',
                   color: 'var(--color-on-primary)',
                   outlineColor: 'var(--color-primary)',
-                  boxShadow: '0 6px 20px -4px color-mix(in srgb, var(--color-primary) 45%, transparent)',
+                  boxShadow: '0 6px 20px -4px color-mix(in srgb, var(--color-primary) 45%, transparent)'
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = ''; }}
@@ -424,14 +423,14 @@ function BookingFlow({ mentor, sessionType, onReset, user, navigate }) {
   const prefill = useMemo(() => ({
     name: user?.user_metadata?.full_name || user?.email || undefined,
     email: user?.email || undefined,
-    customAnswers: { a1: 'Booked via Bridge' },
+    customAnswers: { a1: 'Booked via Bridge' }
   }), [user]);
 
   const utm = useMemo(() => ({
     utmSource: 'bridge',
     utmMedium: 'mentor_profile',
     utmCampaign: mentor.id || 'bridge',
-    utmContent: sessionType?.key || '',
+    utmContent: sessionType?.key || ''
   }), [mentor.id, sessionType]);
 
   return (
@@ -469,7 +468,7 @@ function BookingFlow({ mentor, sessionType, onReset, user, navigate }) {
             className="relative mt-6 overflow-hidden rounded-2xl p-4"
             style={{
               border: '1px solid color-mix(in srgb, var(--color-primary) 30%, rgba(255,255,255,0.1))',
-              background: 'color-mix(in srgb, var(--color-primary) 10%, rgba(255,255,255,0.04))',
+              background: 'color-mix(in srgb, var(--color-primary) 10%, rgba(255,255,255,0.04))'
             }}
           >
             <p className="relative text-[10px] font-black uppercase tracking-[0.22em]" style={{ color: 'color-mix(in srgb, var(--color-primary) 65%, white)' }}>
@@ -533,7 +532,7 @@ function BookingFlow({ mentor, sessionType, onReset, user, navigate }) {
                   style={{
                     background: 'var(--color-primary)',
                     color: 'var(--color-on-primary)',
-                    outlineColor: 'var(--color-primary)',
+                    outlineColor: 'var(--color-primary)'
                   }}
                 >
                   Browse other mentors →
@@ -645,7 +644,7 @@ export default function MentorProfilePage({ embedded = false }) {
           available: payload.new.available,
           calendly_connected: payload.new.calendly_connected,
           calendly_event_type_uri: payload.new.calendly_event_type_uri,
-          calendly_scheduling_url: payload.new.calendly_scheduling_url,
+          calendly_scheduling_url: payload.new.calendly_scheduling_url
         } : prev);
       })
       .subscribe();
@@ -826,7 +825,7 @@ export default function MentorProfilePage({ embedded = false }) {
                 style={{
                   backgroundImage: `linear-gradient(color-mix(in srgb, var(--color-primary) 6%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 6%, transparent) 1px, transparent 1px)`,
                   backgroundSize: '48px 48px',
-                  opacity: 0.5,
+                  opacity: 0.5
                 }}
               />
               <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, var(--color-primary), transparent)` }} />

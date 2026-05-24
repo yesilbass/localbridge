@@ -80,7 +80,7 @@ export default function BookingDrawer({ isOpen, onClose, children }) {
               background: 'var(--bridge-surface)',
               borderRadius: '24px 24px 0 0',
               maxHeight: '85vh',
-              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+              paddingBottom: 'env(safe-area-inset-bottom, 0px)'
             }}
             initial={flat ? false : { y: '100%' }}
             animate={{ y: 0 }}
@@ -105,7 +105,7 @@ export default function BookingDrawer({ isOpen, onClose, children }) {
               style={{
                 background: 'var(--bridge-surface-muted)',
                 color: 'var(--bridge-text-secondary)',
-                outlineColor: 'var(--color-primary)',
+                outlineColor: 'var(--color-primary)'
               }}
             >
               <X className="h-5 w-5" aria-hidden />

@@ -17,7 +17,7 @@ const TONE_GRADIENTS = {
   violet:  'linear-gradient(135deg,#5B21B6,#A78BFA)',
   teal:    'linear-gradient(135deg,#0D9488,#14B8A6)',
   orange:  'linear-gradient(135deg,#4F46E5,#6366F1)',
-  pink:    'linear-gradient(135deg,#312E81,#818CF8)',
+  pink:    'linear-gradient(135deg,#312E81,#818CF8)'
 };
 
 const FEATURED_BIO =
@@ -40,10 +40,6 @@ export default function MentorShowcaseSection() {
       id="mentors"
       aria-labelledby="mentors-heading"
       className="relative py-12 lg:py-16"
-      style={{
-        backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border)',
-      }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -61,7 +57,7 @@ export default function MentorShowcaseSection() {
               lineHeight: 1.05,
               letterSpacing: '-0.03em',
               color: 'var(--bridge-text)',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             {t('landing.showcase.heading1', 'One mentor,')}{' '}<span style={{ color: 'var(--color-primary)' }}>{t('landing.showcase.heading2', 'up close.')}</span>
@@ -71,7 +67,7 @@ export default function MentorShowcaseSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 'clamp(0.95rem, 1.6vw, 1.0625rem)',
-              lineHeight: 1.55,
+              lineHeight: 1.55
             }}
           >
             {t('landing.showcase.subCopy', 'Every profile on Bridge looks like this — real bio, real numbers, real booking.')}
@@ -130,7 +126,7 @@ function Centerpiece({ mentor, t }) {
       style={{
         backgroundColor: 'var(--bridge-surface)',
         boxShadow:
-          'inset 0 0 0 1px var(--bridge-border), 0 22px 60px -28px color-mix(in srgb, var(--color-primary) 30%, transparent)',
+          'inset 0 0 0 1px var(--bridge-border), 0 22px 60px -28px color-mix(in srgb, var(--color-primary) 30%, transparent)'
       }}
     >
       {/* Left: dark identity panel (40%) */}
@@ -139,7 +135,7 @@ function Centerpiece({ mentor, t }) {
         style={{
           background:
             'linear-gradient(160deg, var(--color-midnight) 0%, var(--color-midnight-raised) 100%)',
-          color: 'color-mix(in srgb, white 92%, transparent)',
+          color: 'color-mix(in srgb, white 92%, transparent)'
         }}
       >
         <div className="flex items-center gap-4">
@@ -149,7 +145,7 @@ function Centerpiece({ mentor, t }) {
               style={{
                 background: TONE_GRADIENTS[mentor.tone] || 'var(--color-primary)',
                 fontSize: 24,
-                letterSpacing: '-0.04em',
+                letterSpacing: '-0.04em'
               }}
               aria-hidden="true"
             >
@@ -161,7 +157,7 @@ function Centerpiece({ mentor, t }) {
                 className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full"
                 style={{
                   backgroundColor: 'var(--color-success)',
-                  boxShadow: '0 0 0 2px var(--color-midnight)',
+                  boxShadow: '0 0 0 2px var(--color-midnight)'
                 }}
               />
             )}
@@ -193,7 +189,7 @@ function Centerpiece({ mentor, t }) {
             backgroundColor: 'color-mix(in srgb, white 6%, transparent)',
             color: 'color-mix(in srgb, white 85%, transparent)',
             boxShadow: 'inset 0 0 0 1px color-mix(in srgb, white 8%, transparent)',
-            lineHeight: 1.55,
+            lineHeight: 1.55
           }}
         >
           {FEATURED_QUOTE}
@@ -231,7 +227,7 @@ function Centerpiece({ mentor, t }) {
                 className="rounded-full px-3 py-1 text-[11px] font-semibold"
                 style={{
                   backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                  color: 'var(--color-primary)',
+                  color: 'var(--color-primary)'
                 }}
               >
                 {t}
@@ -244,7 +240,7 @@ function Centerpiece({ mentor, t }) {
           className="grid grid-cols-2 rounded-xl"
           style={{
             backgroundColor: 'var(--bridge-surface-muted)',
-            boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+            boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
           }}
         >
           <Stat label={t('landing.showcase.rating', 'Rating')} value={mentor.rating.toFixed(1)} />
@@ -260,7 +256,7 @@ function Centerpiece({ mentor, t }) {
               color: 'var(--color-on-primary)',
               boxShadow: '0 14px 32px -14px color-mix(in srgb, var(--color-primary) 60%, transparent)',
               outlineColor: 'var(--color-primary)',
-              transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`,
+              transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`
             }}
             onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
@@ -286,7 +282,7 @@ function Stat({ label, value, divider }) {
           fontSize: 18,
           color: 'var(--bridge-text)',
           letterSpacing: '-0.02em',
-          fontFeatureSettings: '"tnum" 1',
+          fontFeatureSettings: '"tnum" 1'
         }}
       >
         {value}
@@ -310,7 +306,7 @@ function MentorChip({ mentor }) {
         backgroundColor: 'var(--bridge-surface)',
         boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
         outlineColor: 'var(--color-primary)',
-        transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`,
+        transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-1px)';
@@ -326,7 +322,7 @@ function MentorChip({ mentor }) {
         style={{
           background: TONE_GRADIENTS[mentor.tone] || 'var(--color-primary)',
           fontSize: 14,
-          letterSpacing: '-0.04em',
+          letterSpacing: '-0.04em'
         }}
         aria-hidden="true"
       >

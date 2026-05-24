@@ -25,7 +25,7 @@ export default function OutcomeReel({ mentor }) {
               className="rounded-2xl p-5 flex flex-col gap-4"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
             >
               <p
@@ -33,7 +33,7 @@ export default function OutcomeReel({ mentor }) {
                 style={{
                   fontSize: 'clamp(0.9375rem, 1.4vw, 1.0625rem)',
                   lineHeight: 1.55,
-                  color: 'var(--bridge-text)',
+                  color: 'var(--bridge-text)'
                 }}
               >
                 {outcome.quote}
@@ -48,7 +48,7 @@ export default function OutcomeReel({ mentor }) {
                     fontSize: '11px',
                     letterSpacing: '0.12em',
                     background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-                    color: 'var(--color-primary)',
+                    color: 'var(--color-primary)'
                   }}
                 >
                   {outcome.metric}

@@ -222,7 +222,6 @@ html.is-landing-route header nav > div > div.rounded-full {
    ═══════════════════════════════════════════════════════════════════════ */
 html.is-landing-route section.bg-gray-900 {
   background: linear-gradient(180deg, var(--color-bg) 0%, color-mix(in srgb, var(--color-bg) 70%, var(--color-secondary)) 100%) !important;
-  border-top: 1px solid var(--bridge-border) !important;
 }
 html.is-landing-route:not(.theme-dark) section.bg-gray-900 .text-white { color: var(--color-text) !important; }
 html.is-landing-route:not(.theme-dark) section.bg-gray-900 .text-white\\/60,

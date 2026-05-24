@@ -6,7 +6,7 @@ const TONE_GRADIENTS = {
   amber:   'linear-gradient(135deg,#4F46E5,#818CF8)',
   emerald: 'linear-gradient(135deg,#059669,#10b981)',
   sky:     'linear-gradient(135deg,#0EA5E9,#38BDF8)',
-  rose:    'linear-gradient(135deg,#6D28D9,#A78BFA)',
+  rose:    'linear-gradient(135deg,#6D28D9,#A78BFA)'
 };
 
 function initialsOf(name) {
@@ -23,10 +23,6 @@ export default function OutcomesSection() {
       id="outcomes"
       aria-labelledby="outcomes-heading"
       className="relative py-20 lg:py-28"
-      style={{
-        backgroundColor: 'var(--bridge-canvas)',
-        borderTop: '1px solid var(--bridge-border)',
-      }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -38,7 +34,7 @@ export default function OutcomesSection() {
               lineHeight: 1.05,
               letterSpacing: '-0.03em',
               color: 'var(--bridge-text)',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             {t('landing.outcomes.heading1', 'People who got')}
@@ -50,7 +46,7 @@ export default function OutcomesSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 'clamp(0.95rem, 1.6vw, 1.0625rem)',
-              lineHeight: 1.55,
+              lineHeight: 1.55
             }}
           >
             {t('landing.outcomes.subCopy', 'Real outcomes from people who booked the session. We use first-name and role only.')}
@@ -97,7 +93,7 @@ function Avatar({ outcome, size, fontSize, lazy = true }) {
         width: size,
         height: size,
         background: TONE_GRADIENTS[tone],
-        fontSize,
+        fontSize
       }}
       aria-hidden="true"
     >
@@ -113,7 +109,7 @@ function FeaturedCard({ outcome }) {
       style={{
         backgroundColor: 'var(--bridge-surface)',
         boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-        transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s cubic-bezier(0.16,1,0.3,1)',
+        transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s cubic-bezier(0.16,1,0.3,1)'
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-3px)';
@@ -131,7 +127,7 @@ function FeaturedCard({ outcome }) {
           style={{
             fontSize: 'clamp(1.125rem, 1.8vw, 1.375rem)',
             lineHeight: 1.55,
-            color: 'var(--bridge-text)',
+            color: 'var(--bridge-text)'
           }}
         >
           “{outcome.quote}”
@@ -145,7 +141,7 @@ function FeaturedCard({ outcome }) {
             style={{
               backgroundColor: 'color-mix(in srgb, var(--color-primary) 14%, transparent)',
               color: 'var(--color-primary)',
-              fontFeatureSettings: '"tnum" 1',
+              fontFeatureSettings: '"tnum" 1'
             }}
           >
             {outcome.metric}
@@ -163,7 +159,7 @@ function SupportingCard({ outcome }) {
       style={{
         backgroundColor: 'var(--bridge-surface)',
         boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
-        transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s cubic-bezier(0.16,1,0.3,1)',
+        transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s cubic-bezier(0.16,1,0.3,1)'
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-3px)';
@@ -191,7 +187,7 @@ function SupportingCard({ outcome }) {
             backgroundColor:
               'color-mix(in srgb, var(--color-primary) 12%, transparent)',
             color: 'var(--color-primary)',
-            fontFeatureSettings: '"tnum" 1',
+            fontFeatureSettings: '"tnum" 1'
           }}
         >
           {outcome.metric}

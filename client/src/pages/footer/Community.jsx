@@ -31,7 +31,7 @@ export default function Community() {
     }
 
     return (
-        <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`} style={{ backgroundColor: 'var(--bridge-canvas)' }}>
+        <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
             <div className="mx-auto max-w-bridge">
 
                 <Reveal>
@@ -57,7 +57,7 @@ export default function Community() {
                                 className="rounded-2xl p-5 text-center"
                                 style={{
                                     backgroundColor: 'var(--bridge-surface)',
-                                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                                 }}
                             >
                                 <p className="font-display text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>{stat.n}</p>
@@ -83,7 +83,7 @@ export default function Community() {
                                         className="rounded-2xl p-5"
                                         style={{
                                             backgroundColor: 'var(--bridge-surface)',
-                                            boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                                            boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                                         }}
                                     >
                                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -110,10 +110,10 @@ export default function Community() {
                                                 className={`shrink-0 rounded-full px-5 py-2 text-[13px] font-semibold transition-all ${focusRing}`}
                                                 style={rsvpd ? {
                                                     backgroundColor: '#10b981',
-                                                    color: '#fff',
+                                                    color: '#fff'
                                                 } : {
                                                     backgroundColor: 'var(--color-primary)',
-                                                    color: 'var(--color-on-primary)',
+                                                    color: 'var(--color-on-primary)'
                                                 }}
                                             >
                                                 {rsvpd ? (
@@ -137,7 +137,7 @@ export default function Community() {
                             className="flex h-full flex-col rounded-2xl p-8 sm:p-10"
                             style={{
                                 backgroundColor: 'var(--bridge-surface)',
-                                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                             }}
                         >
                             <div
@@ -167,7 +167,7 @@ export default function Community() {
                             className="flex h-full flex-col rounded-2xl p-8 sm:p-10"
                             style={{
                                 backgroundColor: 'var(--bridge-surface)',
-                                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                             }}
                         >
                             <div
@@ -200,7 +200,7 @@ export default function Community() {
                                         className="flex-1 rounded-full px-4 py-2.5 text-[13px] text-[var(--bridge-text)] placeholder:text-[var(--bridge-text-muted)] outline-none transition"
                                         style={{
                                             backgroundColor: 'var(--bridge-canvas)',
-                                            boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                                            boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                                         }}
                                         onFocus={e => { e.target.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border), 0 0 0 4px color-mix(in srgb, var(--color-primary) 18%, transparent)'; }}
                                         onBlur={e => { e.target.style.boxShadow = 'inset 0 0 0 1px var(--bridge-border)'; }}

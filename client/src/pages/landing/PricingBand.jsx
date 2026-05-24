@@ -15,10 +15,6 @@ export default function PricingBand() {
       id="pricing"
       aria-labelledby="pricing-heading"
       className="relative py-20 lg:py-28"
-      style={{
-        backgroundColor: 'var(--bridge-canvas)',
-        borderTop: '1px solid var(--bridge-border)',
-      }}
     >
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -27,7 +23,7 @@ export default function PricingBand() {
             style={{
               backgroundColor: 'var(--bridge-surface)',
               boxShadow:
-                'inset 0 0 0 1px var(--bridge-border), 0 18px 50px -28px color-mix(in srgb, var(--color-primary) 25%, transparent)',
+                'inset 0 0 0 1px var(--bridge-border), 0 18px 50px -28px color-mix(in srgb, var(--color-primary) 25%, transparent)'
             }}
           >
             <div className="lg:col-span-7">
@@ -45,7 +41,7 @@ export default function PricingBand() {
                   lineHeight: 1.05,
                   letterSpacing: '-0.03em',
                   color: 'var(--bridge-text)',
-                  fontFeatureSettings: '"kern" 1, "ss01" 1',
+                  fontFeatureSettings: '"kern" 1, "ss01" 1'
                 }}
               >
                 {t('landing.pricing.heading1', 'Mentors volunteer their time.')}{' '}
@@ -56,7 +52,7 @@ export default function PricingBand() {
                 style={{
                   color: 'var(--bridge-text-secondary)',
                   fontSize: 'clamp(0.95rem, 1.6vw, 1.0625rem)',
-                  lineHeight: 1.55,
+                  lineHeight: 1.55
                 }}
               >
                 {t('landing.pricing.subCopy', 'Browse the directory, find the right operator, and book straight from their calendar — no session fees.')}
@@ -78,7 +74,7 @@ export default function PricingBand() {
                   className="flex items-center justify-between gap-4 rounded-2xl px-5 py-4"
                   style={{
                     backgroundColor: 'var(--bridge-surface-muted)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                   }}
                 >
                   <div className="min-w-0">
@@ -93,7 +89,7 @@ export default function PricingBand() {
                       style={{
                         fontSize: 26,
                         color: 'var(--bridge-text)',
-                        letterSpacing: '-0.02em',
+                        letterSpacing: '-0.02em'
                       }}
                     >
                       {item.amount}

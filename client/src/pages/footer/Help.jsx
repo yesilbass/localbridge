@@ -7,7 +7,7 @@ import { useContent } from '../../content';
 const CATEGORY_META = {
   'Getting Started': { Icon: Sparkles },
   'Billing': { Icon: CreditCard },
-  'Sessions': { Icon: Calendar },
+  'Sessions': { Icon: Calendar }
 };
 
 const ARTICLES = {
@@ -19,7 +19,7 @@ const ARTICLES = {
   'refund-policy': { category: 'Billing', title: 'Refund policy', body: `Before a session: 100% refund, any time.\n\nAfter a session: 100% refund within 48 hours if you're unsatisfied. No explanation required — we take your word for it.\n\nMentor no-shows: Automatic full refund plus credit toward your next booking.` },
   'reschedule': { category: 'Sessions', title: 'Rescheduling a session', body: `Go to your Dashboard → Upcoming Sessions → click the session. Use "Reschedule" to pick a new time from the mentor's availability.\n\nFree up to 24 hours before the session. Inside 24 hours, the mentor may charge a rescheduling fee at their discretion.` },
   'cancel': { category: 'Sessions', title: 'Canceling a session', body: `From your Dashboard, open the session and click "Cancel." Full refund issued if more than 24 hours before the session starts. Inside 24 hours, refunds are at the mentor's discretion.\n\nWe don't penalize occasional cancellations. Repeated last-minute cancellations may limit your ability to book.` },
-  'technical': { category: 'Sessions', title: 'Technical issues during a call', body: `If the video call drops, try rejoining from the same link. If problems persist for more than 5 minutes, end the call and message the mentor through the platform — they'll restart or reschedule.\n\nUse Chrome, Safari, or Firefox (latest versions). Mobile works but desktop is more reliable for screen sharing.` },
+  'technical': { category: 'Sessions', title: 'Technical issues during a call', body: `If the video call drops, try rejoining from the same link. If problems persist for more than 5 minutes, end the call and message the mentor through the platform — they'll restart or reschedule.\n\nUse Chrome, Safari, or Firefox (latest versions). Mobile works but desktop is more reliable for screen sharing.` }
 };
 
 const CATEGORIES = [
@@ -51,7 +51,7 @@ export default function Help() {
             className={`mb-8 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-semibold text-[var(--bridge-text-secondary)] transition hover:-translate-y-0.5 hover:text-[var(--bridge-text)] ${focusRing}`}
             style={{
               backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
             }}
           >
             <ArrowLeft className="h-3.5 w-3.5" />
@@ -69,7 +69,7 @@ export default function Help() {
             style={{
               fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
               lineHeight: 1.02,
-              letterSpacing: '-0.03em',
+              letterSpacing: '-0.03em'
             }}
           >
             {article.title}
@@ -83,7 +83,7 @@ export default function Help() {
             className="relative mt-12 overflow-hidden rounded-2xl p-7"
             style={{
               backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
             }}
           >
             <div
@@ -91,7 +91,7 @@ export default function Help() {
               className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full blur-3xl"
               style={{
                 background:
-                  'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent)',
+                  'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent)'
               }}
             />
             <div className="relative flex items-start gap-4">
@@ -99,7 +99,7 @@ export default function Help() {
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
                 style={{
                   backgroundColor:
-                    'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))',
+                    'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))'
                 }}
               >
                 <LifeBuoy className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
@@ -116,7 +116,7 @@ export default function Help() {
                     style={{
                       color: 'var(--color-primary)',
                       textDecorationColor:
-                        'color-mix(in srgb, var(--color-primary) 40%, transparent)',
+                        'color-mix(in srgb, var(--color-primary) 40%, transparent)'
                     }}
                   >
                     {s.common.contactSupport}
@@ -139,7 +139,7 @@ export default function Help() {
         style={{
           background:
             'radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent 68%)',
-          filter: 'blur(80px)',
+          filter: 'blur(80px)'
         }}
       />
 
@@ -156,7 +156,7 @@ export default function Help() {
             style={{
               fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
               lineHeight: 1.02,
-              letterSpacing: '-0.03em',
+              letterSpacing: '-0.03em'
             }}
           >
             Help center
@@ -189,7 +189,7 @@ export default function Help() {
                 className="rounded-2xl p-8 text-center"
                 style={{
                   backgroundColor: 'var(--bridge-surface)',
-                  boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                  boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                 }}
               >
                 <p className="text-[15px] text-[var(--bridge-text-secondary)]">
@@ -204,7 +204,7 @@ export default function Help() {
                   className={`group flex w-full items-center gap-4 rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-0.5 ${focusRing}`}
                   style={{
                     backgroundColor: 'var(--bridge-surface)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                   }}
                 >
                   <div className="min-w-0 flex-1">
@@ -236,7 +236,7 @@ export default function Help() {
                     className="group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5"
                     style={{
                       backgroundColor: 'var(--bridge-surface)',
-                      boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                      boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                     }}
                   >
                     <div
@@ -244,7 +244,7 @@ export default function Help() {
                       className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-0 blur-3xl transition duration-500 group-hover:opacity-100"
                       style={{
                         background:
-                          'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent)',
+                          'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent)'
                       }}
                     />
                     <div className="relative flex items-center gap-3 mb-5">
@@ -252,7 +252,7 @@ export default function Help() {
                         className="flex h-10 w-10 items-center justify-center rounded-xl transition duration-300 group-hover:scale-[1.06]"
                         style={{
                           backgroundColor:
-                            'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))',
+                            'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))'
                         }}
                       >
                         <meta.Icon className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
@@ -286,7 +286,7 @@ export default function Help() {
             className="mt-12 flex flex-col items-start gap-5 rounded-2xl p-7 sm:flex-row sm:items-center sm:justify-between"
             style={{
               backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
             }}
           >
             <div className="flex items-center gap-4">
@@ -294,7 +294,7 @@ export default function Help() {
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
                 style={{
                   backgroundColor:
-                    'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))',
+                    'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))'
                 }}
               >
                 <MessageCircle className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
@@ -315,7 +315,7 @@ export default function Help() {
                 backgroundColor: 'var(--color-primary)',
                 color: 'var(--color-on-primary)',
                 boxShadow:
-                  '0 8px 24px -6px color-mix(in srgb, var(--color-primary) 45%, transparent)',
+                  '0 8px 24px -6px color-mix(in srgb, var(--color-primary) 45%, transparent)'
               }}
             >
               {s.common.contactSupport}

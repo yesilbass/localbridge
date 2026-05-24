@@ -36,7 +36,7 @@ export default function PricingFaq({ headingId, items }) {
             lineHeight: 1.05,
             letterSpacing: '-0.03em',
             color: 'var(--bridge-text)',
-            fontFeatureSettings: '"kern" 1, "ss01" 1',
+            fontFeatureSettings: '"kern" 1, "ss01" 1'
           }}
         >
           {s.pricing.faqHeading}{' '}

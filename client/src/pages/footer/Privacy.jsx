@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Shield, Lock, Eye, FileCheck, Check, ChevronUp, Printer,
-  Clock, Database, UserCheck, Trash2, List, X,
+  Clock, Database, UserCheck, Trash2, List, X
 } from 'lucide-react';
 import Reveal from '../../components/Reveal';
 import { pageShell } from '../../ui';
@@ -23,18 +23,18 @@ const SECTIONS = [
       groups: [
         {
           label: 'Directly from you',
-          items: ['Name, email, and password', 'Profile info and bio', 'Payment method (processed by Stripe — we never see your card number)', 'Messages, reviews, and session notes you write'],
+          items: ['Name, email, and password', 'Profile info and bio', 'Payment method (processed by Stripe — we never see your card number)', 'Messages, reviews, and session notes you write']
         },
         {
           label: 'Generated through use',
-          items: ['Session history and booking patterns', 'Mentor or mentee preferences', 'Platform activity and feature usage'],
+          items: ['Session history and booking patterns', 'Mentor or mentee preferences', 'Platform activity and feature usage']
         },
         {
           label: 'Technical data',
-          items: ['IP address and approximate location', 'Browser type and device identifiers', 'Usage logs and error reports'],
+          items: ['IP address and approximate location', 'Browser type and device identifiers', 'Usage logs and error reports']
         },
-      ],
-    },
+      ]
+    }
   },
   {
     id: 'usage',
@@ -42,8 +42,8 @@ const SECTIONS = [
     content: {
       type: 'mixed',
       body: 'We use your data to operate the platform, match you with mentors, process payments, send transactional communications, improve our services, detect fraud, and comply with legal obligations.',
-      callout: 'We do not sell personal data to third parties. Ever.',
-    },
+      callout: 'We do not sell personal data to third parties. Ever.'
+    }
   },
   {
     id: 'sharing',
@@ -53,8 +53,8 @@ const SECTIONS = [
       paragraphs: [
         'We share data only with: mentors you\'ve booked (limited profile info relevant to the session), service providers who help us operate (Stripe for payments, AWS for hosting), and authorities when legally compelled.',
         'All service providers are bound by data processing agreements.',
-      ],
-    },
+      ]
+    }
   },
   {
     id: 'rights',
@@ -69,8 +69,8 @@ const SECTIONS = [
         { icon: Trash2, label: 'Delete', desc: 'Remove your account and all associated data' },
         { icon: UserCheck, label: 'Object', desc: 'Opt out of specific processing activities' },
       ],
-      footnote: 'EU, UK, and California residents have additional rights under GDPR, CCPA, and similar laws.',
-    },
+      footnote: 'EU, UK, and California residents have additional rights under GDPR, CCPA, and similar laws.'
+    }
   },
   {
     id: 'security',
@@ -82,8 +82,8 @@ const SECTIONS = [
         { label: 'AES-256', note: 'Encryption at rest & in transit' },
         { label: 'SOC 2 Type II', note: 'Third-party audited' },
         { label: 'Access controls', note: 'Role-based, least-privilege' },
-      ],
-    },
+      ]
+    }
   },
   {
     id: 'cookies',
@@ -92,8 +92,8 @@ const SECTIONS = [
       type: 'text',
       paragraphs: [
         'We use cookies for authentication, preferences, and analytics. No third-party advertising cookies are set. See our Cookie Policy for the full breakdown.',
-      ],
-    },
+      ]
+    }
   },
   {
     id: 'retention',
@@ -102,8 +102,8 @@ const SECTIONS = [
       type: 'text',
       paragraphs: [
         'We retain account data while your account is active. If you delete your account, personal data is removed within 30 days — except where retention is legally required (e.g., tax records, which are kept for 7 years per IRS requirements).',
-      ],
-    },
+      ]
+    }
   },
   {
     id: 'children',
@@ -112,8 +112,8 @@ const SECTIONS = [
       type: 'text',
       paragraphs: [
         'Bridge is not for users under 18. We do not knowingly collect data from minors. If you believe a minor has created an account, email mentors.bridge@gmail.com and we\'ll remove it immediately.',
-      ],
-    },
+      ]
+    }
   },
   {
     id: 'changes',
@@ -122,8 +122,8 @@ const SECTIONS = [
       type: 'text',
       paragraphs: [
         'We may update this policy as the platform evolves. Material changes — anything that affects how your data is used or shared — will be communicated via email at least 30 days before taking effect. The "last updated" date at the top of this page always reflects the most recent revision.',
-      ],
-    },
+      ]
+    }
   },
   {
     id: 'contact',
@@ -131,8 +131,8 @@ const SECTIONS = [
     content: {
       type: 'contact',
       email: 'mentors.bridge@gmail.com',
-      address: 'Bridge Privacy Office\n525 Market Street, Suite 1200\nSan Francisco, CA 94105',
-    },
+      address: 'Bridge Privacy Office\n525 Market Street, Suite 1200\nSan Francisco, CA 94105'
+    }
   },
 ];
 
@@ -145,7 +145,7 @@ const TLDR = [
       'Session history and activity',
       'Payment info (Stripe handles it)',
       'Device and usage logs',
-    ],
+    ]
   },
   {
     icon: Shield,
@@ -155,7 +155,7 @@ const TLDR = [
       'Share without consent',
       'Use it for advertising',
       'Retain after you delete',
-    ],
+    ]
   },
   {
     icon: UserCheck,
@@ -165,7 +165,7 @@ const TLDR = [
       'Export everything',
       'Delete your account fully',
       'Email us any time',
-    ],
+    ]
   },
 ];
 
@@ -269,7 +269,7 @@ function FloatingToc({ sections, activeSection, visible }) {
         opacity: visible ? 1 : 0,
         transform: `translateX(-50%) translateY(${visible ? 0 : 16}px)`,
         transition: 'opacity 280ms cubic-bezier(0.16,1,0.3,1), transform 320ms cubic-bezier(0.16,1,0.3,1)',
-        pointerEvents: visible ? 'auto' : 'none',
+        pointerEvents: visible ? 'auto' : 'none'
       }}
     >
       {/* Expanded list — opens upward */}
@@ -284,14 +284,13 @@ function FloatingToc({ sections, activeSection, visible }) {
           transition: 'opacity 220ms cubic-bezier(0.16,1,0.3,1), transform 260ms cubic-bezier(0.16,1,0.3,1)',
           pointerEvents: open ? 'auto' : 'none',
           maxHeight: open ? '70vh' : 0,
-          overflowY: 'auto',
+          overflowY: 'auto'
         }}
       >
         <div
           className="sticky top-0 flex items-center justify-between px-4 py-2.5"
           style={{
-            backgroundColor: 'var(--bridge-surface)',
-            borderBottom: '1px solid var(--bridge-border)',
+            backgroundColor: 'var(--bridge-surface)'
           }}
         >
           <span
@@ -325,7 +324,7 @@ function FloatingToc({ sections, activeSection, visible }) {
                     backgroundColor: isActive
                       ? 'color-mix(in srgb, var(--color-primary) 9%, transparent)'
                       : 'transparent',
-                    fontWeight: isActive ? '600' : '500',
+                    fontWeight: isActive ? '600' : '500'
                   }}
                   onMouseEnter={(e) => {
                     if (!isActive) {
@@ -370,7 +369,7 @@ function FloatingToc({ sections, activeSection, visible }) {
           boxShadow: '0 4px 24px -4px var(--bridge-shadow-soft), inset 0 0 0 1px var(--bridge-border)',
           color: 'var(--bridge-text)',
           whiteSpace: 'nowrap',
-          maxWidth: 'min(320px, calc(100vw - 2rem))',
+          maxWidth: 'min(320px, calc(100vw - 2rem))'
         }}
         aria-expanded={open}
         aria-label="Toggle table of contents"
@@ -389,7 +388,7 @@ function FloatingToc({ sections, activeSection, visible }) {
           className="h-3.5 w-3.5 shrink-0 transition-transform duration-200"
           style={{
             color: 'var(--bridge-text-muted)',
-            transform: open ? 'rotate(0deg)' : 'rotate(180deg)',
+            transform: open ? 'rotate(0deg)' : 'rotate(180deg)'
           }}
           aria-hidden="true"
         />
@@ -449,7 +448,7 @@ function SectionBody({ content }) {
           style={{
             backgroundColor: 'color-mix(in srgb, var(--color-primary) 7%, transparent)',
             borderLeft: '3px solid var(--color-primary)',
-            color: 'var(--bridge-text)',
+            color: 'var(--bridge-text)'
           }}
         >
           {content.callout}
@@ -471,7 +470,7 @@ function SectionBody({ content }) {
               className="flex items-start gap-3 rounded-xl p-3.5"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--bridge-canvas) 70%, transparent)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
             >
               <span
@@ -503,7 +502,7 @@ function SectionBody({ content }) {
               className="rounded-xl px-4 py-2.5"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--bridge-canvas) 70%, transparent)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
             >
               <p className="text-[13px] font-bold" style={{ color: 'var(--bridge-text)' }}>{label}</p>
@@ -527,7 +526,7 @@ function SectionBody({ content }) {
           style={{
             backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
             color: 'var(--color-primary)',
-            boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 20%, transparent)',
+            boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 20%, transparent)'
           }}
           onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--color-primary) 16%, transparent)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--color-primary) 10%, transparent)'; }}
@@ -562,7 +561,6 @@ export default function Privacy() {
   return (
     <main
       className={`${pageShell} scroll-smooth`}
-      style={{ backgroundColor: 'var(--bridge-canvas)' }}
     >
       <div className="mx-auto max-w-6xl px-5 pt-28 pb-8 sm:px-8 lg:pt-36 lg:pb-12">
 
@@ -584,7 +582,7 @@ export default function Privacy() {
                 fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
                 lineHeight: 1.02,
                 letterSpacing: '-0.03em',
-                color: 'var(--color-primary)',
+                color: 'var(--color-primary)'
               }}
             >
               Privacy policy
@@ -609,7 +607,7 @@ export default function Privacy() {
                 style={{
                   backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
                   color: 'var(--bridge-text-secondary)',
-                  boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 16%, transparent)',
+                  boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 16%, transparent)'
                 }}
               >
                 <Icon className="h-3 w-3 shrink-0" style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
@@ -622,7 +620,7 @@ export default function Privacy() {
               className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-medium transition-colors"
               style={{
                 color: 'var(--bridge-text-muted)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
               onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--bridge-text)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--bridge-text-muted)'; }}
@@ -639,7 +637,7 @@ export default function Privacy() {
             className="mb-16 overflow-hidden rounded-2xl"
             style={{
               backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
             }}
           >
             <div
@@ -703,7 +701,7 @@ export default function Privacy() {
               className="relative overflow-hidden rounded-2xl"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
-                boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
             >
               {/* Reading progress bar */}
@@ -711,7 +709,7 @@ export default function Privacy() {
                 className="absolute inset-x-0 top-0 h-0.5 origin-left transition-transform duration-150"
                 style={{
                   backgroundColor: 'var(--color-primary)',
-                  transform: `scaleX(${progress})`,
+                  transform: `scaleX(${progress})`
                 }}
                 aria-hidden="true"
               />
@@ -736,7 +734,7 @@ export default function Privacy() {
                             backgroundColor: isActive
                               ? 'color-mix(in srgb, var(--color-primary) 9%, transparent)'
                               : 'transparent',
-                            fontWeight: isActive ? '600' : '500',
+                            fontWeight: isActive ? '600' : '500'
                           }}
                           onMouseEnter={(e) => {
                             if (!isActive) {
@@ -784,7 +782,7 @@ export default function Privacy() {
                   className="scroll-mt-28 rounded-2xl p-8 sm:p-10"
                   style={{
                     backgroundColor: 'var(--bridge-surface)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                   }}
                 >
                   <h2
@@ -846,7 +844,7 @@ export default function Privacy() {
           boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 4px 16px -4px var(--bridge-shadow-soft)',
           opacity: showBackToTop ? 1 : 0,
           transform: showBackToTop ? 'translateY(0)' : 'translateY(12px)',
-          pointerEvents: showBackToTop ? 'auto' : 'none',
+          pointerEvents: showBackToTop ? 'auto' : 'none'
         }}
         onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--color-primary) 10%, var(--bridge-surface))'; }}
         onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--bridge-surface)'; }}

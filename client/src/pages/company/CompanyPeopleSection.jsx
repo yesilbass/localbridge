@@ -12,10 +12,6 @@ export default function CompanyPeopleSection() {
       id="team"
       aria-labelledby="team-heading"
       className={COMPANY_PAD}
-      style={{
-        backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border-strong)',
-      }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-16">
@@ -39,7 +35,7 @@ export default function CompanyPeopleSection() {
                     className="flex items-center gap-4 rounded-xl px-4 py-3.5"
                     style={{
                       backgroundColor: 'var(--bridge-surface)',
-                      boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                      boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
                     }}
                   >
                     <span
@@ -94,7 +90,7 @@ export default function CompanyPeopleSection() {
                         backgroundColor: entry.live ? 'var(--color-primary)' : 'var(--bridge-surface)',
                         boxShadow: entry.live
                           ? '0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent)'
-                          : 'inset 0 0 0 1px var(--bridge-border)',
+                          : 'inset 0 0 0 1px var(--bridge-border)'
                       }}
                       aria-hidden
                     />

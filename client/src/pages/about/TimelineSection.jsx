@@ -10,11 +10,6 @@ export default function TimelineSection() {
       id="timeline"
       aria-labelledby="timeline-heading"
       className={ABOUT_SECTION_PAD}
-      style={{
-        backgroundColor: 'var(--bridge-surface-muted)',
-        borderTop: '1px solid var(--bridge-border-strong)',
-        borderBottom: '1px solid var(--bridge-border-strong)',
-      }}
     >
       <div className="mx-auto max-w-3xl px-5 sm:px-8">
         <RevealOnScroll>
@@ -22,7 +17,7 @@ export default function TimelineSection() {
             className="text-[10px] font-black uppercase"
             style={{
               color: 'var(--color-primary)',
-              letterSpacing: '0.32em',
+              letterSpacing: '0.32em'
             }}
           >
             {s.about.timelineEyebrow}
@@ -35,7 +30,7 @@ export default function TimelineSection() {
               fontSize: 'clamp(2rem, 5vw, 4rem)',
               lineHeight: 0.98,
               letterSpacing: '-0.035em',
-              fontFeatureSettings: '"kern" 1, "ss01" 1',
+              fontFeatureSettings: '"kern" 1, "ss01" 1'
             }}
           >
             <span className="block" style={{ color: 'var(--bridge-text)' }}>
@@ -51,7 +46,7 @@ export default function TimelineSection() {
             style={{
               color: 'var(--bridge-text-secondary)',
               fontSize: 17,
-              lineHeight: 1.6,
+              lineHeight: 1.6
             }}
           >
             From insight to product, the moments that mattered.
@@ -79,7 +74,7 @@ export default function TimelineSection() {
                           : 'var(--bridge-surface)',
                         boxShadow: e.live
                           ? '0 0 0 4px color-mix(in srgb, var(--color-primary) 18%, transparent)'
-                          : 'inset 0 0 0 2px var(--bridge-border)',
+                          : 'inset 0 0 0 2px var(--bridge-border)'
                       }}
                     />
                   </div>
@@ -89,7 +84,7 @@ export default function TimelineSection() {
                       style={{
                         color: 'var(--color-primary)',
                         letterSpacing: '0.22em',
-                        fontFeatureSettings: '"tnum" 1, "kern" 1',
+                        fontFeatureSettings: '"tnum" 1, "kern" 1'
                       }}
                     >
                       {e.date}
@@ -100,7 +95,7 @@ export default function TimelineSection() {
                         fontSize: 'clamp(1.25rem, 2.4vw, 1.625rem)',
                         color: 'var(--bridge-text)',
                         letterSpacing: '-0.02em',
-                        lineHeight: 1.1,
+                        lineHeight: 1.1
                       }}
                     >
                       {e.title}
@@ -113,7 +108,7 @@ export default function TimelineSection() {
                       style={{
                         color: 'var(--bridge-text-secondary)',
                         fontSize: 16,
-                        lineHeight: 1.65,
+                        lineHeight: 1.65
                       }}
                     >
                       {e.body}
@@ -127,7 +122,7 @@ export default function TimelineSection() {
                           boxShadow: 'inset 0 0 0 1px var(--bridge-border-strong)',
                           outlineColor: 'var(--color-primary)',
                           transition:
-                            'box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                            'box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
                         }}
                         onMouseEnter={(ev) => {
                           ev.currentTarget.style.boxShadow =
