@@ -14,6 +14,53 @@ const VALID_SESSION_TYPES = ['career_advice', 'interview_prep', 'resume_review',
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const REALTIME_FEATURE = 'realtime_session'
 const REALTIME_FEATURE_APPLICATION = 'realtime_mentor_application'
+const REALTIME_MODEL = 'gpt-realtime-1.5'
+
+function buildGaSessionPayload({ instructions, tools }) {
+  return {
+    expires_after: { anchor: 'created_at', seconds: 600 },
+    session: {
+      type: 'realtime',
+      model: REALTIME_MODEL,
+      instructions,
+      audio: {
+        input: {
+          transcription: { model: 'gpt-4o-mini-transcribe' },
+          turn_detection: { type: 'semantic_vad', eagerness: 'auto' },
+        },
+        output: { voice: 'ballad' },
+      },
+      tools,
+      tool_choice: 'auto',
+    },
+  }
+}
+
+async function createGaRealtimeSession(apiKey, config) {
+  const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(buildGaSessionPayload(config)),
+  })
+
+  if (!response.ok) {
+    const errText = await response.text()
+    console.error('[realtime-session] OpenAI error', response.status, errText)
+    return null
+  }
+
+  const data = await response.json()
+  return {
+    client_secret: {
+      value: data.value,
+      expires_at: data.expires_at,
+    },
+    session: data.session,
+  }
+}
 
 const intakeSchema = z.object({
   sessionType: z.enum(VALID_SESSION_TYPES),
@@ -141,44 +188,27 @@ export default async function handler(req, res) {
         sessionType +
         '. Ask only the questions for this session type.'
 
-      const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-realtime-1.5',
-          voice: 'ballad',
-          instructions,
-          input_audio_transcription: { model: 'gpt-4o-mini-transcribe' },
-          turn_detection: { type: 'semantic_vad', eagerness: 'auto' },
-          tools: [
-            {
-              type: 'function',
-              name: 'complete_intake',
-              description: 'Called when the intake interview is fully complete',
-              parameters: {
-                type: 'object',
-                properties: {
-                  session_type: { type: 'string' },
-                  status: { type: 'string' },
-                },
-                required: ['session_type', 'status'],
+      const data = await createGaRealtimeSession(apiKey, {
+        instructions,
+        tools: [
+          {
+            type: 'function',
+            name: 'complete_intake',
+            description: 'Called when the intake interview is fully complete',
+            parameters: {
+              type: 'object',
+              properties: {
+                session_type: { type: 'string' },
+                status: { type: 'string' },
               },
+              required: ['session_type', 'status'],
             },
-          ],
-          tool_choice: 'auto',
-        }),
+          },
+        ],
       })
 
-      if (!response.ok) {
-        const errText = await response.text()
-        console.error('[realtime-session] OpenAI error', response.status, errText)
-        return jsonError(res, 502, 'Could not create realtime session')
-      }
+      if (!data) return jsonError(res, 502, 'Could not create realtime session')
 
-      const data = await response.json()
       await recordRealtimeUsage(user.id, REALTIME_FEATURE)
       return res.json(data)
     } catch (err) {
@@ -214,41 +244,24 @@ export default async function handler(req, res) {
   try {
     const instructions = mentorApplicationPrompt({ full_name, current_role, location })
 
-    const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-realtime-1.5',
-        voice: 'ballad',
-        instructions,
-        input_audio_transcription: { model: 'gpt-4o-mini-transcribe' },
-        turn_detection: { type: 'semantic_vad', eagerness: 'auto' },
-        tools: [
-          {
-            type: 'function',
-            name: 'complete_application',
-            description: 'Called when the mentor application conversation is fully complete',
-            parameters: {
-              type: 'object',
-              properties: { status: { type: 'string' } },
-              required: ['status'],
-            },
+    const data = await createGaRealtimeSession(apiKey, {
+      instructions,
+      tools: [
+        {
+          type: 'function',
+          name: 'complete_application',
+          description: 'Called when the mentor application conversation is fully complete',
+          parameters: {
+            type: 'object',
+            properties: { status: { type: 'string' } },
+            required: ['status'],
           },
-        ],
-        tool_choice: 'auto',
-      }),
+        },
+      ],
     })
 
-    if (!response.ok) {
-      const errText = await response.text()
-      console.error('[realtime-session] OpenAI error', response.status, errText)
-      return jsonError(res, 502, 'Could not create realtime session')
-    }
+    if (!data) return jsonError(res, 502, 'Could not create realtime session')
 
-    const data = await response.json()
     await recordRealtimeUsage(user.id, REALTIME_FEATURE_APPLICATION)
     return res.json(data)
   } catch (err) {
