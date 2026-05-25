@@ -31,8 +31,8 @@ export default function HowItWorksHero({ track, onTrackChange }) {
               maxWidth: '13ch'
             }}
           >
-            Talk 1:1 with operators
-            <span style={{ color: 'var(--color-primary)' }}> who have done your job.</span>
+            Talk 1:1 with mentors
+            <span style={{ color: 'var(--color-primary)' }}> who have been there.</span>
           </h1>
 
           <p
@@ -85,7 +85,7 @@ export default function HowItWorksHero({ track, onTrackChange }) {
                 boxShadow: '0 16px 40px -12px color-mix(in srgb, var(--color-primary) 55%, transparent)'
               }}
             >
-              Get started free
+              Get started
               <ArrowRight className="h-4 w-4" aria-hidden />
             </AppLink>
             <Link

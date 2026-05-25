@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import AppLink from '../../components/AppLink';
 import { motion, useReducedMotion } from 'motion/react';
-import { ArrowRight, ShieldCheck, Calendar, Star } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import HeroLiveMatch from './HeroLiveMatch';
 import {
   EASE,
@@ -11,12 +11,36 @@ import {
   usePerfTier
 } from './landingHooks';
 import { useContent } from '../../content';
+import { PUBLIC_NAVBAR_H } from '../../utils/mentorProfileLayout';
 
 export default function HeroSection() {
   const reduced = useReducedMotion();
   const tier    = usePerfTier();
   const { s }   = useContent();
   const flat    = reduced || tier === 'low';
+
+  const heroChecks = [
+    s.landing.heroTrustNoCard,
+    s.landing.heroTrustBooked,
+  ];
+
+  const heroQuotes = [
+    {
+      quote:
+        "I had no idea what career path to take. One conversation with someone who'd been through it changed everything for me.",
+      attribution: '— College junior, undecided major',
+    },
+    {
+      quote:
+        'I kept applying and getting rejected. A mentor spotted exactly what was wrong with my approach in 20 minutes.',
+      attribution: '— Recent grad, first job search',
+    },
+    {
+      quote:
+        'I wish something like this existed when I was starting out. Would have saved me two years of figuring it out alone.',
+      attribution: '— First-gen student, engineering',
+    },
+  ];
 
   const enter = (delay, axis = 'y', distance = 14, duration = DUR_MED) => {
     if (flat) return {};
@@ -33,9 +57,9 @@ export default function HeroSection() {
     <section
       id="hero"
       aria-labelledby="hero-heading"
-      className="relative flex min-h-[100dvh] items-center overflow-hidden px-5 pb-16 sm:px-8"
+      className="relative flex min-h-[100svh] flex-col overflow-hidden px-5 pb-10 sm:px-8 sm:pb-12"
+      style={{ paddingTop: `calc(${PUBLIC_NAVBAR_H} + 2rem)` }}
     >
-      {/* Background depth — decorative only */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.028]"
@@ -68,220 +92,177 @@ export default function HeroSection() {
               'linear-gradient(to top, var(--bridge-canvas) 0%, transparent 100%)'
           }}
         />
-        <div
-          className="absolute inset-x-0 bottom-0 h-px"
-          style={{
-            background:
-              'linear-gradient(to right, transparent, color-mix(in srgb, var(--color-primary) 30%, transparent), transparent)'
-          }}
-        />
       </div>
 
-      <div       className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-16 pt-24 lg:grid-cols-12 lg:gap-14 lg:pt-28">
-        {/* Left: copy column */}
-        <div className="lg:col-span-6">
-          {/* Eyebrow status pill (t=0.00) */}
-          <motion.div
-            {...enter(0, 'y', 8, DUR_SHORT)}
-            className="mb-7 inline-flex items-center gap-2.5 rounded-full px-3.5 py-1.5 text-[11px] font-semibold tracking-wide backdrop-blur-sm"
-            style={{
-              backgroundColor:
-                'color-mix(in srgb, var(--bridge-surface) 80%, transparent)',
-              color: 'var(--bridge-text-secondary)',
-              boxShadow:
-                '0 0 0 1px var(--bridge-border) inset, 0 4px 14px -8px color-mix(in srgb, var(--color-primary) 35%, transparent)'
-            }}
-          >
-            <span
-              aria-hidden="true"
-              className="bridge-pulse inline-block h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: '#10b981' }}
-            />
-            <span style={{ color: 'var(--bridge-text-muted)' }}>
-              {s.landing.heroEyebrow}
-            </span>
-          </motion.div>
-
-          {/* Headline */}
-          <h1
-            id="hero-heading"
-            className="font-display font-black"
-            style={{
-              fontSize: 'clamp(2.8rem, 6vw, 5rem)',
-              lineHeight: 1.06,
-              letterSpacing: '-0.035em',
-              color: 'var(--bridge-text)',
-              fontFeatureSettings: '"kern" 1, "ss01" 1'
-            }}
-          >
-            <motion.span
-              {...enter(0.05, 'y', 14, DUR_MED)}
-              className="block"
-            >
-              {s.landing.heroHeadline1}
-            </motion.span>
-            <motion.span
-              {...enter(0.18, 'y', 14, DUR_MED)}
-              className="block bg-clip-text text-transparent"
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center">
+        <div className="grid w-full grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-14 xl:gap-16">
+          {/* Left — headline → body → CTA → checks */}
+          <div className="max-w-xl">
+            <h1
+              id="hero-heading"
+              className="font-display font-bold overflow-visible"
               style={{
-                backgroundImage:
-                  'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)'
+                fontSize: 'clamp(2.65rem, 5.2vw, 4.25rem)',
+                lineHeight: 1.16,
+                letterSpacing: '-0.028em',
+                color: 'var(--bridge-text)',
+                fontFeatureSettings: '"kern" 1, "ss01" 1'
               }}
             >
-              {s.landing.heroHeadline2}
-            </motion.span>
-          </h1>
+              <motion.span
+                {...enter(0.05, 'y', 14, DUR_MED)}
+                className="block"
+                style={{ lineHeight: 1.12 }}
+              >
+                {s.landing.heroHeadline1}
+              </motion.span>
+              <motion.span
+                {...enter(0.18, 'y', 14, DUR_MED)}
+                className="inline-block w-full bg-clip-text pb-[0.1em] text-transparent [-webkit-box-decoration-break:clone] [box-decoration-break:clone]"
+                style={{
+                  lineHeight: 1.22,
+                  backgroundImage:
+                    'linear-gradient(94deg, var(--lp-grad-from) 0%, var(--lp-grad-mid) 55%, var(--lp-grad-to) 100%)'
+                }}
+              >
+                {s.landing.heroHeadline2}
+              </motion.span>
+            </h1>
 
-          {/* Italic sub-tagline (t=0.32) */}
-          <motion.p
-            {...enter(0.32, 'y', 14, DUR_MED)}
-            className="mt-4 italic font-display font-normal"
-            style={{
-              fontSize: 'clamp(1.1rem, 2vw, 1.5rem)',
-              lineHeight: 1.3,
-              color: 'color-mix(in srgb, var(--bridge-text) 50%, transparent)'
-            }}
-          >
-            {s.landing.heroSubTagline}
-          </motion.p>
-
-          {/* Sub-copy (t=0.45) */}
-          <motion.p
-            {...enter(0.45, 'y', 14, DUR_MED)}
-            className="mt-6 max-w-lg"
-            style={{
-              color: 'var(--bridge-text-secondary)',
-              fontSize: 16,
-              lineHeight: 1.65
-            }}
-          >
-            {s.landing.heroSubCopy}
-          </motion.p>
-
-          {/* CTA pair (t=0.55) */}
-          <motion.div
-            {...enter(0.55, 'y', 14, DUR_MED)}
-            className="mt-9 flex flex-wrap gap-4"
-          >
-            <AppLink
-              to="/register"
-              className="lp-cta group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full px-7 py-3.5 text-[15px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
-              style={{
-                backgroundColor: 'var(--color-primary)',
-                color: 'var(--color-on-primary)',
-                boxShadow:
-                  '0 18px 40px -12px color-mix(in srgb, var(--color-primary) 60%, transparent)',
-                outlineColor: 'var(--color-primary)',
-                transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
+            <motion.p
+              {...enter(0.32, 'y', 14, DUR_MED)}
+              className="mt-5 max-w-md text-base leading-relaxed sm:text-[17px] sm:leading-[1.7]"
+              style={{ color: 'var(--bridge-text-secondary)' }}
             >
-              <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
-              <span className="relative z-10 flex items-center gap-2">
-                {s.landing.heroCtaGetMatched}
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </span>
-            </AppLink>
-            <Link
-              to="/how-it-works"
-              className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-[14px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
-              style={{
-                color: 'var(--bridge-text-secondary)',
-                boxShadow: '0 0 0 1px var(--bridge-border) inset',
-                outlineColor: 'var(--color-primary)',
-                transition: `box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), color ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow =
-                  '0 0 0 1px var(--bridge-border-strong) inset';
-                e.currentTarget.style.color = 'var(--bridge-text)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow =
-                  '0 0 0 1px var(--bridge-border) inset';
-                e.currentTarget.style.color = 'var(--bridge-text-secondary)';
-              }}
-            >
-              {s.landing.heroCtaSeeHow}
-            </Link>
-          </motion.div>
+              {s.landing.heroSubTagline}{' '}
+              {s.landing.heroSubCopy}
+            </motion.p>
 
-          {/* Trust row (t=0.65) */}
-          <motion.div
-            {...enter(0.65, 'y', 14, DUR_MED)}
-            className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-3"
-          >
-            <Trust icon={<ShieldCheck className="h-4 w-4" aria-hidden="true" />} text={s.landing.heroTrustNoCard} />
-            <Trust icon={<Calendar className="h-4 w-4" aria-hidden="true" />} text={s.landing.heroTrustBooked} />
-            <Trust
-              icon={<Star className="h-4 w-4" style={{ fill: 'currentColor' }} aria-hidden="true" />}
-              text={
-                <>
-                  <b style={{ color: 'var(--bridge-text)', fontFeatureSettings: '"tnum" 1' }}>4.9</b>
-                  {s.landing.heroTrustRating}
-                </>
-              }
-            />
-          </motion.div>
-
-          {/* Stats inline (t=0.75) */}
-          <motion.div
-            {...enter(0.75, 'y', 10, DUR_MED)}
-            className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3"
-            style={{ borderTop: '1px solid var(--bridge-border)', paddingTop: 20 }}
-          >
-            {[
-              { value: '2,400+', label: 'Vetted mentors' },
-              { value: '4.9/5',  label: '1,200+ reviews' },
-              { value: '97%',    label: 'Would recommend' },
-              { value: '$2.1M+', label: 'In comp increases' },
-            ].map(({ value, label }) => (
-              <div key={label} className="flex flex-col gap-0.5">
-                <span
-                  className="font-display font-black tabular-nums"
-                  style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.6rem)', lineHeight: 1, letterSpacing: '-0.03em', backgroundImage: 'linear-gradient(135deg, var(--lp-grad-from, var(--color-primary)) 0%, var(--lp-grad-to, var(--color-primary)) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
-                >
-                  {value}
+            <motion.div {...enter(0.45, 'y', 14, DUR_MED)} className="mt-8">
+              <AppLink
+                to="/register"
+                className="lp-cta group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full px-8 py-4 text-base font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
+                style={{
+                  backgroundColor: 'var(--color-primary)',
+                  color: 'var(--color-on-primary)',
+                  boxShadow:
+                    '0 18px 40px -12px color-mix(in srgb, var(--color-primary) 60%, transparent)',
+                  outlineColor: 'var(--color-primary)',
+                  transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
+                <span className="relative z-10 flex items-center gap-2">
+                  {s.landing.heroCtaGetMatched}
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </span>
-                <span className="text-[11.5px] font-medium" style={{ color: 'var(--bridge-text-muted)' }}>
-                  {label}
-                </span>
+              </AppLink>
+              <Link
+                to="/how-it-works"
+                className="mt-4 block text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
+                style={{ color: 'var(--bridge-text-muted)', outlineColor: 'var(--color-primary)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--color-primary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--bridge-text-muted)';
+                }}
+              >
+                {s.landing.heroCtaSeeHow}
+              </Link>
+            </motion.div>
+
+            <motion.ul
+              {...enter(0.55, 'y', 14, DUR_MED)}
+              className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 sm:gap-x-8"
+            >
+              {heroChecks.map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <span
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                    style={{
+                      backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+                      color: 'var(--color-primary)'
+                    }}
+                  >
+                    <Check className="h-3 w-3 stroke-[3]" aria-hidden="true" />
+                  </span>
+                  <span className="text-sm leading-snug" style={{ color: 'var(--bridge-text-secondary)' }}>
+                    {item}
+                  </span>
+                </li>
+              ))}
+            </motion.ul>
+
+            <motion.div
+              {...enter(0.65, 'y', 14, DUR_MED)}
+              className="mt-10 w-full"
+            >
+              <p
+                className="text-center text-[10px] font-black uppercase"
+                style={{ color: 'var(--color-text-muted)', letterSpacing: '0.3em' }}
+              >
+                EARLY REACTIONS
+              </p>
+              <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+                {heroQuotes.map((item, index) => (
+                  <figure
+                    key={item.attribution}
+                    className={`rounded-2xl p-4 ${index === 2 ? 'hidden md:block' : ''}`}
+                    style={{
+                      backgroundColor: 'var(--color-surface)',
+                      borderLeft:
+                        '3px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
+                      boxShadow: 'inset 0 0 0 1px var(--color-border)',
+                    }}
+                  >
+                    <blockquote
+                      className="italic"
+                      style={{
+                        fontSize: 13,
+                        lineHeight: 1.6,
+                        color: 'var(--color-text)',
+                      }}
+                    >
+                      {item.quote}
+                    </blockquote>
+                    <figcaption
+                      className="mt-3"
+                      style={{
+                        fontSize: 12,
+                        lineHeight: 1.45,
+                        color: 'var(--color-text-muted)',
+                      }}
+                    >
+                      {item.attribution}
+                    </figcaption>
+                  </figure>
+                ))}
               </div>
-            ))}
+            </motion.div>
+          </div>
+
+          {/* Right — animation vertically centered with left block */}
+          <motion.div
+            {...(flat
+              ? {}
+              : {
+                  initial: { opacity: 0, x: 16 },
+                  animate: { opacity: 1, x: 0 },
+                  transition: { duration: DUR_LONG, delay: 0.35, ease: EASE }
+                })}
+            className="relative w-full lg:justify-self-end lg:max-w-[540px] xl:max-w-[580px]"
+          >
+            <HeroLiveMatch />
           </motion.div>
         </div>
-
-        {/* Right column: HeroLiveMatch (t=0.40) */}
-        <motion.div
-          {...(flat
-            ? {}
-            : {
-                initial: { opacity: 0, x: 16 },
-                animate: { opacity: 1, x: 0 },
-                transition: { duration: DUR_LONG, delay: 0.4, ease: EASE }
-              })}
-          className="relative lg:col-span-6 lg:self-center"
-        >
-          <HeroLiveMatch />
-        </motion.div>
       </div>
     </section>
-  );
-}
-
-function Trust({ icon, text }) {
-  return (
-    <span
-      className="inline-flex items-center gap-2 text-[13px] font-medium"
-      style={{ color: 'var(--bridge-text-secondary)' }}
-    >
-      <span style={{ color: 'var(--color-primary)' }}>{icon}</span>
-      {text}
-    </span>
   );
 }

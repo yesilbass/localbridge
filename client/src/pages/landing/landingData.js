@@ -36,6 +36,19 @@ export const MATCH_GOALS = [
     mentorIds: ['m-omar-hassan', 'm-aisha-park', 'm-tom-rodriguez'] },
 ];
 
+// HeroLiveMatch — browse chips (life pillars) vs career outcome after click.
+export const HERO_BROWSE_CHIPS = [
+  'New parenthood',
+  'Fitness routine',
+  'Grad school prep',
+  'Personal finance',
+];
+
+export const HERO_CAREER_DEMO = {
+  chip: 'Land my next PM role',
+  mentorIds: ['m-maya-chen', 'm-alex-wong', 'm-jordan-reeves'],
+};
+
 // OutcomesSection — three featured testimonials with first-name + initial only.
 // No company names in attribution; industry-only. Metric is short and concrete.
 export const OUTCOMES = [

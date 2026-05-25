@@ -56,7 +56,7 @@ Vite dev port: **5173 or 5174**. Server: **3001**. Never `:3000`.
 5. **Server secrets** (`SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, `STRIPE_SECRET_KEY`) live in `server/.env` only. Never expose to client.
 6. **Supabase singleton** — always `import supabase from '../api/supabase'`. Never `createClient` twice.
 7. **`mentor_profiles.id` ≠ `auth.users.id`.** `getMentorById()` queries by profile UUID. Returns `{ data: { mentor, reviews }, error }` — destructure `mentor`, not `data`.
-8. **Session types** — four keys, source of truth `client/src/constants/sessionTypes.js`: `career_advice`, `interview_prep`, `resume_review`, `networking`. Mirror in server validation.
+8. **Session types** — four keys for booking/API, source of truth `client/src/constants/sessionTypes.js`: `career_advice`, `interview_prep`, `resume_review`, `networking`. Mirror in server validation. Marketing **Explore** links use mentorship pillars (`/mentors?category=career|relationships|faith|life`), not session-type labels in the footer.
 9. **RLS-first thinking.** Client writes can silently fail. Aggregations like `mentor_profiles.rating` are DB triggers, never client-side.
 10. **Performance gating.** Animations heavier than opacity + 1-axis translate respect `usePerfTier()` and `prefers-reduced-motion`.
 
@@ -79,7 +79,8 @@ client/src/
     nav/               ← mainNavModel, NavMenus, navChrome, dashboardNavModel
   utils/authNav.js     ← resolveAuthEntryPath, dashboardProductPath, presentAsMarketingGuest
   pages/
-    landing/           ← Hero, Bento, Manifesto, HowItWorks, FinalCta, …
+    landing/           ← Hero, Bento, Manifesto, HowItWorksSection, FinalCta, …
+    how-it-works/      ← /how-it-works page (HowItWorksHero, HowItWorksSteps, howItWorksData)
     community/         ← CommunityHub, CommunityCategory, communityShared
     dashboard/         ← mentee + mentor views, hooks, modals
     footer/            ← static informational pages
@@ -114,7 +115,8 @@ supabase/migrations/   ← canonical SQL; do NOT auto-run, hand to user
 | Video call | `client/src/pages/VideoCall.jsx` (WebRTC + Supabase Realtime) |
 | Calendar / Calendly OAuth | `client/src/api/calendly.js`, `api/calendly/` |
 | Community | `client/src/api/community.js`, `client/src/pages/community/`, `CommunityEntryGate` |
-| Nav / chrome | `client/src/components/nav/`, `Navbar.jsx`, `DashboardTopBar.jsx`, `authNav.js` |
+| Nav / chrome | `client/src/components/nav/mainNavModel.js`, `Navbar.jsx`, `DashboardTopBar.jsx`, `authNav.js`, `Footer.jsx` |
+| How it works page | `client/src/pages/how-it-works/` (`howItWorksData.js` for step copy) |
 | Mentor application | `client/src/pages/MentorApplication.jsx`, `api/realtime-session.js`, `api/verification/` |
 | Mentor posts (not community) | `client/src/api/mentorPosts.js`, `client/src/pages/community/MentorPostsPage.jsx` |
 | Stripe / payments | `client/src/api/stripe.js`, `server/routes/stripe.js`, `client/src/components/EmbeddedCheckoutPanel.jsx`. See `.cursor/skills/adding-stripe/SKILL.md`. |

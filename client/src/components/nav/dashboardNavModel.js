@@ -65,7 +65,8 @@ export function buildDashboardNavModel(isMentor, t) {
       label: t(item.labelKey, item.fallback),
     })),
   }));
-  return { primary: { to: '/dashboard', label: t('nav.dashboard', 'Dashboard') }, groups };
+  const links = groups.flatMap((g) => g.items);
+  return { links };
 }
 
 export function isDashboardPathActive(pathname, to) {
@@ -73,8 +74,4 @@ export function isDashboardPathActive(pathname, to) {
     return pathname === '/dashboard' || pathname === '/dashboard/';
   }
   return pathname === to || pathname.startsWith(`${to}/`);
-}
-
-export function isDashboardGroupActive(pathname, group) {
-  return group.items.some((item) => isDashboardPathActive(pathname, item.to));
 }

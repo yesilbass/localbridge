@@ -4,7 +4,7 @@ export const HIW_TRACKS = [
     label: 'On-demand sessions',
     tagline: 'From signup to video call in under five minutes.',
     bullets: [
-      'Volunteer operators — mentor time stays free',
+      'Volunteer mentors — session time stays free',
       'Real calendar slots on every profile',
       'Built-in Bridge video, no external links',
       'Public reviews before you request',
@@ -28,14 +28,13 @@ export const HIW_TRACKS = [
 export const SESSION_STEPS = [
   {
     num: '01',
-    title: 'Create your free account',
+    title: 'Create your account',
     body: 'Sign up in seconds. Tell Bridge what role you are targeting — optional AI intake shapes better matches later.',
-    chip: 'No card required',
     visual: 'signup',
   },
   {
     num: '02',
-    title: 'Find an operator who has done your job',
+    title: 'Find a mentor who gets it',
     body: 'Browse vetted mentors by industry and session type, or let AI rank the best fits. Every profile shows reviews, expertise, and live availability.',
     chip: 'Browse or AI match',
     visual: 'discover',
@@ -43,7 +42,7 @@ export const SESSION_STEPS = [
   {
     num: '03',
     title: 'Book a real slot — not a maybe',
-    body: 'Pick career advice, interview prep, resume review, or networking. Choose a time on their calendar, add context, and send the request. No scheduling ping-pong.',
+    body: 'Pick a topic, choose a time on their calendar, add context, and send the request. No scheduling ping-pong.',
     chip: 'Calendly on every profile',
     visual: 'book',
   },
@@ -67,7 +66,7 @@ export const TOOL_STEPS = [
   {
     num: '02',
     title: 'Get ranked mentor matches',
-    body: 'AI reads your profile against operator expertise and returns a short list with reasons — not a random directory scroll.',
+    body: 'AI reads your profile against mentor expertise and returns a short list with reasons — not a random directory scroll.',
     chip: '3 free · unlimited on Plus',
     visual: 'match',
   },
@@ -81,46 +80,8 @@ export const TOOL_STEPS = [
   {
     num: '04',
     title: 'Move faster on Pro',
-    body: 'Priority matching, faster queue placement, and early access when new operators join — for when you are booking every week.',
+    body: 'Priority matching, faster queue placement, and early access when new mentors join — for when you are booking every week.',
     chip: 'See pricing',
     visual: 'priority',
   },
-];
-
-export const INCLUDED_ALWAYS = [
-  'Unlimited volunteer mentor sessions',
-  'Browse directory with unfiltered reviews',
-  'Book via live Calendly availability',
-  'Built-in Bridge video rooms',
-  '3 AI mentor matches',
-  '1 AI resume review',
-];
-
-export const INCLUDED_PAID = [
-  'Unlimited AI matching & resume reviews',
-  'Calendar sync & session notes',
-  'Priority matching & queue placement',
-  'Early access to new mentors',
-];
-
-export const CONTRAST_POINTS = [
-  {
-    title: 'No membership wall for mentorship',
-    body: 'Other platforms charge $50–$150/month just to book calls. On Bridge, operator time is free on every plan.',
-  },
-  {
-    title: 'No anonymous experts',
-    body: 'Every mentor has a verified profile — company, role, reviews, and expertise you can read before you request.',
-  },
-  {
-    title: 'No scheduling archaeology',
-    body: 'Real availability on the profile. Pick a slot, send context, done — not five emails to find a Tuesday.',
-  },
-];
-
-export const OLD_WAY_ROWS = [
-  { label: 'Cost per hour', old: '$150+ consultants', bridge: 'Free volunteer sessions' },
-  { label: 'Time to first call', old: 'Days to weeks', bridge: 'Minutes' },
-  { label: 'Video', old: 'External Zoom link', bridge: 'Built into Bridge' },
-  { label: 'Reviews', old: 'Hidden or curated', bridge: 'Public on every profile' },
 ];

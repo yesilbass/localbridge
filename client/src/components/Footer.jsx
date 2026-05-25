@@ -4,7 +4,6 @@ import AppLink from './AppLink';
 import { Mail, ArrowRight, Heart } from 'lucide-react';
 import { COMPANY_EMAIL, mailtoHref } from '../config/contact';
 import { useI18n } from '../i18n';
-import { SESSION_TYPES } from '../constants/sessionTypes';
 import ThemeToggle from './ThemeToggle';
 
 const navLink =
@@ -12,15 +11,6 @@ const navLink =
 
 const legalLink =
   'text-[12.5px] font-medium transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded-sm';
-
-const COMMUNITY_AVATARS = [
-  { initials: 'JR', bg: 'color-mix(in srgb, var(--color-primary) 85%, #fff)' },
-  { initials: 'MK', bg: 'color-mix(in srgb, var(--color-accent) 75%, var(--color-primary))' },
-  { initials: 'SL', bg: 'color-mix(in srgb, var(--color-primary) 65%, #000)' },
-  { initials: 'AP', bg: 'color-mix(in srgb, var(--color-accent) 55%, var(--bridge-surface))' },
-  { initials: 'TC', bg: 'color-mix(in srgb, var(--color-primary) 50%, var(--color-accent))' },
-  { initials: 'DW', bg: 'color-mix(in srgb, var(--color-primary) 40%, var(--bridge-text))' },
-];
 
 const SOCIALS = [
   {
@@ -104,27 +94,6 @@ export default function Footer() {
                 <p className="mt-3 text-[15px] leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
                   {t('footer.newsletterBody', 'Mentor spotlights, career resources, and product updates. No spam, ever.')}
                 </p>
-                <p className="mt-5 text-[13px] font-semibold" style={{ color: 'var(--bridge-text-secondary)' }}>
-                  {t('footer.communityProof', 'Be part of a 2,400+ mentor community')}
-                </p>
-                <div className="mt-3 flex items-center">
-                  {COMMUNITY_AVATARS.map(({ initials, bg }, i) => (
-                    <span
-                      key={initials}
-                      aria-hidden
-                      className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-bold"
-                      style={{
-                        marginLeft: i === 0 ? 0 : '-0.4rem',
-                        zIndex: COMMUNITY_AVATARS.length - i,
-                        borderColor: 'var(--bridge-surface)',
-                        background: bg,
-                        color: 'var(--color-on-primary, #fff)',
-                      }}
-                    >
-                      {initials}
-                    </span>
-                  ))}
-                </div>
               </div>
 
               {subscribed ? (
@@ -228,12 +197,14 @@ export default function Footer() {
             />
 
             <LinkColumn
-              title={t('footer.sessionTypes', 'Session types')}
-              links={SESSION_TYPES.map(({ name }) => ({
-                label: name,
-                to: '/mentors',
-                app: true,
-              }))}
+              title={t('footer.explore', 'Explore')}
+              links={[
+                { label: t('footer.browseMentors', 'Browse Mentors'), to: '/mentors', app: true },
+                { label: t('footer.categoryCareer', 'Career & Professional'), to: '/mentors?category=career', app: true },
+                { label: t('footer.categoryRelationships', 'Relationships & Family'), to: '/mentors?category=relationships', app: true },
+                { label: t('footer.categoryFaith', 'Faith & Spirituality'), to: '/mentors?category=faith', app: true },
+                { label: t('footer.categoryLife', 'Life Navigation'), to: '/mentors?category=life', app: true },
+              ]}
             />
           </div>
 

@@ -29,17 +29,17 @@ export default function HowItWorksSteps({ track }) {
     <section
       id="steps"
       aria-label="How Bridge works steps"
-      className="bg-[var(--bridge-canvas)] py-24 sm:py-32"
+      className="bg-[var(--bridge-canvas)] py-14 sm:py-20"
     >
       <div className="mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-14 xl:max-w-[88rem] xl:px-16">
-        <ol className="flex flex-col gap-24 sm:gap-28 lg:gap-32">
+        <ol className="flex flex-col gap-8 sm:gap-10 lg:gap-12">
           {steps.map((step, index) => {
             const Visual = VISUALS[step.visual] ?? SignupVisual;
             const textFirst = index % 2 === 0;
 
             return (
               <RevealOnScroll key={step.num} delay={index * 40}>
-                <li className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16 xl:gap-20">
+                <li className="grid grid-cols-1 items-center gap-6 lg:grid-cols-2 lg:gap-10 xl:gap-12">
                   <div className={`flex justify-center lg:justify-end ${textFirst ? 'lg:order-2' : ''}`}>
                     <Visual />
                   </div>
@@ -62,15 +62,17 @@ export default function HowItWorksSteps({ track }) {
                     >
                       {step.body}
                     </p>
-                    <span
-                      className="mt-6 inline-flex rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em]"
-                      style={{
-                        backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                        color: 'var(--color-primary)',
-                      }}
-                    >
-                      {step.chip}
-                    </span>
+                    {step.chip && (
+                      <span
+                        className="mt-6 inline-flex rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em]"
+                        style={{
+                          backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                          color: 'var(--color-primary)',
+                        }}
+                      >
+                        {step.chip}
+                      </span>
+                    )}
                   </div>
                 </li>
               </RevealOnScroll>
@@ -108,7 +110,7 @@ function SignupVisual() {
       >
         <div className="flex items-center gap-2.5">
           <UserPlus className="h-4 w-4 text-[var(--color-primary)]" aria-hidden />
-          <span className="text-[13px] font-bold text-[var(--bridge-text)]">Create your free account</span>
+          <span className="text-[13px] font-bold text-[var(--bridge-text)]">Create your account</span>
         </div>
         <div className="mt-4 space-y-2.5">
           {[
@@ -127,7 +129,7 @@ function SignupVisual() {
           className="mt-4 w-full rounded-xl py-2.5 text-[13px] font-bold text-[var(--color-on-primary)]"
           style={{ backgroundColor: 'var(--color-primary)' }}
         >
-          Continue — no card required
+          Continue
         </button>
       </div>
       <div
@@ -497,7 +499,7 @@ function PriorityVisual() {
           <MessageSquare className="h-3.5 w-3.5 text-[var(--color-primary)]" aria-hidden />
           <p className="text-[11px] font-semibold text-[var(--bridge-text)]">Early access mentors</p>
         </div>
-        <p className="mt-1 text-[10px] leading-snug text-[var(--bridge-text-muted)]">New operators surface in your queue first.</p>
+        <p className="mt-1 text-[10px] leading-snug text-[var(--bridge-text-muted)]">New mentors surface in your queue first.</p>
       </div>
     </VisualRoot>
   );

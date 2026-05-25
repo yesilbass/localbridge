@@ -1,16 +1,42 @@
-import { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion, useMotionValue, useSpring } from 'motion/react';
 import { MessageCircle, CalendarCheck, Mic, Video, PhoneOff } from 'lucide-react';
-import { MATCH_GOALS, findMentor } from './landingData';
+import { HERO_BROWSE_CHIPS, HERO_CAREER_DEMO, findMentor } from './landingData';
 import { EASE, usePerfTier } from './landingHooks';
 
-const T_IDLE     = 1900;
-const T_CHIPS    = 2600;
-const T_SELECTED = 2600;
-const T_BOOKED   = 3600;
+const STAGE_W = 520;
+const STAGE_R = STAGE_W / 400;
 
-const CARD_BODY_MIN_H = 124;
-const STAGE_EXT_MIN_H = 248;
+const T_IDLE     = 2400;
+const T_CHIPS    = 3100;
+const T_SELECTED = 3100;
+const T_BOOKED   = 5700;
+
+const CARD_BODY_MIN_H = Math.round(118 * STAGE_R);
+
+const WOOSH_SPRING = { type: 'spring', stiffness: 420, damping: 32, mass: 0.85 };
+const CURSOR_SPRING = { stiffness: 118, damping: 28, mass: 1.08 };
+
+const SECTION_MS = {
+  idle: T_IDLE,
+  chips: T_CHIPS,
+  selected: T_SELECTED,
+  booked: T_BOOKED,
+};
+
+const CURSOR_MOVE_DELAY_MS = {
+  idle: 100,
+  chips: 340,
+  selected: 620,
+  booked: 400,
+};
+
+const CLICK_MS = {
+  idle: 1020,
+  chips: 2280,
+  selected: 2780,
+  booked: 1780,
+};
 
 const TONE_GRAD = {
   amber:'linear-gradient(135deg,#4F46E5,#818CF8)', emerald:'linear-gradient(135deg,#059669,#10b981)',
@@ -53,7 +79,7 @@ function VideoCallPanel({ mentor, flat }) {
   const grad = TONE_GRAD[mentor?.tone] || 'var(--color-primary)';
 
   return (
-    <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid var(--bridge-border)', boxShadow: '0 8px 24px -8px rgba(0,0,0,0.14)' }}>
+    <div style={{ width: '100%', borderRadius: Math.round(16 * STAGE_R), overflow: 'hidden', border: '1px solid var(--bridge-border)', boxShadow: '0 8px 24px -8px color-mix(in srgb, var(--color-secondary) 18%, transparent)' }}>
       <AnimatePresence mode="wait">
         {phase === 'connecting' ? (
           <motion.div key="conn" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} transition={{ duration:0.25 }}
@@ -99,7 +125,20 @@ function VideoCallPanel({ mentor, flat }) {
   );
 }
 
-function CardBodyLayer({ active, children }) {
+function CardBodyLayer({ active, children, inline = false }) {
+  if (inline) {
+    if (!active) return null;
+    return (
+      <motion.div
+        initial={false}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.22, ease: EASE }}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       aria-hidden={!active}
@@ -109,6 +148,7 @@ function CardBodyLayer({ active, children }) {
       style={{
         position: 'absolute',
         inset: 0,
+        width: '100%',
         pointerEvents: active ? 'auto' : 'none',
         visibility: active ? 'visible' : 'hidden'
       }}
@@ -125,6 +165,7 @@ export default function HeroLiveMatch() {
 
   const [status, setStatus] = useState('idle');
   const [showVideo, setShowVideo] = useState(false);
+  const [ready, setReady] = useState(false);
 
   const containerRef = useRef(null);
   const cardRef      = useRef(null);
@@ -132,14 +173,15 @@ export default function HeroLiveMatch() {
   const chipRef      = useRef(null);
   const circleRef    = useRef(null);
   const calCheckRef  = useRef(null);
-  const bootedRef    = useRef(false);
 
   const rawX    = useMotionValue(0);
   const rawY    = useMotionValue(0);
-  const springX = useSpring(rawX, { stiffness: 280, damping: 26, mass: 0.55 });
-  const springY = useSpring(rawY, { stiffness: 280, damping: 26, mass: 0.55 });
+  const springX = useSpring(rawX, CURSOR_SPRING);
+  const springY = useSpring(rawY, CURSOR_SPRING);
   const [cursorVis, setCursorVis] = useState(false);
   const [clicking, setClicking]   = useState(false);
+  const genRef = useRef(0);
+  const auxTimersRef = useRef([]);
 
   const getPos = useCallback((ref) => {
     const el = ref?.current || ref;
@@ -157,7 +199,7 @@ export default function HeroLiveMatch() {
 
   const moveCursor = useCallback((ref, immediate = false) => {
     const p = getPos(ref);
-    if (!p) return;
+    if (!p) return false;
     if (immediate) {
       rawX.jump(p.x);
       rawY.jump(p.y);
@@ -165,115 +207,142 @@ export default function HeroLiveMatch() {
       rawX.set(p.x);
       rawY.set(p.y);
     }
+    return true;
   }, [getPos, rawX, rawY]);
 
-  useEffect(() => {
-    if (status !== 'booked') {
-      setShowVideo(false);
-      return;
-    }
-    if (flat) setShowVideo(true);
-  }, [status, flat]);
-
-  useEffect(() => {
-    if (flat) return;
-    const t1 = setTimeout(() => moveCursor(inputRef, true), 80);
-    const t2 = setTimeout(() => setCursorVis(true), 420);
-    const t3 = setTimeout(doClick, 1050);
-    const t4 = setTimeout(() => { bootedRef.current = true; }, 300);
-    return () => [t1, t2, t3, t4].forEach(clearTimeout);
-  }, [flat, moveCursor, doClick]);
-
-  useLayoutEffect(() => {
-    if (flat || !cursorVis || !bootedRef.current) return;
-
+  const moveCursorWhenReady = useCallback((ref, { immediate = false, delay = 0 } = {}) => {
     let cancelled = false;
-    const run = () => {
+    let retryTimer = null;
+
+    const attempt = (tries = 0) => {
       if (cancelled) return;
-      if (status === 'idle') moveCursor(inputRef);
-      else if (status === 'chips') moveCursor(chipRef);
-      else if (status === 'selected') moveCursor(circleRef);
-      else if (status === 'booked') moveCursor(calCheckRef);
-    };
-
-    requestAnimationFrame(() => requestAnimationFrame(run));
-    return () => { cancelled = true; };
-  }, [status, flat, cursorVis, moveCursor]);
-
-  useEffect(() => {
-    if (flat || !cursorVis || !bootedRef.current) return;
-
-    if (status === 'idle') {
-      const t = setTimeout(doClick, 680);
-      return () => clearTimeout(t);
-    }
-    if (status === 'chips') {
-      const t = setTimeout(doClick, 1480);
-      return () => clearTimeout(t);
-    }
-    if (status === 'selected') {
-      const t = setTimeout(doClick, 1680);
-      return () => clearTimeout(t);
-    }
-    if (status === 'booked') {
-      const t1 = setTimeout(() => {
-        doClick();
-        setShowVideo(true);
-      }, 980);
-      const t2 = setTimeout(() => setCursorVis(false), 1280);
-      return () => { clearTimeout(t1); clearTimeout(t2); };
-    }
-    return undefined;
-  }, [status, flat, cursorVis, doClick]);
-
-  useEffect(() => {
-    if (flat) return undefined;
-    let timer = null;
-    let loopReset = null;
-
-    const durations = { idle: T_IDLE, chips: T_CHIPS, selected: T_SELECTED, booked: T_BOOKED };
-
-    const onHidden = () => {
-      if (document.hidden && timer) {
-        clearTimeout(timer);
-        timer = null;
-      } else if (!document.hidden && !timer) {
-        timer = setTimeout(advance, durations[status] ?? T_IDLE);
+      const moved = moveCursor(ref, immediate);
+      if (!moved && tries < 12) {
+        retryTimer = setTimeout(() => attempt(tries + 1), 48);
       }
     };
 
-    const advance = () => {
-      if (document.hidden) return;
+    const start = () => requestAnimationFrame(() => requestAnimationFrame(() => attempt()));
+
+    if (delay > 0) {
+      const t = setTimeout(start, delay);
+      return () => {
+        cancelled = true;
+        clearTimeout(t);
+        if (retryTimer) clearTimeout(retryTimer);
+      };
+    }
+
+    start();
+    return () => {
+      cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
+    };
+  }, [moveCursor]);
+
+  const schedule = useCallback((fn, ms) => {
+    const gen = genRef.current;
+    const id = setTimeout(() => {
+      if (genRef.current === gen) fn();
+    }, ms);
+    return id;
+  }, []);
+
+  const clearAuxTimers = useCallback(() => {
+    auxTimersRef.current.forEach(clearTimeout);
+    auxTimersRef.current = [];
+  }, []);
+
+  useEffect(() => {
+    if (flat) {
+      setReady(true);
+      return undefined;
+    }
+    const t1 = setTimeout(() => moveCursor(inputRef, true), 80);
+    const t3 = setTimeout(() => setReady(true), 360);
+    return () => { clearTimeout(t1); clearTimeout(t3); };
+  }, [flat, moveCursor]);
+
+  useEffect(() => {
+    if (flat || !ready || status !== 'idle') return undefined;
+    const t = setTimeout(() => setCursorVis(true), 140);
+    return () => clearTimeout(t);
+  }, [status, flat, ready]);
+
+  useEffect(() => {
+    if (flat) {
+      setShowVideo(status === 'booked');
+      return undefined;
+    }
+    if (status !== 'booked') setShowVideo(false);
+    return undefined;
+  }, [status, flat]);
+
+  useEffect(() => {
+    if (flat || !ready) return undefined;
+
+    const targetRef = {
+      idle: inputRef,
+      chips: chipRef,
+      selected: circleRef,
+      booked: calCheckRef,
+    }[status];
+
+    return moveCursorWhenReady(targetRef, {
+      immediate: status === 'idle',
+      delay: CURSOR_MOVE_DELAY_MS[status] ?? 120,
+    });
+  }, [status, flat, ready, moveCursorWhenReady]);
+
+  useEffect(() => {
+    if (flat || !ready) return undefined;
+
+    const timers = [];
+
+    timers.push(schedule(() => {
+      doClick();
+      if (status === 'booked') setShowVideo(true);
+    }, CLICK_MS[status] ?? 1000));
+
+    if (status === 'booked') {
+      timers.push(schedule(() => setCursorVis(false), CLICK_MS.booked + 560));
+    }
+
+    timers.push(schedule(() => {
       if (status === 'idle') {
-        setCursorVis(true);
         setStatus('chips');
       } else if (status === 'chips') {
         setStatus('selected');
       } else if (status === 'selected') {
         setStatus('booked');
       } else if (status === 'booked') {
-        loopReset = setTimeout(() => {
-          setCursorVis(false);
+        setShowVideo(false);
+        setCursorVis(false);
+        clearAuxTimers();
+        auxTimersRef.current.push(schedule(() => {
           setStatus('idle');
-          requestAnimationFrame(() => {
-            moveCursor(inputRef, true);
-            setCursorVis(true);
-          });
-        }, 80);
+          moveCursor(inputRef, true);
+        }, 360));
       }
-    };
-
-    timer = setTimeout(advance, durations[status] ?? T_IDLE);
-    document.addEventListener('visibilitychange', onHidden);
+    }, SECTION_MS[status] ?? T_IDLE));
 
     return () => {
-      if (timer) clearTimeout(timer);
-      if (loopReset) clearTimeout(loopReset);
-      document.removeEventListener('visibilitychange', onHidden);
+      timers.forEach(clearTimeout);
+      clearAuxTimers();
+      genRef.current += 1;
     };
-  }, [status, flat, moveCursor]);
+  }, [status, flat, ready, doClick, moveCursor, schedule, clearAuxTimers]);
 
-  const goal      = MATCH_GOALS[0];
+  useEffect(() => {
+    if (flat || !showVideo || status !== 'booked') return undefined;
+    let cancelMove = () => {};
+    const t = setTimeout(() => {
+      cancelMove = moveCursorWhenReady(calCheckRef, { delay: 40 }) ?? (() => {});
+    }, 520);
+    return () => { clearTimeout(t); cancelMove(); };
+  }, [flat, showVideo, status, moveCursorWhenReady]);
+
+  const goal      = HERO_CAREER_DEMO;
   const mentors   = goal.mentorIds.map(findMentor).filter(Boolean);
   const topMentor = mentors[0];
   const isBooked  = status === 'booked';
@@ -281,8 +350,7 @@ export default function HeroLiveMatch() {
   return (
     <div
       ref={containerRef}
-      className="relative w-full flex flex-col items-center select-none"
-      style={flat ? undefined : { minHeight: 548 }}
+      className="relative flex w-full flex-col items-center select-none"
     >
       <style>{`
         @keyframes vc-ring { 0%{transform:scale(1);opacity:0.8} 100%{transform:scale(1.7);opacity:0} }
@@ -292,32 +360,62 @@ export default function HeroLiveMatch() {
 
       {!flat && <Cursor x={springX} y={springY} visible={cursorVis} clicking={clicking} />}
 
-      <div style={{ width:60,height:60,borderRadius:'50%',background:TONE_GRAD[topMentor?.tone]||'var(--color-primary)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,fontWeight:900,color:'white',letterSpacing:'-0.04em',border:'3px solid var(--bridge-surface)',boxShadow:'0 4px 16px -4px rgba(0,0,0,0.15)',flexShrink:0 }} aria-hidden>
-        {ini(topMentor?.name??'')}
-      </div>
+      <div className="relative w-full" style={{ maxWidth: STAGE_W }}>
+        <motion.div
+          className="relative flex w-full flex-col items-center"
+          animate={{ y: showVideo && status === 'booked' ? Math.round(-14 * STAGE_R) : 0 }}
+          transition={WOOSH_SPRING}
+        >
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 2,
+            width: Math.round(56 * STAGE_R),
+            height: Math.round(56 * STAGE_R),
+            marginBottom: Math.round(-20 * STAGE_R),
+            borderRadius: '50%',
+            background: TONE_GRAD[topMentor?.tone] || 'var(--color-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: Math.round(14 * STAGE_R),
+            fontWeight: 900,
+            color: 'var(--color-on-primary)',
+            letterSpacing: '-0.04em',
+            border: `${Math.round(3 * STAGE_R)}px solid var(--bridge-surface)`,
+            boxShadow: '0 8px 24px -8px color-mix(in srgb, var(--color-primary) 45%, transparent)',
+            flexShrink: 0
+          }}
+          aria-hidden
+        >
+          {ini(topMentor?.name ?? '')}
+        </div>
 
-      <div aria-hidden style={{ width:1,height:28,background:'var(--bridge-border)',flexShrink:0 }} />
-
-      <div
-        ref={cardRef}
-        style={{
-          width:'100%', maxWidth:400, flexShrink:0,
-          backgroundColor:'var(--bridge-surface)',
-          border:'1px solid var(--bridge-border)',
-          borderRadius:20,
-          boxShadow:'0 8px 32px -12px rgba(0,0,0,0.12),0 2px 8px -4px rgba(0,0,0,0.06)'
-        }}
-      >
-        <div style={{ minHeight: 58, padding:'16px 18px 12px', display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative' }}>
+        <div
+          ref={cardRef}
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            width: '100%',
+            maxWidth: STAGE_W,
+            flexShrink: 0,
+            backgroundColor: 'var(--bridge-surface)',
+            border: '1px solid var(--bridge-border)',
+            borderRadius: Math.round(20 * STAGE_R),
+            boxShadow:
+              '0 0 0 1px var(--bridge-shadow-ring), 0 2px 4px var(--bridge-shadow-soft), 0 16px 40px -12px color-mix(in srgb, var(--color-primary) 20%, transparent), 0 36px 72px -24px color-mix(in srgb, var(--color-secondary) 12%, transparent)'
+          }}
+        >
+        <div style={{ minHeight: Math.round(58 * STAGE_R), padding:`${Math.round(16 * STAGE_R)}px ${Math.round(18 * STAGE_R)}px ${Math.round(12 * STAGE_R)}px`, display:'flex', alignItems:'center', justifyContent:'space-between', position:'relative' }}>
           <motion.div
             initial={false}
             animate={{ opacity: isBooked ? 0 : 1 }}
             transition={{ duration: 0.2 }}
             style={{ position: isBooked ? 'absolute' : 'relative', inset: isBooked ? '16px 18px 12px 18px' : undefined, display:'flex', alignItems:'center', justifyContent:'space-between', pointerEvents: isBooked ? 'none' : 'auto' }}
           >
-            <p style={{ fontSize:17,fontWeight:800,letterSpacing:'-0.02em',color:'var(--bridge-text)' }}>Find a mentor</p>
-            <div style={{ width:34,height:34,borderRadius:'50%',background:'var(--bridge-canvas)',border:'1px solid var(--bridge-border)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
-              <MessageCircle size={15} style={{ color:'var(--bridge-text-muted)' }} aria-hidden />
+            <p style={{ fontSize:Math.round(17 * STAGE_R),fontWeight:800,letterSpacing:'-0.02em',color:'var(--bridge-text)' }}>Find a mentor</p>
+            <div style={{ width:Math.round(34 * STAGE_R),height:Math.round(34 * STAGE_R),borderRadius:'50%',background:'var(--bridge-canvas)',border:'1px solid var(--bridge-border)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
+              <MessageCircle size={Math.round(15 * STAGE_R)} style={{ color:'var(--bridge-text-muted)' }} aria-hidden />
             </div>
           </motion.div>
           <motion.div
@@ -327,90 +425,110 @@ export default function HeroLiveMatch() {
             style={{ position: isBooked ? 'relative' : 'absolute', inset: isBooked ? undefined : '16px 18px 12px 18px', display:'flex', alignItems:'center', justifyContent:'space-between', width: isBooked ? '100%' : undefined, pointerEvents: isBooked ? 'auto' : 'none' }}
           >
             <div style={{ display:'flex',alignItems:'center',gap:10 }}>
-              <div style={{ width:36,height:36,borderRadius:'50%',background:TONE_GRAD[topMentor?.tone]||'var(--color-primary)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:900,color:'white',letterSpacing:'-0.04em',flexShrink:0 }} aria-hidden>{ini(topMentor?.name??'')}</div>
-              <p style={{ fontSize:17,fontWeight:800,letterSpacing:'-0.02em',color:'var(--bridge-text)' }}>Session Booked</p>
+              <div style={{ width:Math.round(36 * STAGE_R),height:Math.round(36 * STAGE_R),borderRadius:'50%',background:TONE_GRAD[topMentor?.tone]||'var(--color-primary)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:Math.round(11 * STAGE_R),fontWeight:900,color:'white',letterSpacing:'-0.04em',flexShrink:0 }} aria-hidden>{ini(topMentor?.name??'')}</div>
+              <p style={{ fontSize:Math.round(17 * STAGE_R),fontWeight:800,letterSpacing:'-0.02em',color:'var(--bridge-text)' }}>Session Booked</p>
             </div>
-            <div style={{ width:34,height:34,borderRadius:'50%',background:'var(--bridge-canvas)',border:'1px solid var(--bridge-border)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
-              <MessageCircle size={15} style={{ color:'var(--bridge-text-muted)' }} aria-hidden />
+            <div style={{ width:Math.round(34 * STAGE_R),height:Math.round(34 * STAGE_R),borderRadius:'50%',background:'var(--bridge-canvas)',border:'1px solid var(--bridge-border)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
+              <MessageCircle size={Math.round(15 * STAGE_R)} style={{ color:'var(--bridge-text-muted)' }} aria-hidden />
             </div>
           </motion.div>
         </div>
 
-        <div style={{ position:'relative', minHeight: CARD_BODY_MIN_H, margin:'0 12px 16px' }}>
-          <CardBodyLayer active={status === 'idle'}>
-            <div ref={inputRef} style={{ padding:'11px 16px',borderRadius:12,background:'var(--bridge-canvas)',border:'1px solid var(--bridge-border)',display:'flex',alignItems:'center',gap:10 }}>
-              <span style={{ fontSize:14,color:'var(--color-primary)' }}>✏</span>
-              <span style={{ fontSize:13.5,color:'var(--bridge-text-muted)' }}>What do you want to figure out?</span>
+        <div style={{ position:'relative', minHeight: status === 'chips' ? CARD_BODY_MIN_H : undefined, margin:`0 ${Math.round(12 * STAGE_R)}px ${Math.round(16 * STAGE_R)}px` }}>
+          <CardBodyLayer active={status === 'idle'} inline>
+            <div ref={inputRef} style={{ width:'100%', padding:`${Math.round(11 * STAGE_R)}px ${Math.round(16 * STAGE_R)}px`,borderRadius:Math.round(12 * STAGE_R),background:'var(--bridge-canvas)',border:'1px solid var(--bridge-border)',display:'flex',alignItems:'center',gap:Math.round(10 * STAGE_R),boxSizing:'border-box' }}>
+              <span style={{ fontSize:Math.round(14 * STAGE_R),color:'var(--color-primary)',flexShrink:0 }}>✏</span>
+              <span style={{ flex:1,fontSize:Math.round(13.5 * STAGE_R),color:'var(--bridge-text-muted)' }}>What do you want to figure out?</span>
             </div>
           </CardBodyLayer>
 
           <CardBodyLayer active={status === 'chips'}>
-            <div style={{ display:'flex',flexWrap:'wrap',gap:8 }}>
-              {MATCH_GOALS.map((g,i) => {
-                const active = i === 0;
-                return (
-                  <button key={g.chip} ref={active ? chipRef : null} type="button"
-                    style={{ display:'flex',alignItems:'center',gap:6,padding:'9px 14px',borderRadius:11,background:active?'color-mix(in srgb,var(--color-primary) 9%,var(--bridge-canvas))':'var(--bridge-canvas)',border:`1px solid ${active?'color-mix(in srgb,var(--color-primary) 30%,transparent)':'var(--bridge-border)'}`,fontSize:13,fontWeight:500,color:active?'var(--color-primary)':'var(--bridge-text-secondary)',cursor:'default',userSelect:'none' }}>
-                    <span style={{ color:'var(--bridge-text-faint)',fontWeight:400 }}>#</span>
-                    {g.chip}
-                  </button>
-                );
-              })}
+            <div style={{ display:'flex', flexDirection:'column', gap:Math.round(8 * STAGE_R), width:'100%' }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:Math.round(7 * STAGE_R) }}>
+                {HERO_BROWSE_CHIPS.map((chip) => (
+                  <div key={chip}
+                    style={{ display:'flex',alignItems:'center',gap:Math.round(5 * STAGE_R),padding:`${Math.round(8 * STAGE_R)}px ${Math.round(11 * STAGE_R)}px`,borderRadius:Math.round(10 * STAGE_R),background:'var(--bridge-canvas)',border:'1px solid var(--bridge-border)',fontSize:Math.round(12 * STAGE_R),fontWeight:500,lineHeight:1.25,color:'var(--bridge-text-secondary)',userSelect:'none',textAlign:'left' }}>
+                    <span style={{ color:'var(--bridge-text-faint)',fontWeight:400,flexShrink:0 }}>#</span>
+                    <span>{chip}</span>
+                  </div>
+                ))}
+              </div>
+              <div ref={chipRef} style={{ width:'100%', padding:`${Math.round(10 * STAGE_R)}px ${Math.round(12 * STAGE_R)}px`,borderRadius:Math.round(11 * STAGE_R),background:'color-mix(in srgb,var(--color-primary) 9%,var(--bridge-canvas))',border:'1px solid color-mix(in srgb,var(--color-primary) 30%,transparent)',display:'flex',alignItems:'center',gap:Math.round(8 * STAGE_R),boxSizing:'border-box' }}>
+                <span style={{ fontSize:Math.round(14 * STAGE_R),color:'var(--color-primary)' }}>✏</span>
+                <span style={{ fontSize:Math.round(13 * STAGE_R),fontWeight:600,color:'var(--bridge-text)' }}>{HERO_CAREER_DEMO.chip}</span>
+              </div>
             </div>
           </CardBodyLayer>
 
-          <CardBodyLayer active={status === 'selected'}>
-            <div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'9px 14px',borderRadius:11,background:'color-mix(in srgb,var(--color-primary) 9%,var(--bridge-canvas))',border:'1px solid color-mix(in srgb,var(--color-primary) 30%,transparent)',fontSize:13,fontWeight:500,color:'var(--color-primary)' }}>
-              <span style={{ color:'var(--bridge-text-faint)',fontWeight:400 }}>#</span>
-              {goal.chip}
+          <CardBodyLayer active={status === 'selected'} inline>
+            <div style={{ width:'100%',display:'flex',alignItems:'center',gap:Math.round(6 * STAGE_R),padding:`${Math.round(9 * STAGE_R)}px ${Math.round(14 * STAGE_R)}px`,borderRadius:Math.round(11 * STAGE_R),background:'color-mix(in srgb,var(--color-primary) 9%,var(--bridge-canvas))',border:'1px solid color-mix(in srgb,var(--color-primary) 30%,transparent)',fontSize:Math.round(13 * STAGE_R),fontWeight:500,color:'var(--color-primary)',boxSizing:'border-box' }}>
+              <span style={{ color:'var(--bridge-text-faint)',fontWeight:400,flexShrink:0 }}>#</span>
+              <span>{goal.chip}</span>
             </div>
           </CardBodyLayer>
 
-          <CardBodyLayer active={status === 'booked'}>
+          <CardBodyLayer active={status === 'booked'} inline>
             <div>
-              <div style={{ marginBottom:10,display:'inline-flex',alignItems:'center',gap:6,padding:'7px 13px',borderRadius:10,background:'var(--bridge-canvas)',border:'1px solid var(--bridge-border)',fontSize:12.5,color:'var(--bridge-text-secondary)' }}>
+              <div style={{ marginBottom:Math.round(10 * STAGE_R),display:'inline-flex',alignItems:'center',gap:Math.round(6 * STAGE_R),padding:`${Math.round(7 * STAGE_R)}px ${Math.round(13 * STAGE_R)}px`,borderRadius:Math.round(10 * STAGE_R),background:'var(--bridge-canvas)',border:'1px solid var(--bridge-border)',fontSize:Math.round(12.5 * STAGE_R),color:'var(--bridge-text-secondary)' }}>
                 <span style={{ color:'var(--bridge-text-faint)' }}>#</span>
                 {goal.chip}
               </div>
-              <div style={{ padding:'11px 14px',borderRadius:12,background:'var(--bridge-canvas)',display:'flex',alignItems:'center',gap:12 }}>
-                <div style={{ width:38,height:38,borderRadius:'50%',background:TONE_GRAD[topMentor?.tone]||'var(--color-primary)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:900,color:'white',letterSpacing:'-0.04em',flexShrink:0 }} aria-hidden>{ini(topMentor?.name??'')}</div>
+              <div style={{ padding:`${Math.round(11 * STAGE_R)}px ${Math.round(14 * STAGE_R)}px`,borderRadius:Math.round(12 * STAGE_R),background:'var(--bridge-canvas)',display:'flex',alignItems:'center',gap:Math.round(12 * STAGE_R) }}>
+                <div style={{ width:Math.round(38 * STAGE_R),height:Math.round(38 * STAGE_R),borderRadius:'50%',background:TONE_GRAD[topMentor?.tone]||'var(--color-primary)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:Math.round(12 * STAGE_R),fontWeight:900,color:'white',letterSpacing:'-0.04em',flexShrink:0 }} aria-hidden>{ini(topMentor?.name??'')}</div>
                 <div style={{ flex:1,minWidth:0 }}>
-                  <p style={{ fontSize:13.5,fontWeight:700,color:'var(--bridge-text)',letterSpacing:'-0.01em',lineHeight:1.2 }}>{topMentor?.name}</p>
-                  <p style={{ fontSize:11,color:'var(--bridge-text-muted)',marginTop:2 }}>{topMentor?.title}</p>
+                  <p style={{ fontSize:Math.round(13.5 * STAGE_R),fontWeight:700,color:'var(--bridge-text)',letterSpacing:'-0.01em',lineHeight:1.2 }}>{topMentor?.name}</p>
+                  <p style={{ fontSize:Math.round(11 * STAGE_R),color:'var(--bridge-text-muted)',marginTop:2 }}>{topMentor?.title}</p>
                 </div>
-                <div ref={calCheckRef} style={{ width:38,height:38,borderRadius:'50%',background:'var(--color-primary)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,boxShadow:'0 4px 12px -4px color-mix(in srgb,var(--color-primary) 60%,transparent)' }}>
-                  <CalendarCheck size={17} style={{ color:'white' }} aria-hidden />
+                <div ref={calCheckRef} style={{ width:Math.round(38 * STAGE_R),height:Math.round(38 * STAGE_R),borderRadius:'50%',background:'var(--color-primary)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,boxShadow:'0 4px 12px -4px color-mix(in srgb,var(--color-primary) 60%,transparent)' }}>
+                  <CalendarCheck size={Math.round(17 * STAGE_R)} style={{ color:'white' }} aria-hidden />
                 </div>
               </div>
             </div>
           </CardBodyLayer>
         </div>
-      </div>
+        </div>
+        </motion.div>
 
-      <div
-        style={{
-          width:'100%', maxWidth:400, minHeight: STAGE_EXT_MIN_H, flexShrink:0,
-          position:'relative', display:'flex', flexDirection:'column', alignItems:'center'
-        }}
-      >
-        <AnimatePresence initial={false} mode="sync">
+        <AnimatePresence initial={false}>
           {status === 'selected' && (
             <motion.div
               key="circles"
-              initial={flat ? false : { opacity:0 }}
-              animate={{ opacity:1 }}
-              exit={{ opacity:0 }}
-              transition={{ duration:0.28, ease:EASE }}
-              style={{ display:'flex', flexDirection:'column', alignItems:'center', width:'100%' }}
+              initial={flat ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6, transition: { duration: 0.2 } }}
+              transition={{ duration: 0.28, ease: EASE }}
+              className="flex w-full flex-col items-center"
             >
-              <div aria-hidden style={{ width:1,height:28,background:'var(--bridge-border)',flexShrink:0 }} />
-              <div style={{ display:'flex',alignItems:'center',gap:14,paddingTop:4 }}>
-                {mentors.slice(0,3).map((m,i)=>{
+              <div aria-hidden className="mx-auto h-7 w-px shrink-0" style={{ backgroundColor: 'var(--bridge-border)' }} />
+              <div className="flex items-center gap-4 pt-1">
+                {mentors.slice(0, 3).map((m, i) => {
                   const isMiddle = i === 1;
-                  const size = isMiddle ? 66 : 52;
+                  const size = isMiddle ? Math.round(66 * STAGE_R) : Math.round(52 * STAGE_R);
                   return (
-                    <div key={m.id} ref={isMiddle ? circleRef : null}
-                      style={{ width:size,height:size,borderRadius:'50%',background:TONE_GRAD[m.tone]||'var(--color-primary)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:Math.round(size*0.27),fontWeight:900,color:'white',letterSpacing:'-0.04em',border:'3px solid var(--bridge-surface)',boxShadow:isMiddle?'0 6px 20px -6px rgba(0,0,0,0.2)':'0 4px 12px -4px rgba(0,0,0,0.14)',flexShrink:0,animation:flat?undefined:`mtr-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) ${i*120}ms both` }} aria-hidden>
+                    <div
+                      key={m.id}
+                      ref={isMiddle ? circleRef : null}
+                      style={{
+                        width: size,
+                        height: size,
+                        borderRadius: '50%',
+                        background: TONE_GRAD[m.tone] || 'var(--color-primary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: Math.round(size * 0.27),
+                        fontWeight: 900,
+                        color: 'var(--color-on-primary)',
+                        letterSpacing: '-0.04em',
+                        border: `${Math.round(3 * STAGE_R)}px solid var(--bridge-surface)`,
+                        boxShadow: isMiddle
+                          ? '0 6px 20px -6px color-mix(in srgb, var(--color-primary) 35%, transparent)'
+                          : '0 4px 12px -4px color-mix(in srgb, var(--color-secondary) 20%, transparent)',
+                        flexShrink: 0,
+                        animation: flat ? undefined : `mtr-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) ${i * 120}ms both`,
+                      }}
+                      aria-hidden
+                    >
                       {ini(m.name)}
                     </div>
                   );
@@ -422,13 +540,13 @@ export default function HeroLiveMatch() {
           {status === 'booked' && showVideo && (
             <motion.div
               key="video"
-              initial={flat ? false : { opacity:0, y:8 }}
-              animate={{ opacity:1, y:0 }}
-              exit={{ opacity:0 }}
-              transition={{ duration:0.32, ease:EASE }}
-              style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center' }}
+              initial={flat ? false : { opacity: 0, y: 56, scale: 0.94 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 32, scale: 0.96 }}
+              transition={WOOSH_SPRING}
+              className="mt-2 w-full"
             >
-              <div aria-hidden style={{ width:1,height:24,background:'var(--bridge-border)',flexShrink:0 }} />
+              <div aria-hidden className="mx-auto mb-2 h-5 w-px" style={{ backgroundColor: 'var(--bridge-border)' }} />
               <VideoCallPanel mentor={topMentor} flat={flat} />
             </motion.div>
           )}
