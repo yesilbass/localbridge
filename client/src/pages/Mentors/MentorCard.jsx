@@ -4,6 +4,7 @@ import AppLink from '../../components/AppLink';
 import MentorAvatar from '../../components/MentorAvatar';
 import { focusRing } from '../../ui';
 import TierBadge from '../../components/TierBadge.jsx';
+import { getCategoryLabels } from '../../constants/mentorshipCategories';
 import MentorTagGroups from '../../components/MentorTagGroups';
 import {
   getNextAvailability,
@@ -220,6 +221,9 @@ export default function MentorCard({
   const availability = getNextAvailability(mentor, nextAvailableIso, availabilityMeta);
   const availStyle = availabilityToneStyle(availability.tone);
   const slotIso = typeof nextAvailableIso === 'string' ? nextAvailableIso : null;
+  const categoryLabels = getCategoryLabels(mentor.mentorship_categories).filter(Boolean);
+  const visibleCategories = categoryLabels.slice(0, 2);
+  const extraCategories = categoryLabels.length - visibleCategories.length;
 
   return (
     <article
@@ -240,6 +244,14 @@ export default function MentorCard({
               <h3 className="text-[1.35rem] font-bold leading-tight tracking-tight text-[var(--bridge-text)] sm:text-[1.4rem]">
                 {mentor.name}
               </h3>
+              {mentor.is_featured && (
+                <span
+                  className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                  style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary)' }}
+                >
+                  Mentor spotlight
+                </span>
+              )}
               {mentor.verification_tier && mentor.verification_tier !== 'bronze' ? (
                 <TierBadge tier={mentor.verification_tier} size="sm" showLabel={false} />
               ) : null}
@@ -294,6 +306,23 @@ export default function MentorCard({
           <p className="mt-3 line-clamp-2 text-[15px] leading-relaxed text-[var(--bridge-text)]">
             {mentor.bio}
           </p>
+        )}
+
+        {visibleCategories.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            {visibleCategories.map((label) => (
+              <span
+                key={label}
+                className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                style={{ backgroundColor: 'var(--bridge-surface-muted)', color: 'var(--bridge-text-secondary)' }}
+              >
+                {label}
+              </span>
+            ))}
+            {extraCategories > 0 && (
+              <span className="text-[11px] font-medium text-[var(--bridge-text-muted)]">+{extraCategories} more</span>
+            )}
+          </div>
         )}
 
         <MentorTagGroups mentor={mentor} layout="browse" limits={{ expertise: 4, industry: 2, tools: 3 }} />

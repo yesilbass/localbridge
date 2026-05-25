@@ -2,7 +2,7 @@
 
 Bridge is a paid mentorship marketplace: job seekers book one-on-one video sessions with
 vetted industry professionals, with AI-assisted matching, an OpenAI Realtime intake call,
-Stripe payments, Google Calendar scheduling, and a built-in WebRTC video room.
+Stripe payments, Calendly scheduling, and a built-in WebRTC video room.
 
 This document covers the end-to-end system architecture — how every major layer is
 structured, why key decisions were made, and what to know before touching each area.
@@ -20,12 +20,13 @@ structured, why key decisions were made, and what to know before touching each a
 7. [Payments — Stripe](#7-payments--stripe)
 8. [Video Calls — WebRTC](#8-video-calls--webrtc)
 9. [AI Features](#9-ai-features)
-10. [Google Calendar Integration](#10-google-calendar-integration)
+10. [Calendly Integration](#10-calendly-integration)
 11. [Mentor Onboarding Pipeline](#11-mentor-onboarding-pipeline)
-12. [Storage](#12-storage)
-13. [Design System](#13-design-system)
-14. [Local Development](#14-local-development)
-15. [Key Constraints & Non-Obvious Decisions](#15-key-constraints--non-obvious-decisions)
+12. [Community](#12-community)
+13. [Storage](#13-storage)
+14. [Design System](#14-design-system)
+15. [Local Development](#15-local-development)
+16. [Key Constraints & Non-Obvious Decisions](#16-key-constraints--non-obvious-decisions)
 
 ---
 
@@ -47,21 +48,20 @@ structured, why key decisions were made, and what to know before touching each a
 │  JWT auth on all    │◄────────────┤  │ Postgres + RLS       │    │
 │  protected routes   │  SQL via    │  │ Auth (JWTs)          │    │
 │                     │  supabase-js│  │ Realtime (WebSockets)│    │
-│  _lib/              │             │  │ Storage (resumes)    │    │
-│   auth.js           │             │  └──────────────────────┘    │
-│   allowedOrigins.js │             └──────────────────────────────┘
-│   calendarBook.js   │
+│  _lib/              │             │  │ Storage (resumes,     │    │
+│   auth.js           │             │  │  mentor-avatars)     │    │
+│   allowedOrigins.js │             │  └──────────────────────┘    │
+│   calendly.js       │             └──────────────────────────────┘
 └──────────┬──────────┘
            │ HTTPS
     ┌──────┴────────────────────────────────┐
     │          Third-party services         │
     │                                       │
     │  Stripe          (payments)           │
-    │  Google Calendar (scheduling)         │
-    │  OpenAI          (matching, i18n,     │
-    │                   realtime intake)    │
+    │  Calendly        (mentor scheduling)  │
+    │  OpenAI          (matching, intake,   │
+    │                   mentor application) │
     │  Anthropic Claude (resume review)     │
-    │  Calendly        (scheduling widget)  │
     └───────────────────────────────────────┘
 ```
 
@@ -142,11 +142,15 @@ Key routes:
 | `/mentors` | `Mentors.jsx` | Public browse |
 | `/mentor/:id` | `MentorProfile.jsx` | `id` = `mentor_profiles.id` (profile UUID) |
 | `/dashboard` | `Dashboard.jsx` | Auth required — routes to mentee or mentor view |
+| `/community` | `CommunityHub.jsx` | Auth required — live feed + pillar sidebar |
+| `/community/:categoryId` | `CommunityCategory.jsx` | Auth required — pillar feed with filters |
+| `/become-a-mentor` | `BecomeMentor.jsx` | Public marketing |
+| `/apply/mentor` | `MentorApplication.jsx` | Voice-first mentor application |
+| `/onboarding/mentor` | `MentorOnboardingFlow.jsx` | Post-approval profile wizard |
 | `/session/:sessionId/video` | `VideoCall.jsx` | Auth required |
 | `/intake/:sessionId` | `IntakeCall.jsx` | Auth required |
-| `/onboarding/mentor/verify` | Mentor verification flow | Auth required |
-| `/admin` | Admin panel | Admin role required |
-| `/resume-review` | `ResumeReview.jsx` | Auth required |
+| `/admin/verification` | Admin panel | Admin role required |
+| `/resume` | `ResumeReview.jsx` | Public (embedded in dashboard for mentees) |
 
 ### State Management
 
@@ -172,7 +176,12 @@ Each file owns one domain. They call Supabase directly or hit `/api/*` endpoints
 | `favorites.js` | Add/remove/list favorites |
 | `menteeProfile.js` | AI onboarding output (mentee_profiles table) |
 | `mentorOnboarding.js` | Mentor profile CRUD during onboarding |
-| `calendar.js` | Google Calendar auth, availability, booking |
+| `calendly.js` | Calendly OAuth, event types, availability |
+| `community.js` | Community posts, upvotes, comments (direct Supabase — no API layer) |
+| `mentorPosts.js` | Mentor advice posts (profile/directory — separate from community) |
+| `mentorBadges.js` | Mentor badge fetch |
+| `tagMentorCategories.js` | AI category tagging via `ai-proxy` |
+| `verification.js` | Mentor application submit, profile row fetch |
 | `stripe.js` | Create booking checkout, create subscription checkout |
 | `ai.js` | Direct Anthropic SDK wrapper |
 | `aiMatching.js` | OpenAI mentor ranking from mentee profile |
@@ -183,7 +192,7 @@ Each file owns one domain. They call Supabase directly or hit `/api/*` endpoints
 
 ### Design System
 
-See [Section 13 — Design System](#13-design-system).
+See [Section 14 — Design System](#14-design-system).
 
 ---
 
@@ -198,21 +207,24 @@ api/
 ├── _lib/
 │   ├── auth.js              # verifyToken(req) — JWT verification helper
 │   ├── allowedOrigins.js    # CORS allowlist + applyCors() helper
-│   └── calendarBook.js      # Shared calendar booking logic
-├── admin/[action].js        # Approve or reject mentor applications
-├── calendly/                # Calendly webhook handlers
-├── verification/            # Mentor document verification helpers
-├── ai-proxy.js              # AI proxy
-├── cancel-session.js        # Session cancellation with rate limiting
-├── create-booking-checkout.js    # Stripe session booking checkout
-├── create-subscription-checkout.js  # Stripe subscription checkout (.edu discount)
-├── finalize-checkout.js     # Post-Stripe-redirect confirmation
-├── google-auth.js           # Initiate Google Calendar OAuth
-├── google-callback.js       # Google OAuth callback — stores refresh token
-├── calendar-availability.js # Fetch mentor's available slots from Google Calendar
-├── calendar-book.js         # Create a Google Calendar event for a session
-└── realtime-session.js      # Issue ephemeral OpenAI Realtime API key
+│   ├── calendly.js          # Calendly OAuth + API helpers
+│   └── verification/        # Scoring, orchestrator, AI evaluators
+├── admin/
+│   └── review/[action].js   # list, detail, decide, mentor-flags
+├── calendly/[action].js     # OAuth callback, event types, disconnect
+├── calendly-webhook.js      # Calendly scheduling webhooks
+├── verification/[action].js # Mentor application + verification pipeline
+├── ai-proxy.js              # OpenAI/Anthropic proxy (matching, resume, mentor_tag)
+├── booking-confirm-scheduled.js
+├── cancel-session.js
+├── create-booking-checkout.js
+├── create-subscription-checkout.js
+├── finalize-checkout.js
+├── realtime-session.js      # Ephemeral OpenAI Realtime key (intake + mentor application)
+└── utils/[action].js        # user-names, mentor-room-slug, cron, dev portal, checkr-webhook
 ```
+
+**Exactly 12 serverless functions** (Hobby limit). Mentor category tagging uses `ai-proxy` action `mentor_tag` — not a separate function. Community uses direct Supabase client queries — no function.
 
 ### Auth on Every Protected Endpoint
 
@@ -275,8 +287,12 @@ The central table for the mentor side of the platform.
 | `rating` | decimal(4,2) | **Maintained by Postgres trigger — never compute client-side** |
 | `total_sessions` | int | Maintained by trigger |
 | `expertise` | jsonb | Array of skill strings |
-| `availability_schedule` | jsonb | `{"weekly":{"0":["09:00",...],...},"timezone":"UTC"}` |
-| `google_refresh_token` | text | Google Calendar OAuth token |
+| `availability_schedule` | jsonb | Legacy weekly schedule (Calendly is primary scheduling) |
+| `mentorship_description` | text | Free-text mentorship focus; AI-tagged into pillars |
+| `mentorship_categories` | jsonb | AI-derived pillar IDs (service-role write only) |
+| `why_i_mentor` | text | Public motivation statement |
+| `onboarding_step` | int | Post-approval wizard progress (0–5) |
+| `is_featured` | boolean | Admin spotlight toggle |
 
 **Critical**: `mentor_profiles.id` and `auth.users.id` are different UUIDs. A mentor
 has both a Supabase Auth account (`auth.users.id`) and a mentor profile row
@@ -323,6 +339,21 @@ Tracks per-user AI feature consumption to enforce limits:
 Simple join table: `user_id` + `mentor_id`, with a `UNIQUE` constraint. Toggle via
 `addToFavorites` / `removeFromFavorites` in `client/src/api/favorites.js`.
 
+#### `community_posts` / `community_post_upvotes` / `community_comments`
+
+Authenticated community product at `/community`. Organized around 8 mentorship pillars
+(from `shared/mentorshipCategories.js`). Post types: `question`, `win`, `discussion`,
+`resource`. Upvote and comment counts are maintained by Postgres triggers — never
+updated client-side.
+
+**Not the same as `mentor_posts`** — short advice written by mentors on profiles and
+the `/community/posts` directory.
+
+#### `mentor_posts` / `mentor_badges`
+
+Mentor value stack: advice posts and earned badges on mentor profiles. Separate tables,
+separate UI from community.
+
 ### Row Level Security (RLS)
 
 RLS is enabled on all user-owned tables. Key policies:
@@ -336,6 +367,9 @@ RLS is enabled on all user-owned tables. Key policies:
 | `user_profiles` | SELECT/INSERT/UPDATE: own `user_id` only. |
 | `mentee_profiles` | Own `user_id` only. |
 | `ai_usage` | Own `user_id` only. |
+| `community_posts` | SELECT: public. INSERT: own `author_id`. DELETE: own only. |
+| `community_post_upvotes` | SELECT: public. INSERT/DELETE: own `user_id`. |
+| `community_comments` | SELECT: public. INSERT: own `author_id`. DELETE: own only. |
 
 Silent write failures (no error thrown, zero rows affected) almost always indicate a
 missing or incorrect RLS policy.
@@ -402,7 +436,7 @@ POST /api/finalize-checkout
   - JWT verified
   - Stripe session confirmed (payment_status === 'paid')
   - Bridge session row created in Supabase (status: 'pending')
-  - Google Calendar invite sent to mentor
+  - User schedules via embedded Calendly widget on `/booking/finalize`
 ```
 
 **Price lock**: The session price is fetched from `mentor_profiles.session_rate` on
@@ -520,46 +554,35 @@ translation cached in `localStorage`. Full coverage is a pending task.
 
 ---
 
-## 10. Google Calendar Integration
+## 10. Calendly Integration
 
-Mentors can connect their Google Calendar to enable automatic event creation when a
-session is booked.
+Mentors connect Calendly for scheduling after a mentee completes Stripe checkout.
 
 ### OAuth Flow
 
 ```
-Mentor clicks "Connect Google Calendar"
+Mentor clicks "Connect Calendly" in dashboard
         │
         ▼
-GET /api/google-auth
+GET /api/calendly/auth (or local server mirror)
   - JWT verified, mentor ownership confirmed
-  - Generates Google OAuth URL with Calendar scope
-  - Returns URL to client
+  - Redirect to Calendly OAuth
         │
         ▼
-Mentor authenticates with Google in a popup/redirect
+Callback stores tokens + event type on mentor_profiles
         │
         ▼
-GET /api/google-callback
-  - Receives authorization code
-  - Exchanges code for access + refresh tokens
-  - Validates refresh_token present before saving
-  - Saves refresh_token to mentor_profiles.google_refresh_token
+Mentee schedules on /booking/finalize via embedded Calendly widget
+        │
+        ▼
+Calendly webhook + booking-confirm-scheduled write scheduled_date to sessions
 ```
 
-### Calendar Operations
+**Files**: `api/calendly/[action].js`, `api/calendly-webhook.js`,
+`api/booking-confirm-scheduled.js`, `client/src/api/calendly.js`,
+`client/src/components/CalendlyInlineWidget.jsx`
 
-**File**: `api/_lib/calendarBook.js` (shared logic)
-
-On session booking confirmation (`finalize-checkout.js`), `calendarBook.js`:
-1. Reads the mentor's `google_refresh_token` from `mentor_profiles`.
-2. Creates an OAuth2 client and sets the credentials.
-3. The Google client library auto-refreshes the access token via the `tokens` event
-   listener, which persists the new token back to `mentor_profiles`.
-4. Creates a Google Calendar event with the session details and both participants.
-
-**Files**: `api/google-auth.js`, `api/google-callback.js`, `api/calendar-book.js`,
-`api/calendar-availability.js`, `client/src/api/calendar.js`
+Google Calendar OAuth was removed; some legacy `google_refresh_token` columns may remain in older rows.
 
 ---
 
@@ -567,55 +590,75 @@ On session booking confirmation (`finalize-checkout.js`), `calendarBook.js`:
 
 New mentors go through a three-phase pipeline before appearing on the platform.
 
-### Phase 1 — Verification Application (`/onboarding/mentor/verify`)
+### Phase 1 — Application (`/become-a-mentor` → `/apply/mentor`)
 
-A 9-step multi-screen form:
-1. Welcome
-2. LinkedIn URL
-3. Resume upload (to Supabase Storage)
-4. Diploma upload + degree level
-5. Professional email
-6. References
-7. Identity check
-8. Interview questions
-9. Review & submit
+Public marketing page leads to a **voice-first application** using the OpenAI Realtime API
+(same ephemeral-key pattern as intake calls). The AI conducts a structured conversation and
+calls `complete_application` to persist application data. On submit: `mentor_status` set
+to `pending` / `under_review`. A legacy document-verification backend still exists
+(`api/verification/`, reference tokens) but the primary client entry is the voice flow.
 
-On submit: `mentor_status` set to `pending`. The mentor sees a "pending review" screen.
-They can return and edit their application while `pending`.
+### Phase 2 — Admin Review (`/admin/verification`)
 
-### Phase 2 — Admin Review (`/admin`)
+Admin sees pending applications with scoring breakdown. Approve or reject via
+`POST /api/admin/review/[action]`:
 
-Admin sees all pending applications with a scoring breakdown. Approve or reject via
-`POST /api/admin/[action]`:
+- **Approve**: `mentor_status` → `active`. Application fields copied to profile. Tier/rate
+  algorithm may run. User redirected to `/onboarding/mentor`.
+- **Reject**: `mentor_status` → `rejected`. Mentor can re-apply.
 
-- **Approve**: `mentor_status` → `active`. The server-side tier/rate algorithm runs,
-  assigning a tier (`rising` / `professional` / `senior` / `elite`) and `session_rate`
-  based on years of experience, degree level, LinkedIn verification, and a composite
-  score. Mentors cannot set their own rates.
-- **Reject**: `mentor_status` → `rejected`. The mentor can re-apply.
+### Phase 3 — Profile Completion (`/onboarding/mentor`)
 
-### Phase 3 — Profile Completion
-
-After approval the mentor completes their public profile: bio, photo, expertise tags,
-availability schedule, and optionally connects Google Calendar. Once complete, they
-appear in the mentor directory.
+5-step post-approval wizard: photo, bio, expertise, Calendly connect, review.
+Progress stored in `mentor_profiles.onboarding_step`. Once complete, mentor appears in
+directory (with `onboarding_complete` and active status).
 
 ### Visibility Logic
 
-`getAllMentors()` in `client/src/api/mentors.js` filters by `onboarding_complete: true`
-and `mentor_status` in `['active', null]` — `null` allows seeded demo mentors through.
-Pending or rejected profiles are never shown publicly.
+`getAllMentors()` filters by `onboarding_complete: true` and `mentor_status` in
+`['active', null]`. Pending or rejected profiles are never shown publicly.
 
 ---
 
-## 12. Storage
+## 12. Community
 
-### Supabase Storage — `resumes` bucket
+Bridge Community (`/community`) is the between-sessions engagement layer. Auth required;
+unauthenticated users redirect to `/login?redirect=/community`.
 
-**Access**: Private. RLS restricts all operations to files prefixed `{user_id}/`.
-Only the authenticated owner can read, upload, or delete their own files.
+### Data model
 
-**Operations** (via `client/src/api/resumeStorage.js`):
+- **`community_posts`** — pillar `category_id`, `post_type`, title, body, denormalized
+  `upvotes` and `comment_count`
+- **`community_post_upvotes`** — unique per user/post; trigger syncs count
+- **`community_comments`** — flat comments (no nesting); trigger syncs count
+
+All CRUD via `client/src/api/community.js` direct to Supabase. Author enrichment joins
+`user_profiles.personal_info` for display names and `mentor_profiles` (where
+`mentor_status = 'active'`) for the **Mentor** badge.
+
+### UI
+
+| Route | Component | Notes |
+|-------|-----------|-------|
+| `/community` | `CommunityHub.jsx` | Live feed (all pillars) + 8 pillar sidebar cards |
+| `/community/:categoryId` | `CommunityCategory.jsx` | Pillar feed, type filters, sort, inline comments |
+
+Palette: `quiet-authority` (same as dashboard). Pillar IDs from `MENTORSHIP_CATEGORIES`.
+
+**Separate feature:** `mentor_posts` at `/community/posts` and on mentor profiles — do not conflate.
+
+---
+
+## 13. Storage
+
+### Supabase Storage
+
+**`resumes` bucket** — private. RLS: files prefixed `{user_id}/`.
+
+**`mentor-avatars` bucket** — public read. RLS: authenticated upload to `{user_id}/*`.
+Created manually in Supabase dashboard (not via SQL migration).
+
+**Operations** (via `client/src/api/resumeStorage.js`, `mentorAvatarStorage.js`):
 - `uploadResumeFile(userId, file)` — uploads to `resumes/{userId}/{filename}`
 - `getResumeSignedUrl(userId, filename)` — generates a short-lived signed URL
 - `removeResumeFile(userId, filename)` — deletes the file
@@ -625,7 +668,7 @@ mentor verification application.
 
 ---
 
-## 13. Design System
+## 14. Design System
 
 ### Three Palettes
 
@@ -659,7 +702,7 @@ fallback for all motion.
 
 ---
 
-## 14. Local Development
+## 15. Local Development
 
 ```bash
 # Install all deps
@@ -681,7 +724,7 @@ standard use. All team members hit the same dev database.
 
 ---
 
-## 15. Key Constraints & Non-Obvious Decisions
+## 16. Key Constraints & Non-Obvious Decisions
 
 | Constraint | Why |
 |-----------|-----|
@@ -692,4 +735,6 @@ standard use. All team members hit the same dev database.
 | Express dev server mirrors Vercel Functions | Vercel Functions are stateless and have a cold start. The Express server gives a better local dev experience while the `api/` files remain the production source of truth. Keep both in sync. |
 | No direct pushes to `main` | Vercel auto-deploys every push to `main`. A broken push goes straight to production. PRs with peer review are the only gate. |
 | Supabase singleton | A second Supabase client would create a separate auth session, breaking token sharing between the auth context and data modules. Always import from `client/src/api/supabase.js`. |
+| Community has no API layer | Direct Supabase + RLS keeps Vercel at the 12-function limit. Do not add serverless functions for community CRUD. |
+| `community_posts` ≠ `mentor_posts` | Community is the authenticated hub at `/community`. Mentor posts are short advice on profiles — different tables and UI. |
 | `mentor_status: null` shows publicly | Seeded demo mentors have no `mentor_status`. The query treats `null` the same as `active` so demo data appears without requiring every seed row to be updated. Real mentors always go through the onboarding pipeline and receive an explicit `active` status. |

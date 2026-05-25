@@ -100,21 +100,25 @@ export default function Navbar() {
     ? [
         { path: mentorsBrowsePath, label: t('nav.mentors', 'Mentors') },
         { path: '/company', label: t('nav.company', 'Company') },
-        { path: '/resume', label: t('nav.resume', 'Resume'), ai: true },
-        { path: '/pricing', label: t('nav.pricing', 'Pricing') },
+        { path: resolveAuthEntryPath('/resume', user), label: t('nav.resume', 'Resume'), ai: true },
+        { path: resolveAuthEntryPath('/pricing', user), label: t('nav.pricing', 'Pricing') },
+        { path: '/become-a-mentor', label: 'Become a mentor' },
       ]
     : asMentor
     ? [
         { path: '/dashboard', label: t('nav.dashboard', 'Dashboard') },
+        { path: resolveAuthEntryPath('/community', user), label: 'Community' },
         { path: '/company', label: t('nav.company', 'Company') },
-        { path: '/pricing', label: t('nav.pricing', 'Pricing') },
+        { path: resolveAuthEntryPath('/pricing', user), label: t('nav.pricing', 'Pricing') },
       ]
     : [
         { path: mentorsBrowsePath, label: t('nav.mentors', 'Mentors') },
+        { path: resolveAuthEntryPath('/community', user), label: 'Community' },
         { path: '/dashboard', label: t('nav.dashboard', 'Dashboard') },
         { path: '/company', label: t('nav.company', 'Company') },
-        { path: '/resume', label: t('nav.resume', 'Resume'), ai: true },
-        { path: '/pricing', label: t('nav.pricing', 'Pricing') },
+        { path: resolveAuthEntryPath('/resume', user), label: t('nav.resume', 'Resume'), ai: true },
+        { path: resolveAuthEntryPath('/pricing', user), label: t('nav.pricing', 'Pricing') },
+        { path: '/become-a-mentor', label: 'Become a mentor' },
       ];
 
   return (

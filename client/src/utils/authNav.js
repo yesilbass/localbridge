@@ -1,12 +1,32 @@
 import { isMarketingRoute } from './marketingRoute';
 import { isMenteeAccount } from './accountRole';
+import { dashboardCommunityPath } from '../pages/community/communityPaths';
 
 const AUTH_ENTRY_PATHS = new Set(['/login', '/register']);
+
+const AUTH_PRODUCT_DASHBOARD = {
+  '/pricing': '/dashboard/plan',
+  '/profile': '/dashboard/profile',
+  '/settings': '/dashboard/settings',
+};
 
 /** Public /mentors → embedded dashboard browse for signed-in mentees. */
 export function menteeMentorsDashboardPath(pathname) {
   if (typeof pathname !== 'string' || !/^\/mentors(\/.*)?$/.test(pathname)) return null;
   return pathname.replace(/^\/mentors/, '/dashboard/mentors');
+}
+
+/** Map standalone product URLs to dashboard shell routes for signed-in users. */
+export function dashboardProductPath(pathname = '/', user = null) {
+  if (!user || typeof pathname !== 'string') return null;
+  const community = dashboardCommunityPath(pathname);
+  if (community) return community;
+  if (AUTH_PRODUCT_DASHBOARD[pathname]) return AUTH_PRODUCT_DASHBOARD[pathname];
+  if (isMenteeAccount(user)) {
+    if (pathname === '/resume') return '/dashboard/resume';
+    return menteeMentorsDashboardPath(pathname);
+  }
+  return null;
 }
 
 /** Marketing/content URLs where signed-in users see the public (logged-out) chrome. */
@@ -16,25 +36,23 @@ export function isMarketingGuestChrome(pathname = '/') {
   if (pathname.startsWith('/session/') || pathname.startsWith('/meet/') || pathname.startsWith('/intake/')) {
     return false;
   }
+  if (pathname.startsWith('/community')) return false;
   return isMarketingRoute(pathname);
 }
 
 /** True when navbar and CTAs should match the logged-out marketing experience. */
 export function presentAsMarketingGuest(user, pathname = '/') {
-  if (!user) return true;
-  return isMarketingGuestChrome(pathname);
+  return !user;
 }
 
-/** Log in / sign up → dashboard; browse mentors → dashboard browse for mentees. */
+/** Log in / sign up → dashboard; product URLs → dashboard shell when signed in. */
 export function resolveAuthEntryPath(path, user) {
   if (!user || typeof path !== 'string') return path;
   const qIdx = path.indexOf('?');
   const base = qIdx === -1 ? path : path.slice(0, qIdx);
   const query = qIdx === -1 ? '' : path.slice(qIdx);
   if (AUTH_ENTRY_PATHS.has(base)) return '/dashboard';
-  if (isMenteeAccount(user)) {
-    const dest = menteeMentorsDashboardPath(base);
-    if (dest) return dest + query;
-  }
+  const dash = dashboardProductPath(base);
+  if (dash) return dash + query;
   return path;
 }

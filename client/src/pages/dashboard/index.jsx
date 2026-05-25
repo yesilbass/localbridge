@@ -20,6 +20,9 @@ import MentorProfile from '../mentor-profile/index.jsx';
 import MessagesPage from './MessagesPage.jsx';
 import Pricing from '../Pricing/index.jsx';
 import ResumeReview from '../ResumeReview.jsx';
+import MentorPostsPanel from './MentorPostsPanel.jsx';
+import CommunityHub from '../community/CommunityHub.jsx';
+import CommunityCategory from '../community/CommunityCategory.jsx';
 
 import PageHeader from './home/PageHeader.jsx';
 import HomeHeader from './home/HomeHeader.jsx';
@@ -115,6 +118,15 @@ function EarningsRoute() {
     <>
       <PageHeader title="Earnings" subtitle="Tracked nightly. Paid weekly." />
       <EarningsPage />
+    </>
+  );
+}
+
+function PostsRoute() {
+  return (
+    <>
+      <PageHeader title="Posts" subtitle="Share advice with the community." />
+      <MentorPostsPanel />
     </>
   );
 }
@@ -226,12 +238,15 @@ export default function DashboardPage() {
         {activeRole === 'mentee' && <Route path="resume" element={<ResumeRoute />} />}
         {activeRole === 'mentor' && <Route path="calendar" element={<Navigate to="/dashboard/sessions" replace />} />}
         {activeRole === 'mentor' && <Route path="earnings" element={<EarningsRoute />} />}
+        {activeRole === 'mentor' && <Route path="posts" element={<PostsRoute />} />}
         {activeRole === 'mentor' && <Route path="reviews" element={<ReviewsRoute />} />}
         {activeRole === 'mentee' && <Route path="messages" element={<MessagesRoute />} />}
         {activeRole === 'mentee' && <Route path="messages/:conversationId" element={<MessagesRoute />} />}
         {activeRole === 'mentor' && <Route path="messages" element={<MessagesRoute />} />}
         {activeRole === 'mentor' && <Route path="messages/:conversationId" element={<MessagesRoute />} />}
-        {activeRole === 'mentee' && <Route path="plan" element={<PlanRoute />} />}
+        <Route path="community" element={<CommunityHub />} />
+        <Route path="community/:categoryId" element={<CommunityCategory />} />
+        <Route path="plan" element={<PlanRoute />} />
         {activeRole === 'mentee' && <Route path="billing" element={<BillingRoute />} />}
         <Route path="profile" element={<ProfileRoute isMentor={activeRole === 'mentor'} />} />
         <Route path="settings" element={<SettingsRoute />} />

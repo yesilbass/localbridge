@@ -9,6 +9,9 @@ import { isMarketingRoute } from './marketingRoute';
  */
 const ROUTE_RULES = [
   // ── Product shell — logged-in / transactional ──
+  { match: /^\/community(\/|$)/,         palette: 'quiet-authority' },
+  { match: /^\/apply\/mentor(\/|$)/,      palette: 'quiet-authority' },
+  { match: /^\/onboarding\/mentor(\/|$)/, palette: 'quiet-authority' },
   { match: /^\/dashboard(\/|$)/,         palette: 'quiet-authority' },
   { match: /^\/profile(\/|$)/,           palette: 'quiet-authority' },
   { match: /^\/settings(\/|$)/,          palette: 'quiet-authority' },

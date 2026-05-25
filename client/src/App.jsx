@@ -12,7 +12,7 @@ import Footer from './components/Footer';
 import BridgeGlobalAtmosphere from './components/BridgeGlobalAtmosphere';
 import FeedbackFAB from './components/FeedbackFAB';
 import ErrorBoundary from './components/ErrorBoundary';
-import { AuthPage, PublicPage, AuthenticatedProductRedirect } from './components/routing/RouteGuards';
+import { AuthPage, PublicPage, AuthenticatedProductRedirect, CommunityEntryGate } from './components/routing/RouteGuards';
 import { isPublicMentorProfileDetail } from './utils/mentorProfileRoute';
 import LegacyCompanyRedirect from './components/routing/LegacyCompanyRedirect';
 import DevPortal from './pages/DevPortal/index.jsx';
@@ -43,7 +43,12 @@ const FAQ       = lazy(() => import('./pages/footer/FAQ.jsx'));
 const Contact   = lazy(() => import('./pages/footer/Contact.jsx'));
 const Help      = lazy(() => import('./pages/footer/Help.jsx'));
 const Trust     = lazy(() => import('./pages/footer/Trust.jsx'));
-const Community = lazy(() => import('./pages/footer/Community.jsx'));
+const BecomeMentor       = lazy(() => import('./pages/BecomeMentor.jsx'));
+const MentorApplication  = lazy(() => import('./pages/MentorApplication.jsx'));
+const MentorOnboardingFlow = lazy(() => import('./pages/MentorOnboardingFlow.jsx'));
+const CommunityHub       = lazy(() => import('./pages/community/CommunityHub.jsx'));
+const CommunityCategory  = lazy(() => import('./pages/community/CommunityCategory.jsx'));
+const MentorPostsPage    = lazy(() => import('./pages/community/MentorPostsPage.jsx'));
 const Privacy   = lazy(() => import('./pages/footer/Privacy.jsx'));
 const Terms     = lazy(() => import('./pages/footer/Terms.jsx'));
 const Cookies   = lazy(() => import('./pages/footer/Cookies.jsx'));
@@ -77,10 +82,18 @@ function AppContent() {
   const isMentorsRoute =
     location.pathname === '/mentors' || location.pathname.startsWith('/mentors/');
   const isMentorProfileDetail = isPublicMentorProfileDetail(location.pathname);
+  const isCommunity =
+    location.pathname === '/community'
+    || location.pathname.startsWith('/community/')
+    || location.pathname.startsWith('/dashboard/community');
+  const isApplyOrOnboarding =
+    location.pathname === '/apply/mentor' || location.pathname === '/onboarding/mentor';
   const hideFooter =
     location.pathname.startsWith('/profile') ||
     location.pathname.startsWith('/settings') ||
     isDashboard ||
+    isCommunity ||
+    isApplyOrOnboarding ||
     isVideoCall ||
     isAuthPage ||
     isMentorsRoute;
@@ -127,16 +140,19 @@ function AppContent() {
           <Route path="/admin/verification" element={<AdminVerification />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/blog/write" element={<WriteBlogPost />} />
-          <Route path="/profile" element={<PublicPage><Profile /></PublicPage>} />
-          <Route path="/settings" element={<PublicPage><Settings /></PublicPage>} />
+          <Route path="/profile" element={<PublicPage><AuthenticatedProductRedirect><Profile /></AuthenticatedProductRedirect></PublicPage>} />
+          <Route path="/settings" element={<PublicPage><AuthenticatedProductRedirect><Settings /></AuthenticatedProductRedirect></PublicPage>} />
           <Route path="/session/:sessionId/video" element={<VideoCall />} />
           <Route path="/meet/:slug" element={<MeetLobby />} />
           <Route path="/intake/:sessionId" element={<IntakeCall />} />
           <Route path="/booking/finalize" element={<BookingFinalize />} />
-          <Route path="/pricing" element={<PublicPage><Pricing /></PublicPage>} />
-          <Route path="/resume" element={<PublicPage><ResumeReview /></PublicPage>} />
+          <Route path="/pricing" element={<PublicPage><AuthenticatedProductRedirect><Pricing /></AuthenticatedProductRedirect></PublicPage>} />
+          <Route path="/resume" element={<PublicPage><AuthenticatedProductRedirect><ResumeReview /></AuthenticatedProductRedirect></PublicPage>} />
           <Route path="/company" element={<PublicPage><Company /></PublicPage>} />
           <Route path="/how-it-works" element={<PublicPage><HowItWorks /></PublicPage>} />
+          <Route path="/become-a-mentor" element={<PublicPage><BecomeMentor /></PublicPage>} />
+          <Route path="/apply/mentor" element={<PublicPage><MentorApplication /></PublicPage>} />
+          <Route path="/onboarding/mentor" element={<PublicPage><MentorOnboardingFlow /></PublicPage>} />
           <Route path="/about" element={<LegacyCompanyRedirect />} />
           <Route path="/why-us" element={<LegacyCompanyRedirect />} />
           <Route path="/careers" element={<PublicPage><Careers /></PublicPage>} />
@@ -145,7 +161,9 @@ function AppContent() {
           <Route path="/contact" element={<PublicPage><Contact /></PublicPage>} />
           <Route path="/help" element={<PublicPage><Help /></PublicPage>} />
           <Route path="/trust" element={<PublicPage><Trust /></PublicPage>} />
-          <Route path="/community" element={<PublicPage><Community /></PublicPage>} />
+          <Route path="/community" element={<CommunityEntryGate />} />
+          <Route path="/community/posts" element={<PublicPage><MentorPostsPage /></PublicPage>} />
+          <Route path="/community/:categoryId" element={<CommunityEntryGate />} />
           <Route path="/privacy" element={<PublicPage><Privacy /></PublicPage>} />
           <Route path="/terms" element={<PublicPage><Terms /></PublicPage>} />
           <Route path="/cookies" element={<PublicPage><Cookies /></PublicPage>} />

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import { AlertCircle, ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import FuturisticAuthFrame from '../components/FuturisticAuthFrame';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -23,6 +23,7 @@ export default function Login() {
   const { login, user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -34,7 +35,19 @@ export default function Login() {
   const [devError, setDevError] = useState('');
 
   const fromRaw = location.state?.from;
-  const redirectPath = typeof fromRaw === 'string' && fromRaw.startsWith('/') && !fromRaw.startsWith('//') && !fromRaw.includes('://') ? fromRaw : null;
+  const redirectQuery = searchParams.get('redirect');
+  const redirectFromQuery =
+    typeof redirectQuery === 'string'
+    && redirectQuery.startsWith('/')
+    && !redirectQuery.startsWith('//')
+    && !redirectQuery.includes('://')
+    && !redirectQuery.startsWith('/login')
+    && !redirectQuery.startsWith('/register')
+      ? redirectQuery
+      : null;
+  const redirectPath =
+    (typeof fromRaw === 'string' && fromRaw.startsWith('/') && !fromRaw.startsWith('//') && !fromRaw.includes('://') ? fromRaw : null)
+    || redirectFromQuery;
 
   function handleSecretTap() {
     const next = devTaps + 1;

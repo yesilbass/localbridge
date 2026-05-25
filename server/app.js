@@ -23,6 +23,7 @@ import utilsDispatcher from '../api/utils/[action].js';
 import verificationDispatcher from '../api/verification/[action].js';
 import adminReviewDispatcher from '../api/admin/review/[action].js';
 import aiProxyHandler from '../api/ai-proxy.js';
+import realtimeSessionHandler from '../api/realtime-session.js';
 
 const app = express();
 
@@ -102,6 +103,10 @@ function dispatchAdminReview(req, res, next) {
   Promise.resolve(adminReviewDispatcher(req, res)).catch(next);
 }
 app.all(/^\/api\/admin\/review-[a-z-]+$/i, dispatchAdminReview);
+app.post('/api/admin/mentor-flags', (req, res, next) => {
+  req.query = { ...(req.query || {}), action: 'mentor-flags' };
+  Promise.resolve(adminReviewDispatcher(req, res)).catch(next);
+});
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 // Stripe checkout
@@ -115,6 +120,7 @@ app.use('/api/cancellations', cancellationsRoute);
 
 // AI proxy — mirrors Vercel api/ai-proxy.js (large limit for base64 resume payloads)
 app.post('/api/ai-proxy', wrapApiHandler(aiProxyHandler));
+app.post('/api/realtime-session', wrapApiHandler(realtimeSessionHandler));
 
 // Health check
 app.get('/api', (_req, res) => res.json({ ok: true, service: 'Bridge API' }));

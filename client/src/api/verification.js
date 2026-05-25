@@ -39,7 +39,22 @@ export const submitInterview               = (payload)                  => postJ
 export const inviteReference               = (payload)                  => postJson('/api/verification/reference-invite', payload);
 export const finalizeVerification          = (runId)                    => postJson('/api/verification/finalize', { runId });
 
-// ─── public reference submission ─────────────────────────────────────────────
+// ─── mentor application (voice screening flow) ─────────────────────────────
+
+export const submitMentorApplication = (payload) => postJson('/api/verification/apply', payload);
+
+export const getApplicationStatus = () => getJson('/api/verification/application-status');
+
+export async function fetchOwnMentorProfileRow(userId) {
+  if (!userId) return null;
+  const { data } = await supabase
+    .from('mentor_profiles')
+    .select('id, mentor_status, onboarding_complete, onboarding_step, verification_data, name, title, mentorship_description, why_i_mentor, bio, expertise, image_url, calendly_connected, calendly_event_type_uri')
+    .eq('user_id', userId)
+    .maybeSingle();
+  return data;
+}
+
 
 export const submitReference = (payload) => postJson('/api/verification/reference-submit', payload);
 

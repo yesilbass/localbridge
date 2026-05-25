@@ -45,6 +45,7 @@ export default function IntakeCall() {
   const { user, loading: authLoading } = useAuth()
 
   const [pageState, setPageState] = useState('loading')
+  const [sessionGoals, setSessionGoals] = useState('')
   const [sessionData, setSessionData] = useState(null)
   const [mentorName, setMentorName] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
@@ -134,7 +135,8 @@ export default function IntakeCall() {
         .update({ intake_summary: summary, intake_completed: true })
         .eq('id', sessionId)
 
-      setFlowState('complete')
+      setFlowState('idle')
+      setPageState('goals')
     } catch (err) {
       setErrorMessage(err?.message ?? 'Failed to save intake summary')
       setFlowState('error')
@@ -336,6 +338,51 @@ export default function IntakeCall() {
           >
             {s.common.backToDashboard}
           </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (pageState === 'goals') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--bridge-canvas)' }}>
+        <div className="w-full max-w-lg">
+          <h2 className="text-2xl font-semibold mb-2" style={{ color: 'var(--bridge-text)' }}>
+            What do you want to get out of this session?
+          </h2>
+          <p className="text-sm mb-4" style={{ color: 'var(--bridge-text-muted)' }}>
+            Write 1–3 goals — one per line. Your mentor will see these before you meet.
+          </p>
+          <textarea
+            value={sessionGoals}
+            onChange={(e) => setSessionGoals(e.target.value)}
+            rows={5}
+            className="w-full rounded-xl px-4 py-3 text-sm"
+            style={{ boxShadow: 'inset 0 0 0 1px var(--bridge-border)', backgroundColor: 'var(--bridge-surface)', color: 'var(--bridge-text)' }}
+            placeholder="e.g. Get feedback on my resume summary&#10;Understand how to prepare for system design interviews"
+          />
+          <div className="mt-4 flex gap-3">
+            <button
+              type="button"
+              onClick={async () => {
+                const goals = sessionGoals.split('\n').map((g) => g.trim()).filter(Boolean).slice(0, 3);
+                await supabase.from('sessions').update({ session_goals: goals }).eq('id', sessionId);
+                setPageState('ready');
+                setFlowState('complete');
+              }}
+              className="px-6 py-2.5 rounded-xl text-sm font-medium text-white bg-amber-500 hover:bg-amber-400 transition-colors"
+            >
+              Continue
+            </button>
+            <button
+              type="button"
+              onClick={() => { setPageState('ready'); setFlowState('complete'); }}
+              className="text-sm font-medium"
+              style={{ color: 'var(--bridge-text-muted)' }}
+            >
+              Skip
+            </button>
+          </div>
         </div>
       </div>
     )

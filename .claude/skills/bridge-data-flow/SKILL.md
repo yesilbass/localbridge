@@ -5,7 +5,7 @@ description: >-
   storage uploads, RPC, optimistic updates, error codes, query optimization,
   pagination, search/filter patterns, return shapes. Use when reading or
   writing data via @supabase/supabase-js, debugging RLS denials, designing
-  a new table query, fetching session/mentor/review/favorite data, uploading
+  a new table query, fetching session/mentor/review/favorite/community data, uploading
   resumes, subscribing to realtime channels, building any data-bound view,
   or repairing inconsistent return shapes across api modules.
 ---
@@ -466,6 +466,8 @@ cursor-based.
 - Inserting without `.select().single()` and then "guessing" the inserted row.
 - Trusting `mentor_profiles.id` and `auth.users.id` are interchangeable.
 - Updating `mentor_profiles.rating` from client code.
+- Updating `community_posts.upvotes` or `comment_count` from client code (use triggers via upvote/comment tables).
+- Conflating `community_posts` (hub at `/community`) with `mentor_posts` (mentor advice on profiles).
 - Using `getPublicUrl()` for private buckets.
 - Skipping `removeChannel()` cleanup on Realtime channels.
 - Passing arbitrary user input into `.or()` without sanitizing — PostgREST `or` syntax can be abused.
@@ -484,6 +486,8 @@ Indexes that exist (per migrations):
 - `sessions`: `mentee_id`, `mentor_id`, `scheduled_date`, `status`.
 - `reviews`: `session_id`, `mentor_id`, `reviewer_id`.
 - `favorites`: `(user_id, mentor_id)` unique composite.
+- `community_posts`: `(category_id, created_at DESC)`, `(created_at DESC)`.
+- `community_comments`: `(post_id, created_at ASC)`.
 
 Filter on indexed columns first, then non-indexed. Sort on indexed columns
 when paginating large lists.
@@ -512,10 +516,12 @@ span pages.
 6. Match return shapes (Section 2) to neighbours.
 7. Schema-document the new table in `CLAUDE.md` only after the user confirms the migration ran.
 
+**Community pattern:** tables like `community_posts` use direct Supabase client queries only — no Vercel serverless function. RLS + triggers handle auth and denormalized counts. See `client/src/api/community.js`.
+
 ---
 
 ## 16. When in doubt
 
 Match the closest existing api module's style. Bridge's data layer is
 opinionated and consistent — copy from `mentors.js`, `favorites.js`,
-`sessions.js` rather than inventing new patterns.
+`sessions.js`, `community.js` rather than inventing new patterns.

@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import DashboardTopBar from '../../components/DashboardTopBar.jsx';
+import MentorOnboardingBanner from '../../components/MentorOnboardingBanner.jsx';
 import { useI18n } from '../../i18n';
 import { isDashboardMentorProfileDetail } from '../../utils/mentorProfileRoute.js';
 import { DASHBOARD_SHELL_MAX, DASHBOARD_SHELL_PAD, DASHBOARD_NAVBAR_H } from './dashboardLayout.js';
@@ -26,6 +27,7 @@ export default function DashboardShell({ activeRole, children }) {
           backgroundColor: 'var(--bridge-canvas)',
         }}
       >
+        <MentorOnboardingBanner />
         <a
           href="#dashboard-main"
           className="bridge-focus sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:px-3 focus:py-2 focus:text-[12px] focus:font-bold"
