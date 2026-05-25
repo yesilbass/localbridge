@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import HowItWorksHero from './HowItWorksHero.jsx';
 import HowItWorksSteps from './HowItWorksSteps.jsx';
-import HowItWorksContrast, { HowItWorksIncluded, HowItWorksClose } from './HowItWorksContrast.jsx';
+import HowItWorksClose from './HowItWorksContrast.jsx';
 
 export default function HowItWorksPage() {
   const [track, setTrack] = useState('sessions');
@@ -13,8 +13,6 @@ export default function HowItWorksPage() {
     >
       <HowItWorksHero track={track} onTrackChange={setTrack} />
       <HowItWorksSteps track={track} />
-      <HowItWorksContrast />
-      <HowItWorksIncluded />
       <HowItWorksClose />
     </main>
   );

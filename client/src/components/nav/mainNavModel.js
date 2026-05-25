@@ -1,6 +1,5 @@
 const COMPANY_PATHS = [
   { path: '/company', labelKey: 'nav.aboutBridge', fallback: 'About Bridge' },
-  { path: '/how-it-works', label: 'How it works' },
   { path: '/blog', label: 'Blog' },
   { path: '/careers', label: 'Careers' },
   { path: '/faq', label: 'FAQ' },
@@ -30,7 +29,6 @@ export function buildMainNavModel({ showGuestChrome, asMentor, resolve, t }) {
           label: t('nav.discover', 'Discover'),
           items: [
             { path: resolve('/mentors'), label: t('nav.findMentors', 'Find mentors') },
-            { path: resolve('/how-it-works'), label: t('nav.howItWorks', 'How it works') },
           ],
         },
         {

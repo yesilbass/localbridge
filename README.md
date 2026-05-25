@@ -51,7 +51,7 @@ Bridge is pre-revenue, demo-ready, and deployed on Vercel from `main`. The stack
 |---|---|
 | `/` | Landing — hero, trust band, video testimonials, audience fit, mentor roster |
 | `/company` | Company story, beliefs, comparison, proof, team, CTA |
-| `/how-it-works` | Dual-track explainer (sessions vs subscriptions) |
+| `/how-it-works` | Dual-track explainer — on-demand sessions vs AI career stack (`pages/how-it-works/`) |
 | `/pricing` | Tier cards, compare table, FAQ, embedded Stripe checkout |
 | `/resume` | AI resume review |
 | `/mentors` | Mentor directory (+ AI match wizard) |
@@ -99,7 +99,7 @@ Legacy redirects: `/about` and `/why-us` → `/company`.
 
 Shared: home (now strip, next session, at-a-glance), sessions, profile, settings, notification panel, first-login onboarding modal, post-call review modal.
 
-**Top bar (grouped dropdowns):** mentees — **Explore** (mentors, community), **Activity** (sessions, messages, saved), **Tools** (resume); mentors — **Work** (sessions, messages, community), **Mentor** (availability, earnings, reviews). Implemented in `DashboardTopBar.jsx` + `client/src/components/nav/dashboardNavModel.js`.
+**Top bar (flat links):** logo returns to dashboard home; mentees see Mentors, Community, Sessions, Messages, Saved, Resume; mentors see Sessions, Messages, Community, Availability, Earnings, Reviews. `DashboardTopBar.jsx` + `dashboardNavModel.js`.
 
 **Mentee-only:** saved mentors, browse mentors (embedded), mentor profile (embedded), resume review (embedded), messages, plan/pricing (embedded), billing, community at `/dashboard/community`.
 
@@ -186,7 +186,7 @@ Three route-driven palettes: `modern-signal`, `grounded-guidance`, `quiet-author
 - **Mentor discovery** — filterable directory with tier badges, session rates, availability, and AI-powered goal-based matching
 - **Mentor application & onboarding** — voice-first application at `/apply/mentor` (OpenAI Realtime) → admin review → 5-step profile wizard at `/onboarding/mentor`; tiers and rates assigned server-side by a scoring algorithm
 - **Community** — authenticated hub at `/dashboard/community` (aliases from `/community`) with live feed and 8 mentorship-pillar sub-communities; questions, wins, discussions, and resources with upvotes and flat comments; active mentors get a trust badge
-- **Grouped navigation** — marketing `Navbar` (Discover / Tools / Company dropdowns) and dashboard `DashboardTopBar` (role-based groups); flat underline chrome, not pill bubbles
+- **Grouped navigation** — marketing `Navbar` (Discover / Tools / Company dropdowns; `/how-it-works` via footer and landing, not in nav menus) and dashboard `DashboardTopBar` (role-based groups); flat underline chrome, not pill bubbles
 - **Mentor value stack** — impact stats, earned badges, short advice posts on profiles, session action items, featured mentor spotlight
 - **Admin review panel** — approve or reject mentor applications at `/admin`, with scoring breakdowns
 - **Session booking** — Stripe Checkout (price locked server-side); Calendly integration for scheduling (OAuth, embedded widget, webhook)
@@ -242,6 +242,7 @@ bridge/
 │       │   └── nav/        # mainNavModel, NavMenus, navChrome, dashboardNavModel
 │       ├── context/        # AuthContext + useAuth hook
 │       ├── pages/          # Route-level page components
+│       │   ├── how-it-works/  # HowItWorksHero, HowItWorksSteps, howItWorksData
 │       │   └── community/  # CommunityHub, CommunityCategory, communityShared
 │       ├── constants/      # sessionTypes.js, mentorshipCategories.js
 │       ├── utils/          # routePalette.js, helpers

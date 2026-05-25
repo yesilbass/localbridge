@@ -199,7 +199,7 @@ export default function MentorRosterSection() {
             className="font-display font-black"
             style={{ fontSize: 'clamp(2.2rem, 5.5vw, 3.9rem)', lineHeight: 1.0, letterSpacing: '-0.04em', color: 'var(--bridge-text)' }}
           >
-            2,400 mentors.<br />
+            Every mentor.<br />
             <span style={{ color: 'var(--color-primary)' }}>One conversation away.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-[26rem]"
@@ -239,9 +239,9 @@ export default function MentorRosterSection() {
           animate={triggered ? { opacity: 1 } : {}}
           transition={{ duration: 0.55, delay: 0.52 }}
         >
-          {['No credit card', 'First session guaranteed', 'Cancel any time'].map(label => (
-            <p key={label} className="text-[11px] font-medium" style={{ color: 'var(--bridge-text-faint)' }}>{label}</p>
-          ))}
+          <p className="text-[11px] font-medium" style={{ color: 'var(--bridge-text-faint)' }}>
+            Cancel any time
+          </p>
         </motion.div>
       </div>
     </section>

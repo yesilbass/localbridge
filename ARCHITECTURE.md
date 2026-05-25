@@ -162,11 +162,21 @@ Two shells — do not conflate:
 | Marketing / product | `Navbar.jsx` + `components/nav/*` | All routes except `/dashboard/*`, video, auth pages |
 | Dashboard | `DashboardTopBar.jsx` + `dashboardNavModel.js` | `/dashboard/*` only |
 
-**Marketing nav** (`mainNavModel.js`): grouped dropdowns — **Discover**, **Tools**, **Company** (guest); signed-in mentees add **Dashboard** + same groups; mentors get **Dashboard**, **Company**, flat **Community** + **Pricing**. Flat underline active state (`navChrome.js`) — no pill bubbles.
+**Marketing nav** (`mainNavModel.js`): grouped dropdowns with flat underline active state (`navChrome.js`) — no pill bubbles.
+
+| Role | Primary | Dropdowns | Flat links |
+|------|---------|-----------|------------|
+| Guest | — | **Discover** → Find mentors; **Tools** → Resume review; **Company** → About Bridge, Blog, Careers, FAQ, Contact, Trust & safety | Pricing, Become a mentor |
+| Signed-in mentee | Dashboard | **Discover** → Mentors, Community; **Tools** → Resume review; **Company** (same as guest) | Pricing |
+| Mentor | Dashboard | **Company** (same as guest) | Community, Pricing |
+
+`/how-it-works` is intentionally absent from navbar dropdowns; reach it via footer **Platform → How it works**, landing hero/section links, or direct URL.
+
+**Footer** (`Footer.jsx`): newsletter + **Company**, **Resources**, **Platform** (Browse mentors, How it works, AI matching), **Tools**, and **Explore** (browse + four mentorship category query links — not the legacy four session-type labels).
 
 **Auth routing** (`authNav.js`): `resolveAuthEntryPath()` sends signed-in users from `/mentors`, `/resume`, `/pricing`, `/community`, etc. to dashboard equivalents. `presentAsMarketingGuest()` is `!user` — logged-in users always see authenticated chrome on public URLs.
 
-**Dashboard nav**: mentee **Explore** / **Activity** / **Tools**; mentor **Work** / **Mentor** dropdowns.
+**Dashboard nav** (`DashboardTopBar.jsx`): flat top-bar links (no dropdowns). Logo → `/dashboard` (no separate Dashboard tab). Mentee links: Mentors, Community, Sessions, Messages, Saved, Resume. Mentor links: Sessions, Messages, Community, Availability, Earnings, Reviews.
 
 ### State Management
 

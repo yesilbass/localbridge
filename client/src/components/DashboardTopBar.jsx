@@ -27,7 +27,6 @@ export default function DashboardTopBar({
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileSections, setMobileSections] = useState({});
 
   const isMentor = activeRole === 'mentor';
   const navModel = buildDashboardNavModel(isMentor, t);
@@ -55,10 +54,6 @@ export default function DashboardTopBar({
   }
 
   const closeMobile = () => setMobileOpen(false);
-  const toggleMobileSection = (id) => {
-    setMobileSections((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
   return (
     <>
       <header
@@ -75,6 +70,7 @@ export default function DashboardTopBar({
         <div className="mx-auto flex h-full w-full max-w-[100rem] items-center gap-4 px-5 sm:px-8 lg:px-12">
           <Link
             to="/dashboard"
+            aria-label={t('nav.dashboardHome', 'Bridge dashboard home')}
             className="shrink-0 font-display text-[1.12rem] font-black tracking-[-0.04em] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] sm:text-[1.22rem]"
             style={{ color: 'var(--bridge-text)', lineHeight: 1 }}
           >
@@ -192,10 +188,7 @@ export default function DashboardTopBar({
           >
             <DashboardNavMenusMobile
               model={navModel}
-              pathname={location.pathname}
               onNavigate={closeMobile}
-              openSections={mobileSections}
-              onSectionToggle={toggleMobileSection}
             />
             <div
               className="mt-4 flex items-center justify-between gap-3 border-t pt-4 sm:hidden"

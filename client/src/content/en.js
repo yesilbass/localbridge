@@ -1058,14 +1058,14 @@ export const EN_CONTENT = {
 
   landing: {
     heroEyebrow: 'Now booking — 2,400+ mentors live this week',
-    heroHeadline1: 'The fastest path',
-    heroHeadline2: 'to your next role.',
+    heroHeadline1: 'Mentorship across',
+    heroHeadline2: 'eight areas of life.',
     heroSubTagline: "Talk to someone who's already done it.",
-    heroSubCopy: 'AI-matched to your exact goal. Booked in seconds — no subscriptions, no packages, no DMs.',
+    heroSubCopy: 'Parenting, career, fitness, finances, faith, and more. Matched to your goal — booked in seconds.',
     heroCtaGetMatched: 'Get matched',
     heroCtaSeeHow: 'See how it works ↓',
     heroTrustNoCard: 'No credit card to browse',
-    heroTrustBooked: 'Booked in 60 seconds',
+    heroTrustBooked: 'Sessions always free',
     heroTrustRating: '/5 across 1,200+ sessions',
   },
 };
