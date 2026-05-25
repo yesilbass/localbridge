@@ -71,12 +71,12 @@ export function AuthenticatedProductRedirect({ children }) {
   return children;
 }
 
-/** /community → /dashboard/community (or login). Standalone community URLs only. */
+/** /community → /dashboard/community (or login). Requires subscription after auth. */
 export function CommunityEntryGate() {
-  const { user, loading } = useAuth();
+  const { user, loading, isSubscribed, settingsLoading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  if (loading || (user && settingsLoading)) {
     return <LoadingSpinner label="Loading…" className="min-h-screen" size="lg" />;
   }
 
@@ -86,5 +86,29 @@ export function CommunityEntryGate() {
     return <Navigate to={`/login?redirect=${encodeURIComponent(dashboardPath + location.search)}`} replace />;
   }
 
+  if (!isSubscribed) {
+    return <Navigate to="/pricing?reason=community" replace />;
+  }
+
   return <Navigate to={dashboardPath + location.search} replace />;
+}
+
+/** Wrap dashboard community routes — auth assumed; blocks unsubscribed users. */
+export function CommunitySubscriptionGate({ children }) {
+  const { user, loading, isSubscribed, settingsLoading } = useAuth();
+  const location = useLocation();
+
+  if (loading || settingsLoading) {
+    return <LoadingSpinner label="Loading…" className="min-h-[50vh]" size="lg" />;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  if (!isSubscribed) {
+    return <Navigate to="/pricing?reason=community" replace />;
+  }
+
+  return children;
 }

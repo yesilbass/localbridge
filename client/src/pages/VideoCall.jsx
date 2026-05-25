@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { isMentorAccount } from '../utils/accountRole';
 import supabase from '../api/supabase';
-import { isActiveSubscription } from '../utils/subscription';
+import { isSubscribed } from '../utils/subscription';
 import { updateSessionStatus } from '../api/sessions';
 import { useContent } from '../content';
 import {
@@ -744,8 +744,8 @@ export default function VideoCall() {
             .select('settings')
             .eq('user_id', user.id)
             .maybeSingle();
-          if (!isActiveSubscription(settingsRow?.settings)) {
-            if (!cancelled) setAccessError('An active Plus or Pro subscription is required to join calls.');
+          if (!isSubscribed(settingsRow?.settings)) {
+            if (!cancelled) setAccessError('An active Bridge subscription is required to join calls.');
             return;
           }
         }

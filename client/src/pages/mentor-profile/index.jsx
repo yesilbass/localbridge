@@ -11,7 +11,7 @@ import supabase from '../../api/supabase';
 import { ArrowLeft, BadgeCheck, Heart, MessageCircle } from 'lucide-react';
 import AppLink from '../../components/AppLink';
 import { useContent } from '../../content';
-import { useSubscription } from '../../hooks/useSubscription';
+import PaywallPrompt from '../../components/PaywallPrompt';
 
 import {
   useFavoriteMentor,
@@ -33,7 +33,6 @@ import IndustriesSection from './IndustriesSection';
 import MentorHeroMeta from './MentorHeroMeta';
 import MentorBookingSnapshot from './MentorBookingSnapshot';
 import HeroBookModal from './HeroBookModal';
-import SubscribeUnlockModal from './SubscribeUnlockModal';
 import MentorSectionNav from './MentorSectionNav';
 import { formatRoleHeadline } from './mentorMeta';
 import { bodyClass, sectionTitleClass, sectionTitleStyle } from './profileType';
@@ -60,13 +59,15 @@ function MentorHero({
   canEngage,
   subscriberReady,
   subscriptionLoading,
+  user,
   mentorsListPath = '/mentors',
   embedded = false,
   menteesHelped = 0,
 }) {
   const { s } = useContent();
   const roleHeadline = formatRoleHeadline(mentor.title, mentor.company);
-  const gatedLabel = subscriptionLoading ? 'Checking plan…' : 'Book a session →';
+  const showSignIn = canEngage && !user;
+  const showBookingGate = canEngage && user && !subscriberReady && !subscriptionLoading;
 
   return (
     <section aria-labelledby="profile-heading" className={`relative pb-16 lg:pb-20 ${embedded ? 'pt-4 sm:pt-6' : 'pt-6 sm:pt-8'}`}>
@@ -191,37 +192,64 @@ function MentorHero({
             <div className="mt-8 flex flex-wrap items-center gap-3">
               {canEngage && (
                 <>
-                  <button
-                    ref={heroCtaRef}
-                    type="button"
-                    onClick={onBook}
-                    disabled={subscriptionLoading}
-                    className={`rounded-full px-9 py-4 text-[15px] font-black tracking-wide transition-all disabled:opacity-60 ${ring}`}
-                    style={{
-                      background: 'var(--color-primary)',
-                      color: 'var(--color-on-primary)',
-                      boxShadow: '0 14px 36px -6px color-mix(in srgb, var(--color-primary) 58%, transparent)',
-                      outlineColor: 'var(--color-primary)',
-                      letterSpacing: '0.01em',
-                    }}
-                  >
-                    {subscriberReady ? 'Book a session →' : gatedLabel}
-                  </button>
+                  {showSignIn && (
+                    <Link
+                      ref={heroCtaRef}
+                      to="/login"
+                      state={{ from: typeof window !== 'undefined' ? window.location.pathname : '/mentors' }}
+                      className={`rounded-full px-9 py-4 text-[15px] font-black tracking-wide transition-all ${ring}`}
+                      style={{
+                        background: 'var(--color-primary)',
+                        color: 'var(--color-on-primary)',
+                        boxShadow: '0 14px 36px -6px color-mix(in srgb, var(--color-primary) 58%, transparent)',
+                      }}
+                    >
+                      Sign in to book
+                    </Link>
+                  )}
 
-                  <button
-                    type="button"
-                    onClick={onMessage}
-                    disabled={subscriptionLoading || messageLoading}
-                    className={`inline-flex items-center gap-2 rounded-full px-6 py-4 text-sm font-semibold transition-all disabled:opacity-60 ${ring}`}
-                    style={{
-                      background: 'var(--bridge-surface-muted)',
-                      color: 'var(--bridge-text-secondary)',
-                      outlineColor: 'var(--color-primary)',
-                    }}
-                  >
-                    <MessageCircle className="h-4 w-4" aria-hidden />
-                    {messageLoading ? 'Opening…' : subscriberReady ? 'Message' : 'Message'}
-                  </button>
+                  {user && subscriberReady && (
+                    <button
+                      ref={heroCtaRef}
+                      type="button"
+                      onClick={onBook}
+                      disabled={subscriptionLoading}
+                      className={`rounded-full px-9 py-4 text-[15px] font-black tracking-wide transition-all disabled:opacity-60 ${ring}`}
+                      style={{
+                        background: 'var(--color-primary)',
+                        color: 'var(--color-on-primary)',
+                        boxShadow: '0 14px 36px -6px color-mix(in srgb, var(--color-primary) 58%, transparent)',
+                        outlineColor: 'var(--color-primary)',
+                        letterSpacing: '0.01em',
+                      }}
+                    >
+                      Book a session →
+                    </button>
+                  )}
+
+                  {user && subscriberReady && (
+                    <button
+                      type="button"
+                      onClick={onMessage}
+                      disabled={subscriptionLoading || messageLoading}
+                      className={`inline-flex items-center gap-2 rounded-full px-6 py-4 text-sm font-semibold transition-all disabled:opacity-60 ${ring}`}
+                      style={{
+                        background: 'var(--bridge-surface-muted)',
+                        color: 'var(--bridge-text-secondary)',
+                        outlineColor: 'var(--color-primary)',
+                      }}
+                    >
+                      <MessageCircle className="h-4 w-4" aria-hidden />
+                      {messageLoading ? 'Opening…' : 'Message'}
+                    </button>
+                  )}
+
+                  {showBookingGate && (
+                    <div className="w-full max-w-md">
+                      <PaywallPrompt feature="booking" />
+                    </div>
+                  )}
+
                   {messageError && (
                     <p className="w-full text-sm" style={{ color: 'var(--color-error)' }} role="alert">
                       {messageError}
@@ -324,8 +352,7 @@ export default function MentorProfilePage({ embedded = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user } = useAuth();
-  const { isActive: subscriberReady, loading: subscriptionLoading } = useSubscription();
+  const { user, isSubscribed, settingsLoading } = useAuth();
   const heroCtaRef = useRef(null);
 
   const [rawMentor, setRawMentor] = useState(null);
@@ -336,7 +363,6 @@ export default function MentorProfilePage({ embedded = false }) {
 
   const [checkoutNotice, setCheckoutNotice] = useState(null);
   const [bookModalOpen, setBookModalOpen] = useState(false);
-  const [unlockModal, setUnlockModal] = useState({ open: false, intent: 'book' });
   const [messageLoading, setMessageLoading] = useState(false);
   const [messageError, setMessageError] = useState(null);
 
@@ -397,7 +423,6 @@ export default function MentorProfilePage({ embedded = false }) {
   const bookingDisabledForMentor = viewerIsMentor && !isOwnMentorProfile;
   const canEngage = !isOwnMentorProfile && !bookingDisabledForMentor;
 
-  const planPath = embedded ? '/dashboard/plan' : '/pricing';
   const loginReturn = location.pathname;
 
   function openUnlockModal(intent) {
@@ -405,11 +430,8 @@ export default function MentorProfilePage({ embedded = false }) {
       navigate('/login', { state: { from: loginReturn } });
       return false;
     }
-    if (subscriptionLoading) return false;
-    if (!subscriberReady) {
-      setUnlockModal({ open: true, intent });
-      return false;
-    }
+    if (settingsLoading) return false;
+    if (!isSubscribed) return false;
     return true;
   }
 
@@ -521,8 +543,9 @@ export default function MentorProfilePage({ embedded = false }) {
           messageError={messageError}
           heroCtaRef={heroCtaRef}
           canEngage={canEngage}
-          subscriberReady={subscriberReady}
-          subscriptionLoading={subscriptionLoading}
+          subscriberReady={isSubscribed}
+          subscriptionLoading={settingsLoading}
+          user={user}
           mentorsListPath={embedded ? '/dashboard/mentors' : '/mentors'}
           embedded={embedded}
           menteesHelped={menteesHelped}
@@ -541,15 +564,6 @@ export default function MentorProfilePage({ embedded = false }) {
         onClose={() => setBookModalOpen(false)}
         mentor={rawMentor}
         user={user}
-      />
-
-      <SubscribeUnlockModal
-        open={unlockModal.open}
-        intent={unlockModal.intent}
-        mentor={mentor}
-        user={user}
-        pricingPath={planPath}
-        onClose={() => setUnlockModal((prev) => ({ ...prev, open: false }))}
       />
 
       {/* Content */}

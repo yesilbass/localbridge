@@ -23,6 +23,7 @@ import ResumeReview from '../ResumeReview.jsx';
 import MentorPostsPanel from './MentorPostsPanel.jsx';
 import CommunityHub from '../community/CommunityHub.jsx';
 import CommunityCategory from '../community/CommunityCategory.jsx';
+import { CommunitySubscriptionGate } from '../../components/routing/RouteGuards.jsx';
 
 import PageHeader from './home/PageHeader.jsx';
 import HomeHeader from './home/HomeHeader.jsx';
@@ -72,7 +73,7 @@ function MessagesRoute() {
 function PlanRoute() {
   return (
     <>
-      <PageHeader title="Plans" subtitle="Upgrade platform access — mentor sessions stay free." />
+      <PageHeader title="Plans" subtitle="One plan — everything included. Mentor sessions stay free." />
       <Pricing embedded />
     </>
   );
@@ -244,8 +245,8 @@ export default function DashboardPage() {
         {activeRole === 'mentee' && <Route path="messages/:conversationId" element={<MessagesRoute />} />}
         {activeRole === 'mentor' && <Route path="messages" element={<MessagesRoute />} />}
         {activeRole === 'mentor' && <Route path="messages/:conversationId" element={<MessagesRoute />} />}
-        <Route path="community" element={<CommunityHub />} />
-        <Route path="community/:categoryId" element={<CommunityCategory />} />
+        <Route path="community" element={<CommunitySubscriptionGate><CommunityHub /></CommunitySubscriptionGate>} />
+        <Route path="community/:categoryId" element={<CommunitySubscriptionGate><CommunityCategory /></CommunitySubscriptionGate>} />
         <Route path="plan" element={<PlanRoute />} />
         {activeRole === 'mentee' && <Route path="billing" element={<BillingRoute />} />}
         <Route path="profile" element={<ProfileRoute isMentor={activeRole === 'mentor'} />} />

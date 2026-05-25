@@ -2,8 +2,8 @@ import { DASHBOARD_NAVBAR_H } from '../pages/dashboard/dashboardLayout.js';
 
 export { DASHBOARD_NAVBAR_H };
 
-/** Public marketing navbar height — keep in sync with Navbar.jsx `h-[5.25rem]`. */
-export const PUBLIC_NAVBAR_H = '5.25rem';
+/** Public marketing navbar height — keep in sync with Navbar.jsx `h-[6.25rem]`. */
+export const PUBLIC_NAVBAR_H = '6.25rem';
 
 /** Sticky profile section nav bar height (py-3.5 + text). */
 export const PROFILE_SECTION_NAV_H = '3.5rem';

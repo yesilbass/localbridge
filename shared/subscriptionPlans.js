@@ -1,12 +1,20 @@
-/** Single source of truth — keep in sync with Stripe checkout (unit_amount in cents). */
-export const PLAN_MONTHLY_USD = {
-  Plus: 49,
-  Pro: 79,
-};
+/** Bridge single-plan pricing — keep in sync with Stripe price IDs in env. */
+export const SUBSCRIPTION_MONTHLY_USD = 29;
+export const SUBSCRIPTION_ANNUAL_MONTHLY_USD = 19;
+export const SUBSCRIPTION_ANNUAL_USD = 228;
+export const ANNUAL_SAVINGS_PERCENT = 34;
+export const STUDENT_DISCOUNT = 0.5;
 
-export const PLAN_PRICES_CENTS = {
-  Plus: PLAN_MONTHLY_USD.Plus * 100,
-  Pro: PLAN_MONTHLY_USD.Pro * 100,
-};
+export const BILLING_PLANS = ['monthly', 'annual'];
 
-export const PAID_PLAN_NAMES = ['Plus', 'Pro'];
+export function isStudentEmail(email) {
+  if (!email) return false;
+  const domain = (email.split('@')[1] ?? '').toLowerCase();
+  return domain.endsWith('.edu');
+}
+
+export function displayMonthlyPrice(plan, { isStudent = false } = {}) {
+  const base = plan === 'annual' ? SUBSCRIPTION_ANNUAL_MONTHLY_USD : SUBSCRIPTION_MONTHLY_USD;
+  if (!isStudent) return base;
+  return Math.round(base * (1 - STUDENT_DISCOUNT) * 100) / 100;
+}

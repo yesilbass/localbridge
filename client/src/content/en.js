@@ -869,10 +869,10 @@ export const EN_CONTENT = {
   },
 
   pricing: {
-    heroEyebrow: 'Pick your plan — no card to start',
-    heroHeading1: 'Simple pricing,',
-    heroHeading2: 'pick what fits.',
-    heroSubCopy: 'Mentor sessions are always free. Subscriptions unlock the AI career stack — matching, resume review, and booking workflow — priced below premium mentorship memberships.',
+    heroEyebrow: 'PRICING',
+    heroHeading1: 'One plan. Everything included.',
+    heroHeading2: '',
+    heroSubCopy: 'Mentor sessions are always free — mentors volunteer their time. Your subscription unlocks AI tools, unlimited bookings, community, and everything we build next.',
     billingMonthly: 'Monthly',
     billingAnnual: 'Annual',
     trustRating: '4.9 / 5 from',

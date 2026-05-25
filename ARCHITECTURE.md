@@ -142,8 +142,9 @@ Key routes:
 | `/mentors` | `Mentors.jsx` | Public browse |
 | `/mentor/:id` | `MentorProfile.jsx` | `id` = `mentor_profiles.id` (profile UUID) |
 | `/dashboard` | `Dashboard.jsx` | Auth required — routes to mentee or mentor view |
-| `/community` | `CommunityHub.jsx` | Auth required — live feed + pillar sidebar |
-| `/community/:categoryId` | `CommunityCategory.jsx` | Auth required — pillar feed with filters |
+| `/dashboard/community` | `CommunityHub.jsx` | Auth — primary community shell |
+| `/dashboard/community/:categoryId` | `CommunityCategory.jsx` | Auth — pillar feed |
+| `/community`, `/community/:categoryId` | `CommunityEntryGate` | Redirect to dashboard when signed in |
 | `/become-a-mentor` | `BecomeMentor.jsx` | Public marketing |
 | `/apply/mentor` | `MentorApplication.jsx` | Voice-first mentor application |
 | `/onboarding/mentor` | `MentorOnboardingFlow.jsx` | Post-approval profile wizard |
@@ -151,6 +152,21 @@ Key routes:
 | `/intake/:sessionId` | `IntakeCall.jsx` | Auth required |
 | `/admin/verification` | Admin panel | Admin role required |
 | `/resume` | `ResumeReview.jsx` | Public (embedded in dashboard for mentees) |
+
+### Navigation chrome
+
+Two shells — do not conflate:
+
+| Shell | Component | When shown |
+|-------|-----------|------------|
+| Marketing / product | `Navbar.jsx` + `components/nav/*` | All routes except `/dashboard/*`, video, auth pages |
+| Dashboard | `DashboardTopBar.jsx` + `dashboardNavModel.js` | `/dashboard/*` only |
+
+**Marketing nav** (`mainNavModel.js`): grouped dropdowns — **Discover**, **Tools**, **Company** (guest); signed-in mentees add **Dashboard** + same groups; mentors get **Dashboard**, **Company**, flat **Community** + **Pricing**. Flat underline active state (`navChrome.js`) — no pill bubbles.
+
+**Auth routing** (`authNav.js`): `resolveAuthEntryPath()` sends signed-in users from `/mentors`, `/resume`, `/pricing`, `/community`, etc. to dashboard equivalents. `presentAsMarketingGuest()` is `!user` — logged-in users always see authenticated chrome on public URLs.
+
+**Dashboard nav**: mentee **Explore** / **Activity** / **Tools**; mentor **Work** / **Mentor** dropdowns.
 
 ### State Management
 
@@ -526,19 +542,18 @@ Flow:
 
 **Usage limit**: 1 use per user (tracked in `ai_usage` table).
 
-### Intake Call — OpenAI Realtime
+### Intake Call & Mentor Application — OpenAI Realtime (GA)
 
-**File**: `client/src/pages/IntakeCall.jsx`, `api/realtime-session.js`
-**Model**: OpenAI Realtime API (voice)
-**Trigger**: Mentee joins an intake call before their session
+**Files**: `client/src/pages/IntakeCall.jsx`, `client/src/pages/MentorApplication.jsx`, `client/src/hooks/useRealtimeCall.js`, `api/realtime-session.js`
+**Model**: `gpt-realtime-1.5` (voice via WebRTC)
+**Triggers**: Pre-session intake (`sessionType` + `sessionId`); mentor application (`type: mentor_application`)
 
 Flow:
-1. Client calls `GET /api/realtime-session` with a valid JWT to get an ephemeral
-   OpenAI Realtime API key (the permanent key never leaves the server).
-2. Client opens a WebRTC connection directly to the OpenAI Realtime API using the
-   ephemeral key.
-3. AI conducts a voice intake interview based on the session type and mentee profile.
-4. Responses saved to Supabase and surfaced to the mentor on their dashboard.
+1. Client `POST /api/realtime-session` with JWT and body (intake or mentor-application fields).
+2. Server calls OpenAI **`POST /v1/realtime/client_secrets`** (GA API — not the deprecated beta `/v1/realtime/sessions` shape) and returns `{ client_secret: { value, expires_at } }`.
+3. Client uses `client_secret.value` for WebRTC SDP exchange at `POST https://api.openai.com/v1/realtime?model=gpt-realtime-1.5`.
+4. Voice interview runs with server-side instructions + optional tool calls (`complete_intake`, `complete_application`).
+5. Usage tracked in `ai_usage` (`realtime_session` / `realtime_mentor_application` rate limits).
 
 ### i18n Auto-translation — OpenAI
 
@@ -622,8 +637,8 @@ directory (with `onboarding_complete` and active status).
 
 ## 12. Community
 
-Bridge Community (`/community`) is the between-sessions engagement layer. Auth required;
-unauthenticated users redirect to `/login?redirect=/community`.
+Bridge Community is the between-sessions engagement layer. Auth required.
+`/community` and `/community/:categoryId` redirect signed-in users to **`/dashboard/community`** via `CommunityEntryGate` (`client/src/components/routing/RouteGuards.jsx`). Unauthenticated users go to `/login?redirect=/community`.
 
 ### Data model
 
@@ -640,8 +655,9 @@ All CRUD via `client/src/api/community.js` direct to Supabase. Author enrichment
 
 | Route | Component | Notes |
 |-------|-----------|-------|
-| `/community` | `CommunityHub.jsx` | Live feed (all pillars) + 8 pillar sidebar cards |
-| `/community/:categoryId` | `CommunityCategory.jsx` | Pillar feed, type filters, sort, inline comments |
+| `/dashboard/community` | `CommunityHub.jsx` | Primary shell — live feed + pillar sidebar |
+| `/dashboard/community/:categoryId` | `CommunityCategory.jsx` | Pillar feed, type filters, sort, inline comments |
+| `/community`, `/community/:categoryId` | `CommunityEntryGate` | Redirect to dashboard routes when signed in |
 
 Palette: `quiet-authority` (same as dashboard). Pillar IDs from `MENTORSHIP_CATEGORIES`.
 
@@ -731,7 +747,8 @@ standard use. All team members hit the same dev database.
 | `mentor_profiles.id` ≠ `auth.users.id` | The mentor profile is a separate entity with its own UUID PK. `user_id` is the soft link to auth. This allows seeded demo mentors without corresponding auth accounts. |
 | No client-side rating calculation | `mentor_profiles` UPDATE is RLS-restricted to the row's own user, so a mentee write would silently fail. Concurrent inserts would race. A Postgres trigger is the only correct solution. |
 | Prices locked server-side | The session rate is read from `mentor_profiles.session_rate` on the server before creating the Stripe Checkout Session. The client cannot pass or influence the price — this closes the price manipulation attack vector. |
-| Realtime API key never sent to client | The OpenAI Realtime API key lives in `server/.env` only. The client requests a short-lived ephemeral key from `/api/realtime-session` — the permanent key never leaves the server. |
+| Realtime API key never sent to client | `OPENAI_API_KEY` is server-only. Client `POST /api/realtime-session` → OpenAI GA `client_secrets` → ephemeral `client_secret.value` for WebRTC. |
+| Nav stays under 12 functions | Grouped menus in `Navbar` + `DashboardTopBar`; product URLs map to dashboard via `client/src/utils/authNav.js` — no extra API routes. |
 | Express dev server mirrors Vercel Functions | Vercel Functions are stateless and have a cold start. The Express server gives a better local dev experience while the `api/` files remain the production source of truth. Keep both in sync. |
 | No direct pushes to `main` | Vercel auto-deploys every push to `main`. A broken push goes straight to production. PRs with peer review are the only gate. |
 | Supabase singleton | A second Supabase client would create a separate auth session, breaking token sharing between the auth context and data modules. Always import from `client/src/api/supabase.js`. |

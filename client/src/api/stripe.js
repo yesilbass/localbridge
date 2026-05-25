@@ -1,7 +1,5 @@
 import supabase from './supabase';
 
-// Re-trigger Calendly time sync on a session whose row already has the event
-// URI but no scheduled_date (mentor's token had expired during initial flow).
 export async function resyncCalendlySession(sessionId) {
   const auth = await getAuthHeaders();
   const res = await fetch('/api/booking-confirm-scheduled', {
@@ -24,9 +22,7 @@ export async function createBookingCheckout({
   menteeName,
   mentorId,
   mentorName,
-  /** Display label for Stripe product text */
   sessionTypeName,
-  /** `sessions.session_type` check constraint value, e.g. `career_advice` */
   sessionTypeKey,
   scheduledDate,
   message,
@@ -52,17 +48,28 @@ export async function createBookingCheckout({
   return { ok: true, clientSecret: data.clientSecret };
 }
 
-export async function createSubscriptionCheckout({ planName, userEmail }) {
+export async function createSubscriptionCheckout(plan = 'monthly') {
   const auth = await getAuthHeaders();
   const res = await fetch('/api/create-subscription-checkout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...auth },
-    body: JSON.stringify({ planName, userEmail }),
+    body: JSON.stringify({ plan }),
   });
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) return { ok: false, error: data.error || 'Could not start subscription checkout.' };
-  return { ok: true, clientSecret: data.clientSecret };
+  return { ok: true, url: data.url };
+}
+
+export async function openBillingPortal() {
+  const auth = await getAuthHeaders();
+  const res = await fetch('/api/billing-portal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...auth },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) return { ok: false, error: data.error || 'Could not open billing portal.' };
+  return { ok: true, url: data.url };
 }
 
 export async function confirmScheduledBooking({ stripeSessionId, eventUri, inviteeUri }) {

@@ -74,7 +74,10 @@ client/src/
     calendly.js stripe.js intake.js cancellations.js
     menteeProfile.js mentorOnboarding.js verification.js
     tagMentorCategories.js resumeStorage.js mentorAvatarStorage.js
-  components/          ← reusable UI (Navbar, Footer, MagneticPointer, Reveal …)
+  components/
+    Navbar.jsx DashboardTopBar.jsx
+    nav/               ← mainNavModel, NavMenus, navChrome, dashboardNavModel
+  utils/authNav.js     ← resolveAuthEntryPath, dashboardProductPath, presentAsMarketingGuest
   pages/
     landing/           ← Hero, Bento, Manifesto, HowItWorks, FinalCta, …
     community/         ← CommunityHub, CommunityCategory, communityShared
@@ -110,7 +113,8 @@ supabase/migrations/   ← canonical SQL; do NOT auto-run, hand to user
 | AI intake call | `client/src/pages/IntakeCall.jsx`, `api/prompts/intakePrompt.js` |
 | Video call | `client/src/pages/VideoCall.jsx` (WebRTC + Supabase Realtime) |
 | Calendar / Calendly OAuth | `client/src/api/calendly.js`, `api/calendly/` |
-| Community | `client/src/api/community.js`, `client/src/pages/community/` |
+| Community | `client/src/api/community.js`, `client/src/pages/community/`, `CommunityEntryGate` |
+| Nav / chrome | `client/src/components/nav/`, `Navbar.jsx`, `DashboardTopBar.jsx`, `authNav.js` |
 | Mentor application | `client/src/pages/MentorApplication.jsx`, `api/realtime-session.js`, `api/verification/` |
 | Mentor posts (not community) | `client/src/api/mentorPosts.js`, `client/src/pages/community/MentorPostsPage.jsx` |
 | Stripe / payments | `client/src/api/stripe.js`, `server/routes/stripe.js`, `client/src/components/EmbeddedCheckoutPanel.jsx`. See `.cursor/skills/adding-stripe/SKILL.md`. |

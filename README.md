@@ -6,7 +6,7 @@ A paid mentorship marketplace connecting job seekers and early-career profession
 
 ## Project Status — Shipped (for AI context)
 
-> **Last updated:** May 24, 2026 (community + mentor application expansion). Copy this section when briefing an AI on what Bridge has already built.
+> **Last updated:** May 24, 2026 (community, mentor application, grouped nav, OpenAI Realtime GA). Copy this section when briefing an AI on what Bridge has already built.
 
 Bridge is pre-revenue, demo-ready, and deployed on Vercel from `main`. The stack is React 19 + Vite 8 + Tailwind v4 (client), Supabase (auth, Postgres, RLS, Realtime, Storage), Stripe (session checkout + subscriptions), Calendly (scheduling), and Vercel serverless functions (`api/`). Local dev uses Express 5 in `server/` as an API mirror.
 
@@ -74,8 +74,8 @@ Legacy redirects: `/about` and `/why-us` → `/company`.
 | Route | Page |
 |---|---|
 | `/dashboard/*` | Role-aware dashboard shell (see below) |
-| `/community` | Community hub — live feed + 8 pillar cards (`quiet-authority`) |
-| `/community/:categoryId` | Pillar feed — filter, sort, inline comments |
+| `/community`, `/dashboard/community` | Community hub — live feed + 8 pillar cards (`quiet-authority`); signed-in users use dashboard shell |
+| `/community/:categoryId`, `/dashboard/community/:categoryId` | Pillar feed — filter, sort, inline comments |
 | `/community/posts` | Mentor advice posts directory (separate from community posts) |
 | `/profile`, `/settings` | Standalone profile + settings |
 | `/booking/finalize` | Stripe finalize → Calendly scheduling |
@@ -97,11 +97,13 @@ Legacy redirects: `/about` and `/why-us` → `/company`.
 
 ### Dashboard (`/dashboard/*`)
 
-Shared: home (now strip, next session, at-a-glance), sessions, profile, settings, notification panel, first-login onboarding modal, post-call review modal, **Community** nav link.
+Shared: home (now strip, next session, at-a-glance), sessions, profile, settings, notification panel, first-login onboarding modal, post-call review modal.
 
-**Mentee-only:** saved mentors, browse mentors (embedded), mentor profile (embedded), resume review (embedded), messages, plan/pricing (embedded), billing.
+**Top bar (grouped dropdowns):** mentees — **Explore** (mentors, community), **Activity** (sessions, messages, saved), **Tools** (resume); mentors — **Work** (sessions, messages, community), **Mentor** (availability, earnings, reviews). Implemented in `DashboardTopBar.jsx` + `client/src/components/nav/dashboardNavModel.js`.
 
-**Mentor-only:** availability (Calendly connect + event type), earnings, reviews, profile health card.
+**Mentee-only:** saved mentors, browse mentors (embedded), mentor profile (embedded), resume review (embedded), messages, plan/pricing (embedded), billing, community at `/dashboard/community`.
+
+**Mentor-only:** availability (Calendly connect + event type), earnings, reviews, profile health card, community at `/dashboard/community`.
 
 Role is derived from auth metadata (`accountRole`) with an in-dashboard role toggle.
 
@@ -115,7 +117,7 @@ Pre-join device preview, mic/camera toggle, screen share, in-call text chat with
 |---|---|---|
 | Mentor matching ranking | OpenAI GPT-4o-mini | 3 uses (`ai_usage`) |
 | Resume review | Anthropic Claude Sonnet | 1 use |
-| Intake call (voice) | OpenAI Realtime API | Per session |
+| Intake call (voice) | OpenAI Realtime API (GA `client_secrets` via `api/realtime-session.js`) | Per session |
 | Intake summary | OpenAI via `ai-proxy` | Per session |
 | Resume → profile extract | OpenAI via `ai-proxy` | On upload |
 | Mentor verification scoring | Server-side AI in `api/_lib/verification/` | Per application |
@@ -183,7 +185,8 @@ Three route-driven palettes: `modern-signal`, `grounded-guidance`, `quiet-author
 
 - **Mentor discovery** — filterable directory with tier badges, session rates, availability, and AI-powered goal-based matching
 - **Mentor application & onboarding** — voice-first application at `/apply/mentor` (OpenAI Realtime) → admin review → 5-step profile wizard at `/onboarding/mentor`; tiers and rates assigned server-side by a scoring algorithm
-- **Community** — authenticated hub at `/community` with live feed and 8 mentorship-pillar sub-communities; questions, wins, discussions, and resources with upvotes and flat comments; active mentors get a trust badge
+- **Community** — authenticated hub at `/dashboard/community` (aliases from `/community`) with live feed and 8 mentorship-pillar sub-communities; questions, wins, discussions, and resources with upvotes and flat comments; active mentors get a trust badge
+- **Grouped navigation** — marketing `Navbar` (Discover / Tools / Company dropdowns) and dashboard `DashboardTopBar` (role-based groups); flat underline chrome, not pill bubbles
 - **Mentor value stack** — impact stats, earned badges, short advice posts on profiles, session action items, featured mentor spotlight
 - **Admin review panel** — approve or reject mentor applications at `/admin`, with scoring breakdowns
 - **Session booking** — Stripe Checkout (price locked server-side); Calendly integration for scheduling (OAuth, embedded widget, webhook)
@@ -235,7 +238,8 @@ bridge/
 ├── client/
 │   └── src/
 │       ├── api/            # Client data modules — one file per domain
-│       ├── components/     # Shared UI components
+│       ├── components/     # Shared UI (Navbar, DashboardTopBar, nav/ menus)
+│       │   └── nav/        # mainNavModel, NavMenus, navChrome, dashboardNavModel
 │       ├── context/        # AuthContext + useAuth hook
 │       ├── pages/          # Route-level page components
 │       │   └── community/  # CommunityHub, CommunityCategory, communityShared

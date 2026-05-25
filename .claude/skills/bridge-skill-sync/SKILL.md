@@ -55,6 +55,7 @@ candidate for an update:
 | `client/src/index.css` (new `@utility`, keyframe, palette token usage) | `bridge-ui`, `bridge-motion` |
 | `client/src/appearance.css` (palette tokens, theme colors) | `bridge-ui`, `bridge-context` |
 | `client/src/components/*` new shared component | `bridge-ui` |
+| `client/src/components/nav/*`, `Navbar.jsx`, `DashboardTopBar.jsx`, `authNav.js` | `bridge-context`, `bridge-ui` |
 | `client/src/pages/landing/*` new section | `bridge-web-design` |
 | `client/src/api/supabase.js` or singleton patterns | `bridge-data-flow`, `bridge-context` |
 | `client/src/api/ai*.js`, `api/prompts/*` | `bridge-ai-features` |

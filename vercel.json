@@ -20,7 +20,7 @@
     { "source": "/api/checkr-webhook", "destination": "/api/utils/[action]?action=checkr-webhook" },
     { "source": "/api/verification/apply", "destination": "/api/verification/[action]?action=apply" },
     { "source": "/api/verification/application-status", "destination": "/api/verification/[action]?action=application-status" },
-    { "source": "/api/user-names", "destination": "/api/utils/[action]?action=user-names" },
+    { "source": "/api/billing-portal", "destination": "/api/utils/[action]?action=billing-portal" },
     { "source": "/api/mentor-room-slug", "destination": "/api/utils/[action]?action=mentor-room-slug" },
     { "source": "/api/booking-confirm-scheduled", "destination": "/api/booking-confirm-scheduled.js" },
     { "source": "/api/verification/start",                       "destination": "/api/verification/[action]?action=start" },

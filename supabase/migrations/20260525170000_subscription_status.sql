@@ -1,0 +1,14 @@
+-- Subscription fields live in user_settings.settings (jsonb).
+-- Expected shape (written by Stripe checkout + webhooks):
+--
+-- {
+--   subscription_status: 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | null,
+--   subscription_plan: 'monthly' | 'annual' | null,
+--   stripe_subscription_id: text | null,
+--   stripe_customer_id: text | null,
+--   trial_end: timestamptz ISO string | null,
+--   current_period_end: timestamptz ISO string | null,
+--   is_student: boolean
+-- }
+--
+-- No DDL change required — documentation migration only.

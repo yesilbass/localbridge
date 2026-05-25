@@ -7,6 +7,7 @@ import { getAIResumeReview } from '../api/aiResumeReview';
 import { uploadResumeToBucket, saveResumeReview, getResumeReview, deleteResumeReview } from '../api/resumeReview';
 import { hasReachedLimit } from '../api/aiUsage';
 import PageGutterAtmosphere from '../components/PageGutterAtmosphere';
+import SubscriptionGate from '../components/SubscriptionGate';
 import { focusRing } from '../ui';
 import { useContent } from '../content';
 
@@ -407,7 +408,9 @@ export default function ResumeReview({ embedded = false }) {
                 <p className="font-display text-base font-semibold text-amber-900">{s.resumeReview.limitReachedTitle}</p>
                 <p className="mt-1.5 text-sm text-amber-800/80">{s.resumeReview.limitReachedBody}</p>
               </div>
-            ) : <>
+            ) : (
+            <SubscriptionGate feature="ai_resume">
+            <>
             {/* API error */}
             {apiError && (
               <div className="mb-6 rounded-2xl border border-red-200/80 bg-red-50/90 px-5 py-4">
@@ -540,7 +543,9 @@ export default function ResumeReview({ embedded = false }) {
             <p className="mt-3 text-center text-xs text-stone-400">
               {s.resumeReview.privacyNote}
             </p>
-            </>}
+            </>
+            </SubscriptionGate>
+            )}
           </>
         )}
 

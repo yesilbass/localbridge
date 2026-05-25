@@ -792,3 +792,21 @@ html.is-marketing-route .landing-root > div[aria-hidden],
 html.is-marketing-route main section > div[aria-hidden].pointer-events-none {
   display: none !important;
 }
+
+.pricing-plan-card {
+  box-shadow:
+    0 0 0 1px var(--bridge-shadow-ring),
+    0 2px 4px var(--bridge-shadow-soft),
+    0 16px 40px -12px color-mix(in srgb, var(--color-primary) 28%, transparent),
+    0 48px 96px -20px color-mix(in srgb, var(--color-primary) 32%, transparent);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pricing-plan-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px var(--bridge-shadow-ring),
+    0 2px 4px var(--bridge-shadow-soft),
+    0 20px 48px -10px color-mix(in srgb, var(--color-primary) 35%, transparent),
+    0 56px 110px -18px color-mix(in srgb, var(--color-primary) 38%, transparent);
+}

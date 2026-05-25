@@ -12,8 +12,10 @@ import Footer from './components/Footer';
 import BridgeGlobalAtmosphere from './components/BridgeGlobalAtmosphere';
 import FeedbackFAB from './components/FeedbackFAB';
 import ErrorBoundary from './components/ErrorBoundary';
-import { AuthPage, PublicPage, AuthenticatedProductRedirect, CommunityEntryGate } from './components/routing/RouteGuards';
+import { AuthPage, PublicPage, AuthenticatedProductRedirect, CommunityEntryGate, CommunitySubscriptionGate } from './components/routing/RouteGuards';
+import TrialBanner from './components/TrialBanner';
 import { isPublicMentorProfileDetail } from './utils/mentorProfileRoute';
+import { PUBLIC_NAVBAR_H } from './utils/mentorProfileLayout';
 import LegacyCompanyRedirect from './components/routing/LegacyCompanyRedirect';
 import DevPortal from './pages/DevPortal/index.jsx';
 
@@ -52,12 +54,13 @@ const MentorPostsPage    = lazy(() => import('./pages/community/MentorPostsPage.
 const Privacy   = lazy(() => import('./pages/footer/Privacy.jsx'));
 const Terms     = lazy(() => import('./pages/footer/Terms.jsx'));
 const Cookies   = lazy(() => import('./pages/footer/Cookies.jsx'));
+const SubscriptionSuccess = lazy(() => import('./pages/SubscriptionSuccess'));
 
 function PageLoadingFallback() {
   return (
     <div
       className="flex flex-1 flex-col items-center justify-center"
-      style={{ minHeight: 'calc(100vh - 5.25rem)' }}
+      style={{ minHeight: `calc(100vh - ${PUBLIC_NAVBAR_H})` }}
       aria-hidden="true"
     >
       <div
@@ -123,9 +126,11 @@ function AppContent() {
       {showScrollProgress && <ScrollProgress />}
       {!isVideoCall && !isAuthPage && <MagneticPointer />}
       {!hideNavbar && <Navbar />}
+      <TrialBanner />
       <div
         key={location.pathname}
-        className={`relative z-10 flex flex-1 flex-col animate-page-enter ${isLanding || isDashboard || isAuthPage || isMentorProfileDetail ? '' : 'pt-[5.25rem]'}`}
+        className={`relative z-10 flex flex-1 flex-col animate-page-enter ${isLanding || isDashboard || isAuthPage || isMentorProfileDetail ? '' : ''}`}
+        style={isLanding || isDashboard || isAuthPage || isMentorProfileDetail ? undefined : { paddingTop: PUBLIC_NAVBAR_H }}
       >
         <ErrorBoundary>
         <Suspense fallback={<PageLoadingFallback />}>
@@ -147,6 +152,7 @@ function AppContent() {
           <Route path="/intake/:sessionId" element={<IntakeCall />} />
           <Route path="/booking/finalize" element={<BookingFinalize />} />
           <Route path="/pricing" element={<PublicPage><AuthenticatedProductRedirect><Pricing /></AuthenticatedProductRedirect></PublicPage>} />
+          <Route path="/subscription/success" element={<PublicPage><SubscriptionSuccess /></PublicPage>} />
           <Route path="/resume" element={<PublicPage><AuthenticatedProductRedirect><ResumeReview /></AuthenticatedProductRedirect></PublicPage>} />
           <Route path="/company" element={<PublicPage><Company /></PublicPage>} />
           <Route path="/how-it-works" element={<PublicPage><HowItWorks /></PublicPage>} />

@@ -8,6 +8,7 @@ import { isMentorAccount } from '../../utils/accountRole';
 import AppLink from '../../components/AppLink';
 import { focusRing } from '../../ui';
 import MentorMatchWizard from '../../components/MentorMatchWizard';
+import SubscriptionGate from '../../components/SubscriptionGate';
 import { getAIMatchedMentors, saveMenteeAssessment, loadMenteeAssessment } from '../../api/aiMatching';
 import { getRemainingUses, hasReachedLimit } from '../../api/aiUsage';
 import { getCalendlyEventTypeSummary } from '../../api/calendly';
@@ -19,7 +20,6 @@ import { useContent } from '../../content';
 import { useMentorBooking } from '../../hooks/useMentorBooking';
 import { MentorPostsStrip } from '../../components/MentorPostsStrip';
 import HeroBookModal from '../mentor-profile/HeroBookModal';
-import SubscribeUnlockModal from '../mentor-profile/SubscribeUnlockModal';
 
 function FetchErrorBanner({ message, onRetry }) {
   return (
@@ -55,7 +55,7 @@ function FetchErrorBanner({ message, onRetry }) {
 }
 
 export default function Mentors({ embedded = false }) {
-  const { user } = useAuth();
+  const { user, isSubscribed, settingsLoading } = useAuth();
   const { s } = useContent();
   const navigate  = useNavigate();
   const location  = useLocation();
@@ -99,10 +99,9 @@ export default function Mentors({ embedded = false }) {
     beginBook,
     bookMentor,
     closeBook,
-    unlock,
-    closeUnlock,
     planPath,
     subscriptionLoading,
+    isSubscribed: bookingAllowed,
   } = useMentorBooking({ embedded });
 
   // Debounce search input
@@ -186,7 +185,7 @@ export default function Mentors({ embedded = false }) {
 
   async function handleAiMatchClick() {
     if (!user) { navigate('/login', { state: { message: 'Please log in to use AI mentor matching' } }); return; }
-    if (await hasReachedLimit(user.id, 'mentor_match')) return;
+    if (!isSubscribed) { setWizardOpen(true); return; }
     const { data: existing } = await loadMenteeAssessment(user.id);
     setPrefillData(existing ?? null);
     setWizardOpen(true);
@@ -959,7 +958,9 @@ export default function Mentors({ embedded = false }) {
       </div>
 
       {wizardOpen && (
-        <MentorMatchWizard prefill={prefillData} onComplete={handleWizardComplete} onClose={() => setWizardOpen(false)} />
+        <SubscriptionGate feature="ai_matching">
+          <MentorMatchWizard prefill={prefillData} onComplete={handleWizardComplete} onClose={() => setWizardOpen(false)} />
+        </SubscriptionGate>
       )}
 
       <HeroBookModal
@@ -968,15 +969,6 @@ export default function Mentors({ embedded = false }) {
         mentor={bookMentor}
         user={user}
         utmMedium="mentors_browse"
-      />
-
-      <SubscribeUnlockModal
-        open={unlock.open}
-        intent={unlock.intent}
-        mentor={unlock.mentor}
-        user={user}
-        pricingPath={planPath}
-        onClose={closeUnlock}
       />
     </Root>
   );
