@@ -70,7 +70,8 @@ candidate for an update:
 | `package.json` major dep change | `bridge-context` |
 | Stripe-related (`api/create-*-checkout.js`, `EmbeddedCheckoutPanel.jsx`) | `.cursor/skills/adding-stripe/SKILL.md` |
 | WebRTC / video signaling | `bridge-data-flow`, `bridge-debugging` |
-| Google Calendar OAuth | `bridge-data-flow`, `shipping-features` |
+| Calendly OAuth | `bridge-data-flow`, `shipping-features` |
+| Community (direct Supabase) | `bridge-data-flow`, `bridge-ui` |
 
 A code change can affect more than one skill — sync them together if so.
 

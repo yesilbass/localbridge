@@ -9,6 +9,10 @@ export async function getMentorById(mentorProfileId) {
   if (error) return { data: null, error };
   if (!data) return { data: null, error: null };
 
+  const { data: menteeCount } = await supabase.rpc('get_distinct_mentee_count', {
+    mentor_profile_id: mentorProfileId,
+  });
+
   return {
     data: {
       mentor: data,
@@ -16,27 +20,33 @@ export async function getMentorById(mentorProfileId) {
         count: data.total_sessions ?? 0,
         average: data.rating ?? null,
       },
+      menteesHelped: menteeCount ?? 0,
     },
     error: null,
   };
 }
 
-export async function getAllMentors({ search = '', industry = '', tier = '', availableOnly = false, rateMin = '', rateMax = '', sortBy = 'rating', page = 0, pageSize = 12, includeUnverified = false } = {}) {
+export async function getAllMentors({
+  search = '',
+  industry = '',
+  tier = '',
+  category = '',
+  subcategory = '',
+  availableOnly = false,
+  rateMin = '',
+  rateMax = '',
+  sortBy = 'rating',
+  page = 0,
+  pageSize = 12,
+  includeUnverified = false,
+} = {}) {
   const sortColumn = sortBy === 'experience' ? 'years_experience' : sortBy === 'sessions' ? 'total_sessions' : 'rating';
 
   let query = supabase
     .from("mentor_profiles")
     .select("*", { count: "exact" })
-    // Seeded/demo mentors have onboarding_complete = NULL — keep them visible.
-    // Hide only mentors who started real onboarding but didn't finish (false).
-    .or('onboarding_complete.is.null,onboarding_complete.eq.true');
-
-  // Only show active mentors. Seeded/demo mentors have mentor_status NULL
-  // (pre-migration rows) and are kept visible; new mentors must be approved.
-  query = query.or('mentor_status.is.null,mentor_status.eq.active');
-
-  // verification_status/verification_tier are legacy columns from the old system.
-  // New mentors are gated solely by mentor_status (already filtered above).
+    .or('onboarding_complete.is.null,onboarding_complete.eq.true')
+    .or('mentor_status.is.null,mentor_status.eq.active');
 
   if (search) {
     query = query.or(`name.ilike.%${search}%,title.ilike.%${search}%,company.ilike.%${search}%`);
@@ -46,6 +56,12 @@ export async function getAllMentors({ search = '', industry = '', tier = '', ava
   }
   if (tier) {
     query = query.eq("tier", tier);
+  }
+  if (category) {
+    query = query.contains('mentorship_categories', [category]);
+  }
+  if (subcategory) {
+    query = query.contains('mentorship_subcategories', [subcategory]);
   }
   if (availableOnly) {
     query = query.eq("available", true);
@@ -68,10 +84,11 @@ export async function getAllMentors({ search = '', industry = '', tier = '', ava
 
 export async function getFeaturedMentors() {
   const { data, error } = await supabase.from('mentor_profiles').select('*')
+    .eq('is_featured', true)
     .or('mentor_status.is.null,mentor_status.eq.active')
     .or('onboarding_complete.is.null,onboarding_complete.eq.true')
     .order('rating', { ascending: false })
-    .limit(6);
+    .limit(3);
   if (error) throw error;
   return data || [];
 }

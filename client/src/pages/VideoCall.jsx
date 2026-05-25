@@ -460,6 +460,66 @@ function DrawCanvas({ enabled, color, strokes, onStroke }) {
   );
 }
 
+// ─── MentorActionItemsModal ───────────────────────────────────────────────────
+
+function MentorActionItemsModal({ session, onDone, onSkip }) {
+  const [items, setItems] = useState(['', '', '']);
+  const [mentorNotes, setMentorNotes] = useState('');
+  const [saving, setSaving] = useState(false);
+  const menteeName = session?.mentee_name?.split(/\s+/)[0] ?? 'your mentee';
+
+  function updateItem(index, value) {
+    setItems((prev) => prev.map((item, i) => (i === index ? value : item)));
+  }
+
+  async function submit() {
+    setSaving(true);
+    const actionItems = items.map((text) => text.trim()).filter(Boolean).slice(0, 5).map((text) => ({ text, completed: false }));
+    await supabase.from('sessions').update({
+      action_items: actionItems,
+      mentor_notes: mentorNotes.trim() || null,
+    }).eq('id', session.id);
+    setSaving(false);
+    onDone();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl bg-stone-900 p-6 ring-1 ring-white/10">
+        <h2 className="text-base font-bold text-white">What should {menteeName} do next?</h2>
+        <p className="mt-1 text-xs text-stone-400">Up to 5 action items for your mentee.</p>
+        <div className="mt-4 space-y-2">
+          {items.map((item, i) => (
+            <input
+              key={i}
+              value={item}
+              onChange={(e) => updateItem(i, e.target.value)}
+              placeholder={`Action item ${i + 1}`}
+              className="w-full rounded-xl px-3 py-2.5 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-orange-500/50"
+              style={{ backgroundColor: '#292524', color: '#ffffff' }}
+            />
+          ))}
+        </div>
+        <label className="mt-4 block text-xs font-semibold text-stone-400">Private notes for this mentee</label>
+        <textarea
+          value={mentorNotes}
+          onChange={(e) => setMentorNotes(e.target.value)}
+          rows={3}
+          placeholder="Only you can see these…"
+          className="mt-1 w-full resize-none rounded-xl px-3 py-2.5 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-orange-500/50"
+          style={{ backgroundColor: '#292524', color: '#ffffff' }}
+        />
+        <div className="mt-4 flex items-center gap-2">
+          <button type="button" onClick={submit} disabled={saving} className="flex-1 rounded-xl bg-orange-500 py-2.5 text-sm font-bold text-white hover:bg-orange-400 disabled:opacity-50">
+            {saving ? 'Saving…' : 'Save & continue'}
+          </button>
+          <button type="button" onClick={onSkip} className="text-sm text-stone-400 hover:text-stone-300">Skip</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── MentorMenteeReviewModal ──────────────────────────────────────────────────
 
 function MentorMenteeReviewModal({ session, menteeId, onDone }) {
@@ -614,6 +674,7 @@ export default function VideoCall() {
   const [showModPanel, setShowModPanel] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [showMenteeReview, setShowMenteeReview] = useState(false);
+  const [showActionItems, setShowActionItems] = useState(false);
   const [toast, setToast]             = useState(null);
 
   // ── Chat
@@ -1044,7 +1105,7 @@ export default function VideoCall() {
     if (isMentor) {
       // Mentor: maybe show mentee review
       if (sessionEndedByMentor.current) {
-        setShowMenteeReview(true);
+        setShowActionItems(true);
       } else {
         navigate('/dashboard');
       }
@@ -1316,7 +1377,7 @@ export default function VideoCall() {
   if (callStatus === 'prejoin') {
     return <PreJoinScreen session={session} isMentor={isMentor} user={user} onJoin={handleJoin} />;
   }
-  if (callStatus === 'ended' && !showMenteeReview) {
+  if (callStatus === 'ended' && !showMenteeReview && !showActionItems) {
     // Navigation handled by effect; show brief ended screen as fallback
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-stone-950">
@@ -1332,6 +1393,14 @@ export default function VideoCall() {
       {toast && <Toast text={toast.text} type={toast.type} onDismiss={() => setToast(null)} />}
 
       {/* Mentor mentee-review modal */}
+      {showActionItems && (
+        <MentorActionItemsModal
+          session={session}
+          onDone={() => { setShowActionItems(false); setShowMenteeReview(true); }}
+          onSkip={() => { setShowActionItems(false); setShowMenteeReview(true); }}
+        />
+      )}
+
       {showMenteeReview && (
         <MentorMenteeReviewModal
           session={session}

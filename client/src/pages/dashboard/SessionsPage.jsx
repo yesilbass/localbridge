@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useContent } from '../../content';
+import supabase from '../../api/supabase';
 import { Calendar, Check, X as XIcon, Clock, Video, List, CalendarDays, Star, AlertTriangle } from 'lucide-react';
 import { useDashboardSessions } from './dashboardHooks.js';
 import EmptyState from './EmptyState.jsx';
@@ -8,7 +9,6 @@ import SessionCalendar from './SessionCalendar.jsx';
 import CancellationModal from '../../components/CancellationModal.jsx';
 import ReviewModal from '../../components/ReviewModal.jsx';
 import { getMyReviewedSessionIds } from '../../api/reviews';
-import supabase from '../../api/supabase';
 
 function formatDateTimeRaw(iso) {
   const d = new Date(iso);
@@ -56,6 +56,8 @@ function StatusChip({ status }) {
 
 function SessionCard({ session, isMentor, mentor, onAccept, onDecline, onCancel, onReview, reviewed, busy }) {
   const { s } = useContent();
+  const [actionItems, setActionItems] = useState(() => session.action_items ?? []);
+  useEffect(() => { setActionItems(session.action_items ?? []); }, [session.id, session.action_items]);
   const status = String(session.status ?? 'pending').toLowerCase();
   const isPast = session.scheduled_date && new Date(session.scheduled_date).getTime() <= Date.now() - 30 * 60 * 1000;
   const otherName = isMentor
@@ -121,6 +123,27 @@ function SessionCard({ session, isMentor, mentor, onAccept, onDecline, onCancel,
               </p>
             ) : null;
           })()}
+          {!isMentor && status === 'completed' && actionItems.length > 0 && (
+            <ul className="mt-3 space-y-1.5">
+              {actionItems.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-[12px]" style={{ color: 'var(--bridge-text-secondary)' }}>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(item.completed)}
+                    onChange={async () => {
+                      const next = actionItems.map((it, i) =>
+                        i === idx ? { ...it, completed: !it.completed } : it
+                      );
+                      setActionItems(next);
+                      await supabase.from('sessions').update({ action_items: next }).eq('id', session.id);
+                    }}
+                    className="mt-0.5"
+                  />
+                  <span className={item.completed ? 'line-through opacity-60' : ''}>{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 

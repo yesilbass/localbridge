@@ -366,6 +366,16 @@ html.theme-dark {
     radial-gradient(ellipse 38% 32% at 10% 28%, color-mix(in srgb, var(--color-primary-hover) 12%, transparent), transparent 56%);
 }
 
+/* Calendly inline embed — fill shell, no letterboxing */
+.bridge-calendly-shell .calendly-inline-widget {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.bridge-calendly-shell .calendly-inline-widget iframe {
+  width: 100% !important;
+}
+
 @utility custom-scrollbar {
   &::-webkit-scrollbar {
     width: 6px;

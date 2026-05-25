@@ -53,7 +53,7 @@ Don't remove deps without searching the codebase exhaustively first
 
 ## Bundle size wins (highest leverage first)
 
-1. **Code-split routes**: `App.jsx` imports every page eagerly. Convert heavy pages (`VideoCall`, `MentorProfile`, `MentorOnboarding`, `Settings`, `ResumeReview`, `IntakeCall`) to `React.lazy` + `<Suspense fallback={<LoadingSpinner />}>`. Each is 50–100 KB.
+1. **Code-split routes**: heavy pages (`VideoCall`, `MentorProfile`, `MentorOnboardingFlow`, `Settings`, `ResumeReview`, `IntakeCall`, `CommunityHub`) use `React.lazy` + `<Suspense>`.
 2. **Lazy-load 3D**: `@react-three/fiber` is huge. Wrap any `<Canvas>` in `React.lazy`. Show a static SVG fallback.
 3. **Drop unused Supabase methods** — `@supabase/supabase-js` tree-shakes okay but make sure you're not importing the whole `auth-helpers` separately.
 4. **`googleapis`** in client — should NOT be in client bundle. If it appears, move calendar work to server endpoints.
@@ -143,7 +143,7 @@ If a file exceeds these, consider splitting:
 | CSS file | 800 lines (`index.css` is exempt — keep utilities centralised) |
 
 Bridge has known offenders (`MentorProfile.jsx`, `Profile.jsx`, `VideoCall.jsx`,
-`Settings.jsx`, `MentorOnboarding.jsx`). Split only when refactoring an
+`Settings.jsx`, `MentorOnboardingFlow.jsx`). Split only when refactoring an
 adjacent feature; don't refactor purely for line count.
 
 ## Type safety in JS-only repo

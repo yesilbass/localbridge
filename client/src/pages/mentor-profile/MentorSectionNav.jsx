@@ -124,6 +124,7 @@ export default function MentorSectionNav({ reviewCount = 0, heroCtaRef, inHero =
       id: 'reviews',
       label: reviewCount > 0 ? `Reviews (${reviewCount})` : 'Reviews',
     },
+    { id: 'posts', label: 'Posts' },
   ];
 
   const copyLink = useCallback(() => {

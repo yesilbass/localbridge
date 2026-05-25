@@ -62,74 +62,123 @@ export default async function handler(req, res) {
 
 // ─── apply ────────────────────────────────────────────────────────────────────
 
+const applySchema = z.object({
+  full_name: z.string().min(2).max(120),
+  current_role: z.string().min(2).max(100),
+  location: z.string().min(2).max(120),
+  linkedin_url: z.string().url().optional().or(z.literal('')).transform((v) => v || null),
+  call_transcript_id: z.string().uuid(),
+  transcript: z.array(z.object({ role: z.string(), text: z.string() })).optional(),
+  summary: z.string().max(8000).optional(),
+  mentorship_description: z.string().max(2000).optional(),
+  why_i_mentor: z.string().max(400).optional(),
+});
+
 async function handleApply(req, res) {
   if (req.method !== 'POST') return jsonError(res, 405, 'Method not allowed');
   const { user, error: authErr } = await verifyAuthUser(req);
   if (!user) return jsonError(res, 401, authErr || 'Unauthorized');
 
-  const { profile, error: pErr } = await fetchOwnMentorProfile(user.id);
-  if (pErr || !profile) return jsonError(res, 404, 'No mentor profile. Complete onboarding first.');
+  const body = validateJsonBody(req, applySchema);
+  if (body.error) return jsonError(res, 400, body.error);
+  const app = body.data;
 
-  if (['under_review', 'active'].includes(profile.mentor_status)) {
+  let { profile } = await fetchOwnMentorProfile(user.id);
+  if (profile && profile.mentor_status === 'rejected') {
+    profile = { ...profile, mentor_status: null };
+  }
+
+  if (profile && ['under_review', 'active'].includes(profile.mentor_status)) {
     return res.json({ ok: true, alreadyApplied: true, mentorStatus: profile.mentor_status });
   }
-
-  const apiKey = process.env.CHECKR_API_KEY;
-  let candidateId = null;
-  let reportId = null;
-
-  if (apiKey) {
-    try {
-      const auth = Buffer.from(`${apiKey}:`).toString('base64');
-      const parts = (profile.name || '').trim().split(/\s+/);
-      const firstName = parts[0] || 'Unknown';
-      const lastName = parts.slice(1).join(' ') || 'Unknown';
-
-      const candRes = await fetch('https://api.checkr.com/v1/candidates', {
-        method: 'POST',
-        headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ first_name: firstName, last_name: lastName, email: profile.email }),
-      });
-      const cand = await candRes.json();
-      candidateId = cand?.id ?? null;
-
-      if (candidateId) {
-        const rptRes = await fetch('https://api.checkr.com/v1/reports', {
-          method: 'POST',
-          headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ package: 'tasker_standard', candidate_id: candidateId }),
-        });
-        const rpt = await rptRes.json();
-        reportId = rpt?.id ?? null;
-      }
-    } catch (err) {
-      console.error('[apply] Checkr error:', err?.message);
-    }
+  if (profile && profile.mentor_status === 'pending') {
+    return res.json({ ok: true, alreadyApplied: true, mentorStatus: 'pending' });
   }
 
-  let bodyData = {};
-  try {
-    const raw = req.body;
-    bodyData = typeof raw === 'string' ? JSON.parse(raw)
-      : Buffer.isBuffer(raw) ? JSON.parse(raw.toString('utf8'))
-      : (raw || {});
-  } catch {}
+  const email = user.email || profile?.email || null;
+  const verificationData = {
+    application: {
+      ...app,
+      submitted_at: new Date().toISOString(),
+    },
+  };
 
-  const { error: updateErr } = await supabase.from('mentor_profiles').update({
+  const profilePayload = {
+    user_id: user.id,
+    name: app.full_name,
+    email,
+    title: app.current_role,
+    linkedin_url: app.linkedin_url,
+    mentorship_description: app.mentorship_description || null,
+    why_i_mentor: app.why_i_mentor || null,
+    verification_data: verificationData,
     mentor_status: 'pending',
-    checkr_candidate_id: candidateId,
-    checkr_report_id: reportId,
-    checkr_status: 'pending',
     application_submitted_at: new Date().toISOString(),
-    verification_data: bodyData.verificationData || null,
-  }).eq('id', profile.id);
+    checkr_status: 'pending',
+  };
 
-  if (updateErr) {
-    console.error('[apply] profile update failed', updateErr);
-    return jsonError(res, 500, `Failed to submit application: ${updateErr.message}`);
+  if (profile?.id) {
+    const { error: updateErr } = await supabase
+      .from('mentor_profiles')
+      .update(profilePayload)
+      .eq('id', profile.id);
+    if (updateErr) {
+      console.error('[apply] profile update failed', updateErr);
+      return jsonError(res, 500, 'Failed to submit application');
+    }
+  } else {
+    const { data: inserted, error: insertErr } = await supabase
+      .from('mentor_profiles')
+      .insert(profilePayload)
+      .select('id')
+      .single();
+    if (insertErr || !inserted) {
+      console.error('[apply] profile insert failed', insertErr);
+      return jsonError(res, 500, 'Failed to submit application');
+    }
+    profile = { ...profilePayload, id: inserted.id };
   }
 
-  return res.json({ ok: true, reportId });
+  const mentorProfileId = profile.id;
+
+  const { run, error: runErr } = await ensureActiveRun(mentorProfileId);
+  if (runErr || !run) {
+    console.error('[apply] run create failed', runErr);
+    return jsonError(res, 500, 'Failed to submit application');
+  }
+
+  const transcriptText = (app.transcript || [])
+    .map((t) => `${t.role}: ${t.text}`)
+    .join('\n');
+
+  await writeStep({
+    runId: run.id,
+    component: 'expertise_interview',
+    status: 'passed',
+    score: COMPONENT_WEIGHTS.expertise_interview,
+    payload: {
+      call_transcript_id: app.call_transcript_id,
+      transcript_length: transcriptText.length,
+      full_name: app.full_name,
+      current_role: app.current_role,
+      location: app.location,
+    },
+    evaluation: {
+      summary: app.summary || null,
+      transcript: app.transcript || null,
+      mentorship_description: app.mentorship_description || null,
+      why_i_mentor: app.why_i_mentor || null,
+    },
+    idempotencyKey: `apply:${app.call_transcript_id}`,
+  });
+
+  await supabase.from('mentor_review_queue').insert({
+    run_id: run.id,
+    reason: 'Voice mentor application',
+    priority: 70,
+  });
+
+  return res.json({ ok: true, mentorProfileId });
 }
 
 // ─── application-status ───────────────────────────────────────────────────────

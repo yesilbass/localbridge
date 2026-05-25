@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { InlineWidget, useCalendlyEventListener } from 'react-calendly';
 
 function readCssVarColor(name, fallback) {
@@ -6,25 +6,48 @@ function readCssVarColor(name, fallback) {
   const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   if (!raw) return fallback;
   if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(raw)) return raw.replace('#', '');
-  // Convert rgb()/oklch() etc. into hex via canvas
   try {
-    const c = document.createElement('canvas').getContext('2d');
-    c.fillStyle = raw;
-    const computed = c.fillStyle;
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.fillStyle = raw;
+    const computed = ctx.fillStyle;
     if (/^#([0-9a-f]{6})$/i.test(computed)) return computed.replace('#', '');
+    if (/^#([0-9a-f]{3})$/i.test(computed)) {
+      const [, r, g, b] = computed.match(/^#(.)(.)(.)$/i) || [];
+      if (r && g && b) return `${r}${r}${g}${g}${b}${b}`;
+    }
   } catch { /* fall back */ }
   return fallback;
 }
 
-function usePageSettings() {
-  return useMemo(() => ({
+function buildPageSettings() {
+  return {
     backgroundColor: readCssVarColor('--bridge-surface', 'ffffff'),
     primaryColor: readCssVarColor('--color-primary', 'f97316'),
     textColor: readCssVarColor('--bridge-text', '0c0a09'),
     hideEventTypeDetails: false,
     hideLandingPageDetails: true,
     hideGdprBanner: true,
-  }), []);
+  };
+}
+
+function usePageSettings() {
+  const [pageSettings, setPageSettings] = useState(buildPageSettings);
+
+  useEffect(() => {
+    const refresh = () => setPageSettings(buildPageSettings());
+    window.addEventListener('bridge-theme-change', refresh);
+    const obs = new MutationObserver(refresh);
+    obs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-palette'],
+    });
+    return () => {
+      window.removeEventListener('bridge-theme-change', refresh);
+      obs.disconnect();
+    };
+  }, []);
+
+  return pageSettings;
 }
 
 function useReducedMotion() {
@@ -90,8 +113,14 @@ export default function CalendlyInlineWidget({
 }) {
   const containerRef = useRef(null);
   const [visible, setVisible] = useState(false);
+  const [widgetHeight, setWidgetHeight] = useState(minHeight);
   const reduced = useReducedMotion();
   const pageSettings = usePageSettings();
+  const surfaceHex = pageSettings.backgroundColor;
+
+  useEffect(() => {
+    setWidgetHeight(minHeight);
+  }, [url, minHeight]);
 
   useEffect(() => {
     if (visible) return;
@@ -106,27 +135,42 @@ export default function CalendlyInlineWidget({
     return () => obs.disconnect();
   }, [visible]);
 
+  const onCalendlyMessage = useCallback((event) => {
+    if (event.origin !== 'https://calendly.com') return;
+    if (event.data?.event !== 'calendly.page_height') return;
+    const next = Number(event.data?.payload?.height);
+    if (!Number.isFinite(next) || next <= 0) return;
+    setWidgetHeight(Math.max(Math.ceil(next), 420));
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('message', onCalendlyMessage);
+    return () => window.removeEventListener('message', onCalendlyMessage);
+  }, [onCalendlyMessage]);
+
   return (
     <div
       ref={containerRef}
-      className="relative overflow-hidden rounded-3xl"
+      className="bridge-calendly-shell relative overflow-hidden rounded-3xl"
       style={{
-        backgroundColor: 'var(--bridge-surface)',
-        boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 24px 48px -24px rgba(0,0,0,0.18)',
-        minHeight,
+        backgroundColor: `#${surfaceHex}`,
+        boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+        height: widgetHeight,
+        minHeight: widgetHeight,
       }}
     >
       {!visible || !url ? (
-        <Skeleton minHeight={minHeight} reduced={reduced} />
+        <Skeleton minHeight={widgetHeight} reduced={reduced} />
       ) : (
         <>
           <Listener onScheduled={onScheduled} />
           <InlineWidget
+            key={`${url}-${pageSettings.backgroundColor}-${pageSettings.primaryColor}-${pageSettings.textColor}`}
             url={url}
             prefill={prefill}
             utm={utm}
             pageSettings={pageSettings}
-            styles={{ height: `${minHeight}px`, minWidth: '320px' }}
+            styles={{ height: `${widgetHeight}px`, minWidth: '100%', width: '100%' }}
           />
         </>
       )}

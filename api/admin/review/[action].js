@@ -28,6 +28,7 @@ export default async function handler(req, res) {
     case 'list':    return handleList(req, res);
     case 'detail':  return handleDetail(req, res);
     case 'decide':  return handleDecide(req, res);
+    case 'mentor-flags': return handleMentorFlags(req, res);
     default:        return jsonError(res, 404, 'Not found');
   }
 }
@@ -73,7 +74,7 @@ async function handleDetail(req, res) {
       id, run_id, reason, priority, decision, decision_notes, decided_at, decided_by, created_at,
       mentor_verification_runs (
         id, mentor_profile_id, score, tier, status, started_at, completed_at, components,
-        mentor_profiles ( id, name, email, title, company, image_url, linkedin_url, bio )
+        mentor_profiles ( id, name, email, title, company, image_url, linkedin_url, bio, mentorship_categories, is_featured, verification_data, mentor_status )
       )
     `)
     .eq('id', queueId)
@@ -144,10 +145,20 @@ async function handleDecide(req, res) {
     const finalTier = tierForScore(finalScore);
 
     if (body.data.decision === 'approve') {
+      const { data: mentorRow } = await supabase
+        .from('mentor_profiles')
+        .select('id, user_id, name, email, verification_data, mentorship_description, why_i_mentor')
+        .eq('id', run.mentor_profile_id)
+        .maybeSingle();
+
+      const app = mentorRow?.verification_data?.application || {};
+      const firstName = (mentorRow?.name || app.full_name || 'there').split(/\s+/)[0];
+
       await supabase
         .from('mentor_verification_runs')
         .update({ status: 'passed', completed_at: new Date().toISOString(), score: finalScore, tier: finalTier })
         .eq('id', run.id);
+
       await supabase
         .from('mentor_profiles')
         .update({
@@ -155,8 +166,31 @@ async function handleDecide(req, res) {
           verification_score: finalScore,
           verification_tier: finalTier,
           verified_at: new Date().toISOString(),
+          mentor_status: 'active',
+          available: true,
+          onboarding_complete: false,
+          mentorship_description: app.mentorship_description || mentorRow?.mentorship_description || null,
+          why_i_mentor: app.why_i_mentor || mentorRow?.why_i_mentor || null,
+          name: app.full_name || mentorRow?.name || null,
+          title: app.current_role || null,
+          linkedin_url: app.linkedin_url || null,
         })
         .eq('id', run.mentor_profile_id);
+
+      if (mentorRow?.user_id) {
+        try {
+          await supabase.auth.admin.updateUserById(mentorRow.user_id, {
+            user_metadata: { role: 'mentor' },
+          });
+        } catch (authErr) {
+          console.error('[admin/review] could not update user role', authErr);
+        }
+      }
+
+      await sendMentorApprovalEmail({
+        email: mentorRow?.email || user.email,
+        firstName,
+      });
     } else if (body.data.decision === 'reject') {
       await supabase
         .from('mentor_verification_runs')
@@ -164,7 +198,7 @@ async function handleDecide(req, res) {
         .eq('id', run.id);
       await supabase
         .from('mentor_profiles')
-        .update({ verification_status: 'rejected', verification_tier: 'bronze' })
+        .update({ verification_status: 'rejected', verification_tier: 'bronze', mentor_status: 'rejected' })
         .eq('id', run.mentor_profile_id);
     } else {
       // request_more_info: keep run in_progress, wizard will reopen.
@@ -180,4 +214,47 @@ async function handleDecide(req, res) {
   }
 
   return res.json({ ok: true });
+}
+
+const mentorFlagsSchema = z.object({
+  mentor_profile_id: z.string().uuid(),
+  is_featured: z.boolean(),
+});
+
+async function handleMentorFlags(req, res) {
+  if (req.method !== 'POST') return jsonError(res, 405, 'Method not allowed');
+  const body = validateJsonBody(req, mentorFlagsSchema);
+  if (body.error) return jsonError(res, 400, body.error);
+
+  const { error } = await supabase
+    .from('mentor_profiles')
+    .update({ is_featured: body.data.is_featured })
+    .eq('id', body.data.mentor_profile_id);
+
+  if (error) return jsonError(res, 500, 'Update failed');
+  return res.json({ ok: true, is_featured: body.data.is_featured });
+}
+
+async function sendMentorApprovalEmail({ email, firstName }) {
+  if (!email) return;
+  const clientUrl = process.env.CLIENT_URL_PROD || process.env.CLIENT_URL || 'https://mentorshipbridge.com';
+  const onboardingUrl = `${clientUrl.replace(/\/$/, '')}/onboarding/mentor`;
+  const subject = `You're in. Welcome to Bridge, ${firstName}.`;
+  const body = `Hi ${firstName},
+
+Your application to mentor on Bridge has been approved.
+
+Set up your profile here: ${onboardingUrl}
+
+It takes about 5 minutes. Once it's done, mentees will be able to find and book you.
+
+Welcome.
+— The Bridge team`;
+
+  // TODO: wire transactional email provider (Resend/SendGrid). Log until configured.
+  console.info('[admin/review] mentor approval email (not sent — no mail provider configured)', {
+    to: email,
+    subject,
+    bodyPreview: body.slice(0, 120),
+  });
 }

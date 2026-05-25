@@ -17,6 +17,12 @@ import {
   useFavoriteMentor,
   normalizeMentor,
 } from './profileHooks';
+import MentorshipDescriptionSection from './MentorshipDescriptionSection';
+import MentorshipAreasSection from './MentorshipAreasSection';
+import WhyIMentorBlock from './WhyIMentorBlock';
+import ImpactStatsStrip from './ImpactStatsStrip';
+import MentorProfilePosts from './MentorProfilePosts';
+import MentorBadgesSection from './MentorBadgesSection';
 import TrackRecord from './TrackRecord';
 import ReviewsBlock from './ReviewsBlock';
 import ComparableMentors from './ComparableMentors';
@@ -56,6 +62,7 @@ function MentorHero({
   subscriptionLoading,
   mentorsListPath = '/mentors',
   embedded = false,
+  menteesHelped = 0,
 }) {
   const { s } = useContent();
   const roleHeadline = formatRoleHeadline(mentor.title, mentor.company);
@@ -174,6 +181,8 @@ function MentorHero({
                 {roleHeadline}
               </p>
             )}
+
+            <ImpactStatsStrip mentor={mentor} rawMentor={rawMentor} menteesHelped={menteesHelped} />
 
             <MentorHeroMeta mentor={mentor} />
 
@@ -321,6 +330,7 @@ export default function MentorProfilePage({ embedded = false }) {
 
   const [rawMentor, setRawMentor] = useState(null);
   const [rawReviews, setRawReviews] = useState([]);
+  const [menteesHelped, setMenteesHelped] = useState(0);
   const [loadError, setLoadError] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -341,6 +351,7 @@ export default function MentorProfilePage({ embedded = false }) {
         setLoadError(mentorRes.error?.message ?? 'Could not load mentor.');
       } else {
         setRawMentor(mentorRes.data.mentor);
+        setMenteesHelped(mentorRes.data.menteesHelped ?? 0);
         setRawReviews(reviewsRes.error ? [] : (reviewsRes.data ?? []));
         addRecentlyViewedMentor(mentorRes.data.mentor);
       }
@@ -514,6 +525,7 @@ export default function MentorProfilePage({ embedded = false }) {
           subscriptionLoading={subscriptionLoading}
           mentorsListPath={embedded ? '/dashboard/mentors' : '/mentors'}
           embedded={embedded}
+          menteesHelped={menteesHelped}
         />
 
         <MentorSectionNav
@@ -543,7 +555,11 @@ export default function MentorProfilePage({ embedded = false }) {
       {/* Content */}
       <div className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 pb-20">
         <FeaturedReviewSpotlight review={mentor?.featuredReview} firstName={mentor?.firstName} />
+        <MentorshipDescriptionSection rawMentor={rawMentor} />
         <AboutSection mentor={mentor} rawMentor={rawMentor} />
+        <MentorshipAreasSection rawMentor={rawMentor} />
+        <WhyIMentorBlock rawMentor={rawMentor} />
+        <MentorBadgesSection mentorProfileId={rawMentor?.id} />
         <ExpertiseToolkitSection mentor={mentor} rawMentor={rawMentor} />
         <IndustriesSection mentor={mentor} rawMentor={rawMentor} />
         <ToolkitSection mentor={mentor} rawMentor={rawMentor} />
@@ -574,6 +590,7 @@ export default function MentorProfilePage({ embedded = false }) {
         )}
 
         <ReviewsBlock mentor={mentor} />
+        <MentorProfilePosts mentorProfileId={rawMentor?.id} />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 pb-28">

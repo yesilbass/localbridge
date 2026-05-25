@@ -38,6 +38,7 @@
     { "source": "/api/admin/review-list",                        "destination": "/api/admin/review/[action]?action=list" },
     { "source": "/api/admin/review-decide",                      "destination": "/api/admin/review/[action]?action=decide" },
     { "source": "/api/admin/review-detail",                      "destination": "/api/admin/review/[action]?action=detail" },
+    { "source": "/api/admin/mentor-flags",                       "destination": "/api/admin/review/[action]?action=mentor-flags" },
     { "source": "/api/cron/verification-retry",                  "destination": "/api/utils/[action]?action=verification-retry" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],

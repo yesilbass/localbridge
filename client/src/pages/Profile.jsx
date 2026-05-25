@@ -26,6 +26,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import supabase from '../api/supabase';
+import { tagMentorCategories } from '../api/tagMentorCategories';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { uploadResumeFile, removeResumeFile, getResumeSignedUrl } from '../api/resumeStorage';
 import { extractResumeData } from '../api/ai';
@@ -176,7 +177,9 @@ export default function Profile() {
     title: '',
     company: '',
     industry: '',
+    mentorship_description: '',
     bio: '',
+    why_i_mentor: '',
     years_experience: '',
     expertise: [],
     available: true,
@@ -264,7 +267,9 @@ export default function Profile() {
           title: mentorRes.data.title || '',
           company: mentorRes.data.company || '',
           industry: mentorRes.data.industry || '',
+          mentorship_description: mentorRes.data.mentorship_description || '',
           bio: mentorRes.data.bio || '',
+          why_i_mentor: mentorRes.data.why_i_mentor || '',
           years_experience: mentorRes.data.years_experience ?? '',
           expertise: mentorRes.data.expertise || [],
           available: mentorRes.data.available ?? true,
@@ -330,6 +335,21 @@ export default function Profile() {
   const saveMentorProfile = async () => {
     setSavingMentor(true);
     try {
+      const desc = mentorProfile.mentorship_description?.trim() ?? '';
+      if (desc.length < 50) {
+        showMsg('error', 'Please write at least 50 characters about what you can help with.');
+        return;
+      }
+      if (desc.length > 1000) {
+        showMsg('error', 'Description must be 1000 characters or fewer.');
+        return;
+      }
+      const whyText = mentorProfile.why_i_mentor?.trim() ?? '';
+      if (whyText.length > 280) {
+        showMsg('error', '"Why I mentor" must be 280 characters or fewer.');
+        return;
+      }
+
       const mentorName = mentorProfile.name?.trim();
       if (mentorName && mentorName !== (user.user_metadata?.full_name ?? '')) {
         const { error: authErr } = await supabase.auth.updateUser({ data: { full_name: mentorName } });
@@ -341,7 +361,9 @@ export default function Profile() {
         title: mentorProfile.title || null,
         company: mentorProfile.company || null,
         industry: mentorProfile.industry || 'technology',
+        mentorship_description: desc,
         bio: mentorProfile.bio || null,
+        why_i_mentor: whyText || null,
         years_experience: mentorProfile.years_experience ? Number(mentorProfile.years_experience) : null,
         expertise: toJsonbSafe(mentorProfile.expertise || []),
         available: mentorProfile.available,
@@ -354,15 +376,20 @@ export default function Profile() {
       };
 
       let error;
+      let savedId = mentorProfileId;
       if (mentorProfileId) {
         const { user_id: _uid, ...updatePayload } = insertPayload;
         ({ error } = await supabase.from('mentor_profiles').update(updatePayload).eq('id', mentorProfileId));
       } else {
         const res = await supabase.from('mentor_profiles').insert(insertPayload).select('id').single();
         error = res.error;
-        if (!error && res.data?.id) setMentorProfileId(res.data.id);
+        if (!error && res.data?.id) {
+          savedId = res.data.id;
+          setMentorProfileId(res.data.id);
+        }
       }
       if (error) throw error;
+      if (savedId) tagMentorCategories(savedId);
       showMsg('success', s.profile.mentorProfileSaved);
     } catch (error) {
       console.error('Error saving mentor profile:', error);
@@ -1101,6 +1128,25 @@ export default function Profile() {
               <p className="text-sm text-stone-500 -mt-2">{s.profile.mentorProfileDescription}</p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
+                    What can you help people with? <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-xs text-stone-500 mb-2">
+                    Write in your own words. Your work experience, your life experience, things you&apos;ve been through, skills you&apos;ve built. There are no wrong answers — people will find you based on what you write here.
+                  </p>
+                  <textarea
+                    value={mentorProfile.mentorship_description}
+                    onChange={(e) => updateMentorField('mentorship_description', e.target.value.slice(0, 1000))}
+                    rows={5}
+                    required
+                    className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors resize-none"
+                    placeholder="e.g. I'm a software engineer with 8 years at startups. I also went through the US immigration process from scratch and can help others navigate that. Outside of work I'm passionate about fitness and trained for my first marathon at 38."
+                  />
+                  <p className="mt-1 text-xs text-stone-400 text-right tabular-nums">
+                    {1000 - (mentorProfile.mentorship_description?.length ?? 0)} remaining · min 50
+                  </p>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.displayName}</label>
                   <input type="text" value={mentorProfile.name} onChange={(e) => updateMentorField('name', e.target.value)}
@@ -1143,6 +1189,20 @@ export default function Profile() {
                   <textarea value={mentorProfile.bio} onChange={(e) => updateMentorField('bio', e.target.value)} rows={4}
                     className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors resize-none"
                     placeholder={s.profile.bioAboutPlaceholder} />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">Why I mentor</label>
+                  <p className="text-xs text-stone-500 mb-2">Optional — share what motivates you to help others.</p>
+                  <textarea
+                    value={mentorProfile.why_i_mentor}
+                    onChange={(e) => updateMentorField('why_i_mentor', e.target.value.slice(0, 280))}
+                    rows={3}
+                    className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors resize-none"
+                    placeholder="I mentor because..."
+                  />
+                  <p className="mt-1 text-xs text-stone-400 text-right tabular-nums">
+                    {280 - (mentorProfile.why_i_mentor?.length ?? 0)} remaining
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">{s.profile.profileImageUrl}</label>

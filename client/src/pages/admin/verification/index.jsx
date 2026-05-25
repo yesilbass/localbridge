@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronRight, Clock, ShieldCheck, Loader2 } from 'lucide-react';
 import supabase from '../../../api/supabase';
+import { tagMentorCategories } from '../../../api/tagMentorCategories';
 import TierBadge from '../../../components/TierBadge.jsx';
 import TestModeChip from '../../../components/TestModeChip.jsx';
 import { COMPONENT_LABELS, COMPONENT_WEIGHTS } from '../../../utils/mentorVerificationScoring.js';
@@ -191,6 +192,58 @@ function QueueRow({ item, active, onClick }) {
   );
 }
 
+function MentorAdminTools({ profile }) {
+  const [featured, setFeatured] = useState(Boolean(profile?.is_featured));
+  const [busy, setBusy] = useState(false);
+  const categoryCount = Array.isArray(profile?.mentorship_categories) ? profile.mentorship_categories.length : 0;
+
+  if (!profile?.id) return null;
+
+  async function toggleFeatured() {
+    setBusy(true);
+    const next = !featured;
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    await fetch('/api/admin/mentor-flags', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ mentor_profile_id: profile.id, is_featured: next }),
+    });
+    setFeatured(next);
+    setBusy(false);
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 border-t px-5 py-3" style={{ borderColor: 'var(--bridge-border)' }}>
+      <span className="text-[11px]" style={{ color: 'var(--bridge-text-muted)' }}>
+        {categoryCount} AI categories tagged
+      </span>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => tagMentorCategories(profile.id)}
+        className="rounded-lg px-3 py-1.5 text-[11px] font-bold"
+        style={{ boxShadow: 'inset 0 0 0 1px var(--bridge-border)', color: 'var(--bridge-text-secondary)' }}
+      >
+        Re-tag categories
+      </button>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={toggleFeatured}
+        className="rounded-lg px-3 py-1.5 text-[11px] font-bold"
+        style={{
+          backgroundColor: featured ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'transparent',
+          color: featured ? 'var(--color-primary)' : 'var(--bridge-text-secondary)',
+          boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+        }}
+      >
+        {featured ? 'Featured ✓' : 'Set spotlight'}
+      </button>
+    </div>
+  );
+}
+
 function DetailPane({ detail, onDecided }) {
   const { queue, steps, references } = detail;
   const run = queue.mentor_verification_runs;
@@ -256,6 +309,8 @@ function DetailPane({ detail, onDecided }) {
         {tab === 'activity'    ? <ActivityTab queue={queue} steps={steps} /> : null}
       </main>
 
+      <MentorAdminTools profile={profile} />
+
       <DecisionBar queueId={queue.id} alreadyDecided={!!queue.decision} onDecided={onDecided} />
     </div>
   );
@@ -296,9 +351,20 @@ function EvidenceTab({ steps }) {
 
 function AiNotesTab({ steps }) {
   const withEval = (steps || []).filter((s) => s.evaluation);
-  if (withEval.length === 0) return <p className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>No AI evaluations recorded.</p>;
+  const interview = (steps || []).find((s) => s.component === 'expertise_interview' && s.evaluation?.summary);
+  if (withEval.length === 0 && !interview) {
+    return <p className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>No AI evaluations recorded.</p>;
+  }
   return (
     <ul className="flex flex-col gap-3">
+      {interview?.evaluation?.summary && (
+        <li className="rounded-2xl p-3" style={{ backgroundColor: 'var(--bridge-surface-muted)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}>
+          <p className="text-[12px] font-bold" style={{ color: 'var(--bridge-text)' }}>Voice application summary</p>
+          <p className="mt-2 text-[13px] leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
+            {interview.evaluation.summary}
+          </p>
+        </li>
+      )}
       {withEval.map((s) => (
         <li key={s.id} className="rounded-2xl p-3" style={{ backgroundColor: 'var(--bridge-surface-muted)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}>
           <p className="text-[12px] font-bold" style={{ color: 'var(--bridge-text)' }}>{COMPONENT_LABELS[s.component] || s.component}</p>

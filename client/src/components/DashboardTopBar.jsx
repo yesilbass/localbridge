@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LogOut, User, Settings, Menu, X, Search, CalendarCheck, Clock,
-  DollarSign, Star, Heart, FileText, CreditCard, Sparkles, MessageSquare,
+  DollarSign, Star, Heart, FileText, CreditCard, Sparkles, MessageSquare, Users,
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import NotificationPanel from './NotificationPanel';
@@ -18,6 +18,7 @@ function getInitials(name = '') {
 
 const MENTEE_LINKS = [
   { to: '/dashboard/mentors', labelKey: 'nav.mentors', fallback: 'Mentors', icon: Search },
+  { to: '/dashboard/community', labelKey: 'nav.community', fallback: 'Community', icon: Users },
   { to: '/dashboard/messages', labelKey: 'nav.messages', fallback: 'Messages', icon: MessageSquare },
   { to: '/dashboard/sessions', labelKey: 'common.sessions', fallback: 'Sessions', icon: CalendarCheck },
   { to: '/dashboard/saved', labelKey: 'common.saved', fallback: 'Saved', icon: Heart },
@@ -26,6 +27,7 @@ const MENTEE_LINKS = [
 
 const MENTOR_LINKS = [
   { to: '/dashboard/sessions', labelKey: 'common.sessions', fallback: 'Sessions', icon: CalendarCheck },
+  { to: '/dashboard/community', labelKey: 'nav.community', fallback: 'Community', icon: Users },
   { to: '/dashboard/messages', labelKey: 'nav.messages', fallback: 'Messages', icon: MessageSquare },
   { to: '/dashboard/availability', labelKey: 'common.availability', fallback: 'Availability', icon: Clock },
   { to: '/dashboard/earnings', labelKey: 'common.earnings', fallback: 'Earnings', icon: DollarSign },

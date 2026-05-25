@@ -5,6 +5,12 @@ import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import usageSupabase from './_lib/supabase.js';
 import { applyCors } from './_lib/allowedOrigins.js';
+import { isAdminUser } from './_lib/verification/admin.js';
+import {
+  MENTORSHIP_CATEGORIES,
+  VALID_CATEGORY_IDS,
+  VALID_SUBCATEGORY_IDS,
+} from '../shared/mentorshipCategories.js';
 
 const MAX_TEXT_BYTES = 100 * 1024;
 const MAX_RESUME_BYTES = 5 * 1024 * 1024;
@@ -24,6 +30,8 @@ const LIMITS = {
   intake_summary: { max: 10, window: 'day' },
   onboarding_ai: { max: 20, window: 'day' },
   resume_extract: { max: 50, window: 'day' },
+  mentor_application_summary: { max: 10, window: 'day' },
+  mentor_tag: { max: 50, window: 'day' },
 };
 
 const textUnderLimit = (label) =>
@@ -45,6 +53,7 @@ const mentorSchema = z.object({
   company: z.string().nullable().optional(),
   industry: z.string().nullable().optional(),
   bio: z.string().nullable().optional(),
+  mentorship_description: z.string().nullable().optional(),
   years_experience: z.union([z.number(), z.string()]).nullable().optional(),
   expertise: z.unknown().optional(),
   rating: z.union([z.number(), z.string()]).nullable().optional(),
@@ -91,6 +100,20 @@ const resumeExtractSchema = z.object({
   }, { message: 'Resume file is too large' }),
 });
 
+const mentorTagSchema = z.object({
+  mentor_id: z.string().uuid(),
+});
+
+const mentorApplicationSummarySchema = z.object({
+  transcript: z.array(transcriptItemSchema).min(1).refine((items) => {
+    const text = formatTranscript(items);
+    return Buffer.byteLength(text, 'utf8') <= MAX_TEXT_BYTES;
+  }, { message: 'Transcript is too large' }),
+  full_name: z.string().min(1).max(120),
+  current_role: z.string().min(1).max(100),
+  location: z.string().min(1).max(120),
+});
+
 const requestSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('claude_chat'), payload: claudeChatSchema }),
   z.object({ action: z.literal('onboarding_ai'), payload: claudeChatSchema }),
@@ -98,6 +121,8 @@ const requestSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('resume_review'), payload: resumeReviewSchema }),
   z.object({ action: z.literal('resume_extract'), payload: resumeExtractSchema }),
   z.object({ action: z.literal('intake_summary'), payload: intakeSummarySchema }),
+  z.object({ action: z.literal('mentor_tag'), payload: mentorTagSchema }),
+  z.object({ action: z.literal('mentor_application_summary'), payload: mentorApplicationSummarySchema }),
 ]);
 
 function jsonError(res, status, error) {
@@ -226,6 +251,7 @@ function mentorListForPrompt(mentors) {
     company: m.company,
     industry: m.industry,
     bio: m.bio,
+    mentorship_description: m.mentorship_description,
     years_experience: m.years_experience,
     expertise: m.expertise,
     rating: m.rating,
@@ -526,13 +552,110 @@ Rules: work_experience newest first; end_year null if current; missing fields �
   }
 }
 
-async function runAction(action, payload) {
+async function runMentorApplicationSummary({ transcript, full_name, current_role, location }) {
+  const text = formatTranscript(transcript);
+  const rawText = await callOpenAIChat({
+    model: 'gpt-4o-mini',
+    maxTokens: 1200,
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You summarize mentor application voice interviews for Bridge. Return only valid JSON.',
+      },
+      {
+        role: 'user',
+        content: `Applicant: ${full_name}, role: ${current_role}, location: ${location}
+
+Transcript:
+${text}
+
+Return ONLY this JSON:
+{
+  "summary": "3-5 sentence admin-facing summary of who they are and what they can help with",
+  "mentorship_description": "100-400 char first-person description of what they can help people with — specific, warm, drawn from the conversation",
+  "why_i_mentor": "Under 280 chars — their motivation in their voice, quote-style"
+}`,
+      },
+    ],
+    responseFormat: { type: 'json_object' },
+  });
+  return parseJsonResponse(rawText, 'mentor_application_summary');
+}
+
+function buildTagPrompt(mentor) {
+  return `You are a categorization engine for a mentorship platform. Given a mentor's description, bio, and expertise tags, identify which of the following categories and subcategories apply to them. Return only valid IDs from the lists below. A mentor can match multiple categories. Be generous — if someone mentions immigration, faith, fitness, or any life experience, tag it.
+
+CATEGORIES AND SUBCATEGORIES:
+${JSON.stringify(MENTORSHIP_CATEGORIES, null, 2)}
+
+MENTOR DATA:
+Description: ${mentor.mentorship_description ?? ''}
+Bio: ${mentor.bio ?? ''}
+Expertise tags: ${JSON.stringify(mentor.expertise ?? [])}
+
+Return ONLY this JSON with no other text:
+{"categories": ["id1", "id2"], "subcategories": ["id1", "id2", "id3"]}`;
+}
+
+async function canTagMentor(user, mentorId) {
+  if (await isAdminUser(user)) return true;
+  const { data, error } = await usageSupabase
+    .from('mentor_profiles')
+    .select('user_id')
+    .eq('id', mentorId)
+    .maybeSingle();
+  if (error || !data) return false;
+  return data.user_id === user.id;
+}
+
+async function runMentorTag({ mentor_id: mentorId }, user) {
+  if (!(await canTagMentor(user, mentorId))) {
+    throw new Error('Forbidden');
+  }
+
+  const { data: mentor, error: fetchErr } = await usageSupabase
+    .from('mentor_profiles')
+    .select('id, mentorship_description, bio, expertise')
+    .eq('id', mentorId)
+    .single();
+
+  if (fetchErr || !mentor) throw new Error('Mentor not found');
+
+  const rawText = await callOpenAIChat({
+    model: 'gpt-4o-mini',
+    maxTokens: 800,
+    messages: [{ role: 'user', content: buildTagPrompt(mentor) }],
+    responseFormat: { type: 'json_object' },
+  });
+
+  const parsed = parseJsonResponse(rawText, 'mentor_tag');
+  const categories = Array.isArray(parsed.categories)
+    ? parsed.categories.filter((id) => VALID_CATEGORY_IDS.has(id))
+    : [];
+  const subcategories = Array.isArray(parsed.subcategories)
+    ? parsed.subcategories.filter((id) => VALID_SUBCATEGORY_IDS.has(id))
+    : [];
+
+  const { error: updateErr } = await usageSupabase
+    .from('mentor_profiles')
+    .update({ mentorship_categories: categories, mentorship_subcategories: subcategories })
+    .eq('id', mentorId);
+
+  if (updateErr) throw new Error('Failed to save categories');
+
+  return { success: true, categories, subcategories };
+}
+
+async function runAction(action, payload, user) {
   if (action === 'claude_chat') return callClaude(payload);
   if (action === 'onboarding_ai') return runOnboardingAI(payload);
   if (action === 'mentor_match') return runMentorMatch(payload);
   if (action === 'resume_review') return runResumeReview(payload);
   if (action === 'resume_extract') return runResumeExtract(payload);
   if (action === 'intake_summary') return runIntakeSummary(payload);
+  if (action === 'mentor_tag') return runMentorTag(payload, user);
+  if (action === 'mentor_application_summary') return runMentorApplicationSummary(payload);
   throw new Error('Unsupported AI action');
 }
 
@@ -558,7 +681,7 @@ export default async function handler(req, res) {
     }
     if (!allowed) return jsonError(res, 429, 'AI usage limit reached');
 
-    const result = await runAction(action, payload);
+    const result = await runAction(action, payload, user);
     try {
       await recordUsage(user.id, action);
     } catch (usageErr) {

@@ -69,17 +69,21 @@ client/src/
   api/                 ← supabase calls (one file per domain)
     supabase.js        ← singleton; never re-instantiate
     mentors.js sessions.js reviews.js favorites.js
+    community.js mentorPosts.js mentorBadges.js
     ai.js aiMatching.js aiResumeReview.js aiUsage.js
-    calendar.js stripe.js intake.js cancellations.js
-    menteeProfile.js mentorOnboarding.js resumeStorage.js
+    calendly.js stripe.js intake.js cancellations.js
+    menteeProfile.js mentorOnboarding.js verification.js
+    tagMentorCategories.js resumeStorage.js mentorAvatarStorage.js
   components/          ← reusable UI (Navbar, Footer, MagneticPointer, Reveal …)
   pages/
     landing/           ← Hero, Bento, Manifesto, HowItWorks, FinalCta, …
+    community/         ← CommunityHub, CommunityCategory, communityShared
     dashboard/         ← mentee + mentor views, hooks, modals
     footer/            ← static informational pages
+    BecomeMentor.jsx MentorApplication.jsx MentorOnboardingFlow.jsx
     Mentors/ Pricing/ DevPortal/
     Login.jsx Register.jsx MentorProfile.jsx Profile.jsx Settings.jsx
-    VideoCall.jsx IntakeCall.jsx MentorOnboarding.jsx ResumeReview.jsx
+    VideoCall.jsx IntakeCall.jsx ResumeReview.jsx
   context/             ← AuthContext + hooks
   utils/               ← appearance, routePalette, useInView, mentorAvailability
   constants/           ← sessionTypes (single source of truth)
@@ -105,7 +109,10 @@ supabase/migrations/   ← canonical SQL; do NOT auto-run, hand to user
 | AI resume review | `client/src/api/aiResumeReview.js`, `client/src/api/resumeStorage.js`, `client/src/pages/ResumeReview.jsx` |
 | AI intake call | `client/src/pages/IntakeCall.jsx`, `api/prompts/intakePrompt.js` |
 | Video call | `client/src/pages/VideoCall.jsx` (WebRTC + Supabase Realtime) |
-| Calendar / Google OAuth | `client/src/api/calendar.js`, `server/routes/googleAuth.js`, `server/routes/calendar.js` |
+| Calendar / Calendly OAuth | `client/src/api/calendly.js`, `api/calendly/` |
+| Community | `client/src/api/community.js`, `client/src/pages/community/` |
+| Mentor application | `client/src/pages/MentorApplication.jsx`, `api/realtime-session.js`, `api/verification/` |
+| Mentor posts (not community) | `client/src/api/mentorPosts.js`, `client/src/pages/community/MentorPostsPage.jsx` |
 | Stripe / payments | `client/src/api/stripe.js`, `server/routes/stripe.js`, `client/src/components/EmbeddedCheckoutPanel.jsx`. See `.cursor/skills/adding-stripe/SKILL.md`. |
 | Landing | `client/src/pages/landing/` |
 | Dashboard | `client/src/pages/dashboard/` |

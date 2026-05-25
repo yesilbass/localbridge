@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
-import { isMenteeAccount } from '../../utils/accountRole';
-import { menteeMentorsDashboardPath } from '../../utils/authNav';
+import { dashboardProductPath } from '../../utils/authNav';
+import { dashboardCommunityPath } from '../../pages/community/communityPaths';
 import LoadingSpinner from '../LoadingSpinner';
 
 /** Public marketing/content pages — available whether or not the user has a session. */
@@ -62,11 +62,29 @@ export function AuthenticatedProductRedirect({ children }) {
   const location = useLocation();
 
   if (loading) return null;
-  if (!user || !isMenteeAccount(user)) return children;
+  if (!user) return children;
 
-  const dest = menteeMentorsDashboardPath(location.pathname);
+  const dest = dashboardProductPath(location.pathname, user);
   if (dest && dest !== location.pathname) {
     return <Navigate to={dest + location.search} replace state={location.state} />;
   }
   return children;
+}
+
+/** /community → /dashboard/community (or login). Standalone community URLs only. */
+export function CommunityEntryGate() {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <LoadingSpinner label="Loading…" className="min-h-screen" size="lg" />;
+  }
+
+  const dashboardPath = dashboardCommunityPath(location.pathname) ?? '/dashboard/community';
+
+  if (!user) {
+    return <Navigate to={`/login?redirect=${encodeURIComponent(dashboardPath + location.search)}`} replace />;
+  }
+
+  return <Navigate to={dashboardPath + location.search} replace />;
 }

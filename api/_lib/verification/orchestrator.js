@@ -16,7 +16,7 @@ import { COMPONENT_WEIGHTS, computeScoreFromSteps, tierForScore } from './scorin
 export async function fetchOwnMentorProfile(userId) {
   const { data, error } = await supabase
     .from('mentor_profiles')
-    .select('id, user_id, name, email, title, company, verification_status, verification_score, verification_tier, verification_run_id')
+    .select('id, user_id, name, email, title, company, mentor_status, verification_status, verification_score, verification_tier, verification_run_id')
     .eq('user_id', userId)
     .maybeSingle();
   if (error) return { error: error.message };

@@ -41,6 +41,17 @@ End-to-end verification + tiering pipeline shipped 2026-05-13. Test mode by defa
 | Reference email   | `*+ref-pass@bridge.dev` · `*+ref-fail@bridge.dev` · `*+ref-review@bridge.dev` (auto-submit on invite) |
 | OPENAI_API_KEY    | Missing → deterministic mock pass in test mode                      |
 
+## Application entry points (2026-05 expansion)
+
+| Flow | Primary routes / files |
+|---|---|
+| Voice mentor application | `/become-a-mentor` → `/apply/mentor` — `MentorApplication.jsx`, `api/realtime-session.js` (`type: mentor_application`), `api/verification/[action].js` |
+| Post-approval onboarding | `/onboarding/mentor` — `MentorOnboardingFlow.jsx`, `mentor_profiles.onboarding_step` |
+| Community (product) | `/community`, `/community/:categoryId` — `CommunityHub.jsx`, `CommunityCategory.jsx`, `client/src/api/community.js` |
+| Mentor advice posts | `/community/posts`, mentor profiles — `mentor_posts` table, `client/src/api/mentorPosts.js` |
+
+The legacy 9-step document verification wizard UI (`client/src/pages/onboarding/mentor/verify/`) is no longer routed. Backend verification pipeline, admin panel, and reference form remain active.
+
 ## Code Map
 
 ```

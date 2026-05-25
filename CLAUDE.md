@@ -12,7 +12,7 @@ Bridge is pre-revenue and pursuing seed approval. Every change ships demo-ready.
 
 - **Parallel by default.** Independent reads, greps, and tool calls fire in one turn, never sequentially. Sequential is only justified when step N's output feeds step N+1.
 - **Read once, remember.** A file read in this conversation is not re-read unless edited or known-changed.
-- **Scope the read.** For files > 1000 lines (`MentorProfile.jsx`, `Profile.jsx`, `VideoCall.jsx`, `Settings.jsx`, `MentorOnboarding.jsx`), grep first, then `read_file` with `offset` + `limit`. No full-file reads on large files.
+- **Scope the read.** For files > 1000 lines (`MentorProfile.jsx`, `Profile.jsx`, `VideoCall.jsx`, `Settings.jsx`, `MentorOnboardingFlow.jsx`), grep first, then `read_file` with `offset` + `limit`. No full-file reads on large files.
 - **Use `code_search` for unknown territory.** Delegate first-pass exploration to the subagent — it's cheaper than searching in-context.
 - **No speculative work.** No "fix while I'm here", no adjacent refactors, no rename-for-clarity. Speculative edits double the diff and the verification cost.
 - **No scratch files.** No helper scripts, progress notes, or `.md` artifacts unless the user asks or the task spans sessions.
@@ -106,7 +106,12 @@ This baseline applies to every prompt. Domain skills (`bridge-ui`, `bridge-web-d
 | availability_schedule | jsonb | `{"weekly":{"0":["09:00",...],...},"timezone":"UTC"}` |
 | tier | text | |
 | session_rate | integer | |
-| google_refresh_token | text | Google Calendar OAuth token |
+| mentorship_description | text | Required for mentors; AI-tagged into pillars |
+| mentorship_categories | jsonb | AI-derived pillar IDs (service-role write only) |
+| mentorship_subcategories | jsonb | AI-derived subcategory IDs |
+| why_i_mentor | text | Public motivation statement |
+| onboarding_step | int | Post-approval wizard progress (0–5) |
+| is_featured | boolean | Admin spotlight toggle |
 | expertise_search | text | generated: `lower(expertise::text)` stored |
 | created_at | timestamptz | default now() |
 **RLS**: SELECT public (anon), INSERT/UPDATE own user only.
@@ -136,7 +141,7 @@ This baseline applies to every prompt. Domain skills (`bridge-ui`, `bridge-web-d
 | comment | text | |
 | created_at | timestamptz | |
 **RLS**: SELECT public, INSERT authenticated, DELETE own.
-**Required trigger** (TODO — set up in Supabase): an `AFTER INSERT OR UPDATE OR DELETE ON reviews` trigger must recalculate `mentor_profiles.rating` (and ideally `total_sessions`) using AVG over all reviews for that `mentor_id`. The client must NOT recalculate this — `mentor_profiles` UPDATE is RLS-restricted to the row's own user, so a mentee write would silently fail, and concurrent inserts race. Until this trigger is in place, displayed mentor ratings will not reflect new reviews.
+**Rating trigger**: `update_mentor_rating()` recalculates `mentor_profiles.rating` on INSERT/UPDATE/DELETE. The client must NOT recalculate — RLS blocks direct mentor_profiles UPDATE from mentees.
 
 ### `favorites`
 | Column | Type | Notes |
@@ -172,8 +177,14 @@ Stores AI onboarding output: `user_id`, `current_position`, `target_role`, `targ
 ### `ai_usage`
 Tracks per-user AI feature consumption: `user_id`, `feature` (`resume_review` limit 1, `mentor_match` limit 3). See `client/src/api/aiUsage.js`.
 
+### `community_posts` / `community_post_upvotes` / `community_comments`
+Community product at `/community`. Pillar `category_id`, post types `question|win|discussion|resource`. Denormalized `upvotes` and `comment_count` maintained by triggers. **Not the same as `mentor_posts`.**
+
+### `mentor_posts` / `mentor_badges`
+Mentor value stack — short advice posts and earned badges on mentor profiles.
+
 ### Storage
-Bucket `resumes` (private). RLS: authenticated user can CRUD files prefixed `{user_id}/`.
+Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in Supabase dashboard). RLS: authenticated user can CRUD files prefixed `{user_id}/`.
 
 ---
 
@@ -195,7 +206,11 @@ Bucket `resumes` (private). RLS: authenticated user can CRUD files prefixed `{us
 
 8. **Video rooms** — Custom WebRTC video call at `/session/:sessionId/video`. Signaling via Supabase Realtime channel `video:{sessionId}`. Mentor = caller (sends offer), mentee = callee (sends answer). `video_room_url` is set to `bridge-{sessionId}` on accept (truthy flag to show "Join Call").
 
-9. **Google Calendar OAuth** — Refresh token is stored in `mentor_profiles.google_refresh_token`. OAuth routes live in `server/routes/googleAuth.js`; calendar operations in `server/routes/calendar.js`.
+9. **Calendly scheduling** — Mentors connect Calendly via `client/src/api/calendly.js` and `api/calendly/`. Post-checkout scheduling uses embedded Calendly widget on `/booking/finalize`. Google Calendar was removed.
+
+10. **Community = direct Supabase** — All community CRUD in `client/src/api/community.js`. No Vercel serverless function (12-function limit). RLS handles auth.
+
+11. **Community posts ≠ mentor posts** — `community_posts` powers `/community` hub and pillar feeds. `mentor_posts` is short mentor advice on profiles and `/community/posts`.
 
 ---
 
@@ -212,8 +227,14 @@ Bucket `resumes` (private). RLS: authenticated user can CRUD files prefixed `{us
 | favorites.js | getMyFavorites, toggleFavorite, addToFavorites, removeFromFavorites |
 | menteeProfile.js | getMenteeProfile, upsertMenteeProfile, deleteMenteeProfile |
 | mentorOnboarding.js | Mentor onboarding CRUD against mentor_profiles |
-| calendar.js | getCalendarAuthUrl, getMentorAvailability, bookCalendarEvent, checkCalendarConnection |
-| ai.js | callClaude() — direct Anthropic SDK wrapper (claude-sonnet-4-20250514) |
+| calendly.js | Calendly OAuth, event types, availability |
+| community.js | Community posts, upvotes, comments (direct Supabase) |
+| mentorPosts.js | Mentor advice posts (separate from community) |
+| mentorBadges.js | Mentor badge fetch |
+| tagMentorCategories.js | AI pillar tagging via ai-proxy |
+| verification.js | Mentor application submit, profile fetch |
+| mentorAvatarStorage.js | mentor-avatars bucket upload |
+| ai.js | callClaude() + callAIProxy() |
 | aiMatching.js | getAIMatchedMentors() — OpenAI-based mentor ranking from mentee profile |
 | aiResumeReview.js | getAIResumeReview() — Claude-based resume analysis |
 | aiUsage.js | getUsageCount, hasReachedLimit, recordUsage per feature |
@@ -231,9 +252,9 @@ Bucket `resumes` (private). RLS: authenticated user can CRUD files prefixed `{us
 | MentorAvatar.jsx | Mentor photo with fallback |
 | SessionTypeCard.jsx | Card for career_advice / interview_prep / resume_review / networking |
 | MentorMatchWizard.jsx | Multi-step AI mentor-matching form |
-| OnboardingModal.jsx | Mentor onboarding modal (goals, expertise, availability) |
-| CalendarConnectButton.jsx | Trigger Google Calendar OAuth |
-| CalendarSuccessToast.jsx | Post-OAuth success toast |
+| OnboardingModal.jsx | Mentee first-login onboarding modal |
+| MentorOnboardingBanner.jsx | Dashboard banner for incomplete mentor onboarding |
+| CalendlyInlineWidget.jsx | Embedded Calendly scheduling widget |
 | FeedbackFAB.jsx | Floating feedback button |
 | FeedbackModal.jsx | Feedback submission form |
 | BridgeGlobalAtmosphere.jsx | Global visual theme/atmosphere |
@@ -250,7 +271,9 @@ Bucket `resumes` (private). RLS: authenticated user can CRUD files prefixed `{us
 | Register.jsx | Auth — sign up |
 | Mentors.jsx | Mentor browse + AI matching |
 | MentorProfile.jsx | Individual mentor detail + booking |
-| MentorOnboarding.jsx | Mentor signup flow |
+| BecomeMentor.jsx | Mentor recruitment landing |
+| MentorApplication.jsx | Voice-first mentor application (`/apply/mentor`) |
+| MentorOnboardingFlow.jsx | Post-approval mentor profile wizard |
 | ResumeReview.jsx | AI resume review interface |
 | Profile.jsx | User profile page |
 | Settings.jsx | User settings |
@@ -270,8 +293,22 @@ Bucket `resumes` (private). RLS: authenticated user can CRUD files prefixed `{us
 | dashboardUtils.js | SESSION_TYPE_MAP (type → icon + color metadata) |
 | useDashboardData.js | Hook: fetches sessions, profile, reviews |
 
+### `client/src/pages/community/`
+| File | Purpose |
+|---|---|
+| CommunityHub.jsx | Live feed + 8 pillar sidebar (`/community`) |
+| CommunityCategory.jsx | Pillar feed with filters, sort, comments |
+| communityShared.jsx | Post cards, create form, mentor badge, post type pills |
+| MentorPostsPage.jsx | Mentor advice posts directory (`/community/posts`) |
+
+### `client/src/constants/`
+| File | Purpose |
+|---|---|
+| sessionTypes.js | Four session type keys — source of truth |
+| mentorshipCategories.js | Re-exports 8 pillars from `shared/mentorshipCategories.js` |
+
 ### `client/src/pages/footer/`
-About, Blog, Careers, Community, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust — static informational pages.
+About, Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust — static informational pages. (Footer `Community.jsx` is marketing copy — not the product `/community` hub.)
 
 ---
 
@@ -286,8 +323,11 @@ About, Blog, Careers, Community, Contact, Cookies, FAQ, Help, Privacy, Terms, Tr
 - AI mentor matching (OpenAI ranking)
 - AI resume review (Claude)
 - AI onboarding wizard (mentee_profiles)
-- Google Calendar OAuth + availability + booking
-- Mentor onboarding flow
+- Calendly OAuth + embedded scheduling widget
+- Voice-first mentor application + post-approval onboarding wizard
+- Community hub + pillar feeds (direct Supabase, quiet-authority palette)
+- Mentor value stack (badges, mentor posts, impact stats, session action items)
+- Mentorship category taxonomy + AI tagging
 - Dashboard (mentee + mentor views)
 - Resume upload/storage (Supabase bucket)
 - 30 seeded mentor profiles across industries
@@ -334,16 +374,12 @@ PORT
 SUPABASE_URL
 SUPABASE_SERVICE_ROLE_KEY
 JWT_SECRET
-GOOGLE_CLIENT_ID
-GOOGLE_CLIENT_SECRET
-GOOGLE_REDIRECT_URI
+STRIPE_SECRET_KEY
+CALENDLY_CLIENT_ID
+CALENDLY_CLIENT_SECRET
+CALENDLY_REDIRECT_URI
 CLIENT_URL
 CLIENT_URL_PROD
-DB_HOST
-DB_PORT
-DB_USER
-DB_PASSWORD
-DB_NAME
 ```
 
 ### Client (`client/.env`)

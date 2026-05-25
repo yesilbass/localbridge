@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getAllMentors } from '../../api/mentors';
+import { getAllMentors, getFeaturedMentors } from '../../api/mentors';
+import { MENTORSHIP_CATEGORIES, getSubcategoriesForCategory } from '../../constants/mentorshipCategories';
 import { getMyFavorites, toggleFavorite } from '../../api/favorites';
 import { useAuth } from '../../context/useAuth';
 import { isMentorAccount } from '../../utils/accountRole';
@@ -16,6 +17,7 @@ import MentorCard, { MentorGridSkeleton } from './MentorCard';
 import { AiMatchCard, AiHonorableCard } from './AiMatchCards';
 import { useContent } from '../../content';
 import { useMentorBooking } from '../../hooks/useMentorBooking';
+import { MentorPostsStrip } from '../../components/MentorPostsStrip';
 import HeroBookModal from '../mentor-profile/HeroBookModal';
 import SubscribeUnlockModal from '../mentor-profile/SubscribeUnlockModal';
 
@@ -62,6 +64,9 @@ export default function Mentors({ embedded = false }) {
   const [search, setSearch]                   = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [activeIndustry, setActiveIndustry]   = useState('');
+  const [activeCategory, setActiveCategory]   = useState('');
+  const [activeSubcategory, setActiveSubcategory] = useState('');
+  const [featuredMentors, setFeaturedMentors] = useState([]);
   const [sortBy, setSortBy]                   = useState('rating');
   const [page, setPage]                       = useState(0);
   const [mentors, setMentors]                 = useState([]);
@@ -109,7 +114,11 @@ export default function Mentors({ embedded = false }) {
   // Reset to page 0 when any filter/sort changes
   useEffect(() => {
     setPage(0);
-  }, [debouncedSearch, activeIndustry, sortBy, availableOnly]);
+  }, [debouncedSearch, activeIndustry, activeCategory, activeSubcategory, sortBy, availableOnly]);
+
+  useEffect(() => {
+    void getFeaturedMentors().then(setFeaturedMentors).catch(() => setFeaturedMentors([]));
+  }, [reloadKey]);
 
   // Load favorites for mentee users
   useEffect(() => {
@@ -144,6 +153,7 @@ export default function Mentors({ embedded = false }) {
       const includeUnverified = new URLSearchParams(window.location.search).get('include_unverified') === '1';
       const { data, error: fetchError, totalCount: count } = await getAllMentors({
         search: debouncedSearch, industry: activeIndustry,
+        category: activeCategory, subcategory: activeSubcategory,
         availableOnly, sortBy, page, pageSize: PAGE_SIZE,
         includeUnverified,
       });
@@ -153,7 +163,7 @@ export default function Mentors({ embedded = false }) {
       setMentors(data ?? []); setTotalCount(count ?? 0);
     })();
     return () => { cancelled = true; };
-  }, [debouncedSearch, activeIndustry, availableOnly, sortBy, page, reloadKey]);
+  }, [debouncedSearch, activeIndustry, activeCategory, activeSubcategory, availableOnly, sortBy, page, reloadKey]);
 
   const loadMentors = useCallback(() => { setLoading(true); setError(null); setReloadKey(k => k + 1); }, []);
 
@@ -243,7 +253,8 @@ export default function Mentors({ embedded = false }) {
   }
 
   function resetFilters() {
-    setSearch(''); setActiveIndustry(''); setSortBy('rating');
+    setSearch(''); setActiveIndustry(''); setActiveCategory(''); setActiveSubcategory('');
+    setSortBy('rating');
     setAvailableOnly(false); setPage(0);
   }
 
@@ -253,7 +264,10 @@ export default function Mentors({ embedded = false }) {
   const canNext  = endIdx < totalCount;
 
   const activeFilterCount =
-    (activeIndustry ? 1 : 0) + (debouncedSearch ? 1 : 0) + (availableOnly ? 1 : 0);
+    (activeIndustry ? 1 : 0) + (activeCategory ? 1 : 0) + (activeSubcategory ? 1 : 0)
+    + (debouncedSearch ? 1 : 0) + (availableOnly ? 1 : 0);
+
+  const subcategoryOptions = activeCategory ? getSubcategoriesForCategory(activeCategory) : [];
 
   // Only exclude the mentor's own card — all other filters are applied server-side
   const visibleMentors = mentors.filter(m => !(asMentor && user?.id && m.user_id === user.id));
@@ -508,6 +522,36 @@ export default function Mentors({ embedded = false }) {
             <div className={`mx-auto w-full ${pageGutter} py-5`} style={pageInnerStyle}>
               <div className="flex flex-wrap items-start gap-x-8 gap-y-5">
                 <div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-faint)]">Category</p>
+                  <select
+                    value={activeCategory}
+                    onChange={(e) => { setActiveCategory(e.target.value); setActiveSubcategory(''); }}
+                    className={`rounded-xl px-3 py-2 text-[12px] font-semibold ${focusRing}`}
+                    style={{ backgroundColor: 'var(--bridge-surface)', color: 'var(--bridge-text-secondary)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}
+                  >
+                    <option value="">All categories</option>
+                    {MENTORSHIP_CATEGORIES.map((c) => (
+                      <option key={c.id} value={c.id}>{c.label}</option>
+                    ))}
+                  </select>
+                </div>
+                {activeCategory && (
+                  <div>
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-faint)]">Focus area</p>
+                    <select
+                      value={activeSubcategory}
+                      onChange={(e) => setActiveSubcategory(e.target.value)}
+                      className={`rounded-xl px-3 py-2 text-[12px] font-semibold ${focusRing}`}
+                      style={{ backgroundColor: 'var(--bridge-surface)', color: 'var(--bridge-text-secondary)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}
+                    >
+                      <option value="">All focus areas</option>
+                      {subcategoryOptions.map((s) => (
+                        <option key={s.id} value={s.id}>{s.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <div>
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-faint)]">Status</p>
                   <button
                     type="button"
@@ -716,6 +760,31 @@ export default function Mentors({ embedded = false }) {
           </div>
         )}
 
+        {!aiMode && featuredMentors.length > 0 && (
+          <div className="mb-8">
+            <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--bridge-text-muted)' }}>
+              Mentor spotlight
+            </h2>
+            <div className="flex flex-col gap-4">
+              {featuredMentors.map((mentor) => (
+                <MentorCard
+                  key={`featured-${mentor.id}`}
+                  mentor={mentor}
+                  isFavorite={favoriteIds.has(normalizeMentorId(mentor.id))}
+                  onToggleFavorite={onToggleFavorite}
+                  user={user}
+                  navigate={navigate}
+                  favoriteBusy={favoriteBusyId === normalizeMentorId(mentor.id)}
+                  favoritesEnabled={!asMentor}
+                  onBookSession={beginBook}
+                  canBook={!asMentor}
+                  subscriptionLoading={subscriptionLoading}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         {favoriteMessage && (
           <div
             className="mb-6 rounded-2xl px-4 py-3 text-[13px]"
@@ -885,6 +954,8 @@ export default function Mentors({ embedded = false }) {
             </button>
           </div>
         ) : null}
+
+        {!aiMode && <MentorPostsStrip />}
       </div>
 
       {wizardOpen && (
