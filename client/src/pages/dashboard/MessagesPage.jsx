@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Check, CheckCheck, MessageSquare, Send } from 'lucide-react';
 import { useAuth } from '../../context/useAuth';
-import { useSubscription } from '../../hooks/useSubscription';
+import PaywallPrompt from '../../components/PaywallPrompt';
 import { useActiveRole } from './dashboardHooks';
 import PageHeader from './home/PageHeader';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -434,16 +434,12 @@ function ThreadView({
       </div>
 
       {!loading && !error && !canSend && (
-        <p className="shrink-0 px-5 pb-2 text-center text-xs" style={{ color: 'var(--bridge-text-muted)' }}>
-          Upgrade to{' '}
-          <Link to="/dashboard/plan" className="font-semibold" style={{ color: 'var(--color-primary)' }}>
-            Plus or Pro
-          </Link>
-          {' '}to send messages. You can still read this thread.
-        </p>
+        <div className="shrink-0 px-4 pb-2">
+          <PaywallPrompt feature="messaging" />
+        </div>
       )}
 
-      {!loading && !error && (
+      {!loading && !error && canSend && (
         <form
           onSubmit={handleSend}
           className="shrink-0 px-4 py-3 sm:px-5 sm:py-4"
@@ -487,8 +483,7 @@ function ThreadView({
 export default function MessagesPage() {
   const { conversationId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { isActive, loading: subLoading } = useSubscription();
+  const { user, isSubscribed, settingsLoading } = useAuth();
   const { active: activeRole } = useActiveRole('mentee');
   const isMentorViewer = activeRole === 'mentor';
 
@@ -559,8 +554,8 @@ export default function MessagesPage() {
     return subscribeToInbox(user.id, mentorProfileId, isMentorViewer, refreshInbox);
   }, [user, mentorProfileId, isMentorViewer, refreshInbox]);
 
-  const canSend = isMentorViewer || isActive;
-  const showUpgrade = !isMentorViewer && !subLoading && !isActive;
+  const canSend = isMentorViewer || isSubscribed;
+  const showUpgrade = !isMentorViewer && !settingsLoading && !isSubscribed;
   const showInbox = !conversationId;
   const showThread = Boolean(conversationId && user);
 
@@ -575,13 +570,8 @@ export default function MessagesPage() {
       />
 
       {showUpgrade && !conversationId && (
-        <div className="mb-4 rounded-2xl px-4 py-3" style={{ background: 'var(--bridge-surface-muted)' }}>
-          <p className="text-sm" style={{ color: 'var(--bridge-text-secondary)' }}>
-            Messaging is included with{' '}
-            <Link to="/dashboard/plan" className="font-semibold" style={{ color: 'var(--color-primary)' }}>
-              Plus or Pro
-            </Link>
-          </p>
+        <div className="mb-4">
+          <PaywallPrompt feature="messaging" />
         </div>
       )}
 

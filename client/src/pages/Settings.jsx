@@ -31,7 +31,11 @@ import {
   applyThemePreference,
   getStoredAppearanceOverlay,
 } from '../utils/appearance';
-import { LANGUAGE_OPTIONS, useI18n } from '../i18n';
+import { openBillingPortal } from '../api/stripe';
+import { isInTrial, trialDaysRemaining, isSubscribed as checkSubscribed } from '../utils/subscriptionStatus';
+import {
+  displayMonthlyPrice,
+} from '../../../shared/subscriptionPlans.js';
 
 /** Never persist password fields to JSONB. */
 function settingsForPersistence(s) {
@@ -88,7 +92,7 @@ const DEFAULT_SETTINGS = {
 };
 
 export default function Settings() {
-  const { user, logout, loading: authLoading } = useAuth();
+  const { user, logout, loading: authLoading, userSettings, settingsLoading } = useAuth();
   const { t, setLanguage } = useI18n();
   const navigate = useNavigate();
   const asMentor = user ? isMentorAccount(user) : false;
@@ -815,56 +819,57 @@ export default function Settings() {
                         </div>
                         <div>
                           <h2 className="font-display text-lg font-bold" style={{ color: 'var(--bridge-text)' }}>Billing & Subscription</h2>
-                          <p className="text-xs" style={{ color: 'var(--bridge-text-muted)' }}>Manage your plan and payment</p>
+                          <p className="text-xs" style={{ color: 'var(--bridge-text-muted)' }}>Manage your Bridge plan</p>
                         </div>
                       </div>
 
                       <div className="overflow-hidden rounded-2xl p-6 text-white"
                         style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-hover, color-mix(in srgb, var(--color-primary) 70%, #000)))' }}>
                         <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-75">Current plan</p>
-                        <p className="mt-1 font-display text-2xl font-black capitalize">{settings.billing.plan}</p>
-                        <p className="mt-1.5 text-sm opacity-80">
-                          {settings.billing.plan === 'free'
-                            ? 'Access the directory and book individual sessions.'
-                            : 'Unlimited access to all mentors and premium features.'}
+                        <p className="mt-1 font-display text-2xl font-black">
+                          {settingsLoading ? '…' : checkSubscribed(userSettings)
+                            ? `Bridge ${userSettings?.subscription_plan === 'annual' ? 'Annual' : 'Monthly'}`
+                            : 'No active plan'}
                         </p>
-                        <button className={`mt-4 inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-semibold transition hover:opacity-90 ${focusRing}`}
-                          style={{ color: 'var(--color-primary)' }}>
-                          {settings.billing.plan === 'free' ? 'Upgrade plan' : 'Manage subscription'}
+                        <p className="mt-1.5 text-sm opacity-80">
+                          {settingsLoading ? 'Loading…' : (() => {
+                            if (!checkSubscribed(userSettings)) return 'Start a 7-day free trial to unlock the full platform.';
+                            if (isInTrial(userSettings)) {
+                              const days = trialDaysRemaining(userSettings);
+                              return `Trial — ${days} ${days === 1 ? 'day' : 'days'} remaining`;
+                            }
+                            if (userSettings?.subscription_status === 'past_due') return 'Past due — update your payment method';
+                            if (userSettings?.subscription_status === 'canceled') return 'Canceled';
+                            return 'Active';
+                          })()}
+                        </p>
+                        {userSettings?.is_student && checkSubscribed(userSettings) && (
+                          <span className="mt-3 inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold">
+                            Student discount (50% off)
+                          </span>
+                        )}
+                        {checkSubscribed(userSettings) && userSettings?.current_period_end && (
+                          <p className="mt-3 text-sm opacity-90">
+                            Next charge: ${displayMonthlyPrice(userSettings.subscription_plan ?? 'monthly', { isStudent: userSettings?.is_student })}
+                            {' '}on {new Date(userSettings.current_period_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (checkSubscribed(userSettings)) {
+                              const res = await openBillingPortal();
+                              if (res.ok && res.url) window.location.href = res.url;
+                            } else {
+                              navigate('/pricing');
+                            }
+                          }}
+                          className={`mt-4 inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-semibold transition hover:opacity-90 ${focusRing}`}
+                          style={{ color: 'var(--color-primary)' }}
+                        >
+                          {checkSubscribed(userSettings) ? 'Manage subscription' : 'Start 7-day free trial'}
                         </button>
                       </div>
-
-                      <div className="space-y-3">
-                        <SectionLabel>Payment method</SectionLabel>
-                        {settings.billing.payment_method ? (
-                          <div className="flex items-center justify-between rounded-xl border p-4" style={{ borderColor: 'var(--bridge-border)', backgroundColor: 'var(--bridge-surface-muted)' }}>
-                            <div className="flex items-center gap-3">
-                              <CreditCard className="h-5 w-5" style={{ color: 'var(--bridge-text-muted)' }} />
-                              <div>
-                                <p className="text-sm font-semibold" style={{ color: 'var(--bridge-text)' }}>Visa ending in 4242</p>
-                                <p className="text-xs" style={{ color: 'var(--bridge-text-muted)' }}>Expires 12/24</p>
-                              </div>
-                            </div>
-                            <button className={`text-sm font-semibold ${focusRing} rounded-sm`} style={{ color: 'var(--color-primary)' }}>Update</button>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center rounded-xl border border-dashed py-8 text-center"
-                            style={{ borderColor: 'var(--bridge-border)', backgroundColor: 'var(--bridge-surface-muted)' }}>
-                            <CreditCard className="mb-3 h-7 w-7" style={{ color: 'var(--bridge-text-faint)' }} />
-                            <p className="mb-4 text-sm" style={{ color: 'var(--bridge-text-muted)' }}>No payment method on file</p>
-                            <button className={`inline-flex items-center rounded-full px-5 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 ${focusRing}`}
-                              style={{ backgroundColor: 'var(--color-primary)', boxShadow: '0 8px 20px -6px color-mix(in srgb, var(--color-primary) 50%, transparent)' }}>
-                              Add payment method
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      <Divider />
-
-                      <ToggleRow label="Auto-renew subscription" description="Automatically renew before your plan expires"
-                        checked={settings.billing.auto_renew}
-                        onChange={v => updateSettings('billing', 'auto_renew', v)} />
                     </div>
                   )}
 

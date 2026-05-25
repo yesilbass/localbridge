@@ -113,14 +113,14 @@ export default function BillingPage() {
           Session history and subscription billing.
         </p>
         <p className="mt-2 text-[13px]" style={{ color: 'var(--bridge-text-secondary)', lineHeight: 1.55 }}>
-          Session history lives here. To upgrade AI tools and platform features — Plus or Pro — go to Plans.
+          Session history lives here. Manage your Bridge subscription from Plans or Settings → Billing.
         </p>
         <Link
           to="/dashboard/plan"
           className="bridge-focus mt-4 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] font-bold"
           style={{ backgroundColor: 'var(--color-primary)', color: '#fff' }}
         >
-          View subscription plans <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          View subscription <ArrowRight className="h-3.5 w-3.5" aria-hidden />
         </Link>
       </section>
 

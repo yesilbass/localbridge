@@ -10,10 +10,31 @@ import {
   writeCredentials,
 } from './_lib/calendly.js';
 import { getPublicOrigin } from './_lib/publicOrigin.js';
+import {
+  mapStripeSubscription,
+  resolveUserIdFromSubscription,
+  upsertSubscriptionSettings,
+} from './_lib/subscriptionSync.js';
 import { z } from 'zod';
 
+export const config = { api: { bodyParser: false } };
+
 const SESSION_TYPES = new Set(['career_advice', 'interview_prep', 'resume_review', 'networking']);
-const PLAN_NAMES = new Set(['Plus', 'Pro']);
+const BILLING_PLANS = new Set(['monthly', 'annual']);
+
+async function readRawBody(req) {
+  if (Buffer.isBuffer(req.body)) return req.body;
+  if (typeof req.body === 'string') return Buffer.from(req.body, 'utf8');
+  if (req.body && typeof req.body === 'object') {
+    return Buffer.from(JSON.stringify(req.body), 'utf8');
+  }
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', (c) => chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
 const FINALIZE_BODY_SCHEMA = z.object({
   sessionId: z.string().min(1).max(255),
 });
@@ -92,31 +113,112 @@ async function ensureRoomSlug(supabaseClient, mentor) {
   return null;
 }
 
+function resolveCheckoutUserId(meta) {
+  return meta.userId || meta.user_id || null;
+}
+
 async function syncSubscription({ supabaseClient, meta, checkoutSession }) {
-  const { data: row } = await supabaseClient
-    .from('user_settings')
-    .select('settings')
-    .eq('user_id', meta.userId)
-    .maybeSingle();
+  const userId = resolveCheckoutUserId(meta);
+  if (!userId) return { synced: false, error: 'Missing user id in checkout metadata.' };
 
-  const prev = row?.settings && typeof row.settings === 'object' ? row.settings : {};
-  const settings = {
-    ...prev,
-    subscription_plan: meta.planName,
-    subscription_status: 'active',
+  const plan = BILLING_PLANS.has(meta.plan) ? meta.plan : 'monthly';
+  const subscriptionObj = checkoutSession.subscription;
+  const stripeSub = subscriptionObj && typeof subscriptionObj === 'object' ? subscriptionObj : null;
+
+  const patch = stripeSub
+    ? mapStripeSubscription(stripeSub)
+    : {
+        subscription_plan: plan,
+        subscription_status: checkoutSession.status === 'complete' ? 'trialing' : 'active',
+        stripe_customer_id: checkoutSession.customer ? String(checkoutSession.customer) : null,
+        stripe_subscription_id: subscriptionObj
+          ? String(subscriptionObj.id ?? subscriptionObj)
+          : null,
+        is_student: meta.is_student === 'true',
+      };
+
+  const result = await upsertSubscriptionSettings(supabaseClient, userId, {
+    ...patch,
     stripe_checkout_session_id: checkoutSession.id,
-    stripe_customer_id: checkoutSession.customer ? String(checkoutSession.customer) : null,
-    stripe_subscription_id: checkoutSession.subscription
-      ? String(checkoutSession.subscription.id ?? checkoutSession.subscription)
-      : null,
-    stripe_paid_at: new Date().toISOString(),
-  };
+  });
+  return result.ok ? { synced: true } : { synced: false, error: result.error };
+}
 
-  const { error } = await supabaseClient.from('user_settings').upsert(
-    { user_id: meta.userId, settings, updated_at: new Date().toISOString() },
-    { onConflict: 'user_id' },
-  );
-  return error ? { synced: false, error: error.message } : { synced: true };
+async function handleStripeWebhook(req, res, rawBody, { stripe, supabaseClient }) {
+  applySecurityHeaders(res);
+  if (req.method !== 'POST') return jsonError(res, 405, 'Method not allowed');
+
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) return jsonError(res, 503, 'Webhook secret is not configured.');
+
+  const signature = req.headers['stripe-signature'];
+  if (!signature) return jsonError(res, 400, 'Missing Stripe signature.');
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+  } catch (err) {
+    console.error('[stripe-webhook] signature verification failed', { message: err?.message });
+    return jsonError(res, 400, 'Invalid webhook signature.');
+  }
+
+  try {
+    switch (event.type) {
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object;
+        const userId = await resolveUserIdFromSubscription(supabaseClient, subscription);
+        if (!userId) break;
+        await upsertSubscriptionSettings(supabaseClient, userId, mapStripeSubscription(subscription));
+        break;
+      }
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object;
+        const userId = await resolveUserIdFromSubscription(supabaseClient, subscription);
+        if (!userId) break;
+        await upsertSubscriptionSettings(supabaseClient, userId, {
+          subscription_status: 'canceled',
+          stripe_subscription_id: subscription.id ?? null,
+        });
+        break;
+      }
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object;
+        const subId = typeof invoice.subscription === 'string'
+          ? invoice.subscription
+          : invoice.subscription?.id;
+        if (!subId) break;
+        const subscription = await stripe.subscriptions.retrieve(subId);
+        const userId = await resolveUserIdFromSubscription(supabaseClient, subscription);
+        if (!userId) break;
+        await upsertSubscriptionSettings(supabaseClient, userId, { subscription_status: 'past_due' });
+        break;
+      }
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object;
+        const subId = typeof invoice.subscription === 'string'
+          ? invoice.subscription
+          : invoice.subscription?.id;
+        if (!subId) break;
+        const subscription = await stripe.subscriptions.retrieve(subId);
+        const userId = await resolveUserIdFromSubscription(supabaseClient, subscription);
+        if (!userId) break;
+        const mapped = mapStripeSubscription(subscription);
+        if (mapped.subscription_status !== 'trialing') {
+          mapped.subscription_status = 'active';
+        }
+        await upsertSubscriptionSettings(supabaseClient, userId, mapped);
+        break;
+      }
+      default:
+        break;
+    }
+  } catch (err) {
+    console.error('[stripe-webhook] handler error', { type: event.type, message: err?.message });
+    return jsonError(res, 500, 'Webhook handler failed.');
+  }
+
+  return res.json({ received: true });
 }
 
 async function mintCalendlyScheduling({ supabaseClient, mentor, mentorProfileId }) {
@@ -265,13 +367,13 @@ export async function finalizeCheckout(
     if (invalidCheckout) return jsonError(res, invalidCheckout.status, invalidCheckout.error);
 
     const meta = checkoutSession.metadata ?? {};
-    if (!meta.userId || meta.userId !== user.id) return jsonError(res, 403, 'Forbidden');
+    const checkoutUserId = resolveCheckoutUserId(meta);
+    if (!checkoutUserId || checkoutUserId !== user.id) return jsonError(res, 403, 'Forbidden');
     if (meta.type !== 'subscription' && meta.type !== 'mentor_booking') {
       return jsonError(res, 400, 'Unknown checkout type.');
     }
 
     if (meta.type === 'subscription') {
-      if (!PLAN_NAMES.has(meta.planName)) return jsonError(res, 400, 'Invalid subscription plan.');
       const sync = await syncSubscription({ supabaseClient, meta, checkoutSession });
       return res.json({ ok: true, type: 'subscription', sessionId: checkoutSession.id, ...sync });
     }
@@ -297,5 +399,19 @@ export async function finalizeCheckout(
 }
 
 export default async function handler(req, res) {
-  return finalizeCheckout(req, res);
+  const rawBody = await readRawBody(req);
+  const stripe = getStripe();
+
+  if (req.headers['stripe-signature']) {
+    if (!stripe) return jsonError(res, 503, 'Stripe is not configured on the server.');
+    return handleStripeWebhook(req, res, rawBody, { stripe, supabaseClient: supabase });
+  }
+
+  try {
+    req.body = JSON.parse(rawBody.toString('utf8'));
+  } catch {
+    req.body = {};
+  }
+
+  return finalizeCheckout(req, res, { stripe });
 }

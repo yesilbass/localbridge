@@ -34,7 +34,9 @@ shipped features.
 | `client/src/api/aiMatching.js` | Mentor matching from mentee profile | `gpt-4o` | JSON output, strict schema validation |
 | `client/src/api/aiResumeReview.js` | Resume review with letter grade + per-section feedback | `gpt-4o` | Files API + multimodal (file + text) |
 | `client/src/api/intake.js` | Voice intake follow-up + post-call summary | `gpt-4o-mini` | Free-form text |
-| `api/prompts/intakePrompt.js` | Real-time voice intake system prompt | n/a | Server-side system prompt for the realtime layer |
+| `api/_lib/intakePrompt.js` | Real-time voice intake system prompt | n/a | Prepended in `api/realtime-session.js` for intake |
+| `api/realtime-session.js` | Ephemeral Realtime key | `POST` | OpenAI GA `POST /v1/realtime/client_secrets`; intake + `mentor_application` |
+| `client/src/hooks/useRealtimeCall.js` | WebRTC to OpenAI Realtime | n/a | Uses `client_secret.value` from `/api/realtime-session` |
 | `client/src/api/aiUsage.js` | Per-user feature usage tracking | n/a | Supabase `ai_usage` table |
 
 API key access is direct from the client: `import.meta.env.VITE_OPENAI_API_KEY`.

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  LogOut, User, Settings, Menu, X, Search, CalendarCheck, Clock,
-  DollarSign, Star, Heart, FileText, CreditCard, Sparkles, MessageSquare, Users,
+  LogOut, User, Settings, Menu, X, Sparkles, CreditCard,
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import NotificationPanel from './NotificationPanel';
@@ -11,44 +10,11 @@ import { useI18n } from '../i18n';
 import { DASHBOARD_NAVBAR_H } from '../pages/dashboard/dashboardLayout.js';
 import { isDashboardMentorProfileDetail } from '../utils/mentorProfileRoute.js';
 import { useMentorProfileNavHidden } from '../hooks/useMentorProfileNavHidden.js';
+import { buildDashboardNavModel } from './nav/dashboardNavModel';
+import { DashboardNavMenusDesktop, DashboardNavMenusMobile } from './nav/DashboardNavMenus';
 
 function getInitials(name = '') {
   return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
-}
-
-const MENTEE_LINKS = [
-  { to: '/dashboard/mentors', labelKey: 'nav.mentors', fallback: 'Mentors', icon: Search },
-  { to: '/dashboard/community', labelKey: 'nav.community', fallback: 'Community', icon: Users },
-  { to: '/dashboard/messages', labelKey: 'nav.messages', fallback: 'Messages', icon: MessageSquare },
-  { to: '/dashboard/sessions', labelKey: 'common.sessions', fallback: 'Sessions', icon: CalendarCheck },
-  { to: '/dashboard/saved', labelKey: 'common.saved', fallback: 'Saved', icon: Heart },
-  { to: '/dashboard/resume', labelKey: 'nav.resume', fallback: 'Resume', icon: FileText },
-];
-
-const MENTOR_LINKS = [
-  { to: '/dashboard/sessions', labelKey: 'common.sessions', fallback: 'Sessions', icon: CalendarCheck },
-  { to: '/dashboard/community', labelKey: 'nav.community', fallback: 'Community', icon: Users },
-  { to: '/dashboard/messages', labelKey: 'nav.messages', fallback: 'Messages', icon: MessageSquare },
-  { to: '/dashboard/availability', labelKey: 'common.availability', fallback: 'Availability', icon: Clock },
-  { to: '/dashboard/earnings', labelKey: 'common.earnings', fallback: 'Earnings', icon: DollarSign },
-  { to: '/dashboard/reviews', labelKey: 'common.reviews', fallback: 'Reviews', icon: Star },
-];
-
-function NavItem({ to, end, label, icon: Icon }) {
-  return (
-    <NavLink
-      to={to}
-      end={end}
-      className={({ isActive }) =>
-        `inline-flex items-center gap-2 px-3 py-2 text-[15px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] ${
-          isActive ? 'text-[var(--color-primary)]' : 'text-[var(--bridge-text-secondary)] hover:text-[var(--bridge-text)]'
-        }`
-      }
-    >
-      <Icon className="h-[18px] w-[18px] shrink-0 opacity-80" aria-hidden />
-      <span className="whitespace-nowrap">{label}</span>
-    </NavLink>
-  );
 }
 
 export default function DashboardTopBar({
@@ -61,13 +27,10 @@ export default function DashboardTopBar({
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSections, setMobileSections] = useState({});
 
   const isMentor = activeRole === 'mentor';
-  const linkDefs = isMentor ? MENTOR_LINKS : MENTEE_LINKS;
-  const navLinks = linkDefs.map((item) => ({
-    ...item,
-    label: t(item.labelKey, item.fallback),
-  }));
+  const navModel = buildDashboardNavModel(isMentor, t);
 
   const isProfileDetail = isDashboardMentorProfileDetail(location.pathname);
   const barHidden = useMentorProfileNavHidden(isProfileDetail);
@@ -91,15 +54,25 @@ export default function DashboardTopBar({
     navigate('/');
   }
 
+  const closeMobile = () => setMobileOpen(false);
+  const toggleMobileSection = (id) => {
+    setMobileSections((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 bg-[var(--bridge-canvas)] transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`fixed inset-x-0 top-0 z-50 border-b transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           barHidden && !mobileOpen ? 'pointer-events-none -translate-y-full opacity-0' : 'translate-y-0 opacity-100'
         }`}
-        style={{ height: navbarH }}
+        style={{
+          height: navbarH,
+          backgroundColor: 'color-mix(in srgb, var(--bridge-canvas) 94%, transparent)',
+          borderColor: 'var(--bridge-border)',
+          backdropFilter: 'blur(12px)',
+        }}
       >
-        <div className="mx-auto flex h-full w-full max-w-[100rem] items-center gap-6 px-5 sm:px-8 lg:px-12">
+        <div className="mx-auto flex h-full w-full max-w-[100rem] items-center gap-4 px-5 sm:px-8 lg:px-12">
           <Link
             to="/dashboard"
             className="shrink-0 font-display text-[1.12rem] font-black tracking-[-0.04em] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] sm:text-[1.22rem]"
@@ -108,14 +81,11 @@ export default function DashboardTopBar({
             mentorshipbridge
           </Link>
 
-          <nav
-            aria-label="Dashboard"
-            className="hidden min-w-0 flex-1 items-center gap-1 md:flex lg:gap-2"
-          >
-            {navLinks.map(({ to, end, label, icon }) => (
-              <NavItem key={to} to={to} end={end} label={label} icon={icon} />
-            ))}
-          </nav>
+          <DashboardNavMenusDesktop
+            model={navModel}
+            pathname={location.pathname}
+            onNavigate={closeMobile}
+          />
 
           <div className="flex shrink-0 items-center gap-2.5 sm:gap-3.5 md:ml-auto">
             <ThemeToggle variant="plain" className="hidden sm:inline-flex" />
@@ -144,11 +114,12 @@ export default function DashboardTopBar({
               {menuOpen && (
                 <div
                   role="menu"
-                  className="animate-pop-in absolute right-0 top-[calc(100%+8px)] z-50 w-52 overflow-hidden rounded-xl border py-1"
+                  className="absolute right-0 top-[calc(100%+8px)] z-50 w-52 overflow-hidden border py-1"
                   style={{
                     backgroundColor: 'var(--bridge-surface-raised)',
                     borderColor: 'var(--bridge-border)',
-                    boxShadow: '0 16px 40px -16px color-mix(in srgb, var(--bridge-text) 30%, transparent)',
+                    borderRadius: '6px',
+                    boxShadow: '0 8px 24px -8px color-mix(in srgb, var(--bridge-text) 18%, transparent)',
                   }}
                 >
                   <div className="border-b px-3.5 py-2.5" style={{ borderColor: 'var(--bridge-border)' }}>
@@ -210,16 +181,22 @@ export default function DashboardTopBar({
             type="button"
             aria-label="Close menu"
             className="absolute inset-0 bg-black/40"
-            onClick={() => setMobileOpen(false)}
+            onClick={closeMobile}
           />
           <div
-            className="absolute inset-x-0 top-0 flex max-h-[85vh] flex-col overflow-y-auto bg-[var(--bridge-canvas)] px-4 pb-6 pt-[calc(var(--navbar-h,4.75rem)+12px)]"
+            className="absolute inset-x-0 top-0 flex max-h-[85vh] flex-col overflow-y-auto border-b px-4 pb-6 pt-[calc(var(--navbar-h,4.75rem)+12px)]"
+            style={{
+              backgroundColor: 'var(--bridge-canvas)',
+              borderColor: 'var(--bridge-border)',
+            }}
           >
-            <nav aria-label="Dashboard mobile" className="flex flex-col gap-0.5">
-              {navLinks.map(({ to, end, label, icon }) => (
-                <NavItem key={to} to={to} end={end} label={label} icon={icon} />
-              ))}
-            </nav>
+            <DashboardNavMenusMobile
+              model={navModel}
+              pathname={location.pathname}
+              onNavigate={closeMobile}
+              openSections={mobileSections}
+              onSectionToggle={toggleMobileSection}
+            />
             <div
               className="mt-4 flex items-center justify-between gap-3 border-t pt-4 sm:hidden"
               style={{ borderColor: 'var(--bridge-border)' }}
@@ -229,10 +206,10 @@ export default function DashboardTopBar({
               </span>
               <ThemeToggle variant="pill" />
             </div>
-            <div className="mt-4 flex flex-col gap-0.5 pt-4 sm:mt-0 sm:pt-0">
+            <div className="mt-4 flex flex-col gap-0.5 border-t pt-4" style={{ borderColor: 'var(--bridge-border)' }}>
               <Link
                 to="/dashboard/profile"
-                onClick={() => setMobileOpen(false)}
+                onClick={closeMobile}
                 className="bridge-focus flex items-center gap-2 rounded-lg px-3 py-2.5 text-[13px] font-medium"
                 style={{ color: 'var(--bridge-text-secondary)' }}
               >
@@ -243,7 +220,7 @@ export default function DashboardTopBar({
                 <>
                   <Link
                     to="/dashboard/plan"
-                    onClick={() => setMobileOpen(false)}
+                    onClick={closeMobile}
                     className="bridge-focus flex items-center gap-2 rounded-lg px-3 py-2.5 text-[13px] font-medium"
                     style={{ color: 'var(--bridge-text-secondary)' }}
                   >
@@ -252,7 +229,7 @@ export default function DashboardTopBar({
                   </Link>
                   <Link
                     to="/dashboard/billing"
-                    onClick={() => setMobileOpen(false)}
+                    onClick={closeMobile}
                     className="bridge-focus flex items-center gap-2 rounded-lg px-3 py-2.5 text-[13px] font-medium"
                     style={{ color: 'var(--bridge-text-secondary)' }}
                   >
@@ -263,7 +240,7 @@ export default function DashboardTopBar({
               )}
               <Link
                 to="/dashboard/settings"
-                onClick={() => setMobileOpen(false)}
+                onClick={closeMobile}
                 className="bridge-focus flex items-center gap-2 rounded-lg px-3 py-2.5 text-[13px] font-medium"
                 style={{ color: 'var(--bridge-text-secondary)' }}
               >

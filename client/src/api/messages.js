@@ -49,7 +49,7 @@ function friendlyError(error) {
     return 'Messaging is not enabled yet. Ask your admin to run the messaging migration.';
   }
   if (error.code === '42501' || msg.toLowerCase().includes('policy')) {
-    return 'Messaging requires an active Plus or Pro plan.';
+    return 'Messaging requires an active Bridge subscription.';
   }
   return msg || 'Something went wrong. Try again.';
 }

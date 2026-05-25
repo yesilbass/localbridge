@@ -1,13 +1,15 @@
-import { PAID_PLAN_NAMES } from '../../../shared/subscriptionPlans.js';
-
-export function isActiveSubscription(settings) {
-  if (!settings || typeof settings !== 'object') return false;
-  const status = settings.subscription_status;
-  const plan = settings.subscription_plan;
-  return status === 'active' && PAID_PLAN_NAMES.includes(plan);
-}
+export {
+  isSubscribed as isActiveSubscription,
+  isSubscribed,
+  isInTrial,
+  trialDaysRemaining,
+  isLapsed,
+  hasNeverSubscribed,
+} from './subscriptionStatus';
 
 export function subscriptionPlanLabel(settings) {
-  if (!isActiveSubscription(settings)) return null;
-  return settings.subscription_plan ?? null;
+  if (!settings?.subscription_plan) return null;
+  if (settings.subscription_plan === 'annual') return 'Bridge Annual';
+  if (settings.subscription_plan === 'monthly') return 'Bridge Monthly';
+  return null;
 }

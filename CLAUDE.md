@@ -210,7 +210,11 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 
 10. **Community = direct Supabase** — All community CRUD in `client/src/api/community.js`. No Vercel serverless function (12-function limit). RLS handles auth.
 
-11. **Community posts ≠ mentor posts** — `community_posts` powers `/community` hub and pillar feeds. `mentor_posts` is short mentor advice on profiles and `/community/posts`.
+11. **Community posts ≠ mentor posts** — `community_posts` powers `/dashboard/community` (and `/community` redirect). `mentor_posts` is short mentor advice on profiles and `/community/posts`.
+
+12. **Navigation** — Marketing: `Navbar.jsx` + `components/nav/` (grouped dropdowns, flat `navChrome.js`). Dashboard: `DashboardTopBar.jsx` + `dashboardNavModel.js`. URL aliasing: `authNav.js` (`resolveAuthEntryPath`, `dashboardProductPath`). Do not add flat link sprawl — extend `mainNavModel.js` / `dashboardNavModel.js`.
+
+13. **Realtime sessions** — `POST /api/realtime-session` → OpenAI GA `POST /v1/realtime/client_secrets` (not beta `/v1/realtime/sessions`). Client uses `client_secret.value` in `useRealtimeCall.js`.
 
 ---
 
@@ -246,7 +250,13 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 ### `client/src/components/`
 | File | Purpose |
 |---|---|
-| Navbar.jsx | Top nav with auth state |
+| Navbar.jsx | Marketing/product top bar (auth, scroll hide, mobile drawer) |
+| DashboardTopBar.jsx | Dashboard shell nav — grouped dropdowns by role |
+| nav/mainNavModel.js | Marketing nav structure (Discover / Tools / Company groups) |
+| nav/NavMenus.jsx | Desktop dropdowns + mobile accordions |
+| nav/navChrome.js | Shared flat link/menu class strings |
+| nav/dashboardNavModel.js | Dashboard nav groups (Explore, Activity, Tools / Work, Mentor) |
+| nav/DashboardNavMenus.jsx | Dashboard dropdown UI |
 | Footer.jsx | App footer |
 | LoadingSpinner.jsx | Reusable spinner |
 | MentorAvatar.jsx | Mentor photo with fallback |

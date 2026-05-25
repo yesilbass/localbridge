@@ -4,6 +4,8 @@ import { applyCors } from '../_lib/allowedOrigins.js';
 import { applySecurityHeaders, jsonError } from '../_lib/security.js';
 import { finalizeRun, recomputeRun } from '../_lib/verification/orchestrator.js';
 import devPortalHandler from '../_lib/devPortal.js';
+import { getStripe } from '../_lib/stripeClient.js';
+import { getPublicOrigin } from '../_lib/publicOrigin.js';
 import { randomBytes, createHmac } from 'node:crypto';
 
 // bodyParser disabled so the Checkr webhook can read raw body for HMAC.
@@ -32,6 +34,7 @@ export default async function handler(req, res) {
 
   if (action === 'user-names') return handleUserNames(req, res);
   if (action === 'mentor-room-slug') return handleMentorRoomSlug(req, res);
+  if (action === 'billing-portal') return handleBillingPortal(req, res);
   if (action === 'verification-retry') return handleVerificationRetry(req, res);
   if (action === 'dev') return devPortalHandler(req, res);
   return jsonError(res, 404, 'Unknown util action');
@@ -107,6 +110,40 @@ async function handleCheckrWebhook(req, res, rawBody) {
   }
 
   return res.json({ ok: true });
+}
+
+// ── billing-portal ───────────────────────────────────────────────────────────
+
+async function handleBillingPortal(req, res) {
+  applyCors(req, res, 'POST, OPTIONS');
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method !== 'POST') return jsonError(res, 405, 'Method not allowed');
+
+  const { user, error: authErr } = await verifyAuthUser(req);
+  if (authErr || !user) return jsonError(res, 401, 'Unauthorized');
+
+  const stripe = getStripe();
+  if (!stripe) return jsonError(res, 503, 'Stripe is not configured on the server.');
+
+  const { data } = await supabase
+    .from('user_settings')
+    .select('settings')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  const customerId = data?.settings?.stripe_customer_id;
+  if (!customerId) return jsonError(res, 400, 'No subscription found');
+
+  try {
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${getPublicOrigin()}/settings`,
+    });
+    return res.json({ url: portalSession.url });
+  } catch (err) {
+    console.error('[billing-portal]', err?.message);
+    return jsonError(res, 500, 'Could not open billing portal.');
+  }
 }
 
 // ── user-names ───────────────────────────────────────────────────────────────
