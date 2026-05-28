@@ -1,0 +1,9 @@
+Hero v1 — two separate cards (left identity card + right session panel with shadow).
+
+To revert: tell the agent "go back to hero v1" or restore these files:
+- MentorHero.jsx → replace MentorHero function in index.jsx
+- MentorHeroGeometry.jsx → ../MentorHeroGeometry.jsx
+- MentorSessionPanel.jsx → ../MentorSessionPanel.jsx
+- ProfileSkeleton.jsx → replace ProfileSkeleton function in index.jsx
+
+Saved: 2026-05-26

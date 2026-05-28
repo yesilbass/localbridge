@@ -37,6 +37,18 @@ async function findMentorByUserUri(userUri) {
   return data ?? null;
 }
 
+async function findMenteeIdByEmail(email) {
+  if (!email) return null;
+  try {
+    const { data, error } = await supabase.auth.admin.listUsers({ perPage: 1000 });
+    if (error) return null;
+    const match = (data?.users ?? []).find(
+      (u) => u.email?.toLowerCase() === email.toLowerCase(),
+    );
+    return match?.id ?? null;
+  } catch { return null; }
+}
+
 function extractJoinUrl(location) {
   if (!location || typeof location !== 'object') return null;
   return location.join_url || location.location || null;
@@ -89,12 +101,13 @@ async function handleInviteeCreated(payload) {
     return;
   }
 
+  const menteeId = await findMenteeIdByEmail(invitee?.email);
+
   await supabase.from('sessions').insert({
     mentor_id: mentor.id,
-    mentee_id: null,
+    mentee_id: menteeId,
     mentee_name: invitee?.name || null,
     session_type: 'career_advice',
-    // Orphan rows (no matching paid Bridge session) still need mentor approval.
     status: 'pending',
     scheduled_date: scheduledAt,
     calendly_event_uri: calendlyEventUri,

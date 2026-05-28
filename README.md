@@ -25,7 +25,7 @@ Bridge is pre-revenue, demo-ready, and deployed on Vercel from `main`. The stack
 | Permanent mentor meet lobby (`/meet/:slug`, knock → admit → video room) | ✅ |
 | Post-session review + Postgres trigger for mentor rating averages | ✅ |
 | Favorites (save/remove mentors) | ✅ |
-| Subscription plans (Stripe Billing, Plus/Pro; 50% student discount for `.edu`) | ✅ |
+| Subscription plan (Stripe Billing, single plan; 50% student discount for `.edu`) | ✅ |
 | Subscription-gated messaging (mentee ↔ mentor, Realtime inbox) | ✅ |
 | AI resume review (PDF upload + Claude analysis) | ✅ |
 | Resume upload → AI extract to pre-fill user profile | ✅ |
@@ -52,7 +52,7 @@ Bridge is pre-revenue, demo-ready, and deployed on Vercel from `main`. The stack
 | `/` | Landing — hero, trust band, video testimonials, audience fit, mentor roster |
 | `/company` | Company story, beliefs, comparison, proof, team, CTA |
 | `/how-it-works` | Dual-track explainer — on-demand sessions vs AI career stack (`pages/how-it-works/`) |
-| `/pricing` | Tier cards, compare table, FAQ, embedded Stripe checkout |
+| `/pricing` | Single-plan pricing, FAQ, embedded Stripe checkout |
 | `/resume` | AI resume review |
 | `/mentors` | Mentor directory (+ AI match wizard) |
 | `/mentors/:id` | Mentor profile (book, favorite, message, reviews) |
@@ -127,8 +127,7 @@ Client AI keys use `VITE_OPENAI_API_KEY` and `VITE_ANTHROPIC_API_KEY` (browser-e
 ### Payments & subscriptions
 
 - **Session booking:** `create-booking-checkout` → Stripe Checkout → `finalize-checkout` creates `sessions` row → Calendly widget for scheduling → `booking-confirm-scheduled` + Calendly webhook write `scheduled_date`.
-- **Subscriptions:** `create-subscription-checkout` → Stripe Billing → status stored in `user_settings.settings`. Plus/Pro unlock messaging and some mentor-profile engagement.
-- **Student discount:** auto-applied at checkout for `.edu` emails.
+- **Subscriptions:** `create-subscription-checkout` → Stripe Billing → status stored in `user_settings.settings`. One plan (monthly or annual) unlocks messaging, community, AI tools, and all platform features. 50% student discount auto-applied for `.edu` emails.
 
 ### Database (Supabase Postgres)
 
@@ -183,7 +182,7 @@ Three route-driven palettes: `modern-signal`, `grounded-guidance`, `quiet-author
 
 ## Features
 
-- **Mentor discovery** — filterable directory with tier badges, session rates, availability, and AI-powered goal-based matching
+- **Mentor discovery** — filterable directory with session rates, availability indicators, and AI-powered goal-based matching
 - **Mentor application & onboarding** — voice-first application at `/apply/mentor` (OpenAI Realtime) → admin review → 5-step profile wizard at `/onboarding/mentor`; tiers and rates assigned server-side by a scoring algorithm
 - **Community** — authenticated hub at `/dashboard/community` (aliases from `/community`) with live feed and 8 mentorship-pillar sub-communities; questions, wins, discussions, and resources with upvotes and flat comments; active mentors get a trust badge
 - **Grouped navigation** — marketing `Navbar` (Discover / Tools / Company dropdowns; `/how-it-works` via footer and landing, not in nav menus) and dashboard `DashboardTopBar` (role-based groups); flat underline chrome, not pill bubbles
@@ -193,7 +192,7 @@ Three route-driven palettes: `modern-signal`, `grounded-guidance`, `quiet-author
 - **AI intake call** — voice-driven pre-session intake via the OpenAI Realtime API; answers surfaced to the mentor on their dashboard
 - **Live video sessions** — peer-to-peer WebRTC video with mic/camera toggle, screen share, in-call chat, collaborative whiteboard, and session timer; no third-party video SDK
 - **AI resume review** — PDF upload to Supabase Storage + Claude analysis with section-by-section scoring and improvement suggestions
-- **Mentor subscriptions** — tiered plans via Stripe Billing; 50% student discount auto-applied for `.edu` emails
+- **Mentee subscription** — one plan (monthly $29 or annual $19/mo) via Stripe Billing; unlocks messaging, community, and AI tools; 50% student discount auto-applied for `.edu` emails; mentor sessions are always free
 - **Reviews** — star ratings with averages maintained by a Postgres trigger
 - **Favorites** — save and manage preferred mentors
 - **In-app notifications** — real-time notification panel via Supabase Realtime

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getMentorById } from '../../api/mentors';
 import { getReviewsForMentor } from '../../api/reviews';
 import { getMyFavorites, toggleFavorite } from '../../api/favorites';
+import { getCalendlyEventTypeSummary } from '../../api/calendly';
 import { useAuth } from '../../context/useAuth';
 
 export const EASE = [0.16, 1, 0.3, 1];
@@ -247,3 +248,53 @@ export function formatRelativeReview(iso) {
     return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
   } catch { return ''; }
 }
+
+export function useCalendlySummary(mentor) {
+  const [nextSlot, setNextSlot] = useState(undefined);
+  const [durationMin, setDurationMin] = useState(null);
+  const [calendarMeta, setCalendarMeta] = useState({ calendarSyncFailed: false, totalOpenSlots: 0 });
+
+  const calendlyReady = Boolean(mentor?.calendly_connected && mentor?.calendly_event_type_uri);
+
+  useEffect(() => {
+    if (!mentor?.id || !calendlyReady) {
+      setNextSlot(null);
+      setDurationMin(null);
+      setCalendarMeta({ calendarSyncFailed: false, totalOpenSlots: 0 });
+      return;
+    }
+
+    let cancelled = false;
+    setNextSlot(undefined);
+
+    void getCalendlyEventTypeSummary(mentor.id).then((res) => {
+      if (cancelled) return;
+      if (!res.ok || !res.ready) {
+        setNextSlot(null);
+        setDurationMin(null);
+        setCalendarMeta({ calendarSyncFailed: true, totalOpenSlots: 0 });
+        return;
+      }
+      setNextSlot(res.next_available ?? null);
+      setDurationMin(res.duration ?? null);
+      setCalendarMeta({
+        calendarSyncFailed: Boolean(res.calendar_sync_failed),
+        totalOpenSlots: res.total_open_slots ?? 0,
+      });
+    });
+
+    return () => { cancelled = true; };
+  }, [mentor?.id, calendlyReady]);
+
+  return { nextSlot, durationMin, calendarMeta, calendlyReady };
+}
+
+function getHeroHook(rawMentor) {
+  const why = rawMentor?.why_i_mentor?.trim();
+  if (why) return why.length > 160 ? `${why.slice(0, 157).trimEnd()}…` : why;
+  const bio = rawMentor?.bio?.trim();
+  if (bio) return bio.length > 160 ? `${bio.slice(0, 157).trimEnd()}…` : bio;
+  return null;
+}
+
+export { getHeroHook };

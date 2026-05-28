@@ -227,7 +227,7 @@ function EventTypeRow({ eventType, busy, onUse }) {
   );
 }
 
-function StatePickEventType({ eventTypes, onSelect, onRefresh, busy, error, selectingUri }) {
+function StatePickEventType({ eventTypes, onSelect, onRefresh, onDisconnect, busy, error, selectingUri }) {
   return (
     <CardShell>
       <p
@@ -296,17 +296,33 @@ function StatePickEventType({ eventTypes, onSelect, onRefresh, busy, error, sele
           ))
         )}
       </div>
-      <p className="mt-5 text-xs" style={{ color: 'var(--bridge-text-muted)' }}>
-        Don't see one?{' '}
-        <a
-          href="https://calendly.com/event_types"
-          target="_blank"
-          rel="noreferrer"
-          style={{ color: 'var(--color-primary)' }}
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs" style={{ color: 'var(--bridge-text-muted)' }}>
+          Don't see one?{' '}
+          <a
+            href="https://calendly.com/event_types"
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: 'var(--color-primary)' }}
+          >
+            Create it in Calendly →
+          </a>
+        </p>
+        <button
+          type="button"
+          onClick={onDisconnect}
+          disabled={busy}
+          className="bridge-focus inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold"
+          style={{
+            backgroundColor: 'transparent',
+            color: 'var(--color-error)',
+            boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--color-error) 35%, transparent)',
+          }}
         >
-          Create it in Calendly →
-        </a>
-      </p>
+          <Trash2 className="h-4 w-4" aria-hidden />
+          {busy ? 'Disconnecting…' : 'Disconnect'}
+        </button>
+      </div>
     </CardShell>
   );
 }
@@ -609,6 +625,7 @@ export default function MentorAvailabilityPanel({ mentorProfileId, reloadKey, on
         eventTypes={eventTypes}
         onSelect={handleSelect}
         onRefresh={handleChangeEventType}
+        onDisconnect={handleDisconnect}
         busy={busy}
         error={error}
         selectingUri={selectingUri}

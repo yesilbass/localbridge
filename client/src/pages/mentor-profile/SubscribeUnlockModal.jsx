@@ -7,7 +7,7 @@ import MentorAvatar from '../../components/MentorAvatar';
 import EmbeddedCheckoutPanel from '../../components/EmbeddedCheckoutPanel';
 import { createSubscriptionCheckout } from '../../api/stripe';
 import { getAllMentors } from '../../api/mentors';
-import { PLAN_MONTHLY_USD } from '../Pricing/constants';
+import { SUBSCRIPTION_MONTHLY_USD } from '../../../../shared/subscriptionPlans.js';
 import { useProfileReducedMotion } from './profileHooks';
 
 const ring = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
@@ -48,8 +48,8 @@ export default function SubscribeUnlockModal({
 
   const subcopy =
     intent === 'message'
-      ? 'Direct messaging is included with Plus and Pro — no per-session fees, ever.'
-      : 'Sessions are included with Plus and Pro — pick a time on their calendar when you upgrade.';
+      ? 'Direct messaging is included with your Bridge subscription — no per-session fees, ever.'
+      : 'Book sessions on their calendar with a Bridge subscription — mentors volunteer their time.';
 
   const reset = useCallback(() => {
     setCheckoutSecret(null);
@@ -223,11 +223,11 @@ export default function SubscribeUnlockModal({
                   </p>
                 )}
 
-                <div className="mt-8 space-y-3">
+                <div className="mt-8">
                   <button
                     type="button"
                     disabled={Boolean(checkoutLoading)}
-                    onClick={() => startCheckout('Pro')}
+                    onClick={() => startCheckout('monthly')}
                     className={`w-full rounded-full px-6 py-4 text-base font-black transition-all hover:-translate-y-0.5 disabled:opacity-60 ${ring}`}
                     style={{
                       background: 'var(--color-primary)',
@@ -235,20 +235,7 @@ export default function SubscribeUnlockModal({
                       boxShadow: '0 14px 36px -8px color-mix(in srgb, var(--color-primary) 55%, transparent)',
                     }}
                   >
-                    {checkoutLoading === 'Pro' ? 'Opening checkout…' : `Upgrade to Pro — $${PLAN_MONTHLY_USD.Pro}/mo`}
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={Boolean(checkoutLoading)}
-                    onClick={() => startCheckout('Plus')}
-                    className={`w-full rounded-full px-6 py-3.5 text-base font-bold transition-all disabled:opacity-60 ${ring}`}
-                    style={{
-                      background: 'var(--bridge-surface-muted)',
-                      color: 'var(--bridge-text)',
-                    }}
-                  >
-                    {checkoutLoading === 'Plus' ? 'Opening checkout…' : `Choose Plus — $${PLAN_MONTHLY_USD.Plus}/mo`}
+                    {checkoutLoading ? 'Opening checkout…' : `Start 7-day free trial — $${SUBSCRIPTION_MONTHLY_USD}/mo`}
                   </button>
                 </div>
 
@@ -269,7 +256,7 @@ export default function SubscribeUnlockModal({
                   className={`mt-5 inline-block text-sm font-semibold transition-colors ${ring}`}
                   style={{ color: 'var(--color-primary)' }}
                 >
-                  Compare all plans →
+                  See what&apos;s included →
                 </Link>
               </div>
             </motion.div>

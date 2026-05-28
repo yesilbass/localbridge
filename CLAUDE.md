@@ -290,7 +290,7 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 | Settings.jsx | User settings |
 | VideoCall.jsx | Custom WebRTC video session (Supabase Realtime signaling) |
 | About.jsx | About page |
-| Pricing.jsx | Pricing tiers |
+| Pricing.jsx | Single-plan pricing page (monthly / annual, student discount) |
 
 ### `client/src/pages/dashboard/`
 | File | Purpose |
@@ -341,7 +341,7 @@ About, Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust — sta
 - Mentorship category taxonomy + AI tagging
 - Dashboard (mentee + mentor views)
 - Resume upload/storage (Supabase bucket)
-- 30 seeded mentor profiles across industries
+- Seeded mentor profiles across industries (see `supabase/seeds/`)
 - Landing, About, Pricing, footer static pages
 
 ---

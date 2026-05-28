@@ -6,10 +6,10 @@ import { focusRing } from '../../ui';
 import TierBadge from '../../components/TierBadge.jsx';
 import { getCategoryLabels } from '../../constants/mentorshipCategories';
 import MentorTagGroups from '../../components/MentorTagGroups';
+import AvailabilityPanel from '../../components/mentor/AvailabilityPanel';
 import {
   getNextAvailability,
   availabilityToneStyle,
-  getAvailabilityDateParts,
 } from '../../utils/mentorDisplay';
 
 export function StarRating({ rating, size = 'md' }) {
@@ -66,49 +66,6 @@ function MetaItem({ icon, children }) {
       {icon}
       {children}
     </span>
-  );
-}
-
-function AvailabilityPanel({ availability, nextAvailableIso, availStyle }) {
-  const dateParts = nextAvailableIso ? getAvailabilityDateParts(nextAvailableIso) : null;
-
-  const subline = availability.loading
-    ? 'Checking their connected calendar…'
-    : dateParts
-    ? 'Pick a time that works — booking is free.'
-    : availability.tone === 'muted'
-    ? 'Try another mentor or save this one for later.'
-    : 'Open their profile to request a time.';
-
-  return (
-    <div className="py-0.5">
-      <p className="text-[14px] font-bold text-[var(--bridge-text)]">{availability.headline}</p>
-      <div className={`mt-2.5 flex items-start gap-3 ${dateParts ? '' : 'flex-col'}`}>
-        {dateParts && (
-          <div
-            className="flex shrink-0 flex-col items-center rounded-xl px-3 py-2 text-center leading-none"
-            style={{
-              backgroundColor: availStyle.bg,
-              boxShadow: `inset 0 0 0 1px ${availStyle.border}`,
-            }}
-          >
-            <span className="text-[11px] font-bold tracking-wide" style={{ color: availStyle.color }}>{dateParts.dow}</span>
-            <span className="mt-1 text-2xl font-black tabular-nums text-[var(--bridge-text)]">{dateParts.day}</span>
-            <span className="mt-0.5 text-[11px] font-semibold text-[var(--bridge-text-muted)]">{dateParts.mon}</span>
-          </div>
-        )}
-        <div className="min-w-0">
-          <p
-            className={`text-[15px] font-semibold leading-snug text-[var(--bridge-text)] ${availability.loading ? 'animate-pulse' : ''}`}
-          >
-            {dateParts ? dateParts.time : availability.detail}
-          </p>
-          {!availability.loading && (
-            <p className="mt-1 text-[12px] leading-snug text-[var(--bridge-text-muted)]">{subline}</p>
-          )}
-        </div>
-      </div>
-    </div>
   );
 }
 
