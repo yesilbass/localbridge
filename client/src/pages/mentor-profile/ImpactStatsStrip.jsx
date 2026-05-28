@@ -12,15 +12,23 @@ function StatCard({ label, value }) {
   );
 }
 
-export default function ImpactStatsStrip({ mentor, rawMentor, menteesHelped = 0 }) {
+export default function ImpactStatsStrip({ rawMentor, menteesHelped = 0 }) {
   const sessions = rawMentor?.total_sessions ?? 0;
   const joined = formatJoinedDate(rawMentor?.created_at);
 
+  const cards = [
+    sessions > 0 && { label: 'Sessions completed', value: sessions },
+    menteesHelped > 0 && { label: 'Mentees helped', value: menteesHelped },
+    joined && { label: 'Member since', value: joined },
+  ].filter(Boolean);
+
+  if (!cards.length) return null;
+
   return (
-    <div className="mt-6 flex flex-wrap gap-3">
-      <StatCard label="Sessions completed" value={sessions} />
-      <StatCard label="Mentees helped" value={menteesHelped} />
-      {joined && <StatCard label="Member since" value={joined} />}
+    <div className="mt-5 flex flex-wrap gap-3">
+      {cards.map(({ label, value }) => (
+        <StatCard key={label} label={label} value={value} />
+      ))}
     </div>
   );
 }

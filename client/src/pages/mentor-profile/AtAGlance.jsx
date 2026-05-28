@@ -17,12 +17,17 @@ function Chip({ icon: Icon, label }) {
   );
 }
 
-export default function AtAGlance({ mentor }) {
+export default function AtAGlance({ mentor, roleHeadline = null, className = 'mt-12' }) {
   if (!mentor) return null;
 
   const chips = [];
 
-  if (mentor.roleLabel) chips.push({ icon: Briefcase, label: mentor.roleLabel });
+  const roleNorm = mentor.roleLabel?.trim()?.toLowerCase();
+  const headlineNorm = roleHeadline?.trim()?.toLowerCase();
+  const titleNorm = mentor.title?.trim()?.toLowerCase();
+  const showRoleChip = mentor.roleLabel && roleNorm !== headlineNorm && roleNorm !== titleNorm;
+
+  if (showRoleChip) chips.push({ icon: Briefcase, label: mentor.roleLabel });
 
   const primaryIndustry = Array.isArray(mentor.industries) && mentor.industries[0];
   if (primaryIndustry) chips.push({ icon: Layers, label: primaryIndustry });
@@ -41,7 +46,7 @@ export default function AtAGlance({ mentor }) {
   if (!visible.length) return null;
 
   return (
-    <section aria-label="At a glance" className="mt-12">
+    <section aria-label="At a glance" className={className}>
       <div className="flex flex-wrap items-center gap-2">
         {visible.map((c, i) => (
           <Chip key={i} icon={c.icon} label={c.label} />

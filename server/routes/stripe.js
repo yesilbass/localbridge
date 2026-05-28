@@ -1,7 +1,12 @@
 import express from 'express';
 import Stripe from 'stripe';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
-import { PLAN_PRICES_CENTS } from '../../shared/subscriptionPlans.js';
+import { SUBSCRIPTION_MONTHLY_USD, SUBSCRIPTION_ANNUAL_USD } from '../../shared/subscriptionPlans.js';
+
+const PLAN_PRICES_CENTS = {
+  monthly: SUBSCRIPTION_MONTHLY_USD * 100,
+  annual: SUBSCRIPTION_ANNUAL_USD * 100,
+};
 
 const router = express.Router();
 const stripe = process.env.STRIPE_SECRET_KEY
@@ -53,7 +58,8 @@ router.post('/create-subscription-checkout', async (req, res) => {
   if (!stripe) return stripeUnavailable(res);
 
   try {
-    const { planName, userId, userEmail } = req.body;
+    const { plan, planName: _legacyPlanName, userId, userEmail } = req.body;
+    const planName = plan ?? _legacyPlanName;
 
     if (!PLAN_PRICES_CENTS[planName]) {
       return res.status(400).json({ error: 'Invalid plan selected.' });

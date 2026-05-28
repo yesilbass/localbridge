@@ -469,11 +469,17 @@ POST /api/finalize-checkout
 the server in `create-booking-checkout.js`. The client cannot pass or modify the price.
 This closes the price manipulation vector.
 
-### Subscription Flow (mentor plans)
+### Subscription Flow (mentee plan)
 
-Mentors can subscribe to tiered plans (Rising / Professional / Senior / Elite) via
-`/api/create-subscription-checkout.js`. Pricing is server-side only. Student discount
-(50% off) is auto-applied for email addresses ending in `.edu`.
+Bridge has a single subscription plan for mentees — available as monthly ($29/mo) or
+annual ($19/mo equivalent, billed as $228/year). Subscriptions are created via
+`/api/create-subscription-checkout.js`. The plan unlocks messaging, community access,
+AI tools (mentor matching, resume review), and all platform features. Mentor sessions
+themselves are always free (mentors volunteer). Pricing is enforced server-side only.
+Student discount (50% off forever) is auto-applied for `.edu` email addresses.
+Subscription status is stored in `user_settings.settings` (Stripe subscription ID,
+plan, trial dates, renewal date). Mentors do not subscribe — they are never shown the
+pricing page.
 
 ### Client-side
 

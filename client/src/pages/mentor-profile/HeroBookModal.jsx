@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import CalendlyInlineWidget from '../../components/CalendlyInlineWidget';
 import BookingDrawer from './BookingDrawer';
 import { useProfileReducedMotion } from './profileHooks';
+import supabase from '../../api/supabase';
 
 const ring = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
 const DARK_BG = 'linear-gradient(140deg, color-mix(in srgb, var(--color-primary) 50%, black), color-mix(in srgb, var(--color-primary) 22%, black))';
@@ -27,6 +28,24 @@ function BookPanel({ mentor, user, onClose, utmMedium }) {
     utmMedium,
     utmCampaign: mentor?.id || 'bridge',
   }), [mentor?.id, utmMedium]);
+
+  const handleScheduled = useCallback(async (payload) => {
+    if (user?.id && mentor?.id) {
+      await supabase.from('sessions').insert({
+        mentor_id: mentor.id,
+        mentee_id: user.id,
+        mentee_name: user.user_metadata?.full_name || user.email || null,
+        session_type: 'career_advice',
+        status: 'pending',
+        scheduled_date: payload?.event?.start_time ?? null,
+        calendly_event_uri: payload?.event?.uri ?? null,
+        calendly_invitee_uri: payload?.invitee?.uri ?? null,
+        message: '[calendly:bridge_booking]',
+      });
+    }
+    onClose();
+    navigate('/dashboard/sessions?booked=1');
+  }, [user, mentor, onClose, navigate]);
 
   return (
     <div>
@@ -74,10 +93,7 @@ function BookPanel({ mentor, user, onClose, utmMedium }) {
           prefill={prefill}
           utm={utm}
           minHeight={620}
-          onScheduled={() => {
-            onClose();
-            navigate('/dashboard/sessions?booked=1');
-          }}
+          onScheduled={handleScheduled}
         />
       )}
     </div>
