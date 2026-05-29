@@ -93,27 +93,27 @@ function CardActionRail({ mentor, availability, slotIso, availStyle, mentorsBase
       />
 
       <div className="flex flex-col gap-2.5 sm:mt-auto">
-        <AppLink
-          to={`${mentorsBase}/${mentor.id}`}
-          className={`inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-[15px] font-black text-[var(--color-on-primary)] transition hover:-translate-y-px hover:brightness-110 ${focusRing}`}
-          style={{
-            backgroundColor: 'var(--color-primary)',
-            boxShadow: '0 10px 28px -8px color-mix(in srgb, var(--color-primary) 55%, transparent)',
-          }}
-        >
-          View profile
-        </AppLink>
         {canBook && (
           <button
             type="button"
             onClick={() => onBookSession?.(mentor)}
             disabled={subscriptionLoading}
-            className={`inline-flex w-full items-center justify-center rounded-full border px-5 py-2.5 text-[14px] font-bold text-[var(--bridge-text)] transition hover:bg-[var(--bridge-surface)] disabled:cursor-wait disabled:opacity-60 ${focusRing}`}
-            style={{ borderColor: 'var(--bridge-border-strong)', backgroundColor: 'var(--bridge-surface)' }}
+            className={`inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-[15px] font-black text-[var(--color-on-primary)] transition hover:-translate-y-px hover:brightness-110 disabled:cursor-wait disabled:opacity-60 ${focusRing}`}
+            style={{
+              backgroundColor: 'var(--color-primary)',
+              boxShadow: '0 10px 28px -8px color-mix(in srgb, var(--color-primary) 55%, transparent)',
+            }}
           >
             {subscriptionLoading ? 'Checking plan…' : 'Book a session'}
           </button>
         )}
+        <AppLink
+          to={`${mentorsBase}/${mentor.id}`}
+          className={`inline-flex w-full items-center justify-center rounded-full border px-5 py-2.5 text-[14px] font-bold text-[var(--bridge-text)] transition hover:bg-[var(--bridge-surface)] ${focusRing}`}
+          style={{ borderColor: 'var(--bridge-border-strong)', backgroundColor: 'var(--bridge-surface)' }}
+        >
+          View profile
+        </AppLink>
       </div>
     </aside>
   );

@@ -98,7 +98,8 @@ function CalendarSessionCard({ session, isMentor, mentorProfile, handleStatusUpd
   const statusInfo = STATUS_STYLE[status] || { label: session.status, cls: 'bg-stone-500/12 text-stone-400 ring-1 ring-stone-400/25' };
   const busy       = actionLoading === session.id;
   const isPast     = session.scheduled_date && new Date(session.scheduled_date).getTime() <= Date.now();
-  const canJoin    = session.video_room_url && status === 'accepted' && !isPast;
+  const canJoin    = (session.room_slug || session.video_room_url) && status === 'accepted' && !isPast;
+  const joinHref   = session.room_slug ? `/meet/${session.room_slug}` : (typeof session.video_room_url === 'string' && session.video_room_url.startsWith('/') ? session.video_room_url : `/session/${session.id}/video`);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-[var(--bridge-border)] bg-[var(--bridge-canvas)] shadow-bridge-tile transition duration-300 hover:-translate-y-0.5 hover:shadow-bridge-card">
@@ -161,7 +162,7 @@ function CalendarSessionCard({ session, isMentor, mentorProfile, handleStatusUpd
           <div className="flex flex-wrap gap-2 pt-0.5">
             {canJoin && (
               <button type="button"
-                onClick={() => navigate(typeof session.video_room_url === 'string' && session.video_room_url.startsWith('/') ? session.video_room_url : `/session/${session.id}/video`)}
+                onClick={() => navigate(joinHref)}
                 className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-emerald-400 transition shadow-sm">
                 <Video className="h-3 w-3" />
                 Join Call

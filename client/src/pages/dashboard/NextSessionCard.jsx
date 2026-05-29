@@ -80,7 +80,7 @@ function ScheduledState({ session }) {
   );
   const live = phase === 'live';
   const delta = hasTime ? new Date(session.scheduledAt).getTime() - now : Infinity;
-  const joinable = hasTime && delta <= 5 * 60 * 1000 && delta > -30 * 60 * 1000;
+  const joinable = hasTime && !!session.joinUrl;
   const ended = phase === 'past';
 
   const [showReview, setShowReview] = useState(false);
@@ -173,7 +173,7 @@ function ScheduledState({ session }) {
       ? !session.asMentor // mentee can't act, mentor goes to sessions
       : timeTbd
         ? true // informational only — no action available
-        : !joinable;
+        : !session.joinUrl;
 
   return (
     <ShellCard live={live}>
@@ -306,7 +306,7 @@ function ScheduledState({ session }) {
               title={
                 awaitingMentor
                   ? (session.asMentor ? 'Open the sessions tab to accept or decline' : 'Your mentor will confirm this session shortly.')
-                  : (!joinable && !ended ? 'Available 5 minutes before start' : undefined)
+                  : undefined
               }
               className={`bridge-focus rounded-xl px-5 py-2.5 text-[14px] font-bold transition-shadow ${
                 live ? 'bridge-cta-live' : ''

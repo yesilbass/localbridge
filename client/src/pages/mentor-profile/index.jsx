@@ -8,8 +8,7 @@ import { getReviewsForMentor } from '../../api/reviews';
 import { getOrCreateConversation } from '../../api/messages';
 import supabase from '../../api/supabase';
 import { ArrowLeft, BadgeCheck, Star } from 'lucide-react';
-import { getNextAvailability, availabilityToneStyle } from '../../utils/mentorDisplay';
-import AvailabilityPanel from '../../components/mentor/AvailabilityPanel';
+import { getNextAvailability, availabilityToneStyle, getAvailabilityDateParts, formatAvailabilityLead } from '../../utils/mentorDisplay';
 import AppLink from '../../components/AppLink';
 import { useContent } from '../../content';
 
@@ -17,6 +16,7 @@ import {
   useFavoriteMentor,
   normalizeMentor,
   useCalendlySummary,
+  getHeroHook,
 } from './profileHooks';
 import MentorshipDescriptionSection from './MentorshipDescriptionSection';
 import MentorshipAreasSection from './MentorshipAreasSection';
@@ -37,7 +37,7 @@ import AtAGlance from './AtAGlance';
 import HeroBookModal from './HeroBookModal';
 import MentorSectionNav from './MentorSectionNav';
 import { formatRoleHeadline } from './mentorMeta';
-import { getCategoryLabels } from '../../constants/mentorshipCategories';
+import { getCategoryLabels, isValidCategoryId } from '../../constants/mentorshipCategories';
 import { bodyClass, sectionTitleClass, sectionTitleStyle } from './profileType';
 import { PUBLIC_NAVBAR_H, primaryNavHeight, PROFILE_SECTION_NAV_H } from '../../utils/mentorProfileLayout';
 
@@ -75,7 +75,10 @@ function MentorHeroAvatar({ mentor }) {
 }
 
 function HeroMentorshipPills({ rawMentor, className = '' }) {
-  const labels = getCategoryLabels(rawMentor?.mentorship_categories).filter(Boolean).slice(0, 3);
+  const ids = Array.isArray(rawMentor?.mentorship_categories)
+    ? rawMentor.mentorship_categories.filter(isValidCategoryId)
+    : [];
+  const labels = getCategoryLabels(ids).filter(Boolean).slice(0, 3);
   if (!labels.length) return null;
 
   return (
@@ -149,7 +152,7 @@ function HeroStatsBlock({ mentor, rawMentor }) {
 
   return (
     <div className="flex shrink-0 flex-col items-end gap-1 text-right">
-      {rating > 0 ? (
+      {rating > 0 && reviewCount >= 3 ? (
         <>
           <div className="flex items-center gap-2">
             <Star
@@ -198,57 +201,138 @@ function HeroStatsBlock({ mentor, rawMentor }) {
 
 // ─── HeroBottomBar ────────────────────────────────────────────────────
 function HeroBottomBar({
-  mentor, rawMentor, nextSlot, calendarMeta, durationMin,
+  mentor, rawMentor,
   user, subscriberReady, subscriptionLoading, showBookingGate,
   onBook, onMessage, isFavorited, onToggleFavorite, favoritedLabel,
   heroCtaRef, messageLoading, messageError, signInPath,
 }) {
+  return (
+    <div
+      className="mt-6 pt-5 border-t"
+      style={{ borderColor: 'color-mix(in srgb, var(--bridge-border) 55%, transparent)' }}
+    >
+      <MentorHeroActions
+        layout="inline"
+        user={user}
+        subscriberReady={subscriberReady}
+        onBook={onBook}
+        onMessage={onMessage}
+        isFavorited={isFavorited}
+        onToggleFavorite={onToggleFavorite}
+        favoritedLabel={favoritedLabel}
+        heroCtaRef={heroCtaRef}
+        subscriptionLoading={subscriptionLoading}
+        messageLoading={messageLoading}
+        showBookingGate={showBookingGate}
+        signInPath={signInPath}
+      />
+
+      {messageError && (
+        <p className="mt-2 text-sm" style={{ color: 'var(--color-error)' }} role="alert">{messageError}</p>
+      )}
+    </div>
+  );
+}
+
+// ─── HeroAvailabilityStrip ────────────────────────────────────────────
+function HeroAvailabilityStrip({ mentor, rawMentor, nextSlot, calendarMeta, durationMin }) {
   const accepting = mentor?.available !== false;
   const availability = getNextAvailability(mentor, nextSlot, calendarMeta);
   const availStyle = availabilityToneStyle(availability.tone);
-  const slotIso = typeof nextSlot === 'string' ? nextSlot : null;
+  const calendlyConnected = Boolean(rawMentor?.calendly_connected && rawMentor?.calendly_event_type_uri);
+  const isLoading = availability.loading && calendlyConnected;
+  const showAvail = accepting && (isLoading || (availability.tone !== 'muted' && !availability.loading));
+
+  if (!showAvail) return null;
+
+  const dateParts = typeof nextSlot === 'string' ? getAvailabilityDateParts(nextSlot) : null;
+  const lead = dateParts ? formatAvailabilityLead(nextSlot) : null;
+
+  const containerStyle = {
+    background: 'var(--bridge-surface)',
+    boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+    borderRadius: '1rem',
+  };
+
+  if (isLoading) {
+    return (
+      <div className="mt-5" style={containerStyle}>
+        <div className="flex items-center gap-4 px-5 py-4">
+          <div className="flex shrink-0 flex-col items-center justify-center rounded-xl px-3 py-2.5 min-w-[52px] animate-pulse" style={{ background: 'var(--bridge-surface-muted)', minHeight: 60 }} />
+          <div className="flex flex-col gap-2 min-w-0 flex-1">
+            <div className="h-2.5 w-20 rounded-full animate-pulse" style={{ background: 'var(--bridge-surface-muted)' }} />
+            <div className="h-4 w-40 rounded-full animate-pulse" style={{ background: 'var(--bridge-surface-muted)' }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className="mt-10 pt-8 border-t"
-      style={{ borderColor: 'color-mix(in srgb, var(--bridge-border) 55%, transparent)' }}
-    >
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-stretch sm:gap-6 lg:gap-8">
-        {accepting && (
+    <div className="mt-5" style={containerStyle}>
+      <div className="flex items-center gap-4 px-5 py-4">
+        {dateParts && (
           <div
-            className="flex-1 rounded-2xl p-5 sm:p-6"
-            style={{ backgroundColor: 'color-mix(in srgb, var(--bridge-surface-muted) 65%, var(--bridge-surface))' }}
+            className="flex shrink-0 flex-col items-center justify-center rounded-xl px-3 py-2.5 min-w-[52px]"
+            style={{
+              background: availStyle.bg,
+              boxShadow: `inset 0 0 0 1px ${availStyle.border}`,
+            }}
           >
-            <AvailabilityPanel
-              availability={availability}
-              nextAvailableIso={slotIso}
-              availStyle={availStyle}
-              context="profile"
-              size="lg"
-            />
+            <span
+              className="font-black uppercase leading-none"
+              style={{ fontSize: '10px', letterSpacing: '0.1em', color: availStyle.color }}
+            >
+              {dateParts.dow}
+            </span>
+            <span
+              className="font-display font-black tabular-nums leading-none mt-0.5"
+              style={{ fontSize: '1.375rem', letterSpacing: '-0.03em', color: availStyle.color }}
+            >
+              {dateParts.day}
+            </span>
+            <span
+              className="font-semibold uppercase leading-none mt-0.5"
+              style={{ fontSize: '9px', letterSpacing: '0.08em', color: availStyle.color, opacity: 0.75 }}
+            >
+              {dateParts.mon}
+            </span>
           </div>
         )}
 
-        <div className={`flex flex-col justify-center gap-3 ${accepting ? 'sm:w-[280px] lg:w-[300px]' : 'w-full'}`}>
-          <MentorHeroActions
-            layout="panel"
-            user={user}
-            subscriberReady={subscriberReady}
-            onBook={onBook}
-            onMessage={onMessage}
-            isFavorited={isFavorited}
-            onToggleFavorite={onToggleFavorite}
-            favoritedLabel={favoritedLabel}
-            heroCtaRef={heroCtaRef}
-            subscriptionLoading={subscriptionLoading}
-            messageLoading={messageLoading}
-            showBookingGate={showBookingGate}
-            signInPath={signInPath}
-          />
-          {messageError && (
-            <p className="text-sm" style={{ color: 'var(--color-error)' }} role="alert">{messageError}</p>
+        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+          <span
+            className="font-semibold"
+            style={{ fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--bridge-text-faint)' }}
+          >
+            {availability.headline}
+          </span>
+          <span
+            className="font-display font-black leading-tight"
+            style={{ fontSize: 'clamp(0.9rem, 1.5vw, 1.05rem)', letterSpacing: '-0.01em', color: availStyle.color }}
+          >
+            {availability.detail}
+          </span>
+          {lead && (
+            <span style={{ fontSize: '12px', color: 'var(--bridge-text-muted)' }}>
+              {lead.charAt(0).toUpperCase() + lead.slice(1)}
+            </span>
           )}
         </div>
+
+        {durationMin > 0 && (
+          <div className="flex shrink-0 flex-col items-end justify-center gap-0.5 pl-4" style={{ borderLeft: '1px solid var(--bridge-border)' }}>
+            <span
+              className="font-display font-black tabular-nums leading-none"
+              style={{ fontSize: '1.125rem', letterSpacing: '-0.02em', color: 'var(--bridge-text)' }}
+            >
+              {durationMin} min
+            </span>
+            <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--bridge-text-faint)' }}>
+              Session
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -277,11 +361,18 @@ function MentorHero({
   const showBookingGate = canEngage && user && !subscriberReady && !subscriptionLoading;
   const { nextSlot, durationMin, calendarMeta } = useCalendlySummary(mentor);
 
+  const tagline = rawMentor?.tagline?.trim() || (() => {
+    const why = rawMentor?.why_i_mentor?.trim();
+    if (!why) return null;
+    const m = why.match(/^[^.!?]+[.!?]/);
+    return m ? m[0].trim() : (why.length <= 140 ? why : null);
+  })();
+
   return (
-    <section aria-labelledby="profile-heading" className={`relative ${embedded ? 'pt-6 pb-12 sm:pt-8 sm:pb-16' : 'pt-8 pb-16 sm:pt-12 sm:pb-24'}`}>
+    <section aria-labelledby="profile-heading" className={`relative ${embedded ? 'pt-4 pb-8 sm:pt-6 sm:pb-10' : 'pt-6 pb-10 sm:pt-8 sm:pb-14'}`}>
       <div className="relative max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
 
-        <nav className="mb-10 lg:mb-12" aria-label="Back to mentors">
+        <nav className="mb-5 lg:mb-6" aria-label="Back to mentors">
           <Link
             to={mentorsListPath}
             className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${ring}`}
@@ -324,6 +415,12 @@ function MentorHero({
                     {roleHeadline}
                   </p>
                 )}
+
+                {tagline && (
+                  <p style={{ fontSize: '14px', lineHeight: '1.5', color: 'var(--bridge-text-muted)' }}>
+                    {tagline}
+                  </p>
+                )}
               </div>
 
               <HeroStatsBlock mentor={mentor} rawMentor={rawMentor} />
@@ -331,7 +428,7 @@ function MentorHero({
 
             <HeroMentorshipPills rawMentor={rawMentor} className="mt-4" />
 
-            <div className="mt-5 space-y-3.5 sm:mt-6">
+            <div className="mt-4 space-y-3">
               <MentorHeroMeta mentor={mentor} rawMentor={rawMentor} />
               <AtAGlance mentor={mentor} roleHeadline={roleHeadline} className="" />
               <MentorSocialLinks rawMentor={rawMentor} />
@@ -339,13 +436,18 @@ function MentorHero({
           </div>
         </div>
 
+        <HeroAvailabilityStrip
+          mentor={mentor}
+          rawMentor={rawMentor}
+          nextSlot={nextSlot}
+          calendarMeta={calendarMeta}
+          durationMin={durationMin}
+        />
+
         {canEngage && (
           <HeroBottomBar
             mentor={mentor}
             rawMentor={rawMentor}
-            nextSlot={nextSlot}
-            calendarMeta={calendarMeta}
-            durationMin={durationMin}
             user={user}
             subscriberReady={subscriberReady}
             subscriptionLoading={subscriptionLoading}

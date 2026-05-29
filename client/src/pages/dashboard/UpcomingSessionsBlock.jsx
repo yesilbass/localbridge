@@ -66,15 +66,13 @@ function Row({ session, isFirst }) {
   const typeLabel = SESSION_TYPE_LABEL[session.session_type] ?? null;
   const countdown = formatCountdownChip(session.scheduled_date);
 
-  const canJoin = status === 'accepted'
-    && date
-    && date.getTime() - Date.now() <= 5 * 60 * 1000
-    && date.getTime() - Date.now() > -30 * 60 * 1000
-    && session.video_room_url;
+  const canJoin = status === 'accepted' && (session.room_slug || session.video_room_url);
 
-  const joinHref = typeof session.video_room_url === 'string' && session.video_room_url.startsWith('/')
-    ? session.video_room_url
-    : (session.video_room_url ? `/session/${session.id}/video` : null);
+  const joinHref = session.room_slug
+    ? `/meet/${session.room_slug}`
+    : (typeof session.video_room_url === 'string' && session.video_room_url.startsWith('/')
+      ? session.video_room_url
+      : (session.video_room_url ? `/session/${session.id}/video` : null));
 
   return (
     <li

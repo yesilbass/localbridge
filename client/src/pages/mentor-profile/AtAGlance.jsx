@@ -1,4 +1,4 @@
-import { Briefcase, Layers, Building2, Clock, Languages, Globe } from 'lucide-react';
+import { Briefcase, Layers, Building2, Languages } from 'lucide-react';
 
 function Chip({ icon: Icon, label }) {
   return (
@@ -34,13 +34,8 @@ export default function AtAGlance({ mentor, roleHeadline = null, className = 'mt
 
   if (mentor.stageLabel) chips.push({ icon: Building2, label: mentor.stageLabel });
 
-  if (mentor.yearsExperience) chips.push({ icon: Clock, label: `${mentor.yearsExperience}+ years` });
-
   const languages = Array.isArray(mentor.languages) && mentor.languages.length > 0 && mentor.languages;
   if (languages) chips.push({ icon: Languages, label: languages.join(', ') });
-
-  const tz = mentor.timezone;
-  if (tz) chips.push({ icon: Globe, label: tz });
 
   const visible = chips.slice(0, 6);
   if (!visible.length) return null;

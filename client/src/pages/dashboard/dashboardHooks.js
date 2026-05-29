@@ -131,6 +131,16 @@ async function fetchMentorProfileId(userId) {
   return data?.id ?? null;
 }
 
+async function fetchMentorRoomSlug(userId) {
+  if (!userId) return null;
+  const { data } = await supabase
+    .from('mentor_profiles')
+    .select('id, room_slug')
+    .eq('user_id', userId)
+    .maybeSingle();
+  return { id: data?.id ?? null, roomSlug: data?.room_slug ?? null };
+}
+
 async function fetchUserNamesMap(userIds) {
   const ids = [...new Set((userIds ?? []).filter(Boolean))];
   if (!ids.length) return {};
@@ -149,8 +159,14 @@ async function fetchUserNamesMap(userIds) {
   } catch { return {}; }
 }
 
-function toNextSession(row, otherParty, asMentor) {
+function toNextSession(row, otherParty, asMentor, mentorRoomSlug = null) {
   if (!row) return null;
+  const accepted = String(row.status || '').toLowerCase() === 'accepted';
+  const joinUrl = accepted && mentorRoomSlug
+    ? `/meet/${mentorRoomSlug}`
+    : (typeof row.video_room_url === 'string' && row.video_room_url.startsWith('/')
+      ? row.video_room_url
+      : (row.video_room_url ? `/session/${row.id}/video` : null));
   return {
     id: row.id,
     scheduledAt: row.scheduled_date,
@@ -159,14 +175,11 @@ function toNextSession(row, otherParty, asMentor) {
     topic: (() => {
       const m = row.message ?? null;
       if (!m) return null;
-      // Strip internal markers like "[stripe_session:cs_test_...]" or "[calendly:...]".
       const cleaned = String(m).replace(/\[(?:stripe_session|calendly)[^\]]*\]\s*/gi, '').trim();
       return cleaned || null;
     })(),
     prepNotes: row.prep_notes ?? null,
-    joinUrl: typeof row.video_room_url === 'string' && row.video_room_url.startsWith('/')
-      ? row.video_room_url
-      : (row.video_room_url ? `/session/${row.id}/video` : null),
+    joinUrl,
     rescheduleUrl: row.calendly_reschedule_url ?? null,
     cancelUrl: row.calendly_cancel_url ?? null,
     mentorId: row.mentor_id ?? null,
@@ -200,8 +213,10 @@ export function useNextSession() {
         return (rows || []).find((r) => !r.scheduled_date || new Date(r.scheduled_date).getTime() >= cutoff) || null;
       };
 
+      let mentorRoomSlug = null;
       if (isMentor) {
-        const mpId = await fetchMentorProfileId(user.id);
+        const { id: mpId, roomSlug } = await fetchMentorRoomSlug(user.id);
+        mentorRoomSlug = roomSlug;
         if (!mpId) { if (v === versionRef.current) setState({ session: null, isLoading: false, isError: false }); return; }
         const { data } = await supabase
           .from('sessions')
@@ -213,7 +228,6 @@ export function useNextSession() {
         row = pickFirst(data);
         if (row) {
           const names = await fetchUserNamesMap([row.mentee_id].filter(Boolean));
-          // Mentee timezone isn't stored — leave null. Mentor sees their own local time.
           other = { id: row.mentee_id, name: names[row.mentee_id] || row.mentee_name || 'Mentee', title: 'Mentee', company: '', avatarUrl: null, timezone: null };
         }
       } else {
@@ -227,12 +241,13 @@ export function useNextSession() {
         row = pickFirst(data);
         if (row?.mentor_id) {
           const { data: mp } = await supabase
-            .from('mentor_profiles').select('id, name, title, company, image_url, timezone')
+            .from('mentor_profiles').select('id, name, title, company, image_url, timezone, room_slug')
             .eq('id', row.mentor_id).maybeSingle();
+          mentorRoomSlug = mp?.room_slug ?? null;
           other = mp ? { id: mp.id, name: mp.name, title: mp.title, company: mp.company, avatarUrl: mp.image_url, timezone: mp.timezone || null } : null;
         }
       }
-      if (v === versionRef.current) setState({ session: toNextSession(row, other, isMentor), isLoading: false, isError: false });
+      if (v === versionRef.current) setState({ session: toNextSession(row, other, isMentor, mentorRoomSlug), isLoading: false, isError: false });
 
       // Self-heal: any row with Calendly URIs but no scheduled_date triggers
       // a server-side retry. Both mentor and mentee accounts are authorised.
@@ -772,19 +787,22 @@ export function useUpcomingSessions({ limit = 5 } = {}) {
       });
 
       if (isMentor) {
-        const names = await fetchUserNamesMap(upcoming.map((s) => s.mentee_id).filter(Boolean));
-        setSessions(upcoming.map((s) => ({ ...s, mentee_name: names[s.mentee_id] || s.mentee_name || 'Mentee' })));
+        const [names, { roomSlug: ownSlug }] = await Promise.all([
+          fetchUserNamesMap(upcoming.map((s) => s.mentee_id).filter(Boolean)),
+          fetchMentorRoomSlug(user.id),
+        ]);
+        setSessions(upcoming.map((s) => ({ ...s, mentee_name: names[s.mentee_id] || s.mentee_name || 'Mentee', room_slug: ownSlug })));
       } else {
         const mentorIds = [...new Set(upcoming.map((s) => s.mentor_id).filter(Boolean))];
         let mentorMap = {};
         if (mentorIds.length) {
           const { data: mentorsRaw } = await supabase
-            .from('mentor_profiles').select('id, name')
+            .from('mentor_profiles').select('id, name, room_slug')
             .in('id', mentorIds);
           const mentors = Array.isArray(mentorsRaw) ? mentorsRaw : [];
-          mentorMap = Object.fromEntries(mentors.map((m) => [m.id, m.name]));
+          mentorMap = Object.fromEntries(mentors.map((m) => [m.id, { name: m.name, room_slug: m.room_slug }]));
         }
-        setSessions(upcoming.map((s) => ({ ...s, mentee_name: mentorMap[s.mentor_id] || 'Mentor' })));
+        setSessions(upcoming.map((s) => ({ ...s, mentee_name: mentorMap[s.mentor_id]?.name || 'Mentor', room_slug: mentorMap[s.mentor_id]?.room_slug || null })));
       }
     } finally { setLoading(false); }
   }, [user, limit]);
@@ -939,9 +957,11 @@ export function useDashboardSessions() {
           }
         });
 
-        const menteeIds = [...new Set(data.map((s) => s.mentee_id).filter(Boolean))];
-        const names = await fetchUserNamesMap(menteeIds);
-        setSessions(data.map((s) => ({ ...s, mentee_name: names[s.mentee_id] || 'Mentee' })));
+        const [names, { roomSlug: ownSlug }] = await Promise.all([
+          fetchUserNamesMap([...new Set(data.map((s) => s.mentee_id).filter(Boolean))]),
+          fetchMentorRoomSlug(user.id),
+        ]);
+        setSessions(data.map((s) => ({ ...s, mentee_name: names[s.mentee_id] || 'Mentee', room_slug: ownSlug })));
       } else {
         const { data: dataRaw } = await supabase
           .from('sessions').select('*')
@@ -950,16 +970,15 @@ export function useDashboardSessions() {
         const data = Array.isArray(dataRaw) ? dataRaw : [];
         const ids = [...new Set(data.map((s) => s.mentor_id).filter(Boolean))];
         if (ids.length) {
-          // Only the columns the views actually consume — avoids pulling
-          // bio/expertise/availability_schedule blobs the dashboard never reads.
           const { data: mpsRaw } = await supabase
             .from('mentor_profiles')
-            .select('id, name, email, title, company, image_url, session_rate, timezone')
+            .select('id, name, email, title, company, image_url, session_rate, timezone, room_slug')
             .in('id', ids);
           const mps = Array.isArray(mpsRaw) ? mpsRaw : [];
           setMentorMap(Object.fromEntries(mps.map((m) => [m.id, m])));
-        } else { setMentorMap({}); }
-        setSessions(data);
+          const slugMap = Object.fromEntries(mps.map((m) => [m.id, m.room_slug]));
+          setSessions(data.map((s) => ({ ...s, room_slug: slugMap[s.mentor_id] ?? null })));
+        } else { setMentorMap({}); setSessions(data); }
       }
     } catch (e) {
       console.error('useDashboardSessions failed:', e);
