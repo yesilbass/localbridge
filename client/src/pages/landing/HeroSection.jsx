@@ -163,19 +163,6 @@ export default function HeroSection() {
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </span>
               </AppLink>
-              <Link
-                to="/how-it-works"
-                className="mt-4 block text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
-                style={{ color: 'var(--bridge-text-muted)', outlineColor: 'var(--color-primary)' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--color-primary)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--bridge-text-muted)';
-                }}
-              >
-                {s.landing.heroCtaSeeHow}
-              </Link>
             </motion.div>
 
             <motion.ul

@@ -289,23 +289,15 @@ export default function Mentors({ embedded = false }) {
     const ids = calendlyMentorKey.split(',');
     let cancelled = false;
 
-    void (async () => {
-      const entries = await Promise.all(
-        ids.map(async (id) => {
-          const res = await getCalendlyEventTypeSummary(id);
-          if (!res.ok || !res.ready) {
-            return [id, { iso: null, calendarSyncFailed: true, totalOpenSlots: 0 }];
-          }
-          return [id, {
-            iso: res.next_available ?? null,
-            calendarSyncFailed: Boolean(res.calendar_sync_failed),
-            totalOpenSlots: res.total_open_slots ?? 0,
-          }];
-        }),
-      );
-      if (cancelled) return;
-      setCalendlySlots(Object.fromEntries(entries));
-    })();
+    ids.forEach((id) => {
+      getCalendlyEventTypeSummary(id).then((res) => {
+        if (cancelled) return;
+        const slot = (!res.ok || !res.ready)
+          ? { iso: null, calendarSyncFailed: true, totalOpenSlots: 0 }
+          : { iso: res.next_available ?? null, calendarSyncFailed: Boolean(res.calendar_sync_failed), totalOpenSlots: res.total_open_slots ?? 0 };
+        setCalendlySlots((prev) => ({ ...prev, [id]: slot }));
+      });
+    });
 
     return () => { cancelled = true; };
   }, [calendlyMentorKey]);
