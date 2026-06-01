@@ -180,7 +180,6 @@ export default function Footer() {
                 {
                   title: t('footer.platform', 'Platform'),
                   links: [
-                    { label: t('footer.browseMentors', 'Browse Mentors'), to: '/mentors', app: true },
                     { label: t('footer.howItWorks', 'How it works'), to: '/how-it-works' },
                     { label: t('footer.aiMatching', 'AI Matching'), to: '/mentors', app: true },
                   ],
@@ -258,7 +257,7 @@ export default function Footer() {
               to="/"
               className="font-display text-xl font-black tracking-[-0.04em] transition-opacity hover:opacity-70"
             >
-              mentorshipbridge
+              <span style={{ opacity: 0.45 }}>mentorship</span><span style={{ color: 'var(--color-primary)' }}>bridge</span>
             </Link>
             <p className="max-w-md text-[13px] leading-relaxed sm:text-right" style={{ color: 'var(--bridge-text-muted)' }}>
               {t('footer.tagline', 'Connecting job seekers with vetted mentors who genuinely enjoy helping people land their next role.')}

@@ -289,7 +289,7 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 | Profile.jsx | User profile page |
 | Settings.jsx | User settings |
 | VideoCall.jsx | Custom WebRTC video session (Supabase Realtime signaling) |
-| About.jsx | About page |
+| pages/company/ | About/Company page — Hero, Story, HowItWorks, Values, People, Stats (gated by `SHOW_STATS`), Testimonials, CTA. Data + placeholders in `companyData.js`. |
 | Pricing.jsx | Single-plan pricing page (monthly / annual, student discount) |
 
 ### `client/src/pages/dashboard/`
@@ -307,7 +307,7 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 ### `client/src/pages/community/`
 | File | Purpose |
 |---|---|
-| CommunityHub.jsx | Live feed + 8 pillar sidebar (`/community`) |
+| CommunityHub.jsx | Live feed + category sidebar (`/community`) |
 | CommunityCategory.jsx | Pillar feed with filters, sort, comments |
 | communityShared.jsx | Post cards, create form, mentor badge, post type pills |
 | MentorPostsPage.jsx | Mentor advice posts directory (`/community/posts`) |
@@ -316,7 +316,7 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 | File | Purpose |
 |---|---|
 | sessionTypes.js | Four session type keys — source of truth |
-| mentorshipCategories.js | Re-exports 8 pillars from `shared/mentorshipCategories.js` |
+| mentorshipCategories.js | Re-exports career mentorship categories from `shared/mentorshipCategories.js` |
 
 ### `client/src/pages/footer/`
 About, Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust — static informational pages. (Footer `Community.jsx` is marketing copy — not the product `/community` hub.)
@@ -336,7 +336,7 @@ About, Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust — sta
 - AI onboarding wizard (mentee_profiles)
 - Calendly OAuth + embedded scheduling widget
 - Voice-first mentor application + post-approval onboarding wizard
-- Community hub + pillar feeds (direct Supabase, quiet-authority palette)
+- Community hub + category feeds (direct Supabase, quiet-authority palette)
 - Mentor value stack (badges, mentor posts, impact stats, session action items)
 - Mentorship category taxonomy + AI tagging
 - Dashboard (mentee + mentor views)

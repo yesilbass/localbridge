@@ -42,7 +42,7 @@ export function buildMainNavModel({ showGuestChrome, asMentor, resolve, t }) {
       ],
       links: [
         { path: resolve('/pricing'), label: t('nav.pricing', 'Pricing') },
-        { path: '/become-a-mentor', label: t('nav.becomeMentor', 'Become a mentor') },
+        { path: '/become-a-mentor', label: t('nav.becomeMentor', 'Become a Mentor') },
       ],
       cta: null,
     };

@@ -157,7 +157,7 @@ export default function Navbar() {
                   className="font-display text-[1.35rem] font-black leading-none tracking-[-0.04em] sm:text-[1.48rem]"
                   style={{ color: isAuthPage ? '#0c0a09' : 'var(--bridge-text)' }}
                 >
-                  mentorshipbridge
+                  <span style={{ opacity: 0.45 }}>mentorship</span><span style={{ color: 'var(--color-primary)' }}>bridge</span>
                 </span>
               </Link>
 
@@ -343,7 +343,7 @@ export default function Navbar() {
 
             <div className="relative flex shrink-0 items-center justify-between border-b px-5 py-4" style={{ borderColor: 'var(--bridge-border)' }}>
               <Link to="/" onClick={() => setMobileOpen(false)} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]">
-                <span className="font-display text-lg font-black leading-none tracking-[-0.04em] text-[var(--bridge-text)]">mentorshipbridge</span>
+                <span className="font-display text-lg font-black leading-none tracking-[-0.04em] text-[var(--bridge-text)]"><span style={{ opacity: 0.45 }}>mentorship</span><span style={{ color: 'var(--color-primary)' }}>bridge</span></span>
               </Link>
               <button
                 type="button"

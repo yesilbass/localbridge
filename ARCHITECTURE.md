@@ -367,7 +367,7 @@ Simple join table: `user_id` + `mentor_id`, with a `UNIQUE` constraint. Toggle v
 
 #### `community_posts` / `community_post_upvotes` / `community_comments`
 
-Authenticated community product at `/community`. Organized around 8 mentorship pillars
+Authenticated community product at `/community`. Organized around career-focused categories
 (from `shared/mentorshipCategories.js`). Post types: `question`, `win`, `discussion`,
 `resource`. Upvote and comment counts are maintained by Postgres triggers — never
 updated client-side.
@@ -671,7 +671,7 @@ All CRUD via `client/src/api/community.js` direct to Supabase. Author enrichment
 
 | Route | Component | Notes |
 |-------|-----------|-------|
-| `/dashboard/community` | `CommunityHub.jsx` | Primary shell — live feed + pillar sidebar |
+| `/dashboard/community` | `CommunityHub.jsx` | Primary shell — live feed + category sidebar |
 | `/dashboard/community/:categoryId` | `CommunityCategory.jsx` | Pillar feed, type filters, sort, inline comments |
 | `/community`, `/community/:categoryId` | `CommunityEntryGate` | Redirect to dashboard routes when signed in |
 

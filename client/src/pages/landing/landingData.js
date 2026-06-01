@@ -38,10 +38,10 @@ export const MATCH_GOALS = [
 
 // HeroLiveMatch — browse chips (life pillars) vs career outcome after click.
 export const HERO_BROWSE_CHIPS = [
-  'New parenthood',
-  'Fitness routine',
-  'Grad school prep',
-  'Personal finance',
+  'Resume review',
+  'Interview prep',
+  'Salary negotiation',
+  'Career change',
 ];
 
 export const HERO_CAREER_DEMO = {

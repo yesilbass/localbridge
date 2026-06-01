@@ -1,21 +1,16 @@
 import RevealOnScroll from '../landing/RevealOnScroll';
-import { COMPANY_PAD } from './companyData';
-
-const PARAS = [
-  'Five operators spent the last decade building product, running engineering teams, designing for early-stage companies, and raising venture capital. Every meaningful step came from someone who had already done the next one.',
-  'The expensive coaching never delivered it. The free advice on LinkedIn rarely matched the situation. The right person almost never had a way to be hired for an hour.',
-  'Bridge is the missing layer — one hour, one operator, booked from their calendar. Free sessions, no packages, no DMs.',
-];
+import { COMPANY_PAD_TIGHT } from './companyData';
 
 export default function CompanyStorySection() {
   return (
     <section
       id="origin"
       aria-labelledby="origin-heading"
-      className={COMPANY_PAD}
+      className={COMPANY_PAD_TIGHT}
     >
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-5 sm:px-8 lg:grid-cols-12 lg:gap-16">
-        <RevealOnScroll className="lg:col-span-5 lg:pt-2">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-5 sm:px-8 lg:grid-cols-12 lg:gap-16">
+
+        <RevealOnScroll className="lg:col-span-5 lg:self-center">
           <p className="font-display text-[13px] font-bold uppercase tracking-[0.2em] text-[var(--color-primary)]">
             Origin
           </p>
@@ -28,24 +23,33 @@ export default function CompanyStorySection() {
         </RevealOnScroll>
 
         <RevealOnScroll className="lg:col-span-7" delay={80}>
-          <div className="space-y-5 text-[16px] leading-[1.7] text-[var(--bridge-text-secondary)] sm:text-[17px]">
-            {PARAS.map((p) => (
-              <p key={p.slice(0, 24)}>{p}</p>
-            ))}
+          <div className="space-y-5 text-[17px] leading-[1.7] text-[var(--bridge-text-secondary)]">
+            <p>
+              The best career advice we ever got came from people who had nothing to sell
+              us — just an hour and a willingness to be straight. Those conversations
+              changed how we thought about what was possible. Finding them had taken months.
+            </p>
+            <p>
+              When we went looking for more, the options were retainer packages,
+              hourly billing, and platforms that required payment before you spoke
+              to anyone. Informal networks helped — if you knew the right people.
+              Most didn't.
+            </p>
+            <p>
+              We built Bridge to fix the access problem, not to build another
+              marketplace. Mentors volunteer their time. Mentees subscribe once.
+              Nothing sits between a question and the person who can answer it.
+            </p>
+            <p
+              className="border-l-2 pl-4"
+              style={{ borderColor: 'var(--color-primary)' }}
+            >
+              We're still small. We hand-review every mentor and read every review
+              ourselves. That won't change.
+            </p>
           </div>
-
-          <figure
-            className="mt-10 border-l-[3px] pl-6"
-            style={{ borderColor: 'var(--color-primary)' }}
-          >
-            <blockquote className="font-display text-[clamp(1.125rem,2vw,1.5rem)] font-medium italic leading-snug text-[var(--bridge-text)]">
-              The right ten minutes with the right person can alter the trajectory of a life. We made those ten minutes bookable.
-            </blockquote>
-            <figcaption className="mt-4 text-[12px] font-bold uppercase tracking-[0.18em] text-[var(--bridge-text-faint)]">
-              Founding thesis · 2026
-            </figcaption>
-          </figure>
         </RevealOnScroll>
+
       </div>
     </section>
   );
