@@ -38,9 +38,9 @@ Bridge is pre-revenue, demo-ready, and deployed on Vercel from `main`. The stack
 | In-app feedback FAB + support email | ✅ |
 | i18n (7 languages: en, es, fr, it, de, ar, tr) | ✅ |
 | Three design palettes + light/dark/system appearance | ✅ |
-| Mentorship category taxonomy (8 pillars + AI tagging) | ✅ |
-| Mentor value stack (badges, mentor posts, impact stats, session action items) | ✅ |
-| Community hub + pillar feeds (questions, wins, discussions, resources) | ✅ |
+| Mentorship category taxonomy + AI tagging | ✅ |
+| Mentor value stack (badges, mentor posts, session action items) | ✅ |
+| Community hub + category feeds (questions, wins, discussions, resources) | ✅ |
 | Voice-first mentor application (`/apply/mentor`) + post-approval onboarding | ✅ |
 
 ### All routes
@@ -74,7 +74,7 @@ Legacy redirects: `/about` and `/why-us` → `/company`.
 | Route | Page |
 |---|---|
 | `/dashboard/*` | Role-aware dashboard shell (see below) |
-| `/community`, `/dashboard/community` | Community hub — live feed + 8 pillar cards (`quiet-authority`); signed-in users use dashboard shell |
+| `/community`, `/dashboard/community` | Community hub — live feed + category cards (`quiet-authority`); signed-in users use dashboard shell |
 | `/community/:categoryId`, `/dashboard/community/:categoryId` | Pillar feed — filter, sort, inline comments |
 | `/community/posts` | Mentor advice posts directory (separate from community posts) |
 | `/profile`, `/settings` | Standalone profile + settings |
@@ -135,7 +135,7 @@ Core tables: `mentor_profiles`, `sessions`, `reviews`, `favorites`, `user_profil
 
 RLS on all tables. **`mentor_profiles.id` ≠ `auth.users.id`** — always use profile UUID for mentor FKs. Review rating averages and community upvote/comment counts are maintained by Postgres triggers (not client-side).
 
-**Community vs mentor posts:** `community_posts` powers the authenticated `/community` product feature (8 mentorship pillars). `mentor_posts` is short advice written by mentors on profiles and `/community/posts` — different tables, different UI.
+**Community vs mentor posts:** `community_posts` powers the authenticated `/community` product feature. `mentor_posts` is short advice written by mentors on profiles and `/community/posts` — different tables, different UI.
 
 Migrations live in `supabase/migrations/`. Recent expansion migrations: `20260525120000_mentor_categories.sql`, `20260525130000_mentor_value_stack.sql`, `20260525140000_community.sql`, `20260525150000_mentor_application.sql`, `20260525160000_community_enhancements.sql`.
 
@@ -184,7 +184,7 @@ Three route-driven palettes: `modern-signal`, `grounded-guidance`, `quiet-author
 
 - **Mentor discovery** — filterable directory with session rates, availability indicators, and AI-powered goal-based matching
 - **Mentor application & onboarding** — voice-first application at `/apply/mentor` (OpenAI Realtime) → admin review → 5-step profile wizard at `/onboarding/mentor`; tiers and rates assigned server-side by a scoring algorithm
-- **Community** — authenticated hub at `/dashboard/community` (aliases from `/community`) with live feed and 8 mentorship-pillar sub-communities; questions, wins, discussions, and resources with upvotes and flat comments; active mentors get a trust badge
+- **Community** — authenticated hub at `/dashboard/community` (aliases from `/community`) with live feed and category sub-communities; questions, wins, discussions, and resources with upvotes and flat comments; active mentors get a trust badge
 - **Grouped navigation** — marketing `Navbar` (Discover / Tools / Company dropdowns; `/how-it-works` via footer and landing, not in nav menus) and dashboard `DashboardTopBar` (role-based groups); flat underline chrome, not pill bubbles
 - **Mentor value stack** — impact stats, earned badges, short advice posts on profiles, session action items, featured mentor spotlight
 - **Admin review panel** — approve or reject mentor applications at `/admin`, with scoring breakdowns
@@ -344,7 +344,7 @@ Supabase Postgres. Schema is versioned in `supabase/migrations/` and applied wit
 | `mentee_profiles` | AI onboarding output used for mentor matching |
 | `user_settings` | Per-user app preferences |
 | `ai_usage` | Per-user AI feature usage tracking and limits |
-| `community_posts` | Community feed posts (pillar `category_id`, type, upvotes, comment_count) |
+| `community_posts` | Community feed posts (category, type, upvotes, comment_count) |
 | `community_post_upvotes` | Per-user upvotes; trigger syncs `community_posts.upvotes` |
 | `community_comments` | Flat comments on community posts; trigger syncs `comment_count` |
 | `mentor_badges` | Earned mentor badges (trigger-awarded) |

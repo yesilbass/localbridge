@@ -1057,15 +1057,15 @@ export const EN_CONTENT = {
   },
 
   landing: {
-    heroEyebrow: 'Now booking — 2,400+ mentors live this week',
-    heroHeadline1: 'Mentorship across',
-    heroHeadline2: 'eight areas of life.',
+    heroEyebrow: 'Career mentorship — book a session today',
+    heroHeadline1: 'Book a mentor.',
+    heroHeadline2: 'Accelerate your career.',
     heroSubTagline: "Talk to someone who's already done it.",
-    heroSubCopy: 'Parenting, career, fitness, finances, faith, and more. Matched to your goal — booked in seconds.',
+    heroSubCopy: 'Resume reviews, interview prep, career strategy, and networking — matched to your goal and booked in seconds.',
     heroCtaGetMatched: 'Get matched',
     heroCtaSeeHow: 'See how it works ↓',
     heroTrustNoCard: 'No credit card to browse',
     heroTrustBooked: 'Sessions always free',
-    heroTrustRating: '/5 across 1,200+ sessions',
+    heroTrustRating: '/5 avg mentor rating',
   },
 };

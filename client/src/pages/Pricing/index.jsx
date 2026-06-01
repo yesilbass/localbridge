@@ -1,15 +1,12 @@
-import { GraduationCap, Check, CheckCircle } from 'lucide-react';
+import { GraduationCap, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
 import { useAuth } from '../../context/useAuth';
 import { isMentorAccount } from '../../utils/accountRole';
 import AppLink from '../../components/AppLink';
 import { focusRing } from '../../ui';
 import { createSubscriptionCheckout, openBillingPortal } from '../../api/stripe';
-import { AuroraBg } from '../dashboard/dashboardCinematic.jsx';
 import PricingFaq from './PricingFaq';
-import { useContent } from '../../content';
 import {
   SUBSCRIPTION_MONTHLY_USD,
   SUBSCRIPTION_ANNUAL_MONTHLY_USD,
@@ -48,7 +45,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What's the annual plan?",
-    a: 'Same everything, billed as $228 once per year instead of $29/month. That works out to $19/month — a 34% saving. Best for people who know they\'ll use Bridge regularly.',
+    a: `Same everything, billed as $${SUBSCRIPTION_ANNUAL_USD} once per year instead of $${SUBSCRIPTION_MONTHLY_USD}/month. That works out to $${SUBSCRIPTION_ANNUAL_MONTHLY_USD}/month — a ${ANNUAL_SAVINGS_PERCENT}% saving.`,
   },
   {
     q: 'Can I switch between monthly and annual?',
@@ -56,24 +53,12 @@ const FAQ_ITEMS = [
   },
   {
     q: 'What about refunds?',
-    a: "If you forget to cancel and get charged, contact us within 48 hours and we'll refund you. No questions asked. After 48 hours, refunds are at our discretion.",
+    a: "If you forget to cancel and get charged, contact us within 48 hours and we'll refund you. No questions asked.",
   },
   {
     q: 'Is there a student discount?',
-    a: 'Yes — 50% off forever for .edu email addresses. Register with your university email and the discount applies automatically. It stays active for as long as you\'re subscribed.',
+    a: "Yes — 50% off forever for .edu email addresses. Register with your university email and the discount applies automatically.",
   },
-];
-
-const TRUST_POINTS = [
-  'Mentors volunteer because they want to help — not for money',
-  'Sessions across 8 areas of life — not just career',
-  'One fair price. No feature tiers. No upsells.',
-];
-
-const TESTIMONIALS = [
-  { quote: "I've learned as much from my mentees as they've learned from me.", name: 'Layla', role: 'Engineer' },
-  { quote: 'I spent years wishing someone had told me what I now know.', name: 'Marcus', role: 'Analyst' },
-  { quote: 'I mentor on things that have nothing to do with my job title.', name: 'Nadia', role: 'PM' },
 ];
 
 function formatDate(iso) {
@@ -81,286 +66,10 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
-function fadeUp(delay, reduced) {
-  if (reduced) return {};
-  return {
-    initial: { opacity: 0, y: 14 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.4, delay, ease: 'easeOut' },
-  };
-}
-
-function RadioDot({ selected }) {
-  return (
-    <span
-      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200"
-      style={{
-        borderColor: selected ? 'var(--color-primary)' : 'var(--bridge-border-strong)',
-        backgroundColor: selected ? 'var(--color-primary)' : 'transparent',
-      }}
-    >
-      {selected && <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-on-primary)' }} />}
-    </span>
-  );
-}
-
-function PlanSelector({
-  isStudent,
-  annual,
-  setAnnual,
-  settingsLoading,
-  subscribed,
-  inTrial,
-  daysLeft,
-  userSettings,
-  checkoutLoading,
-  portalLoading,
-  handleStartTrial,
-  handleManageSubscription,
-}) {
-  const monthlyPrice = displayMonthlyPrice('monthly', { isStudent });
-  const annualMonthlyPrice = displayMonthlyPrice('annual', { isStudent });
-  const annualTotal = isStudent ? Math.round(SUBSCRIPTION_ANNUAL_USD * 0.5) : SUBSCRIPTION_ANNUAL_USD;
-
-  return (
-    <div className="flex flex-col gap-3">
-      {isStudent && (
-        <div
-          className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold"
-          style={{
-            backgroundColor: 'color-mix(in srgb, var(--color-success) 10%, transparent)',
-            color: 'var(--color-success)',
-            border: '1px solid color-mix(in srgb, var(--color-success) 20%, transparent)',
-          }}
-        >
-          <GraduationCap className="h-4 w-4 shrink-0" aria-hidden />
-          Student discount applied — 50% off forever
-        </div>
-      )}
-
-      {/* Monthly row */}
-      <button
-        type="button"
-        onClick={() => setAnnual(false)}
-        className={`w-full rounded-2xl border p-5 text-left transition-all duration-200 ${focusRing}`}
-        style={{
-          borderColor: !annual ? 'var(--color-primary)' : 'var(--bridge-border)',
-          backgroundColor: !annual
-            ? 'color-mix(in srgb, var(--color-primary) 5%, transparent)'
-            : 'transparent',
-          boxShadow: !annual
-            ? '0 0 0 1px var(--color-primary), 0 8px 24px -8px color-mix(in srgb, var(--color-primary) 25%, transparent)'
-            : 'none',
-        }}
-      >
-        <div className="flex items-center gap-4">
-          <RadioDot selected={!annual} />
-          <div className="flex flex-1 items-center justify-between gap-4">
-            <div>
-              <p className="font-display text-[17px] font-black" style={{ color: 'var(--bridge-text)' }}>
-                Monthly
-              </p>
-              <p className="mt-0.5 text-sm" style={{ color: 'var(--bridge-text-muted)' }}>
-                billed monthly · cancel anytime
-              </p>
-            </div>
-            <div className="shrink-0 text-right">
-              {isStudent && (
-                <p className="text-sm font-semibold line-through tabular-nums" style={{ color: 'var(--bridge-text-faint)' }}>
-                  ${SUBSCRIPTION_MONTHLY_USD}/mo
-                </p>
-              )}
-              <p
-                className="font-display text-2xl font-black tabular-nums leading-none"
-                style={{ color: 'var(--bridge-text)' }}
-              >
-                ${monthlyPrice}
-                <span className="text-sm font-semibold" style={{ color: 'var(--bridge-text-muted)' }}>
-                  /mo
-                </span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </button>
-
-      {/* Annual row */}
-      <div className="relative pt-3">
-        <span
-          className="absolute left-4 top-0 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wider"
-          style={{
-            backgroundColor: 'color-mix(in srgb, var(--color-primary) 14%, transparent)',
-            color: 'var(--color-primary)',
-            border: '1px solid color-mix(in srgb, var(--color-primary) 28%, transparent)',
-          }}
-        >
-          Best value — {ANNUAL_SAVINGS_PERCENT}% off
-        </span>
-        <button
-          type="button"
-          onClick={() => setAnnual(true)}
-          className={`w-full rounded-2xl border p-5 text-left transition-all duration-200 ${focusRing}`}
-          style={{
-            borderColor: annual ? 'var(--color-primary)' : 'var(--bridge-border)',
-            backgroundColor: annual
-              ? 'color-mix(in srgb, var(--color-primary) 5%, transparent)'
-              : 'transparent',
-            boxShadow: annual
-              ? '0 0 0 1px var(--color-primary), 0 8px 24px -8px color-mix(in srgb, var(--color-primary) 25%, transparent)'
-              : 'none',
-          }}
-        >
-          <div className="flex items-center gap-4">
-            <RadioDot selected={annual} />
-            <div className="flex flex-1 items-center justify-between gap-4">
-              <div>
-                <p className="font-display text-[17px] font-black" style={{ color: 'var(--bridge-text)' }}>
-                  Annual
-                </p>
-                <p className="mt-0.5 text-sm" style={{ color: 'var(--bridge-text-muted)' }}>
-                  {isStudent ? (
-                    <>
-                      <span className="line-through">${SUBSCRIPTION_ANNUAL_USD}</span>
-                      {' '}${annualTotal} billed annually
-                    </>
-                  ) : (
-                    <>${annualTotal} billed annually</>
-                  )}
-                </p>
-              </div>
-              <div className="shrink-0 text-right">
-                {isStudent && (
-                  <p className="text-sm font-semibold line-through tabular-nums" style={{ color: 'var(--bridge-text-faint)' }}>
-                    ${SUBSCRIPTION_ANNUAL_MONTHLY_USD}/mo
-                  </p>
-                )}
-                <p
-                  className="font-display text-2xl font-black tabular-nums leading-none"
-                  style={{ color: 'var(--bridge-text)' }}
-                >
-                  ${annualMonthlyPrice}
-                  <span className="text-sm font-semibold" style={{ color: 'var(--bridge-text-muted)' }}>
-                    /mo
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </button>
-      </div>
-
-      {/* CTA */}
-      <div className="mt-1">
-        {!settingsLoading && subscribed && !inTrial && (
-          <>
-            <button
-              type="button"
-              disabled
-              className="h-[52px] w-full rounded-full text-base font-black opacity-90"
-              style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)' }}
-            >
-              You&apos;re subscribed
-            </button>
-            <p className="mt-3 text-center text-sm" style={{ color: 'var(--bridge-text-secondary)' }}>
-              Bridge {userSettings?.subscription_plan === 'annual' ? 'Annual' : 'Monthly'}
-              {userSettings?.current_period_end && <> · renews {formatDate(userSettings.current_period_end)}</>}
-            </p>
-            <button
-              type="button"
-              onClick={handleManageSubscription}
-              disabled={portalLoading}
-              className={`mt-3 w-full text-sm font-semibold ${focusRing}`}
-              style={{ color: 'var(--color-primary)' }}
-            >
-              {portalLoading ? 'Opening…' : 'Manage subscription →'}
-            </button>
-          </>
-        )}
-
-        {!settingsLoading && inTrial && (
-          <>
-            <button
-              type="button"
-              disabled
-              className="h-[52px] w-full rounded-full text-base font-black"
-              style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)' }}
-            >
-              Trial active — {daysLeft} {daysLeft === 1 ? 'day' : 'days'} remaining
-            </button>
-            {userSettings?.trial_end && (
-              <p className="mt-3 text-center text-sm" style={{ color: 'var(--bridge-text-secondary)' }}>
-                Your card will be charged on {formatDate(userSettings.trial_end)}.
-              </p>
-            )}
-          </>
-        )}
-
-        {!settingsLoading && !subscribed && (
-          <>
-            <button
-              type="button"
-              onClick={handleStartTrial}
-              disabled={checkoutLoading}
-              className={`h-[52px] w-full rounded-full text-base font-black transition hover:-translate-y-0.5 disabled:opacity-60 ${focusRing}`}
-              style={{
-                backgroundColor: 'var(--color-primary)',
-                color: 'var(--color-on-primary)',
-                boxShadow: '0 12px 32px -8px color-mix(in srgb, var(--color-primary) 55%, transparent)',
-              }}
-            >
-              {checkoutLoading ? 'Redirecting…' : 'Start 7-day free trial'}
-            </button>
-            <p className="mt-3 text-center text-xs" style={{ color: 'var(--bridge-text-muted)' }}>
-              Credit card required · Cancel before day 8 and you won&apos;t be charged
-            </p>
-          </>
-        )}
-      </div>
-
-    </div>
-  );
-}
-
-function StudentBanner() {
-  return (
-    <div
-      className="flex flex-col gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
-      style={{
-        borderColor: 'color-mix(in srgb, var(--color-primary) 18%, var(--bridge-border))',
-        backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
-      }}
-    >
-      <div className="flex min-w-0 items-start gap-3">
-        <GraduationCap className="h-6 w-6 shrink-0" style={{ color: 'var(--color-primary)' }} aria-hidden />
-        <div>
-          <p className="font-display text-lg font-black" style={{ color: 'var(--bridge-text)' }}>
-            Students get 50% off — forever
-          </p>
-          <p className="mt-1 text-sm" style={{ color: 'var(--bridge-text-secondary)' }}>
-            Register with your .edu email — discount applies automatically. No code needed.
-          </p>
-        </div>
-      </div>
-      <AppLink
-        to="/register"
-        className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-black ${focusRing}`}
-        style={{
-          backgroundColor: 'var(--color-primary)',
-          color: 'var(--color-on-primary)',
-        }}
-      >
-        Register with .edu →
-      </AppLink>
-    </div>
-  );
-}
-
 export default function Pricing({ embedded = false }) {
   const { user, userSettings, settingsLoading } = useAuth();
-  const { s } = useContent();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const reduced = useReducedMotion();
   const asMentor = user ? isMentorAccount(user) : false;
   const isStudent = isStudentEmail(user?.email);
   const [annual, setAnnual] = useState(false);
@@ -373,6 +82,9 @@ export default function Pricing({ embedded = false }) {
   const inTrial = isInTrial(userSettings);
   const daysLeft = trialDaysRemaining(userSettings);
   const showCommunityNote = searchParams.get('reason') === 'community';
+  const monthlyPrice = displayMonthlyPrice('monthly', { isStudent });
+  const annualMonthlyPrice = displayMonthlyPrice('annual', { isStudent });
+  const annualTotal = isStudent ? Math.round(SUBSCRIPTION_ANNUAL_USD * 0.5) : SUBSCRIPTION_ANNUAL_USD;
 
   async function handleStartTrial() {
     setCheckoutError('');
@@ -413,9 +125,8 @@ export default function Pricing({ embedded = false }) {
 
   if (asMentor) {
     return (
-      <Root className={embedded ? 'relative' : 'relative isolate min-h-screen px-5 py-16 sm:px-8'}>
-        {!embedded && <AuroraBg />}
-        <div className="relative z-[2] mx-auto max-w-lg text-center">
+      <Root className={embedded ? 'relative' : 'relative min-h-screen px-5 py-16 sm:px-8'}>
+        <div className="mx-auto max-w-lg text-center">
           <p className="font-display text-2xl font-black" style={{ color: 'var(--bridge-text)' }}>
             Mentors volunteer on Bridge — no subscription required.
           </p>
@@ -424,159 +135,267 @@ export default function Pricing({ embedded = false }) {
     );
   }
 
-  const selectorProps = {
-    isStudent,
-    annual,
-    setAnnual,
-    settingsLoading,
-    subscribed,
-    inTrial,
-    daysLeft,
-    userSettings,
-    checkoutLoading,
-    portalLoading,
-    handleStartTrial,
-    handleManageSubscription,
-  };
-
   return (
     <Root
       data-route-atmo={embedded ? undefined : 'pricing'}
-      className={embedded ? 'relative overflow-x-hidden' : 'relative isolate min-h-screen overflow-x-hidden'}
+      className={embedded ? 'relative' : 'relative min-h-screen bg-[var(--bridge-canvas)]'}
       aria-labelledby={embedded ? undefined : 'pricing-heading'}
     >
-      {!embedded && <AuroraBg />}
+      <div className={embedded ? '' : 'mx-auto max-w-2xl px-5 py-16 sm:px-8 sm:py-20'}>
 
-      {/* Error */}
-      {checkoutError && (
+        {/* Error */}
+        {checkoutError && (
+          <div
+            className="mb-6 rounded-xl border px-4 py-3 text-sm font-semibold"
+            style={{
+              borderColor: 'color-mix(in srgb, var(--color-error) 30%, var(--bridge-border))',
+              backgroundColor: 'color-mix(in srgb, var(--color-error) 8%, transparent)',
+              color: 'var(--color-error)',
+            }}
+          >
+            {checkoutError}
+          </div>
+        )}
+
+        {/* Hero */}
+        {!embedded && (
+          <div className="mb-12 text-center">
+            <p
+              className="text-[11px] font-bold uppercase tracking-[0.28em]"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              Pricing
+            </p>
+            <h1
+              id="pricing-heading"
+              className="mt-4 font-display font-black leading-tight tracking-[-0.03em]"
+              style={{ fontSize: 'clamp(2rem, 5vw, 2.75rem)', color: 'var(--bridge-text)' }}
+            >
+              One plan. Everything included.
+            </h1>
+            <p
+              className="mx-auto mt-4 max-w-md text-[16px] leading-relaxed"
+              style={{ color: 'var(--bridge-text-secondary)' }}
+            >
+              Mentor sessions are always free. Your subscription unlocks the platform — AI tools, community, and unlimited sessions.
+            </p>
+          </div>
+        )}
+
+        {showCommunityNote && (
+          <p className="mb-6 text-center text-sm font-medium" style={{ color: 'var(--bridge-text-secondary)' }}>
+            Community requires a Bridge subscription.
+          </p>
+        )}
+
+        {/* Student discount */}
+        {!(user && isStudent) && !embedded && (
+          <div
+            className="mb-8 flex flex-col gap-4 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between"
+            style={{
+              borderColor: 'color-mix(in srgb, var(--color-primary) 20%, var(--bridge-border))',
+              backgroundColor: 'color-mix(in srgb, var(--color-primary) 6%, transparent)',
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <GraduationCap className="h-5 w-5 shrink-0" style={{ color: 'var(--color-primary)' }} aria-hidden />
+              <div>
+                <p className="text-[14px] font-bold" style={{ color: 'var(--bridge-text)' }}>
+                  Students get 50% off — forever
+                </p>
+                <p className="text-[13px]" style={{ color: 'var(--bridge-text-secondary)' }}>
+                  Register with your .edu email. No code needed.
+                </p>
+              </div>
+            </div>
+            <AppLink
+              to="/register"
+              className={`shrink-0 rounded-full px-4 py-2 text-[13px] font-bold ${focusRing}`}
+              style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)' }}
+            >
+              Register with .edu →
+            </AppLink>
+          </div>
+        )}
+
+        {isStudent && (
+          <div
+            className="mb-6 flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--color-success) 10%, transparent)',
+              color: 'var(--color-success)',
+              border: '1px solid color-mix(in srgb, var(--color-success) 20%, transparent)',
+            }}
+          >
+            <GraduationCap className="h-4 w-4 shrink-0" aria-hidden />
+            Student discount applied — 50% off forever
+          </div>
+        )}
+
+        {/* Billing toggle */}
+        <div className="mb-6 flex justify-center">
+          <div
+            className="inline-flex rounded-full p-1"
+            style={{ backgroundColor: 'var(--bridge-surface)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}
+            role="group"
+            aria-label="Billing period"
+          >
+            <button
+              type="button"
+              onClick={() => setAnnual(false)}
+              className={`rounded-full px-5 py-2 text-[13px] font-bold transition-colors ${focusRing}`}
+              style={{
+                backgroundColor: !annual ? 'var(--color-primary)' : 'transparent',
+                color: !annual ? 'var(--color-on-primary)' : 'var(--bridge-text-secondary)',
+              }}
+            >
+              Monthly
+            </button>
+            <button
+              type="button"
+              onClick={() => setAnnual(true)}
+              className={`rounded-full px-5 py-2 text-[13px] font-bold transition-colors ${focusRing}`}
+              style={{
+                backgroundColor: annual ? 'var(--color-primary)' : 'transparent',
+                color: annual ? 'var(--color-on-primary)' : 'var(--bridge-text-secondary)',
+              }}
+            >
+              Annual
+              <span
+                className="ml-2 rounded-full px-2 py-0.5 text-[11px] font-black"
+                style={{
+                  backgroundColor: annual
+                    ? 'color-mix(in srgb, var(--color-on-primary) 20%, transparent)'
+                    : 'color-mix(in srgb, var(--color-primary) 14%, transparent)',
+                  color: annual ? 'var(--color-on-primary)' : 'var(--color-primary)',
+                }}
+              >
+                {ANNUAL_SAVINGS_PERCENT}% off
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Price card */}
         <div
-          className="relative z-[3] mx-auto mt-4 max-w-[560px] rounded-2xl border px-4 py-3 text-sm font-semibold"
+          className="rounded-2xl p-7 sm:p-8"
           style={{
-            borderColor: 'color-mix(in srgb, var(--color-error) 30%, var(--bridge-border))',
-            backgroundColor: 'color-mix(in srgb, var(--color-error) 8%, transparent)',
-            color: 'var(--color-error)',
+            backgroundColor: 'var(--bridge-surface)',
+            boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
           }}
         >
-          {checkoutError}
-        </div>
-      )}
-
-      {/* Hero */}
-      {!embedded && (
-        <header className="relative z-[2] px-5 pb-10 pt-20 text-center sm:px-8 sm:pt-24">
-          <motion.p
-            {...fadeUp(0, reduced)}
-            className="text-[11px] font-black uppercase tracking-[0.32em]"
-            style={{ color: 'var(--color-primary)' }}
-          >
-            Pricing
-          </motion.p>
-          <motion.h1
-            {...fadeUp(0.08, reduced)}
-            id="pricing-heading"
-            className="mx-auto mt-3 max-w-2xl font-display font-black leading-[1.02] tracking-tight"
-            style={{ fontSize: 'clamp(2.4rem, 5.5vw, 3.75rem)', color: 'var(--bridge-text)' }}
-          >
-            One plan.{' '}
-            <span style={{ color: 'var(--color-primary)' }}>Everything included.</span>
-          </motion.h1>
-          <motion.p
-            {...fadeUp(0.16, reduced)}
-            className="mx-auto mt-5 max-w-[440px] text-[17px] leading-relaxed"
-            style={{ color: 'var(--bridge-text-secondary)' }}
-          >
-            Mentor sessions are always free — mentors volunteer their time. Your subscription unlocks the platform.
-          </motion.p>
-          {!(user && isStudent) && (
-            <motion.div
-              {...fadeUp(0.24, reduced)}
-              className="mx-auto mt-8 max-w-[600px] px-5 sm:px-0"
+          {/* Price */}
+          <div className="mb-7 flex items-end gap-2">
+            <span
+              className="font-display font-black tabular-nums leading-none"
+              style={{ fontSize: 'clamp(3rem, 8vw, 3.75rem)', color: 'var(--bridge-text)' }}
             >
-              <StudentBanner />
-            </motion.div>
-          )}
-        </header>
-      )}
+              ${annual ? annualMonthlyPrice : monthlyPrice}
+            </span>
+            <div className="pb-1">
+              <p className="text-[14px] font-semibold" style={{ color: 'var(--bridge-text-muted)' }}>
+                /month
+              </p>
+              {annual && (
+                <p className="text-[12px]" style={{ color: 'var(--bridge-text-faint)' }}>
+                  {isStudent ? (
+                    <>
+                      <span className="line-through">${SUBSCRIPTION_ANNUAL_USD}</span>
+                      {' '}${annualTotal} billed annually
+                    </>
+                  ) : (
+                    <>${annualTotal} billed annually</>
+                  )}
+                </p>
+              )}
+              {!annual && isStudent && (
+                <p className="text-[12px] line-through" style={{ color: 'var(--bridge-text-faint)' }}>
+                  ${SUBSCRIPTION_MONTHLY_USD}/mo
+                </p>
+              )}
+            </div>
+          </div>
 
-      {/* Plan selector — centered */}
-      <div className={`relative z-[2] ${embedded ? 'pb-10 pt-2' : 'px-5 pb-8 sm:px-8'}`}>
-        <div className={embedded ? 'w-full' : 'mx-auto max-w-[520px]'}>
-          {showCommunityNote && (
-            <p className="mb-5 text-center text-sm font-medium" style={{ color: 'var(--bridge-text-secondary)' }}>
-              Community requires a Bridge subscription.
-            </p>
-          )}
-          <motion.div {...fadeUp(embedded ? 0 : 0.22, reduced)}>
-            <PlanSelector {...selectorProps} />
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Features grid */}
-      <div className="relative z-[2] px-5 py-14 sm:px-8 sm:py-16">
-        <div className="mx-auto max-w-[760px]">
-          <p
-            className="text-center text-[11px] font-black uppercase tracking-[0.32em]"
-            style={{ color: 'var(--color-primary)' }}
-          >
-            What&apos;s included
-          </p>
-          <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+          {/* Features */}
+          <ul className="mb-7 grid gap-2.5 sm:grid-cols-2">
             {FEATURES.map((f) => (
-              <li key={f} className="flex gap-3 text-sm leading-snug" style={{ color: 'var(--bridge-text)' }}>
+              <li key={f} className="flex items-start gap-2.5 text-[14px] leading-snug" style={{ color: 'var(--bridge-text)' }}>
                 <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: 'var(--color-primary)' }} aria-hidden />
                 {f}
               </li>
             ))}
           </ul>
-        </div>
-      </div>
 
-      {/* Social proof */}
-      {!embedded && (
-        <div className="relative z-[2] px-5 py-14 sm:px-8 sm:py-16">
-          <div className="mx-auto max-w-[900px]">
-            <div className="grid gap-4 sm:grid-cols-3">
-              {TESTIMONIALS.map((t) => (
-                <blockquote
-                  key={t.name}
-                  className="flex flex-col rounded-2xl border p-6"
-                  style={{
-                    borderColor: 'var(--bridge-border)',
-                    borderLeftWidth: '3px',
-                    borderLeftColor: 'color-mix(in srgb, var(--color-primary) 40%, transparent)',
-                    backgroundColor: 'transparent',
-                  }}
+          {/* CTA */}
+          <div style={{ borderTop: '1px solid var(--bridge-border)', paddingTop: '1.5rem' }}>
+            {!settingsLoading && subscribed && !inTrial && (
+              <>
+                <button
+                  type="button"
+                  disabled
+                  className="h-12 w-full rounded-full text-[15px] font-black opacity-90"
+                  style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)' }}
                 >
-                  <p className="flex-1 text-[15px] leading-relaxed" style={{ color: 'var(--bridge-text)' }}>
-                    &ldquo;{t.quote}&rdquo;
-                  </p>
-                  <footer className="mt-5 text-xs" style={{ color: 'var(--bridge-text-muted)' }}>
-                    <span className="font-bold" style={{ color: 'var(--bridge-text-secondary)' }}>
-                      {t.name}
-                    </span>
-                    {', '}
-                    {t.role}
-                  </footer>
-                </blockquote>
-              ))}
-            </div>
+                  You&apos;re subscribed
+                </button>
+                <p className="mt-3 text-center text-sm" style={{ color: 'var(--bridge-text-secondary)' }}>
+                  Bridge {userSettings?.subscription_plan === 'annual' ? 'Annual' : 'Monthly'}
+                  {userSettings?.current_period_end && <> · renews {formatDate(userSettings.current_period_end)}</>}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleManageSubscription}
+                  disabled={portalLoading}
+                  className={`mt-3 w-full text-sm font-semibold ${focusRing}`}
+                  style={{ color: 'var(--color-primary)' }}
+                >
+                  {portalLoading ? 'Opening…' : 'Manage subscription →'}
+                </button>
+              </>
+            )}
 
-            <ul className="mt-10 grid gap-5 sm:grid-cols-3">
-              {TRUST_POINTS.map((point) => (
-                <li key={point} className="flex gap-3 text-sm leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
-                  <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" style={{ color: 'var(--color-primary)' }} aria-hidden />
-                  {point}
-                </li>
-              ))}
-            </ul>
+            {!settingsLoading && inTrial && (
+              <>
+                <button
+                  type="button"
+                  disabled
+                  className="h-12 w-full rounded-full text-[15px] font-black"
+                  style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)' }}
+                >
+                  Trial active — {daysLeft} {daysLeft === 1 ? 'day' : 'days'} remaining
+                </button>
+                {userSettings?.trial_end && (
+                  <p className="mt-3 text-center text-sm" style={{ color: 'var(--bridge-text-secondary)' }}>
+                    Your card will be charged on {formatDate(userSettings.trial_end)}.
+                  </p>
+                )}
+              </>
+            )}
+
+            {!settingsLoading && !subscribed && !inTrial && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleStartTrial}
+                  disabled={checkoutLoading}
+                  className={`h-12 w-full rounded-full text-[15px] font-black transition hover:-translate-y-0.5 disabled:opacity-60 ${focusRing}`}
+                  style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)' }}
+                >
+                  {checkoutLoading ? 'Redirecting…' : 'Start 7-day free trial'}
+                </button>
+                <p className="mt-3 text-center text-xs" style={{ color: 'var(--bridge-text-muted)' }}>
+                  Credit card required · Cancel before day 8 and you won&apos;t be charged
+                </p>
+              </>
+            )}
           </div>
         </div>
-      )}
 
-      {/* FAQ */}
-      <div className="relative z-[2] mx-auto max-w-[720px] px-5 pb-20 pt-12 sm:px-8 sm:pt-16">
-        <PricingFaq headingId="pricing-faq-heading" items={FAQ_ITEMS} />
+        {/* FAQ */}
+        <div className="mt-16">
+          <PricingFaq headingId="pricing-faq-heading" items={FAQ_ITEMS} />
+        </div>
+
       </div>
     </Root>
   );

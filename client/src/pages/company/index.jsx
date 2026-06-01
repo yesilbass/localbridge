@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import CompanyHero from './CompanyHero';
-import CompanyStorySection from './CompanyStorySection';
-import CompanyBeliefsSection from './CompanyBeliefsSection';
-import CompanyCompareSection from './CompanyCompareSection';
-import CompanyProofSection from './CompanyProofSection';
-import CompanyPeopleSection from './CompanyPeopleSection';
-import CompanyCloseSection from './CompanyCloseSection';
+import CompanyHero              from './CompanyHero';
+import CompanyStorySection      from './CompanyStorySection';
+import CompanyHowItWorksSection from './CompanyHowItWorksSection';
+import CompanyValuesSection     from './CompanyBeliefsSection';
+import CompanyPeopleSection     from './CompanyPeopleSection';
+import CompanyCloseSection      from './CompanyCloseSection';
 
 export default function CompanyPage() {
   const location = useLocation();
@@ -28,9 +27,8 @@ export default function CompanyPage() {
     >
       <CompanyHero />
       <CompanyStorySection />
-      <CompanyBeliefsSection />
-      <CompanyCompareSection />
-      <CompanyProofSection />
+      <CompanyHowItWorksSection />
+      <CompanyValuesSection />
       <CompanyPeopleSection />
       <CompanyCloseSection />
     </main>

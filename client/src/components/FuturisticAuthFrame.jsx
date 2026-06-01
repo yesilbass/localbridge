@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Github, ShieldCheck, Star, UsersRound } from 'lucide-react';
+import { Github, ShieldCheck, UsersRound } from 'lucide-react';
 
 function GoogleIcon() {
   return (
@@ -57,7 +57,7 @@ function SignupSidePanel() {
         className="text-[10px] font-black uppercase tracking-[0.28em]"
         style={{ color: 'var(--color-primary)' }}
       >
-        For job seekers
+        For mentees
       </p>
       <h2
         className="mt-4 font-display text-[2.5rem] font-black leading-[1.02] tracking-[-0.04em] xl:text-[3.5rem]"
@@ -66,57 +66,13 @@ function SignupSidePanel() {
         Your next move starts<br />with one conversation.
       </h2>
       <p className="mt-5 max-w-lg text-[17px] leading-relaxed" style={{ color: 'var(--bridge-text-secondary)' }}>
-        Browse 2,400+ mentors from Google, Stripe, and top startups. Book a session, get honest feedback, and leave with a clear next step.
+        Browse hand-vetted mentors, book free sessions, and get honest feedback from people who've already done the job.
       </p>
 
-      <div className="mt-8 grid grid-cols-3 gap-3.5 max-w-lg">
+      <div className="mt-10 flex flex-wrap gap-3">
         {[
-          ['2,400+', 'Vetted mentors'],
-          ['4.9/5', 'Avg rating'],
-          ['97%', 'Recommend'],
-        ].map(([value, label]) => (
-          <div
-            key={label}
-            className="rounded-2xl p-4 sm:p-5"
-            style={{
-              backgroundColor: 'var(--bridge-surface)',
-              border: '1px solid var(--bridge-border)',
-            }}
-          >
-            <div className="font-display text-2xl font-black tabular-nums" style={{ color: 'var(--bridge-text)' }}>
-              {value}
-            </div>
-            <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--bridge-text-muted)' }}>
-              {label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div
-        className="mt-8 max-w-lg rounded-2xl p-6"
-        style={{
-          backgroundColor: 'var(--bridge-surface)',
-          border: '1px solid var(--bridge-border)',
-        }}
-      >
-        <div className="flex gap-0.5" style={{ color: 'var(--color-primary)' }}>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} className="h-3.5 w-3.5 fill-current" aria-hidden />
-          ))}
-        </div>
-        <p className="mt-3 text-[15px] font-semibold leading-relaxed" style={{ color: 'var(--bridge-text)' }}>
-          &ldquo;One session saved me six months of guessing. Worth every penny.&rdquo;
-        </p>
-        <p className="mt-3 text-xs" style={{ color: 'var(--bridge-text-muted)' }}>
-          — Product manager, Series B startup
-        </p>
-      </div>
-
-      <div className="mt-8 flex flex-wrap gap-3">
-        {[
-          { Icon: ShieldCheck, text: 'Secure auth' },
-          { Icon: UsersRound, text: 'Vetted mentors' },
+          { Icon: ShieldCheck, text: 'Hand-vetted mentors' },
+          { Icon: UsersRound, text: 'Sessions always free' },
         ].map(({ Icon, text }) => (
           <span
             key={text}

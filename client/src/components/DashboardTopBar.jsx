@@ -74,7 +74,7 @@ export default function DashboardTopBar({
             className="shrink-0 font-display text-[1.12rem] font-black tracking-[-0.04em] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] sm:text-[1.22rem]"
             style={{ color: 'var(--bridge-text)', lineHeight: 1 }}
           >
-            mentorshipbridge
+            <span style={{ opacity: 0.45 }}>mentorship</span><span style={{ color: 'var(--color-primary)' }}>bridge</span>
           </Link>
 
           <DashboardNavMenusDesktop
