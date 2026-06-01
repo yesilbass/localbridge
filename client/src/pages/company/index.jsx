@@ -4,6 +4,7 @@ import CompanyHero              from './CompanyHero';
 import CompanyStorySection      from './CompanyStorySection';
 import CompanyHowItWorksSection from './CompanyHowItWorksSection';
 import CompanyValuesSection     from './CompanyBeliefsSection';
+import CompanyBuiltForSection   from './CompanyBuiltForSection';
 import CompanyPeopleSection     from './CompanyPeopleSection';
 import CompanyCloseSection      from './CompanyCloseSection';
 
@@ -29,6 +30,7 @@ export default function CompanyPage() {
       <CompanyStorySection />
       <CompanyHowItWorksSection />
       <CompanyValuesSection />
+      <CompanyBuiltForSection />
       <CompanyPeopleSection />
       <CompanyCloseSection />
     </main>
