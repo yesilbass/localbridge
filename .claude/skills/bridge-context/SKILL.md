@@ -72,18 +72,18 @@ client/src/
     community.js mentorPosts.js mentorBadges.js
     ai.js aiMatching.js aiResumeReview.js aiUsage.js
     calendly.js stripe.js intake.js cancellations.js
-    menteeProfile.js mentorOnboarding.js verification.js
-    tagMentorCategories.js resumeStorage.js mentorAvatarStorage.js
+    menteeProfile.js verification.js tagMentorCategories.js
+    resumeStorage.js mentorAvatarStorage.js
   components/
     Navbar.jsx DashboardTopBar.jsx
     nav/               ← mainNavModel, NavMenus, navChrome, dashboardNavModel
   utils/authNav.js     ← resolveAuthEntryPath, dashboardProductPath, presentAsMarketingGuest
   pages/
-    landing/           ← Hero, Bento, Manifesto, HowItWorksSection, FinalCta, …
-    how-it-works/      ← /how-it-works page (HowItWorksHero, HowItWorksSteps, howItWorksData)
+    landing/           ← HeroSection, HowItWorksSection, WaitlistSection, FAQSection, landingData
+    how-it-works/      ← /how-it-works (index hero, HowItWorksSteps sessions track, HowItWorksContrast)
     community/         ← CommunityHub, CommunityCategory, communityShared
-    dashboard/         ← mentee + mentor views, hooks, modals
-    footer/            ← static informational pages
+    dashboard/         ← DashboardShell + top bar, mentee/mentor sections, hooks
+    footer/            ← FAQ (sticky section nav), Help, Contact, Trust, legal
     BecomeMentor.jsx MentorApplication.jsx MentorOnboardingFlow.jsx
     Mentors/ Pricing/ DevPortal/
     Login.jsx Register.jsx MentorProfile.jsx Profile.jsx Settings.jsx
@@ -116,7 +116,8 @@ supabase/migrations/   ← canonical SQL; do NOT auto-run, hand to user
 | Calendar / Calendly OAuth | `client/src/api/calendly.js`, `api/calendly/` |
 | Community | `client/src/api/community.js`, `client/src/pages/community/`, `CommunityEntryGate` |
 | Nav / chrome | `client/src/components/nav/mainNavModel.js`, `Navbar.jsx`, `DashboardTopBar.jsx`, `authNav.js`, `Footer.jsx` |
-| How it works page | `client/src/pages/how-it-works/` (`howItWorksData.js` for step copy) |
+| How it works page | `client/src/pages/how-it-works/` (`index.jsx`, `HowItWorksSteps.jsx`, `howItWorksData.js`) |
+| FAQ / Help / Trust | `client/src/pages/footer/FAQ.jsx` (sticky section nav), `Help.jsx`, `Trust.jsx` |
 | Mentor application | `client/src/pages/MentorApplication.jsx`, `api/realtime-session.js`, `api/verification/` |
 | Mentor posts (not community) | `client/src/api/mentorPosts.js`, `client/src/pages/community/MentorPostsPage.jsx` |
 | Stripe / payments | `client/src/api/stripe.js`, `server/routes/stripe.js`, `client/src/components/EmbeddedCheckoutPanel.jsx`. See `.cursor/skills/adding-stripe/SKILL.md`. |

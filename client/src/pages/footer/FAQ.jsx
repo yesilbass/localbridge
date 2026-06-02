@@ -1,6 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronRight, ChevronDown } from 'lucide-react';
-import { pageShell, focusRing } from '../../ui';
+import { Link } from 'react-router-dom';
+import { Plus, Minus } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import Reveal from '../../components/Reveal';
+import { pageShell } from '../../ui';
+
+const HAIRLINE = { borderBottom: '1px solid var(--bridge-border)' };
+
+const EYEBROW = {
+    fontSize: '11px',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.16em',
+    color: 'var(--color-primary)',
+};
 
 const SECTIONS = [
     {
@@ -23,6 +36,10 @@ const SECTIONS = [
             {
                 q: 'Do I need an account to look around?',
                 a: `No. You can browse mentor profiles without signing up. You only need an account when you want to book a session, so we can send you the meeting link and a reminder.`,
+            },
+            {
+                q: 'Where are the step-by-step guides?',
+                a: `Open Help from the Resources menu for step-by-step guides — account setup, booking, video calls, and subscription billing. This FAQ covers the bigger "what is Bridge?" questions.`,
             },
             {
                 q: 'You say "pre-launch" but I can sign up. What does pre-launch mean?',
@@ -53,7 +70,7 @@ const SECTIONS = [
             },
             {
                 q: `What if the mentor doesn't show up?`,
-                a: `Email us at bridge@mentorshipbridge.com with the session details. We'll follow up with the mentor and help you rebook with someone else. A no-show without a reason is grounds for us removing a mentor from the platform.`,
+                a: `Contact us with the session details through the Contact page. We'll follow up with the mentor and help you rebook with someone else. A no-show without a reason is grounds for us removing a mentor from the platform.`,
             },
         ],
     },
@@ -95,7 +112,7 @@ const SECTIONS = [
             },
             {
                 q: 'How do I report a bad experience?',
-                a: `Use the form on the Trust & Safety page, or email bridge@mentorshipbridge.com directly. Both go to a real person (us). We respond within 48 hours, usually sooner.`,
+                a: `Use the form on the Trust & Safety page, or the Contact page. Both go to a real person (us). We respond within 48 hours, usually sooner.`,
             },
         ],
     },
@@ -107,28 +124,46 @@ const DEFAULT_OPEN = new Set([
     'How are mentors vetted?',
 ]);
 
-function FAQItem({ q, a, isOpen, onToggle }) {
+function FAQItem({ q, a, isOpen, onToggle, isLast }) {
     const answerId = `answer-${q.replace(/\s+/g, '-').toLowerCase()}`;
     return (
-        <div>
+        <div style={!isLast ? HAIRLINE : undefined}>
             <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => onToggle(q)}
                 aria-expanded={isOpen}
                 aria-controls={answerId}
-                className={`flex items-center gap-3 py-4 text-left ${focusRing}`}
+                className="flex w-full items-start justify-between gap-6 py-6 text-left focus:outline-none focus-visible:underline sm:py-7"
             >
-                <span className="text-base text-[var(--bridge-text)]">{q}</span>
-                {isOpen
-                    ? <ChevronDown className="h-4 w-4 shrink-0 text-[var(--bridge-text-muted)]" />
-                    : <ChevronRight className="h-4 w-4 shrink-0 text-[var(--bridge-text-muted)]" />
-                }
+                <span className="font-display text-lg font-semibold leading-snug tracking-[-0.01em] text-[var(--bridge-text)] sm:text-xl">
+                    {q}
+                </span>
+                <span
+                    className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center"
+                    style={{ color: 'var(--color-primary)' }}
+                    aria-hidden
+                >
+                    {isOpen ? <Minus size={18} strokeWidth={2.5} /> : <Plus size={18} strokeWidth={2.5} />}
+                </span>
             </button>
-            {isOpen && (
-                <div id={answerId} className="pt-1 pb-6">
-                    <p className="max-w-[65ch] leading-relaxed text-[var(--bridge-text-secondary)]">{a}</p>
-                </div>
-            )}
-            <div className="h-px w-full bg-[#E5E7EB] dark:bg-[#2D2D2D]" />
+            <AnimatePresence initial={false}>
+                {isOpen && (
+                    <motion.div
+                        id={answerId}
+                        key="answer"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                        className="overflow-hidden"
+                    >
+                        <p className="max-w-[62ch] pb-7 text-base leading-[1.8] text-[var(--bridge-text-secondary)] sm:text-[17px]">
+                            {a}
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
@@ -163,72 +198,149 @@ export default function FAQ() {
     }, []);
 
     function scrollTo(id) {
-        const el = sectionRefs.current[id];
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     return (
-        <main className={`${pageShell} relative px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
-            <div className="relative mx-auto max-w-5xl">
-                <div className="mb-16">
-                    <h1 className="font-display text-[2.5rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.25rem]">
+        <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
+            <div className="mx-auto max-w-6xl">
+                <Reveal className="mb-16 sm:mb-20 lg:mb-24">
+                    <span className="mb-4 block" style={EYEBROW}>
+                        Questions
+                    </span>
+                    <h1
+                        className="font-display font-black tracking-[-0.03em] text-[var(--bridge-text)]"
+                        style={{ fontSize: 'clamp(2.5rem, 5vw, 3.25rem)', lineHeight: 1.08 }}
+                    >
                         FAQ
                     </h1>
-                    <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--bridge-text-secondary)]">
-                        Things people ask us before signing up. If yours isn&apos;t here, email bridge@mentorshipbridge.com &mdash; a real person reads it.
+                    <p
+                        className="mt-5 max-w-2xl leading-[1.7] text-[var(--bridge-text-secondary)]"
+                        style={{ fontSize: 'clamp(1rem, 1.5vw, 1.125rem)' }}
+                    >
+                        Things people ask before signing up. Step-by-step guides live in the{' '}
+                        <Link
+                            to="/help"
+                            className="font-semibold underline underline-offset-4 transition hover:opacity-80"
+                            style={{ color: 'var(--color-primary)' }}
+                        >
+                            Help center
+                        </Link>
+                        . Still need us?{' '}
+                        <Link
+                            to="/contact"
+                            className="font-semibold underline underline-offset-4 transition hover:opacity-80"
+                            style={{ color: 'var(--color-primary)' }}
+                        >
+                            Contact
+                        </Link>
+                        {' '}&mdash; a real person reads it.
                     </p>
-                </div>
+                </Reveal>
 
-                <div className="flex gap-16">
-                    <nav className="hidden lg:block" style={{ width: '200px', flexShrink: 0 }}>
-                        <ul className="sticky top-24 space-y-5">
-                            {SECTIONS.map((section) => (
-                                <li key={section.id}>
-                                    <button
-                                        onClick={() => scrollTo(section.id)}
-                                        className={`rounded-sm text-left text-sm transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)] dark:focus-visible:ring-orange-400 ${
-                                            activeSection === section.id
-                                                ? 'font-medium text-[var(--bridge-text)]'
-                                                : 'font-normal text-[var(--bridge-text-muted)] hover:text-[var(--bridge-text-secondary)]'
-                                        }`}
-                                    >
-                                        {section.name}
-                                    </button>
-                                </li>
-                            ))}
+                <div className="flex items-start gap-12 xl:gap-20">
+                    <aside className="hidden w-48 shrink-0 lg:block xl:w-52" aria-label="FAQ sections">
+                        <ul className="sticky top-28 space-y-4">
+                            {SECTIONS.map((section) => {
+                                const isActive = activeSection === section.id;
+                                return (
+                                    <li key={section.id}>
+                                        <button
+                                            type="button"
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            onClick={() => scrollTo(section.id)}
+                                            className={`text-left text-base leading-snug transition-colors focus:outline-none focus-visible:underline ${
+                                                isActive
+                                                    ? 'font-semibold text-[var(--color-primary)]'
+                                                    : 'font-normal text-[var(--bridge-text-muted)] hover:text-[var(--bridge-text)]'
+                                            }`}
+                                        >
+                                            {section.name}
+                                        </button>
+                                    </li>
+                                );
+                            })}
                         </ul>
-                    </nav>
+                    </aside>
 
                     <div className="min-w-0 flex-1">
+                        <div className="mb-12 flex flex-wrap gap-x-2 gap-y-2 lg:hidden">
+                            {SECTIONS.map((section, i) => {
+                                const isActive = activeSection === section.id;
+                                return (
+                                    <span key={section.id} className="inline-flex items-center">
+                                        {i > 0 && (
+                                            <span className="mx-2 text-[var(--bridge-border)]" aria-hidden>
+                                                /
+                                            </span>
+                                        )}
+                                        <button
+                                            type="button"
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            onClick={() => scrollTo(section.id)}
+                                            className={`text-base transition-colors focus:outline-none focus-visible:underline ${
+                                                isActive
+                                                    ? 'font-semibold text-[var(--color-primary)]'
+                                                    : 'text-[var(--bridge-text-muted)]'
+                                            }`}
+                                        >
+                                            {section.name}
+                                        </button>
+                                    </span>
+                                );
+                            })}
+                        </div>
+
                         {SECTIONS.map((section, si) => (
-                            <div
-                                key={section.id}
-                                id={section.id}
-                                ref={(el) => { sectionRefs.current[section.id] = el; }}
-                                className={si > 0 ? 'mt-16' : ''}
-                            >
-                                <h2 className="font-display text-2xl font-bold text-[var(--bridge-text)] sm:text-3xl">
-                                    {section.name}
-                                </h2>
-                                <p className="mt-1 text-sm text-[var(--bridge-text-muted)]">{section.sub}</p>
-                                <div className="mt-6">
-                                    <div className="h-px w-full bg-[#E5E7EB] dark:bg-[#2D2D2D]" />
-                                    {section.faqs.map((faq) => (
-                                        <FAQItem
-                                            key={faq.q}
-                                            q={faq.q}
-                                            a={faq.a}
-                                            isOpen={openSet.has(faq.q)}
-                                            onToggle={toggle}
-                                        />
-                                    ))}
+                            <Reveal key={section.id} delay={si * 30}>
+                                <div
+                                    id={section.id}
+                                    ref={(el) => { sectionRefs.current[section.id] = el; }}
+                                    className={`scroll-mt-28 ${si > 0 ? 'mt-20 border-t border-[var(--bridge-border)] pt-20' : ''}`}
+                                >
+                                    <h2 className="font-display text-2xl font-bold tracking-[-0.02em] text-[var(--bridge-text)] sm:text-3xl">
+                                        {section.name}
+                                    </h2>
+                                    <p className="mt-3 max-w-2xl text-base leading-relaxed text-[var(--bridge-text-muted)] sm:text-lg sm:leading-relaxed">
+                                        {section.sub}
+                                    </p>
+                                    <div className="mt-10 border-t border-[var(--bridge-border)]">
+                                        {section.faqs.map((faq, fi) => (
+                                            <FAQItem
+                                                key={faq.q}
+                                                q={faq.q}
+                                                a={faq.a}
+                                                isOpen={openSet.has(faq.q)}
+                                                onToggle={toggle}
+                                                isLast={fi === section.faqs.length - 1}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            </Reveal>
                         ))}
 
-                        <p className="mt-16 text-base text-[var(--bridge-text-secondary)]">
-                            Still stuck? Email bridge@mentorshipbridge.com. One of us (Ahmet or Muaz) will reply, usually same day.
-                        </p>
+                        <Reveal delay={100}>
+                            <p className="mt-20 border-t border-[var(--bridge-border)] pt-12 text-base leading-[1.8] text-[var(--bridge-text-secondary)] sm:text-lg">
+                                Need a how-to?{' '}
+                                <Link
+                                    to="/help"
+                                    className="font-semibold underline underline-offset-4 transition hover:opacity-80"
+                                    style={{ color: 'var(--color-primary)' }}
+                                >
+                                    Help center
+                                </Link>
+                                . Still stuck?{' '}
+                                <Link
+                                    to="/contact"
+                                    className="font-semibold underline underline-offset-4 transition hover:opacity-80"
+                                    style={{ color: 'var(--color-primary)' }}
+                                >
+                                    Contact us
+                                </Link>
+                                . One of us (Ahmet or Muaz) will reply, usually same day.
+                            </p>
+                        </Reveal>
                     </div>
                 </div>
             </div>

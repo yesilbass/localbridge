@@ -1,32 +1,138 @@
 import { useState, useMemo } from 'react';
-import { Search, ArrowLeft, ChevronRight, LifeBuoy, MessageCircle, Sparkles, CreditCard, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, ArrowLeft, ChevronRight } from 'lucide-react';
 import Reveal from '../../components/Reveal';
-import { focusRing, pageShell } from '../../ui';
+import { pageShell } from '../../ui';
 import { useContent } from '../../content';
+import { COMPANY_EMAIL } from '../../config/contact';
 
-const CATEGORY_META = {
-  'Getting Started': { Icon: Sparkles },
-  'Billing': { Icon: CreditCard },
-  'Sessions': { Icon: Calendar }
+const EYEBROW = {
+  fontSize: '11px',
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.16em',
+  color: 'var(--color-primary)',
 };
 
+const HAIRLINE = { borderBottom: '1px solid var(--bridge-border)' };
+
 const ARTICLES = {
-  'creating-account': { category: 'Getting Started', title: 'Creating an account', body: `Signing up takes under a minute. Click "Sign up" in the top right, enter your email and a password, and confirm your email when our message hits your inbox.\n\nIf you don't see the confirmation email within 5 minutes, check your spam folder. Still nothing? Contact mentors.bridge@gmail.com.` },
-  'finding-mentor': { category: 'Getting Started', title: 'Finding the right mentor', body: `Use the filters on the Mentors page: industry, role, company size, and specific skills. Read the full bio — not just the tagline. The bio is where real mentors distinguish themselves.\n\nCheck their session count and rating, but don't over-weight them. A mentor with 8 sessions and 5.0 rating may be better for your specific situation than one with 200 sessions.\n\nRead at least three reviews before booking.` },
-  'first-session': { category: 'Getting Started', title: 'Booking your first session', body: `Click "Book a session" on the mentor's profile. Pick a session format — Career Advice, Interview Prep, Resume Review, or Networking. Choose a date from the calendar, then a time slot.\n\nYou'll see the total price before confirming. Payment is held until 24 hours after the session completes, so if anything goes wrong you get an automatic refund.` },
-  'preparing-session': { category: 'Getting Started', title: 'Preparing for a session', body: `Write down the ONE thing you want to walk away knowing. Not five things — one. Share it with the mentor in the booking note 24 hours before.\n\nIf you're sharing documents (resume, code, pitch deck), send them at least 6 hours ahead so the mentor can actually review.\n\nTest your video and audio 10 minutes before. Nothing wastes a session faster than "can you hear me now?"` },
-  'payment-methods': { category: 'Billing', title: 'Payment methods', body: `We accept all major credit and debit cards (Visa, Mastercard, Amex, Discover), Apple Pay, and Google Pay. Bank transfers aren't supported for session bookings.\n\nYour card is not charged until the mentor confirms the session. For Pro and Premium subscriptions, you're billed monthly or annually depending on your plan.` },
-  'refund-policy': { category: 'Billing', title: 'Refund policy', body: `Before a session: 100% refund, any time.\n\nAfter a session: 100% refund within 48 hours if you're unsatisfied. No explanation required — we take your word for it.\n\nMentor no-shows: Automatic full refund plus credit toward your next booking.` },
-  'reschedule': { category: 'Sessions', title: 'Rescheduling a session', body: `Go to your Dashboard → Upcoming Sessions → click the session. Use "Reschedule" to pick a new time from the mentor's availability.\n\nFree up to 24 hours before the session. Inside 24 hours, the mentor may charge a rescheduling fee at their discretion.` },
-  'cancel': { category: 'Sessions', title: 'Canceling a session', body: `From your Dashboard, open the session and click "Cancel." Full refund issued if more than 24 hours before the session starts. Inside 24 hours, refunds are at the mentor's discretion.\n\nWe don't penalize occasional cancellations. Repeated last-minute cancellations may limit your ability to book.` },
-  'technical': { category: 'Sessions', title: 'Technical issues during a call', body: `If the video call drops, try rejoining from the same link. If problems persist for more than 5 minutes, end the call and message the mentor through the platform — they'll restart or reschedule.\n\nUse Chrome, Safari, or Firefox (latest versions). Mobile works but desktop is more reliable for screen sharing.` }
+  'creating-account': {
+    categoryId: 'getting-started',
+    category: 'Getting started',
+    title: 'Creating an account',
+    body: `Click Sign up in the top right, enter your email and a password, and confirm your email when our message arrives.\n\nYou can browse mentors without an account. You only need one to book a session so we can send your meeting link and reminders.\n\nIf the confirmation email doesn't show up within five minutes, check spam. Still nothing? Email ${COMPANY_EMAIL}.`,
+  },
+  'finding-mentor': {
+    categoryId: 'getting-started',
+    category: 'Getting started',
+    title: 'Finding the right mentor',
+    body: `Open Mentors from the nav. Filter by industry, role, and skills, or use AI matching from your dashboard if you've filled in your goals.\n\nRead the full bio and mentorship description — not just the headline. Check reviews if the mentor has completed sessions, but don't treat session count as the only signal.\n\nWhen someone looks like a fit, open their profile and scan availability before you book.`,
+  },
+  'first-session': {
+    categoryId: 'getting-started',
+    category: 'Getting started',
+    title: 'Booking your first session',
+    body: `On the mentor's profile, choose a session type — Career Advice, Interview Prep, Resume Review, or Networking — then pick an open slot on their calendar. Add a short note about what you want to cover.\n\nMentor time is free. If you don't already have platform access, booking may start a 7-day trial — you won't be charged until day 8 unless you cancel. See Pricing for subscription details.\n\nYou'll get email confirmation. The video link appears in your dashboard once the mentor accepts.`,
+  },
+  'preparing-session': {
+    categoryId: 'getting-started',
+    category: 'Getting started',
+    title: 'Preparing for a session',
+    body: `Pick one outcome you want by the end — not five. Put it in your booking note at least a day ahead when you can.\n\nIf you're sharing a resume, deck, or links, send them through the platform early so the mentor has time to skim.\n\nTest camera and mic about ten minutes before. Join from Chrome, Safari, or Firefox on desktop when you need screen share.`,
+  },
+  'reschedule': {
+    categoryId: 'sessions',
+    category: 'Sessions',
+    title: 'Rescheduling a session',
+    body: `Go to Dashboard → Sessions and open the upcoming session. Use Reschedule when it's available and pick a new time from the mentor's calendar.\n\nTry to move it more than 24 hours ahead so the mentor isn't holding a slot for nothing. If you're cutting it close, message them through the platform.`,
+  },
+  'cancel': {
+    categoryId: 'sessions',
+    category: 'Sessions',
+    title: 'Canceling a session',
+    body: `Dashboard → Sessions → open the session → Cancel, then confirm in the prompt.\n\nCanceling frees the slot for your mentor. Occasional cancellations are fine; repeated last-minute no-shows may limit how often you can book.`,
+  },
+  'join-call': {
+    categoryId: 'sessions',
+    category: 'Sessions',
+    title: 'Joining your video call',
+    body: `After the mentor accepts, Dashboard → Sessions shows Join Call. The session runs in Bridge in your browser — no separate app.\n\nJoin a few minutes early. If the button isn't visible yet, the session may still be pending acceptance.\n\nMentor no-show? Email ${COMPANY_EMAIL} with the session time and mentor name — we'll help you rebook.`,
+  },
+  'technical': {
+    categoryId: 'sessions',
+    category: 'Sessions',
+    title: 'Technical issues during a call',
+    body: `If video or audio drops, refresh and rejoin from the same session in your dashboard. If problems last more than five minutes, end the call and message the mentor in-app.\n\nUse the latest Chrome, Safari, or Firefox. Desktop is more reliable than phone for screen sharing.\n\nStill stuck? Email ${COMPANY_EMAIL} with what you tried and which browser you're on.`,
+  },
+  'subscription': {
+    categoryId: 'subscription',
+    category: 'Subscription',
+    title: 'Platform subscription & free trial',
+    body: `Mentor sessions stay free — mentors volunteer their time. The Bridge subscription unlocks the platform: full directory access, AI matching, resume review, community, messaging, and everything we ship next.\n\nNew bookings may start a 7-day free trial if you're not already subscribed. You won't be charged until day 8; we send a reminder on day 5. Students with a verified .edu email get a reduced rate — see Pricing.`,
+  },
+  'manage-billing': {
+    categoryId: 'subscription',
+    category: 'Subscription',
+    title: 'Manage or cancel your subscription',
+    body: `Dashboard → Billing opens the Stripe customer portal. There you can update your card, view invoices, or cancel.\n\nCancel before day 8 of a trial and you owe nothing. Canceling a paid subscription stops future charges; it doesn't delete your account or session history.\n\nSession bookings stay free either way — you're only managing platform access.`,
+  },
 };
 
 const CATEGORIES = [
-  { name: 'Getting Started', keys: ['creating-account', 'finding-mentor', 'first-session', 'preparing-session'] },
-  { name: 'Billing', keys: ['payment-methods', 'refund-policy'] },
-  { name: 'Sessions', keys: ['reschedule', 'cancel', 'technical'] },
+  {
+    id: 'getting-started',
+    name: 'Getting started',
+    sub: 'Account, mentor search, booking, prep.',
+    keys: ['creating-account', 'finding-mentor', 'first-session', 'preparing-session'],
+  },
+  {
+    id: 'sessions',
+    name: 'Sessions',
+    sub: 'Reschedule, cancel, video, A/V.',
+    keys: ['reschedule', 'cancel', 'join-call', 'technical'],
+  },
+  {
+    id: 'subscription',
+    name: 'Subscription',
+    sub: 'Trial and billing — not session fees.',
+    keys: ['subscription', 'manage-billing'],
+  },
 ];
+
+function ArticleList({ keys, onSelect }) {
+  return (
+    <ul className="mt-4 border-t border-[var(--bridge-border)]">
+      {keys.map((key, i) => {
+        const article = ARTICLES[key];
+        const last = i === keys.length - 1;
+        return (
+          <li key={key} style={!last ? HAIRLINE : undefined}>
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onSelect(key)}
+              className="group flex w-full items-center justify-between gap-3 py-4 text-left focus:outline-none focus-visible:underline"
+            >
+              <span className="text-base font-semibold text-[var(--bridge-text)]">{article.title}</span>
+              <ChevronRight
+                className="h-4 w-4 shrink-0 text-[var(--bridge-text-muted)] transition group-hover:translate-x-0.5"
+                aria-hidden
+              />
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function relatedArticleKeys(activeKey) {
+  const { categoryId } = ARTICLES[activeKey];
+  const cat = CATEGORIES.find((c) => c.id === categoryId);
+  if (!cat) return [];
+  return cat.keys.filter((k) => k !== activeKey).slice(0, 3);
+}
 
 export default function Help() {
   const { s } = useContent();
@@ -34,295 +140,208 @@ export default function Help() {
   const [search, setSearch] = useState('');
 
   const results = useMemo(() => {
-    if (!search) return [];
+    if (!search.trim()) return [];
     const q = search.toLowerCase();
     return Object.entries(ARTICLES).filter(
-      ([, a]) => a.title.toLowerCase().includes(q) || a.body.toLowerCase().includes(q)
+      ([, a]) => a.title.toLowerCase().includes(q) || a.body.toLowerCase().includes(q),
     );
   }, [search]);
 
   if (active) {
     const article = ARTICLES[active];
+    const related = relatedArticleKeys(active);
+
     return (
       <main className={`${pageShell} px-4 py-16 sm:px-6 sm:py-20 lg:px-8`}>
         <article className="mx-auto max-w-3xl">
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => setActive(null)}
-            className={`mb-8 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-semibold text-[var(--bridge-text-secondary)] transition hover:-translate-y-0.5 hover:text-[var(--bridge-text)] ${focusRing}`}
-            style={{
-              backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
-            }}
+            className="mb-8 inline-flex items-center gap-1.5 text-base font-medium text-[var(--bridge-text-muted)] transition hover:text-[var(--bridge-text)] focus:outline-none focus-visible:underline"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Back to help center
+            <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
+            Help center
           </button>
 
-          <p
-            className="text-[10px] font-black uppercase"
-            style={{ letterSpacing: '0.32em', color: 'var(--color-primary)' }}
-          >
+          <p className="mb-4" style={EYEBROW}>
             {article.category}
           </p>
           <h1
-            className="mt-3 font-display font-black text-[var(--bridge-text)]"
-            style={{
-              fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
-              lineHeight: 1.02,
-              letterSpacing: '-0.03em'
-            }}
+            className="font-display font-black tracking-[-0.03em] text-[var(--bridge-text)]"
+            style={{ fontSize: 'clamp(2.5rem, 5vw, 3.25rem)', lineHeight: 1.08 }}
           >
             {article.title}
           </h1>
 
-          <div className="mt-8 space-y-5 text-[15px] leading-[1.75] text-[var(--bridge-text-secondary)]">
-            {article.body.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
+          <div className="mt-8 space-y-5 text-base leading-[1.8] text-[var(--bridge-text-secondary)] sm:text-[17px]">
+            {article.body.split('\n\n').map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
           </div>
 
-          <div
-            className="relative mt-12 overflow-hidden rounded-2xl p-7"
-            style={{
-              backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
-            }}
-          >
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full blur-3xl"
-              style={{
-                background:
-                  'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent)'
-              }}
-            />
-            <div className="relative flex items-start gap-4">
-              <div
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-                style={{
-                  backgroundColor:
-                    'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))'
-                }}
-              >
-                <LifeBuoy className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-display text-[15px] font-semibold text-[var(--bridge-text)]">
-                  Still need help?
-                </p>
-                <p className="mt-1.5 text-[14px] leading-[1.65] text-[var(--bridge-text-secondary)]">
-                  Can&apos;t find what you&apos;re looking for?{' '}
-                  <a
-                    href="/contact"
-                    className="font-semibold underline underline-offset-4 transition hover:opacity-80"
-                    style={{
-                      color: 'var(--color-primary)',
-                      textDecorationColor:
-                        'color-mix(in srgb, var(--color-primary) 40%, transparent)'
-                    }}
-                  >
-                    {s.common.contactSupport}
-                  </a>{' '}
-                  — we reply within 24 hours.
-                </p>
-              </div>
+          {related.length > 0 && (
+            <div className="mt-12 border-t border-[var(--bridge-border)] pt-10">
+              <p className="mb-4 text-base font-semibold text-[var(--bridge-text)]">Related articles</p>
+              <ul>
+                {related.map((key, i) => {
+                  const rel = ARTICLES[key];
+                  const last = i === related.length - 1;
+                  return (
+                    <li key={key} style={!last ? HAIRLINE : undefined}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => setActive(key)}
+                        className="flex w-full items-center justify-between gap-4 py-4 text-left text-base font-semibold text-[var(--bridge-text)] focus:outline-none focus-visible:underline"
+                      >
+                        {rel.title}
+                        <ChevronRight className="h-4 w-4 shrink-0 text-[var(--bridge-text-muted)]" aria-hidden />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
-          </div>
+          )}
+
+          <p className="mt-12 border-t border-[var(--bridge-border)] pt-10 text-base leading-[1.8] text-[var(--bridge-text-secondary)] sm:text-lg">
+            Questions about pricing or how Bridge works?{' '}
+            <Link
+              to="/faq"
+              className="font-semibold underline underline-offset-4 transition hover:opacity-80"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              Read the FAQ
+            </Link>
+            . Still need help?{' '}
+            <a
+              href="/contact"
+              className="font-semibold underline underline-offset-4 transition hover:opacity-80"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              {s.common.contactSupport}
+            </a>
+            .
+          </p>
         </article>
       </main>
     );
   }
 
+  const showBrowse = !search.trim();
+
   return (
-    <main className={`${pageShell} relative px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[45vmax] w-[80vmax] -translate-x-1/2 opacity-30"
-        style={{
-          background:
-            'radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent 68%)',
-          filter: 'blur(80px)'
-        }}
-      />
-
-      <div className="relative mx-auto max-w-5xl">
-        <Reveal className="mb-10">
-          <p
-            className="mb-4 text-[10px] font-black uppercase"
-            style={{ letterSpacing: '0.32em', color: 'var(--color-primary)' }}
-          >
-            Support
-          </p>
+    <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
+      <div className="mx-auto max-w-4xl">
+        <Reveal className="mb-12 border-b border-[var(--bridge-border)] pb-12">
+          <span className="mb-3 block" style={EYEBROW}>
+            Guides
+          </span>
           <h1
-            className="font-display font-black text-[var(--bridge-text)]"
-            style={{
-              fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
-              lineHeight: 1.02,
-              letterSpacing: '-0.03em'
-            }}
+            className="font-display font-black tracking-[-0.03em] text-[var(--bridge-text)]"
+            style={{ fontSize: 'clamp(2rem, 4.5vw, 2.75rem)', lineHeight: 1.08 }}
           >
-            Help center
+            How do I…?
           </h1>
-        </Reveal>
+          <p className="mt-3 max-w-xl text-base leading-[1.7] text-[var(--bridge-text-muted)]">
+            Search tasks below. Policy and &ldquo;is it free?&rdquo; →{' '}
+            <Link to="/faq" className="font-semibold underline underline-offset-4" style={{ color: 'var(--color-primary)' }}>
+              FAQ
+            </Link>
+            .
+          </p>
 
-        <Reveal delay={60}>
-          <div className="relative mb-12 max-w-2xl">
+          <div className="relative mt-8">
             <Search
-              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition"
-              style={{ color: 'var(--bridge-text-muted)' }}
+              className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--bridge-text-muted)]"
+              aria-hidden
             />
             <input
+              type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search help articles…"
-              className={`w-full rounded-2xl py-3.5 pl-12 pr-4 text-[15px] text-[var(--bridge-text)] outline-none placeholder:text-[var(--bridge-text-muted)] shadow-[inset_0_0_0_1px_var(--bridge-border)] transition focus:shadow-[inset_0_0_0_1.5px_var(--color-primary),0_0_0_4px_color-mix(in_srgb,var(--color-primary)_18%,transparent)] ${focusRing}`}
-              style={{ backgroundColor: 'var(--bridge-surface)' }}
+              placeholder="Search — book session, video call, cancel, trial…"
+              aria-label="Search help articles"
+              className="w-full rounded-lg border border-[var(--bridge-border)] bg-transparent py-4 pl-12 pr-4 text-lg text-[var(--bridge-text)] outline-none placeholder:text-[var(--bridge-text-muted)] transition focus:border-[var(--color-primary)] focus:outline-none"
             />
           </div>
         </Reveal>
 
-        {search ? (
-          <div className="space-y-3">
-            <p className="mb-4 text-[13px] font-semibold text-[var(--bridge-text-muted)]">
+        {!showBrowse ? (
+          <div>
+            <p className="mb-6 text-base text-[var(--bridge-text-muted)]">
               {results.length} result{results.length !== 1 && 's'}
             </p>
             {results.length === 0 ? (
-              <div
-                className="rounded-2xl p-8 text-center"
-                style={{
-                  backgroundColor: 'var(--bridge-surface)',
-                  boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
-                }}
-              >
-                <p className="text-[15px] text-[var(--bridge-text-secondary)]">
-                  No articles found for &ldquo;{search}&rdquo;.
-                </p>
-              </div>
+              <p className="py-10 text-base text-[var(--bridge-text-secondary)]">
+                Nothing matched &ldquo;{search}&rdquo;. Try the{' '}
+                <Link to="/faq" className="font-semibold underline underline-offset-4" style={{ color: 'var(--color-primary)' }}>
+                  FAQ
+                </Link>{' '}
+                or{' '}
+                <Link to="/contact" className="font-semibold underline underline-offset-4" style={{ color: 'var(--color-primary)' }}>
+                  contact us
+                </Link>
+                .
+              </p>
             ) : (
-              results.map(([key, a]) => (
-                <button
-                  key={key}
-                  onClick={() => setActive(key)}
-                  className={`group flex w-full items-center gap-4 rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-0.5 ${focusRing}`}
-                  style={{
-                    backgroundColor: 'var(--bridge-surface)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
-                  }}
-                >
-                  <div className="min-w-0 flex-1">
-                    <p
-                      className="text-[10px] font-black uppercase"
-                      style={{ letterSpacing: '0.32em', color: 'var(--color-primary)' }}
-                    >
-                      {a.category}
-                    </p>
-                    <p className="mt-1 font-display text-[15px] font-semibold text-[var(--bridge-text)]">
-                      {a.title}
-                    </p>
-                  </div>
-                  <ChevronRight
-                    className="h-4 w-4 shrink-0 transition group-hover:translate-x-0.5"
-                    style={{ color: 'var(--bridge-text-muted)' }}
-                  />
-                </button>
-              ))
+              <ul className="border-t border-[var(--bridge-border)]">
+                {results.map(([key, a], i) => {
+                  const last = i === results.length - 1;
+                  return (
+                    <li key={key} style={!last ? HAIRLINE : undefined}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          setSearch('');
+                          setActive(key);
+                        }}
+                        className="group flex w-full items-center justify-between gap-4 py-5 text-left focus:outline-none focus-visible:underline"
+                      >
+                        <div className="min-w-0">
+                          <p style={EYEBROW}>{a.category}</p>
+                          <p className="mt-1 text-base font-semibold text-[var(--bridge-text)]">{a.title}</p>
+                        </div>
+                        <ChevronRight
+                          className="h-4 w-4 shrink-0 text-[var(--bridge-text-muted)] transition group-hover:translate-x-0.5"
+                          aria-hidden
+                        />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </div>
         ) : (
-          <div className="grid gap-5 md:grid-cols-2">
-            {CATEGORIES.map((cat, i) => {
-              const meta = CATEGORY_META[cat.name] ?? CATEGORY_META['Getting Started'];
-              return (
-                <Reveal key={cat.name} delay={i * 60}>
-                  <div
-                    className="group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5"
-                    style={{
-                      backgroundColor: 'var(--bridge-surface)',
-                      boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
-                    }}
-                  >
-                    <div
-                      aria-hidden
-                      className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-0 blur-3xl transition duration-500 group-hover:opacity-100"
-                      style={{
-                        background:
-                          'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent)'
-                      }}
-                    />
-                    <div className="relative flex items-center gap-3 mb-5">
-                      <div
-                        className="flex h-10 w-10 items-center justify-center rounded-xl transition duration-300 group-hover:scale-[1.06]"
-                        style={{
-                          backgroundColor:
-                            'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))'
-                        }}
-                      >
-                        <meta.Icon className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
-                      </div>
-                      <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)]">
-                        {cat.name}
-                      </h2>
-                    </div>
-                    <ul className="relative space-y-0.5">
-                      {cat.keys.map((k) => (
-                        <li key={k}>
-                          <button
-                            onClick={() => setActive(k)}
-                            className={`group/row flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-[13px] font-medium text-[var(--bridge-text-secondary)] transition hover:bg-orange-50/60 hover:text-[var(--bridge-text)] dark:hover:bg-orange-500/10 ${focusRing}`}
-                          >
-                            {ARTICLES[k].title}
-                            <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-40 transition group-hover/row:translate-x-0.5 group-hover/row:opacity-80" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
+          <>
+            <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
+              {CATEGORIES.map((cat, ci) => (
+                <Reveal key={cat.id} delay={ci * 40}>
+                  <div>
+                    <h2 className="font-display text-xl font-bold text-[var(--bridge-text)]">
+                      {cat.name}
+                    </h2>
+                    <p className="mt-1 text-base text-[var(--bridge-text-muted)]">{cat.sub}</p>
+                    <ArticleList keys={cat.keys} onSelect={setActive} />
                   </div>
                 </Reveal>
-              );
-            })}
-          </div>
-        )}
-
-        <Reveal delay={280}>
-          <div
-            className="mt-12 flex flex-col items-start gap-5 rounded-2xl p-7 sm:flex-row sm:items-center sm:justify-between"
-            style={{
-              backgroundColor: 'var(--bridge-surface)',
-              boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
-            }}
-          >
-            <div className="flex items-center gap-4">
-              <div
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-                style={{
-                  backgroundColor:
-                    'color-mix(in srgb, var(--color-primary) 12%, var(--bridge-surface))'
-                }}
-              >
-                <MessageCircle className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
-              </div>
-              <div>
-                <p className="font-display text-[15px] font-semibold text-[var(--bridge-text)]">
-                  Still stuck?
-                </p>
-                <p className="mt-0.5 text-[13px] text-[var(--bridge-text-muted)]">
-                  We reply to every message within 24 hours.
-                </p>
-              </div>
+              ))}
             </div>
-            <a
-              href="/contact"
-              className={`inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-semibold transition hover:-translate-y-0.5 ${focusRing}`}
-              style={{
-                backgroundColor: 'var(--color-primary)',
-                color: 'var(--color-on-primary)',
-                boxShadow:
-                  '0 8px 24px -6px color-mix(in srgb, var(--color-primary) 45%, transparent)'
-              }}
-            >
-              {s.common.contactSupport}
-              <ChevronRight className="h-4 w-4" />
-            </a>
-          </div>
-        </Reveal>
+
+            <Reveal delay={120}>
+              <p className="mt-16 border-t border-[var(--bridge-border)] pt-10 text-base leading-[1.8] text-[var(--bridge-text-secondary)]">
+                Still stuck?{' '}
+                <Link to="/contact" className="font-semibold underline underline-offset-4" style={{ color: 'var(--color-primary)' }}>
+                  {s.common.contactSupport}
+                </Link>
+                .
+              </p>
+            </Reveal>
+          </>
+        )}
       </div>
     </main>
   );
