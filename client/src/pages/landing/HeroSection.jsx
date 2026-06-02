@@ -138,13 +138,6 @@ export default function HeroSection() {
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </span>
               </AppLink>
-              <AppLink
-                to="/become-a-mentor"
-                className="self-start text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-                style={{ color: 'var(--bridge-text-secondary)' }}
-              >
-                Or apply as a founding mentor →
-              </AppLink>
             </motion.div>
 
             <motion.div
