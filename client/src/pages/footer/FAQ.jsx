@@ -1,163 +1,235 @@
-import { useState, useMemo } from 'react';
-import { Search, X, Plus, HelpCircle, ArrowRight } from 'lucide-react';
-import Reveal from '../../components/Reveal';
-import { focusRing, pageShell } from '../../ui';
-import { useContent } from '../../content';
+import { useState, useEffect, useRef } from 'react';
+import { ChevronRight, ChevronDown } from 'lucide-react';
+import { pageShell, focusRing } from '../../ui';
 
-const FAQS = [
-    { cat: 'Getting Started', q: 'How does Bridge work?', a: 'Browse 2,400+ vetted mentors by industry, role, or skill. Pick a session format, book an available time slot, and meet over video. Payment is handled securely — you only pay when the session is confirmed.' },
-    { cat: 'Getting Started', q: 'Do I need an account to browse?', a: 'No. You can browse the full directory, read profiles, and view reviews without signing up. An account is only required when you book your first session.' },
-    { cat: 'Getting Started', q: 'How are mentors vetted?', a: 'Every mentor goes through identity verification, credential review, a portfolio assessment, and a live interview with our team. Fewer than 20% of applicants are approved.' },
-    { cat: 'Booking', q: 'How far in advance can I book?', a: 'Up to 60 days in advance. Most mentors open their calendar 2–4 weeks out.' },
-    { cat: 'Booking', q: 'Can I reschedule a session?', a: 'Yes, free of charge up to 24 hours before the scheduled time. Later changes may incur a fee at the mentor\u2019s discretion.' },
-    { cat: 'Booking', q: 'What if the mentor doesn\u2019t show up?', a: 'Full automatic refund within 24 hours, plus a credit toward your next booking. We take this seriously.' },
-    { cat: 'Payment', q: 'How is pricing determined?', a: 'Mentors set their own rates based on experience and demand. Sessions range from $25 to $250+ per hour. The price is shown on every profile before you book.' },
-    { cat: 'Payment', q: 'What payment methods do you accept?', a: 'All major credit and debit cards, Apple Pay, Google Pay. We do not store your card details — all payments are processed through Stripe.' },
-    { cat: 'Payment', q: 'Do you offer refunds?', a: 'Yes. Full refund anytime before a session begins. Full refund within 48 hours of a completed session if you\u2019re unsatisfied — no questions asked.' },
-    { cat: 'Mentors', q: 'Can I become a mentor?', a: 'Mentors join Bridge by invitation. We are not accepting open applications through the site right now.' },
-    { cat: 'Mentors', q: 'How much do mentors earn?', a: 'Mentors keep 85% of every session fee. Top mentors on the platform earn $5,000–$15,000 per month in side income.' },
-    { cat: 'Privacy', q: 'Is my data secure?', a: 'All data is encrypted in transit and at rest. We\u2019re SOC 2 Type II compliant and never sell personal information to third parties.' },
-    { cat: 'Privacy', q: 'Can I stay anonymous?', a: 'Your real name is only shared with mentors you book. You can use a display name publicly. Session transcripts are private to you.' },
+const SECTIONS = [
+    {
+        id: 'getting-started',
+        name: 'Getting started',
+        sub: 'The basics — what Bridge is, what it costs, and what "pre-launch" means today.',
+        faqs: [
+            {
+                q: 'What is Bridge?',
+                a: `Bridge connects people who want career or life advice with mentors who've actually done the thing. You browse mentors, book a free 30-minute session, and have a real conversation. That's it. No courses, no community, no DMs to manage.`,
+            },
+            {
+                q: 'Wait — is it really free?',
+                a: `Yes. Every session on Bridge is free. Mentors volunteer their time because they remember what it was like to need someone who'd answer the email. We don't take a cut because there's nothing to take a cut of. We're not running a marketplace; we're running an introduction.`,
+            },
+            {
+                q: `If it's free, what's the catch? How does Bridge make money?`,
+                a: `Right now, it doesn't. Ahmet and I (Muaz) are funding this ourselves while we figure out whether it's useful to people. If it is, we'll probably add a paid layer for companies who want to sponsor mentorship for their teams — but mentee sessions stay free. We'll tell you before anything changes.`,
+            },
+            {
+                q: 'Do I need an account to look around?',
+                a: `No. You can browse mentor profiles without signing up. You only need an account when you want to book a session, so we can send you the meeting link and a reminder.`,
+            },
+            {
+                q: 'You say "pre-launch" but I can sign up. What does pre-launch mean?',
+                a: `It means we're still recruiting our founding mentors. The product works — you can make an account today — but the mentor side is thin while we onboard the first batch. If your field isn't covered yet, sign up anyway and we'll email you when a relevant mentor comes online.`,
+            },
+        ],
+    },
+    {
+        id: 'booking-a-session',
+        name: 'Booking a session',
+        sub: 'How to actually get on a call with a mentor.',
+        faqs: [
+            {
+                q: 'How does booking actually work?',
+                a: `Open a mentor's profile, pick a time from their calendar, write a sentence or two about what you want to talk about, and confirm. You'll get an email with the video link. Show up at the time. That's the whole flow.`,
+            },
+            {
+                q: 'How long is a session?',
+                a: `30 minutes by default. Some mentors offer 60-minute slots for deeper conversations — you'll see it on their profile if they do.`,
+            },
+            {
+                q: 'How far in advance can I book?',
+                a: `Up to 4 weeks out, depending on what the mentor has opened on their calendar. Most slots get booked within a few days of being posted, so checking back is worth it.`,
+            },
+            {
+                q: 'I need to reschedule. Now what?',
+                a: `From your dashboard, open the upcoming session and pick a new time from the mentor's calendar. Try to do it more than 24 hours ahead so the mentor isn't holding the slot for nothing. Last-minute changes happen — just give them a heads up.`,
+            },
+            {
+                q: `What if the mentor doesn't show up?`,
+                a: `Email us at bridge@mentorshipbridge.com with the session details. We'll follow up with the mentor and help you rebook with someone else. A no-show without a reason is grounds for us removing a mentor from the platform.`,
+            },
+        ],
+    },
+    {
+        id: 'mentors',
+        name: 'Mentors',
+        sub: 'Who they are, how we pick them, and why they show up.',
+        faqs: [
+            {
+                q: 'How are mentors vetted?',
+                a: `Every mentor applies, and Ahmet or I review the application by hand. We check that they actually work where they say they work (usually LinkedIn plus a short call), and we read what they wrote about why they want to mentor. We turn down more applications than we accept. There's more detail on the Trust & Safety page.`,
+            },
+            {
+                q: 'Do mentors get paid?',
+                a: `No. Mentors on Bridge are volunteers. We don't pay them and they don't pay us. If a mentor ever asks you for money — directly, or through a link, or to "move the conversation off-platform" — please report it on the Trust & Safety page. That's not what this is.`,
+            },
+            {
+                q: 'Why would anyone volunteer their time?',
+                a: `Because someone did it for them, mostly. Every mentor we've talked to has a version of the same story: a stranger took a call early in their career, and it changed the trajectory. They want to be that person for someone else. That's the whole thing.`,
+            },
+            {
+                q: 'Can I become a mentor?',
+                a: `Probably, yes — if you have a few years of real experience in something and the patience to talk to people who are earlier than you were. Apply through the Become a Mentor page. We read every application.`,
+            },
+        ],
+    },
+    {
+        id: 'privacy-safety',
+        name: 'Privacy & safety',
+        sub: 'What we collect, what we don\'t, and what to do if something goes wrong.',
+        faqs: [
+            {
+                q: 'Is my data secure?',
+                a: `We collect the minimum we need to make a session happen — your name, email, what you want to talk about. We don't sell data and we don't run ads. Connections are encrypted in transit. We are not SOC 2 certified; we're two people. We say this plainly because anyone claiming bank-grade security at our stage is making it up.`,
+            },
+            {
+                q: 'Can I stay anonymous with my mentor?',
+                a: `Sort of. Your mentor sees the first name and the note you wrote when booking. You don't have to share your last name, your company, or anything else you don't want to. If you'd rather use a different first name with mentors than the one on your account, you can — just put it in your profile.`,
+            },
+            {
+                q: 'How do I report a bad experience?',
+                a: `Use the form on the Trust & Safety page, or email bridge@mentorshipbridge.com directly. Both go to a real person (us). We respond within 48 hours, usually sooner.`,
+            },
+        ],
+    },
 ];
 
-const CATEGORIES = ['All', ...new Set(FAQS.map((f) => f.cat))];
+const DEFAULT_OPEN = new Set([
+    'Wait — is it really free?',
+    'How does booking actually work?',
+    'How are mentors vetted?',
+]);
+
+function FAQItem({ q, a, isOpen, onToggle }) {
+    const answerId = `answer-${q.replace(/\s+/g, '-').toLowerCase()}`;
+    return (
+        <div>
+            <button
+                onClick={() => onToggle(q)}
+                aria-expanded={isOpen}
+                aria-controls={answerId}
+                className={`flex items-center gap-3 py-4 text-left ${focusRing}`}
+            >
+                <span className="text-base text-[var(--bridge-text)]">{q}</span>
+                {isOpen
+                    ? <ChevronDown className="h-4 w-4 shrink-0 text-[var(--bridge-text-muted)]" />
+                    : <ChevronRight className="h-4 w-4 shrink-0 text-[var(--bridge-text-muted)]" />
+                }
+            </button>
+            {isOpen && (
+                <div id={answerId} className="pt-1 pb-6">
+                    <p className="max-w-[65ch] leading-relaxed text-[var(--bridge-text-secondary)]">{a}</p>
+                </div>
+            )}
+            <div className="h-px w-full bg-[#E5E7EB] dark:bg-[#2D2D2D]" />
+        </div>
+    );
+}
 
 export default function FAQ() {
-    const { s } = useContent();
-    const [open, setOpen] = useState(null);
-    const [cat, setCat] = useState('All');
-    const [search, setSearch] = useState('');
-    const filtered = useMemo(() => {
-        return FAQS.filter(
-            (f) =>
-                (cat === 'All' || f.cat === cat) &&
-                (search === '' ||
-                    f.q.toLowerCase().includes(search.toLowerCase()) ||
-                    f.a.toLowerCase().includes(search.toLowerCase())),
-        );
-    }, [cat, search]);
+    const [openSet, setOpenSet] = useState(DEFAULT_OPEN);
+    const [activeSection, setActiveSection] = useState(SECTIONS[0].id);
+    const sectionRefs = useRef({});
+
+    function toggle(q) {
+        setOpenSet((prev) => {
+            const next = new Set(prev);
+            next.has(q) ? next.delete(q) : next.add(q);
+            return next;
+        });
+    }
+
+    useEffect(() => {
+        const observers = SECTIONS.map((section) => {
+            const el = sectionRefs.current[section.id];
+            if (!el) return null;
+            const obs = new IntersectionObserver(
+                ([entry]) => {
+                    if (entry.isIntersecting) setActiveSection(section.id);
+                },
+                { rootMargin: '-30% 0px -60% 0px', threshold: 0 },
+            );
+            obs.observe(el);
+            return obs;
+        });
+        return () => observers.forEach((o) => o?.disconnect());
+    }, []);
+
+    function scrollTo(id) {
+        const el = sectionRefs.current[id];
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
     return (
         <main className={`${pageShell} relative px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
-            <div
-                aria-hidden
-                className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[45vmax] w-[80vmax] -translate-x-1/2 opacity-60 dark:opacity-80"
-                style={{
-                    background:
-                        'conic-gradient(from 190deg at 50% 50%, color-mix(in srgb, var(--color-primary) 14%, transparent), color-mix(in srgb, var(--color-accent) 10%, transparent), color-mix(in srgb, var(--color-primary) 18%, transparent), color-mix(in srgb, var(--color-primary) 14%, transparent))',
-                    filter: 'blur(100px)'
-                }}
-            />
-
-            <div className="relative mx-auto max-w-4xl">
-                <Reveal className="mb-12 text-center">
-                    <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--bridge-border)] bg-[var(--bridge-surface)] px-3.5 py-1.5 shadow-sm backdrop-blur-md">
-                        <HelpCircle className="h-3.5 w-3.5 text-orange-500" />
-                        <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--bridge-text-secondary)]">{s.footer.faqEyebrow}</span>
-                    </div>
-                    <h1 className="font-display text-[2.5rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.25rem] lg:text-[3.75rem]">
-                        {s.footer.faqHeadingLine1}{' '}
-                        <span className="font-editorial italic text-gradient-bridge">{s.footer.faqHeadingItalic}</span>.
+            <div className="relative mx-auto max-w-5xl">
+                <div className="mb-16">
+                    <h1 className="font-display text-[2.5rem] font-bold leading-[1.08] tracking-[-0.012em] text-[var(--bridge-text)] sm:text-[3.25rem]">
+                        FAQ
                     </h1>
-                    <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-[var(--bridge-text-secondary)]">
-                        Can&apos;t find what you&apos;re looking for?{' '}
-                        <a href="/contact" className={`inline-flex items-center gap-1 font-semibold text-orange-700 underline decoration-orange-300/60 underline-offset-4 transition hover:text-orange-800 dark:text-orange-300 dark:hover:text-orange-200 ${focusRing} rounded-sm`}>
-                            Contact support
-                            <ArrowRight className="h-3.5 w-3.5" />
-                        </a>
+                    <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--bridge-text-secondary)]">
+                        Things people ask us before signing up. If yours isn&apos;t here, email bridge@mentorshipbridge.com &mdash; a real person reads it.
                     </p>
-                </Reveal>
-
-                <Reveal delay={80}>
-                    <div className="relative mb-5 group">
-                        <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--bridge-text-faint)] transition group-focus-within:text-orange-500" />
-                        <input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder={s.footer.faqSearchPlaceholder}
-                            className="w-full rounded-2xl border border-[var(--bridge-border-strong)] bg-[var(--bridge-surface)] py-4 pl-12 pr-12 text-base text-[var(--bridge-text)] shadow-bridge-tile placeholder:text-[var(--bridge-text-faint)] outline-none transition focus:border-orange-400 focus:shadow-[0_0_0_4px_color-mix(in srgb, var(--color-primary) 20%, transparent)]"
-                        />
-                        {search ? (
-                            <button
-                                type="button"
-                                onClick={() => setSearch('')}
-                                className={`absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[var(--bridge-text-muted)] transition hover:bg-[var(--bridge-surface-muted)] hover:text-[var(--bridge-text)] ${focusRing}`}
-                                aria-label="Clear search"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        ) : null}
-                    </div>
-                </Reveal>
-
-                <div className="mb-8 flex flex-wrap gap-2">
-                    {CATEGORIES.map((c) => (
-                        <button
-                            key={c}
-                            onClick={() => setCat(c)}
-                            className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
-                                cat === c
-                                    ? 'border-transparent bg-gradient-to-r from-stone-900 to-stone-800 text-amber-50 shadow-[0_6px_20px_-6px_color-mix(in srgb, var(--color-secondary) 45%, transparent)] dark:from-orange-500 dark:to-amber-500 dark:text-stone-950 dark:shadow-[0_8px_22px_-6px_color-mix(in srgb, var(--color-primary) 50%, transparent)]'
-                                    : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] text-[var(--bridge-text-secondary)] hover:-translate-y-0.5 hover:border-orange-300/70 hover:shadow-md'
-                            } ${focusRing}`}
-                        >
-                            {c}
-                        </button>
-                    ))}
                 </div>
 
-                <div className="space-y-3">
-                    {filtered.map((faq, i) => {
-                        const isOpen = open === i;
-                        return (
-                            <Reveal key={faq.q} delay={i * 40}>
-                                <div
-                                    className={`group relative overflow-hidden rounded-2xl border transition-all duration-500 ${
-                                        isOpen
-                                            ? 'border-orange-300/60 bg-gradient-to-br from-[var(--bridge-surface)] via-[var(--bridge-surface)] to-orange-50/30 shadow-bridge-card dark:to-orange-500/[0.04]'
-                                            : 'border-[var(--bridge-border)] bg-[var(--bridge-surface)] shadow-bridge-tile hover:-translate-y-0.5 hover:border-orange-300/50 hover:shadow-bridge-card'
-                                    }`}
-                                >
-                                    {isOpen ? (
-                                        <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br from-orange-400/20 to-transparent blur-3xl" />
-                                    ) : null}
+                <div className="flex gap-16">
+                    <nav className="hidden lg:block" style={{ width: '200px', flexShrink: 0 }}>
+                        <ul className="sticky top-24 space-y-5">
+                            {SECTIONS.map((section) => (
+                                <li key={section.id}>
                                     <button
-                                        onClick={() => setOpen(isOpen ? null : i)}
-                                        className={`relative flex w-full items-center justify-between gap-4 p-5 text-left ${focusRing}`}
+                                        onClick={() => scrollTo(section.id)}
+                                        className={`rounded-sm text-left text-sm transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)] dark:focus-visible:ring-orange-400 ${
+                                            activeSection === section.id
+                                                ? 'font-medium text-[var(--bridge-text)]'
+                                                : 'font-normal text-[var(--bridge-text-muted)] hover:text-[var(--bridge-text-secondary)]'
+                                        }`}
                                     >
-                                        <div>
-                                            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-700 dark:text-orange-300">{faq.cat}</p>
-                                            <p className="mt-1 font-display text-base font-semibold text-[var(--bridge-text)] sm:text-lg">{faq.q}</p>
-                                        </div>
-                                        <span
-                                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
-                                                isOpen
-                                                    ? 'rotate-45 border-orange-300/70 bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_4px_14px_-2px_color-mix(in srgb, var(--color-primary) 55%, transparent)]'
-                                                    : 'border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)] text-[var(--bridge-text-muted)]'
-                                            }`}
-                                        >
-                                            <Plus className="h-4 w-4" />
-                                        </span>
+                                        {section.name}
                                     </button>
-                                    {isOpen ? (
-                                        <div className="relative border-t border-[var(--bridge-border)] bg-[var(--bridge-surface-muted)]/50 px-5 pb-5 pt-4">
-                                            <p className="leading-relaxed text-[var(--bridge-text-secondary)]">{faq.a}</p>
-                                        </div>
-                                    ) : null}
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+
+                    <div className="min-w-0 flex-1">
+                        {SECTIONS.map((section, si) => (
+                            <div
+                                key={section.id}
+                                id={section.id}
+                                ref={(el) => { sectionRefs.current[section.id] = el; }}
+                                className={si > 0 ? 'mt-16' : ''}
+                            >
+                                <h2 className="font-display text-2xl font-bold text-[var(--bridge-text)] sm:text-3xl">
+                                    {section.name}
+                                </h2>
+                                <p className="mt-1 text-sm text-[var(--bridge-text-muted)]">{section.sub}</p>
+                                <div className="mt-6">
+                                    <div className="h-px w-full bg-[#E5E7EB] dark:bg-[#2D2D2D]" />
+                                    {section.faqs.map((faq) => (
+                                        <FAQItem
+                                            key={faq.q}
+                                            q={faq.q}
+                                            a={faq.a}
+                                            isOpen={openSet.has(faq.q)}
+                                            onToggle={toggle}
+                                        />
+                                    ))}
                                 </div>
-                            </Reveal>
-                        );
-                    })}
-                    {filtered.length === 0 ? (
-                        <div className="relative overflow-hidden rounded-2xl border border-dashed border-[var(--bridge-border-strong)] bg-[var(--bridge-surface-muted)]/60 px-8 py-14 text-center">
-                            <div aria-hidden className="pointer-events-none absolute -top-16 left-1/2 h-32 w-64 -translate-x-1/2 rounded-full bg-gradient-to-b from-orange-300/25 to-transparent blur-3xl" />
-                            <div className="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_10px_30px_-6px_color-mix(in srgb, var(--color-primary) 50%, transparent)]">
-                                <HelpCircle className="h-6 w-6" />
                             </div>
-                            <p className="relative font-display text-lg font-semibold text-[var(--bridge-text)]">No matches.</p>
-                            <p className="relative mt-1 text-sm text-[var(--bridge-text-muted)]">Try a different search or category.</p>
-                        </div>
-                    ) : null}
+                        ))}
+
+                        <p className="mt-16 text-base text-[var(--bridge-text-secondary)]">
+                            Still stuck? Email bridge@mentorshipbridge.com. One of us (Ahmet or Muaz) will reply, usually same day.
+                        </p>
+                    </div>
                 </div>
             </div>
         </main>
