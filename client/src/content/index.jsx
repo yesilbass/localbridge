@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { callAIProxy } from '../api/ai';
 import { EN_CONTENT } from './en';
 import { useI18n } from '../i18n';
 
@@ -43,41 +44,15 @@ function mergeWithEnglish(translated) {
 }
 
 async function translateContent(targetLanguage) {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  if (!apiKey) throw new Error('VITE_OPENAI_API_KEY is not set.');
-
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      max_tokens: 8000,
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a professional UI translator. Translate all string values in the provided JSON object to ' +
-            targetLanguage +
-            '. Return ONLY valid JSON with the exact same nested key structure. Never translate the brand name "Bridge". Preserve special characters like "←", "→", "…", "·". Keep translations concise — this is UI copy.',
-        },
-        { role: 'user', content: JSON.stringify(EN_CONTENT) },
-      ],
-    }),
+  return callAIProxy('onboarding_ai', {
+    systemPrompt:
+      'You are a professional UI translator. Translate all string values in the provided JSON object to ' +
+      targetLanguage +
+      '. Return ONLY valid JSON with the exact same nested key structure. Never translate the brand name "Bridge". Preserve special characters like "←", "→", "…", "·". Keep translations concise — this is UI copy.',
+    prompt: JSON.stringify(EN_CONTENT),
+    maxTokens: 8000,
+    json: true,
   });
-
-  if (!res.ok) {
-    const err = await res.text().catch(() => res.statusText);
-    throw new Error(`Translation API error ${res.status}: ${err}`);
-  }
-
-  const data = await res.json();
-  const text = data.choices?.[0]?.message?.content ?? '';
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('OpenAI returned non-JSON translation response.');
-  return JSON.parse(jsonMatch[0]);
 }
 
 const ContentContext = createContext(null);

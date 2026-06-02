@@ -122,7 +122,7 @@ Pre-join device preview, mic/camera toggle, screen share, in-call text chat with
 | Resume → profile extract | OpenAI via `ai-proxy` | On upload |
 | Mentor verification scoring | Server-side AI in `api/_lib/verification/` | Per application |
 
-Client AI keys use `VITE_OPENAI_API_KEY` and `VITE_ANTHROPIC_API_KEY` (browser-exposed by design).
+Product AI runs through `/api/ai-proxy` with server-side `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` — never put provider secrets in `VITE_*` env vars.
 
 ### Payments & subscriptions
 
@@ -302,8 +302,6 @@ VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 VITE_STRIPE_PUBLISHABLE_KEY=
 VITE_SERVER_URL=http://localhost:3001
-VITE_OPENAI_API_KEY=
-VITE_ANTHROPIC_API_KEY=
 ```
 
 ### Run Locally
