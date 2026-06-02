@@ -274,31 +274,17 @@ export default function Navbar() {
                       {t('nav.login', 'Log in')}
                     </Link>
                   )}
-                  {shouldNavigateToApp(mentorsBrowsePath) ? (
-                    <a
-                      href={appUrl(mentorsBrowsePath)}
-                      data-magnet="6"
-                      className="inline-flex items-center rounded-md px-4 py-2.5 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
-                      style={{
-                        backgroundColor: 'var(--color-primary)',
-                        color: 'var(--bridge-on-primary, #fff)',
-                      }}
-                    >
-                      {t('nav.browseMentors', 'Browse mentors')}
-                    </a>
-                  ) : (
-                    <Link
-                      to={mentorsBrowsePath}
-                      data-magnet="6"
-                      className="inline-flex items-center rounded-md px-4 py-2.5 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
-                      style={{
-                        backgroundColor: 'var(--color-primary)',
-                        color: 'var(--bridge-on-primary, #fff)',
-                      }}
-                    >
-                      {t('nav.browseMentors', 'Browse mentors')}
-                    </Link>
-                  )}
+                  <Link
+                    to="/mentors"
+                    data-magnet="6"
+                    className="inline-flex items-center rounded-md px-4 py-2.5 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+                    style={{
+                      backgroundColor: 'var(--color-primary)',
+                      color: 'var(--bridge-on-primary, #fff)',
+                    }}
+                  >
+                    Browse mentors
+                  </Link>
                 </div>
               )}
 
@@ -399,25 +385,14 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
-                  {shouldNavigateToApp(mentorsBrowsePath) ? (
-                    <a
-                      href={appUrl(mentorsBrowsePath)}
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center justify-center rounded-md py-3 text-[15px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-                      style={{ backgroundColor: 'var(--color-primary)', color: 'var(--bridge-on-primary, #fff)' }}
-                    >
-                      {t('nav.browseMentors', 'Browse mentors')}
-                    </a>
-                  ) : (
-                    <Link
-                      to={mentorsBrowsePath}
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center justify-center rounded-md py-3 text-[15px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-                      style={{ backgroundColor: 'var(--color-primary)', color: 'var(--bridge-on-primary, #fff)' }}
-                    >
-                      {t('nav.browseMentors', 'Browse mentors')}
-                    </Link>
-                  )}
+                  <Link
+                    to="/mentors"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center rounded-md py-3 text-[15px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    style={{ backgroundColor: 'var(--color-primary)', color: 'var(--bridge-on-primary, #fff)' }}
+                  >
+                    Browse mentors
+                  </Link>
                   {shouldNavigateToApp(loginPath) ? (
                     <a
                       href={appUrl(loginPath)}

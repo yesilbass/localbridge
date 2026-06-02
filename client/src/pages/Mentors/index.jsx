@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getAllMentors, getFeaturedMentors } from '../../api/mentors';
 import { MENTORSHIP_CATEGORIES, getSubcategoriesForCategory } from '../../constants/mentorshipCategories';
 import { getMyFavorites, toggleFavorite } from '../../api/favorites';
@@ -906,6 +906,33 @@ export default function Mentors({ embedded = false }) {
                 </button>
               </div>
             )}
+          </div>
+        ) : !error && totalCount === 0 && !search && !activeIndustry && !activeCategory && !activeSubcategory && !availableOnly ? (
+          <div
+            className="relative flex flex-col items-center justify-center overflow-hidden rounded-3xl px-6 py-24 text-center"
+            style={{
+              backgroundColor: 'var(--bridge-surface)',
+              boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 30px 60px -28px color-mix(in srgb, var(--color-primary) 22%, transparent)',
+            }}
+          >
+            <div aria-hidden className="pointer-events-none absolute -top-20 h-48 w-48 rounded-full blur-3xl"
+              style={{ background: 'radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, transparent 70%)' }} />
+            <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl"
+              style={{ backgroundColor: 'var(--bridge-surface)', boxShadow: 'inset 0 0 0 1px var(--bridge-border), 0 8px 20px -10px color-mix(in srgb, var(--color-primary) 24%, transparent)' }}>
+              <svg className="h-6 w-6" style={{ color: 'var(--color-primary)' }} fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+            </div>
+            <p className="relative mt-5 font-display text-2xl font-black tracking-tight" style={{ color: 'var(--bridge-text)' }}>Our founding mentors are coming online</p>
+            <p className="relative mt-2 max-w-sm text-[13px] leading-relaxed" style={{ color: 'var(--bridge-text-muted)' }}>We're onboarding our first cohort right now. Create an account and you'll be matched with one of them as soon as they're live.</p>
+            <div className="relative mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Link to="/register" className={`rounded-full px-6 py-3 text-[13px] font-bold transition hover:-translate-y-0.5 hover:brightness-110 ${focusRing}`}
+                style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)', boxShadow: '0 14px 32px -12px color-mix(in srgb, var(--color-primary) 55%, transparent)' }}>
+                Create an account
+              </Link>
+              <Link to="/become-a-mentor" className={`rounded-full border px-6 py-3 text-[13px] font-bold transition hover:-translate-y-0.5 ${focusRing}`}
+                style={{ borderColor: 'var(--bridge-border)', color: 'var(--bridge-text-secondary)' }}>
+                Apply as a mentor →
+              </Link>
+            </div>
           </div>
         ) : !error ? (
           <div

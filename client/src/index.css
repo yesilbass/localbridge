@@ -778,18 +778,22 @@ html.theme-dark {
   border-radius: inherit;
 }
 
-/* Public marketing shell — section rhythm via surface + spacing, not hairline dividers */
-html.is-marketing-route main section,
-html.is-marketing-route .landing-root > section {
+/* Public marketing shell — unified canvas, no hairline dividers between sections */
+html.is-marketing-route section {
   background-color: var(--bridge-canvas) !important;
   background-image: none !important;
   border-top-width: 0 !important;
   border-bottom-width: 0 !important;
 }
 
-/* No page-level glow bands on marketing routes */
+/* No page-level glow bands on marketing routes (light or dark) */
 html.is-marketing-route .landing-root > div[aria-hidden],
-html.is-marketing-route main section > div[aria-hidden].pointer-events-none {
+html.is-marketing-route section > div[aria-hidden].pointer-events-none {
+  display: none !important;
+}
+
+/* Dark mode: flat background — no aurora blobs, no radial glows, no noise anywhere on the site */
+html.theme-dark div[aria-hidden].pointer-events-none {
   display: none !important;
 }
 

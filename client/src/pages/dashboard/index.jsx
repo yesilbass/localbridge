@@ -31,6 +31,7 @@ import HomeNowStrip from './home/HomeNowStrip.jsx';
 import HomeAtAGlance from './home/HomeAtAGlance.jsx';
 import NextSessionCard from './NextSessionCard.jsx';
 import ProfileHealthCard from './ProfileHealthCard.jsx';
+import MenteeIntakePrompt from './MenteeIntakePrompt.jsx';
 import { useProfileHealth } from './dashboardHooks.js';
 
 // ─── home content ─────────────────────────────────────────────────────────
@@ -53,6 +54,7 @@ function MenteeHome({ activeRole }) {
   return (
     <div className="flex flex-col gap-8 lg:gap-12">
       <HomeHeader activeRole={activeRole} />
+      <MenteeIntakePrompt />
       <HomeNowStrip activeRole={activeRole} />
       <NextSessionCard activeRole={activeRole} />
       <HomeAtAGlance activeRole={activeRole} />

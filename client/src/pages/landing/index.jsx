@@ -4,8 +4,8 @@ import { LANDING_CSS } from './landingStyles';
 import { buildLandingPaletteCSS } from './landingPalette';
 import HeroSection from './HeroSection';
 import HowItWorksSection from './HowItWorksSection';
-import MentorRosterSection from './MentorRosterSection';
 import IsThisForYouSection from './IsThisForYouSection';
+import FAQSection from './FAQSection';
 
 export default function Landing() {
   useLayoutEffect(() => {
@@ -21,7 +21,7 @@ export default function Landing() {
       <HeroSection />
       <HowItWorksSection />
       <IsThisForYouSection />
-      <MentorRosterSection />
+      <FAQSection />
     </div>
   );
 }
