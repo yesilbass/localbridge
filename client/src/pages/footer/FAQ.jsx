@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Minus } from 'lucide-react';
+import { Plus, Minus, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Reveal from '../../components/Reveal';
 import { pageShell } from '../../ui';
@@ -171,7 +171,20 @@ function FAQItem({ q, a, isOpen, onToggle, isLast }) {
 export default function FAQ() {
     const [openSet, setOpenSet] = useState(DEFAULT_OPEN);
     const [activeSection, setActiveSection] = useState(SECTIONS[0].id);
+    const [search, setSearch] = useState('');
     const sectionRefs = useRef({});
+
+    const searchResults = useMemo(() => {
+        if (!search.trim()) return [];
+        const q = search.toLowerCase();
+        return SECTIONS.flatMap((section) =>
+            section.faqs
+                .filter((faq) => faq.q.toLowerCase().includes(q) || faq.a.toLowerCase().includes(q))
+                .map((faq) => ({ ...faq, sectionId: section.id, sectionName: section.name })),
+        );
+    }, [search]);
+
+    const showSearch = search.trim().length > 0;
 
     function toggle(q) {
         setOpenSet((prev) => {
@@ -236,8 +249,68 @@ export default function FAQ() {
                         </Link>
                         {' '}&mdash; a real person reads it.
                     </p>
+
+                    <div className="relative mt-8 max-w-2xl">
+                        <Search
+                            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--bridge-text-muted)]"
+                            aria-hidden
+                        />
+                        <input
+                            type="search"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search — free sessions, booking, mentors, privacy…"
+                            aria-label="Search FAQ"
+                            className="w-full rounded-lg border border-[var(--bridge-border)] bg-transparent py-4 pl-12 pr-4 text-lg text-[var(--bridge-text)] outline-none placeholder:text-[var(--bridge-text-muted)] transition focus:border-[var(--color-primary)] focus:outline-none"
+                        />
+                    </div>
                 </Reveal>
 
+                {showSearch ? (
+                    <div className="min-w-0">
+                        <p className="mb-6 text-base text-[var(--bridge-text-muted)]">
+                            {searchResults.length} result{searchResults.length !== 1 && 's'}
+                        </p>
+                        {searchResults.length === 0 ? (
+                            <p className="py-10 text-base leading-[1.8] text-[var(--bridge-text-secondary)]">
+                                Nothing matched &ldquo;{search}&rdquo;. Try the{' '}
+                                <Link
+                                    to="/help"
+                                    className="font-semibold underline underline-offset-4"
+                                    style={{ color: 'var(--color-primary)' }}
+                                >
+                                    Help center
+                                </Link>{' '}
+                                or{' '}
+                                <Link
+                                    to="/contact"
+                                    className="font-semibold underline underline-offset-4"
+                                    style={{ color: 'var(--color-primary)' }}
+                                >
+                                    contact us
+                                </Link>
+                                .
+                            </p>
+                        ) : (
+                            <div className="border-t border-[var(--bridge-border)]">
+                                {searchResults.map((faq, fi) => (
+                                    <div key={faq.q}>
+                                        <p className="pt-6 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
+                                            {faq.sectionName}
+                                        </p>
+                                        <FAQItem
+                                            q={faq.q}
+                                            a={faq.a}
+                                            isOpen={openSet.has(faq.q)}
+                                            onToggle={toggle}
+                                            isLast={fi === searchResults.length - 1}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                ) : (
                 <div className="flex items-start gap-12 xl:gap-20">
                     <aside className="hidden w-48 shrink-0 lg:block xl:w-52" aria-label="FAQ sections">
                         <ul className="sticky top-28 space-y-4">
@@ -343,6 +416,7 @@ export default function FAQ() {
                         </Reveal>
                     </div>
                 </div>
+                )}
             </div>
         </main>
     );

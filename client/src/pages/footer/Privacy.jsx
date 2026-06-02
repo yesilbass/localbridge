@@ -698,7 +698,7 @@ export default function Privacy() {
           {/* Sticky sidebar */}
           <aside ref={sidebarRef} className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
             <nav
-              className="relative overflow-hidden rounded-2xl"
+              className="relative max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
                 boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
@@ -774,16 +774,12 @@ export default function Privacy() {
           </aside>
 
           {/* Article */}
-          <article className="space-y-6 lg:col-span-9">
+          <article className="max-w-3xl space-y-20 lg:col-span-9">
             {SECTIONS.map((s, idx) => (
               <Reveal key={s.id} delay={Math.min(idx * 25, 100)}>
                 <section
                   id={s.id}
-                  className="scroll-mt-28 rounded-2xl p-8 sm:p-10"
-                  style={{
-                    backgroundColor: 'var(--bridge-surface)',
-                    boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
-                  }}
+                  className={`scroll-mt-28 pt-12 ${idx > 0 ? 'border-t border-[var(--bridge-border)]' : ''}`}
                 >
                   <h2
                     className="font-display text-xl font-semibold sm:text-2xl"
