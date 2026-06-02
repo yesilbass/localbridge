@@ -38,14 +38,6 @@ export default function HowItWorksClose() {
               Browse mentors
               <ArrowRight className="h-4 w-4" aria-hidden />
             </AppLink>
-            <AppLink
-              to="/pricing"
-              className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-[15px] font-semibold text-[var(--bridge-text-secondary)] sm:w-auto ${focusRing}`}
-              style={{ boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}
-            >
-              Start free trial
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </AppLink>
           </div>
         </RevealOnScroll>
       </div>

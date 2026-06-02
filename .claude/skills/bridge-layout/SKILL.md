@@ -240,6 +240,7 @@ offsets.
 | Card with header / body / footer | `flex flex-col` with `mt-auto` on the footer |
 | Floating chip overlapping a card | `relative` parent + `absolute` chip with negative offsets |
 | Centered content with sidebar | `lg:grid-cols-[1fr_auto]` (auto column right-anchored) |
+| Long doc page + sticky section nav (FAQ, Terms) | `lg:grid` + `gap-16`; nav `sticky top-28`, content column `min-w-0` |
 | Equal-height tier cards | Grid (auto-fit not needed if tier count is fixed) |
 | Wrapping pill list | `flex flex-wrap gap-1.5` |
 | Sticky table header | `sticky top-0` + `z-10` on `<thead>` |

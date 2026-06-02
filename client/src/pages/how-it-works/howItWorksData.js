@@ -28,30 +28,27 @@ export const HIW_TRACKS = [
 export const SESSION_STEPS = [
   {
     num: '01',
-    title: 'Create your account',
-    body: 'Sign up in seconds. Tell Bridge what role you are targeting — optional AI intake shapes better matches later.',
-    visual: 'signup',
-  },
-  {
-    num: '02',
-    title: 'Find a mentor who gets it',
-    body: 'Browse vetted mentors by industry and session type, or let AI rank the best fits. Every profile shows reviews, expertise, and live availability.',
-    chip: 'Browse or AI match',
+    title: 'Browse or get matched',
+    body: "Browse the mentor directory by skill, industry, or career goal. Or describe your situation and get matched to someone whose experience lines up with what you're facing.",
     visual: 'discover',
   },
   {
-    num: '03',
-    title: 'Book a real slot — not a maybe',
-    body: 'Pick a topic, choose a time on their calendar, add context, and send the request. No scheduling ping-pong.',
-    chip: 'Calendly on every profile',
+    num: '02',
+    title: 'Book a session',
+    body: 'Pick a time that works for you. Scheduling is handled automatically — no back-and-forth emails, no chasing someone down.',
     visual: 'book',
   },
   {
-    num: '04',
-    title: 'Show up in Bridge',
-    body: 'When the mentor accepts, join from your dashboard in one click. Built-in video, optional intake call, and session notes you keep after.',
-    chip: 'No external meeting links',
+    num: '03',
+    title: 'Have the conversation',
+    body: "A live video session with someone who's actually been through what you're facing. Not a course. Not a chatbot. A real person.",
     visual: 'call',
+  },
+  {
+    num: '04',
+    title: 'Leave with a next step',
+    body: "Your mentor sets clear action items before you leave. They're saved in your dashboard so you don't lose momentum after the call.",
+    visual: 'nextsteps',
   },
 ];
 
