@@ -73,16 +73,14 @@ This baseline applies to every prompt. Domain skills (`bridge-ui`, `bridge-web-d
 | Frontend | vite | ^8.0.1 |
 | Frontend | tailwindcss | ^4.2.2 |
 | Frontend | react-router-dom | ^7.14.1 |
-| Frontend | @supabase/supabase-js | ^2.103.3 |
+| Frontend | @supabase/supabase-js | ^2.104.1 |
 | Frontend | axios | ^1.15.0 |
-| Frontend | googleapis | ^171.4.0 |
 | Frontend | lucide-react | ^0.400.0 |
 | Frontend | motion | ^12.38.0 |
 | Backend | express | ^5.2.1 |
 | Backend | @supabase/supabase-js | ^2.103.3 |
 | Backend | jsonwebtoken | ^9.0.3 |
 | Backend | bcrypt | ^6.0.0 |
-| Backend | googleapis | ^171.4.0 |
 | Backend | express-validator | ^7.3.2 |
 
 ---
@@ -206,7 +204,7 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 
 8. **Video rooms** — Custom WebRTC video call at `/session/:sessionId/video`. Signaling via Supabase Realtime channel `video:{sessionId}`. Mentor = caller (sends offer), mentee = callee (sends answer). `video_room_url` is set to `bridge-{sessionId}` on accept (truthy flag to show "Join Call").
 
-9. **Calendly scheduling** — Mentors connect Calendly via `client/src/api/calendly.js` and `api/calendly/`. Post-checkout scheduling uses embedded Calendly widget on `/booking/finalize`. Google Calendar was removed.
+9. **Calendly scheduling** — Mentors connect Calendly via `client/src/api/calendly.js` (client) and `api/calendly/[action].js` (Vercel serverless) + `api/_lib/calendlyHandlers/` (shared handlers, also imported by Express dev server via `server/app.js`). Post-checkout scheduling uses embedded Calendly widget on `/booking/finalize`. Google Calendar was removed.
 
 10. **Community = direct Supabase** — All community CRUD in `client/src/api/community.js`. No Vercel serverless function (12-function limit). RLS handles auth.
 
@@ -226,11 +224,10 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 | supabase.js | Supabase client singleton (VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY) |
 | client.js | Axios instance → http://localhost:3001/api with JWT interceptor |
 | mentors.js | getMentorById, getAllMentors (search/filter/sort), getFeaturedMentors, getIndustries |
-| sessions.js | createSession, getMySession, updateSessionStatus, acceptSession (sets Jitsi URL) |
+| sessions.js | createSession, getMySession, updateSessionStatus, acceptSession (sets video_room_url = `bridge-{sessionId}`) |
 | reviews.js | createReview, getReviewsForMentor |
 | favorites.js | getMyFavorites, toggleFavorite, addToFavorites, removeFromFavorites |
 | menteeProfile.js | getMenteeProfile, upsertMenteeProfile, deleteMenteeProfile |
-| mentorOnboarding.js | Mentor onboarding CRUD against mentor_profiles |
 | calendly.js | Calendly OAuth, event types, availability |
 | community.js | Community posts, upvotes, comments (direct Supabase) |
 | mentorPosts.js | Mentor advice posts (separate from community) |
@@ -246,6 +243,12 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 | resumeStorage.js | uploadResumeFile, removeResumeFile, getResumeSignedUrl (resumes bucket) |
 | mockMentors.js | Static mock mentor data for dev |
 | supportEmail.js | Feedback/support email send |
+| stripe.js | Stripe checkout, subscription, billing portal |
+| cancellations.js | Session cancellation logic |
+| intake.js | Mentee intake call booking |
+| meet.js | Meet/lobby session helpers |
+| messages.js | In-app messaging between mentor and mentee |
+| blog.js | Blog post fetch (Supabase) |
 
 ### `client/src/components/`
 | File | Purpose |
@@ -257,7 +260,10 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 | nav/navChrome.js | Shared flat link/menu class strings |
 | nav/dashboardNavModel.js | Dashboard flat nav links (mentee/mentor sets); logo = home |
 | nav/DashboardNavMenus.jsx | Dashboard dropdown UI |
+| routing/RouteGuards.jsx | Auth-gated route wrappers |
+| routing/LegacyCompanyRedirect.jsx | Redirects old company routes |
 | Footer.jsx | App footer — Company / Resources / Platform / Tools + **Explore** pillar links (`/mentors?category=*`); no fake mentor counts |
+| AppLink.jsx | Smart link — resolves auth-aware paths |
 | LoadingSpinner.jsx | Reusable spinner |
 | MentorAvatar.jsx | Mentor photo with fallback |
 | SessionTypeCard.jsx | Card for career_advice / interview_prep / resume_review / networking |
@@ -267,21 +273,41 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 | CalendlyInlineWidget.jsx | Embedded Calendly scheduling widget |
 | FeedbackFAB.jsx | Floating feedback button |
 | FeedbackModal.jsx | Feedback submission form |
+| ReviewModal.jsx | Post-session review submission modal |
 | BridgeGlobalAtmosphere.jsx | Global visual theme/atmosphere |
 | PageGutterAtmosphere.jsx | Page gutter visual effect |
-| MagneticPointer.jsx | Custom cursor animation |
+| MagneticPointer.jsx | Custom cursor animation (desktop only) |
+| CustomCursor.jsx | Alternative custom cursor |
 | Reveal.jsx | Scroll-triggered reveal animation |
 | ScrollProgress.jsx | Scroll progress bar |
+| EmbeddedCheckoutPanel.jsx | Stripe embedded checkout |
+| SubscriptionGate.jsx | Paywall wrapper for gated features |
+| PaywallPrompt.jsx | Inline paywall prompt UI |
+| TrialBanner.jsx | Trial period status banner |
+| TierBadge.jsx | Mentor tier badge display |
+| TierDisputeModal.jsx | Tier dispute submission modal |
+| CancellationModal.jsx | Session cancellation confirmation |
+| NotificationPanel.jsx | In-app notification tray |
+| CalendarSuccessToast.jsx | Toast after calendar booking |
+| ErrorBoundary.jsx | React error boundary wrapper |
+| MentorPostsStrip.jsx | Horizontal strip of mentor posts |
+| MentorTagGroups.jsx | Grouped expertise/category tags |
+| MentorCertificate.jsx | Mentor certification badge |
+| ThemeToggle.jsx | Light/dark theme toggle |
+| FuturisticAuthFrame.jsx | Animated frame for auth pages |
+| PaletteDevBadge.jsx | Dev-only palette indicator |
+| TestModeChip.jsx | Dev/test mode indicator chip |
+| mentor/ | Mentor-specific sub-components (AvailabilityPanel, FAQSection, etc.) |
 
 ### `client/src/pages/` (top-level)
 | File | Purpose |
 |---|---|
-| Landing.jsx | Public home page |
-| pages/how-it-works/ | `/how-it-works` — dual-track hero + steps (`howItWorksData.js`) |
+| landing/ | Public home page (`/`) — sections: HeroSection, HowItWorksSection, IsThisForYouSection, WaitlistSection, FAQSection; data in `landingData.js`; palette via `landingPalette.js` |
+| how-it-works/ | `/how-it-works` — centered hero in `index.jsx`; `HowItWorksSteps` with `track="sessions"`; close CTA in `HowItWorksContrast.jsx`; copy in `howItWorksData.js` (`SESSION_STEPS`). `BookingFlowAnimation.jsx` / `HowItWorksHero.jsx` kept for reuse (not mounted on this route) |
 | Login.jsx | Auth — sign in |
 | Register.jsx | Auth — sign up |
-| Mentors.jsx | Mentor browse + AI matching |
-| MentorProfile.jsx | Individual mentor detail + booking |
+| Mentors/ | Mentor browse + AI matching (`index.jsx`, `MentorCard.jsx`, `AiMatchCards.jsx`) |
+| mentor-profile/ | Individual mentor detail + booking — modular section components (`BookingDrawer`, `ReviewsBlock`, `ImpactStatsStrip`, etc.); `index.jsx` is entry; `profileHooks.js` for data |
 | BecomeMentor.jsx | Mentor recruitment landing |
 | MentorApplication.jsx | Voice-first mentor application (`/apply/mentor`) |
 | MentorOnboardingFlow.jsx | Post-approval mentor profile wizard |
@@ -289,20 +315,57 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 | Profile.jsx | User profile page |
 | Settings.jsx | User settings |
 | VideoCall.jsx | Custom WebRTC video session (Supabase Realtime signaling) |
-| pages/company/ | About/Company page — Hero, Story, HowItWorks, Values, People, Stats (gated by `SHOW_STATS`), Testimonials, CTA. Data + placeholders in `companyData.js`. |
-| Pricing.jsx | Single-plan pricing page (monthly / annual, student discount) |
+| about/ | About Bridge page — Hero, OriginStory, Principles, Team, Timeline, ContactCta; data in `aboutData.js` |
+| company/ | Company/marketing page — Beliefs, BuiltFor, Story, People, HowItWorks, Close; data in `companyData.js` |
+| why-us/ | `/why-us` — narrative marketing page (AudienceSection, Mechanism, ContrarianBeliefs, Receipts, SideBySide, FinalCta); data in `whyUsData.js` |
+| Pricing/ | Pricing page (monthly / annual, student discount) |
+| IntakeCall.jsx | Mentee intake call scheduling page |
+| MeetLobby.jsx | Pre-session lobby / waiting room |
+| SubscriptionSuccess.jsx | Post-checkout success page |
+| booking/ | `/booking/finalize` — embedded Calendly scheduling post-checkout (`finalize.jsx`) |
+| blog/ | Blog listing + `WriteBlogPost.jsx` |
+| community/ | Community hub + category feeds (see community section below) |
+| dashboard/ | Dashboard shell + all sub-pages (see dashboard section below) |
+| admin/ | Dev portal + admin tools (gated; `DevGate.jsx` guards entry) |
+| footer/ | Static footer pages (About, Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust) |
+| refs/ | `SubmitReference.jsx` — reference submission for mentor applications |
 
 ### `client/src/pages/dashboard/`
 | File | Purpose |
 |---|---|
-| Dashboard.jsx | Container — routes to mentee or mentor view |
-| MenteeDashboardContent.jsx | Sessions, favorites, history for mentees |
-| MentorDashboardContent.jsx | Incoming requests, schedule, earnings for mentors |
-| DashboardSettingsPanel.jsx | In-dashboard settings |
-| MentorAvailabilityModal.jsx | Set/edit availability schedule |
-| dashboardShared.jsx | Shared constants & utilities |
-| dashboardUtils.js | SESSION_TYPE_MAP (type → icon + color metadata) |
-| useDashboardData.js | Hook: fetches sessions, profile, reviews |
+| index.jsx | Dashboard entry — shell + routing |
+| DashboardShell.jsx | Layout wrapper: `DashboardTopBar` + main content (no sidebar) |
+| Sidebar.jsx | Legacy sidebar component (not used by current shell) |
+| MobileTabBar.jsx | Mobile bottom nav |
+| home/ | Dashboard home sub-pages (HomeAtAGlance, HomeHeader, HomeNowStrip, HomeSpending, PageHeader) |
+| MenteeSection.jsx | Mentee-specific dashboard view |
+| MentorSection.jsx | Mentor-specific dashboard view |
+| SessionsPage.jsx | Session list + management |
+| SessionCalendar.jsx | Calendar view of scheduled sessions |
+| UpcomingSessionsBlock.jsx | Upcoming sessions widget |
+| PastSessionsBlock.jsx | Past sessions history block |
+| NextSessionCard.jsx | Next session countdown card |
+| SavedPage.jsx | Saved/favorited mentors page |
+| SavedMentorsBlock.jsx | Saved mentors widget |
+| MessagesPage.jsx | In-app messaging thread UI |
+| ReviewsPage.jsx | Reviews given/received |
+| ReviewsRecentBlock.jsx | Recent reviews widget |
+| EarningsPage.jsx | Mentor earnings breakdown |
+| EarningsCard.jsx | Earnings summary card |
+| BillingPage.jsx | Subscription + billing management |
+| AvailabilityPage.jsx | Mentor availability settings page |
+| MentorAvailabilityPanel.jsx | Availability schedule editor |
+| MentorPostsPanel.jsx | Mentor advice posts management |
+| ProfilePage.jsx | In-dashboard profile editor |
+| ProfileHealthCard.jsx | Profile completeness indicator |
+| SettingsPage.jsx | In-dashboard settings |
+| RecommendationsBlock.jsx | AI-matched mentor recommendations |
+| ActivityFeed.jsx | Recent activity stream |
+| MenteeIntakePrompt.jsx | Prompt to complete mentee intake |
+| EmptyState.jsx | Shared empty state component |
+| dashboardHooks.js | Data-fetching hooks for dashboard pages |
+| dashboardLayout.js | Layout constants and helpers |
+| dashboardCinematic.jsx | Cinematic/animated dashboard transitions |
 
 ### `client/src/pages/community/`
 | File | Purpose |
@@ -311,15 +374,33 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 | CommunityCategory.jsx | Pillar feed with filters, sort, comments |
 | communityShared.jsx | Post cards, create form, mentor badge, post type pills |
 | MentorPostsPage.jsx | Mentor advice posts directory (`/community/posts`) |
+| communityPaths.js | Route helpers — maps `/community/*` ↔ `/dashboard/community/*` for signed-in users |
 
 ### `client/src/constants/`
 | File | Purpose |
 |---|---|
 | sessionTypes.js | Four session type keys — source of truth |
 | mentorshipCategories.js | Re-exports career mentorship categories from `shared/mentorshipCategories.js` |
+| mentorBadges.js | Mentor badge definitions |
+
+### `api/` (Vercel serverless functions)
+| File | Purpose |
+|---|---|
+| ai-proxy.js | Claude/OpenAI proxy — used by client AI features |
+| realtime-session.js | `POST /api/realtime-session` → OpenAI Realtime API client secret |
+| calendly/[action].js | Calendly OAuth + event-type endpoints |
+| calendly-webhook.js | Calendly webhook receiver |
+| create-booking-checkout.js | Stripe checkout session for one-off bookings |
+| create-subscription-checkout.js | Stripe subscription checkout |
+| finalize-checkout.js | Post-payment finalization |
+| booking-confirm-scheduled.js | Confirm booking after Calendly scheduling |
+| cancel-session.js | Server-side session cancellation |
+| verification/ | Mentor verification endpoints |
+| admin/ | Admin-gated API routes |
+| _lib/ | Shared handlers (Calendly, Supabase client, Stripe client, auth, security) |
 
 ### `client/src/pages/footer/`
-About, Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust — static informational pages. (Footer `Community.jsx` is marketing copy — not the product `/community` hub.)
+Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust — static informational pages (`grounded-guidance` palette). **FAQ** (`FAQ.jsx`): two-column layout with sticky section nav (`lg:sticky top-28`), `gap-16` between nav and content, uniform `text-sm` nav labels, `focus-visible` rings only (no default focus ring). **Help**, **Contact**, **Trust**: shared `pageShell` + accordion/section patterns; Help cross-links FAQ for policy questions. Also `Community.jsx` (marketing copy — not the product `/community` hub). About lives at `pages/about/`, not here.
 
 ---
 
@@ -342,7 +423,13 @@ About, Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust — sta
 - Dashboard (mentee + mentor views)
 - Resume upload/storage (Supabase bucket)
 - Seeded mentor profiles across industries (see `supabase/seeds/`)
-- Landing, About, Pricing, footer static pages
+- Landing, About, Pricing, Why Us, footer static pages
+- Stripe subscription + billing portal
+- In-app messaging (mentor ↔ mentee)
+- Mentor intake call scheduling (`IntakeCall.jsx`)
+- Meet lobby / pre-session waiting room (`MeetLobby.jsx`)
+- Dev/admin portal (gated by `DevGate.jsx`)
+- Blog (Supabase-backed)
 
 ---
 

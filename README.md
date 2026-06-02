@@ -49,16 +49,16 @@ Bridge is pre-revenue, demo-ready, and deployed on Vercel from `main`. The stack
 
 | Route | Page |
 |---|---|
-| `/` | Landing — hero, trust band, video testimonials, audience fit, mentor roster |
+| `/` | Landing — hero, how-it-works strip, audience fit, waitlist, FAQ accordion (`pages/landing/`) |
 | `/company` | Company story, beliefs, comparison, proof, team, CTA |
-| `/how-it-works` | Dual-track explainer — on-demand sessions vs AI career stack (`pages/how-it-works/`) |
+| `/how-it-works` | Sessions track explainer — centered hero, four steps, close CTA (`pages/how-it-works/`; `howItWorksData.js`) |
 | `/pricing` | Single-plan pricing, FAQ, embedded Stripe checkout |
 | `/resume` | AI resume review |
 | `/mentors` | Mentor directory (+ AI match wizard) |
 | `/mentors/:id` | Mentor profile (book, favorite, message, reviews) |
 | `/blog` | Published posts |
 | `/become-a-mentor` | Mentor recruitment landing |
-| `/careers`, `/faq`, `/contact`, `/help`, `/trust` | Footer pages |
+| `/careers`, `/faq`, `/contact`, `/help`, `/trust` | Footer pages — FAQ uses sticky section nav; Help/Contact/Trust use shared marketing shell |
 | `/privacy`, `/terms`, `/cookies` | Legal |
 
 Legacy redirects: `/about` and `/why-us` → `/company`.
@@ -185,7 +185,7 @@ Three route-driven palettes: `modern-signal`, `grounded-guidance`, `quiet-author
 - **Mentor discovery** — filterable directory with session rates, availability indicators, and AI-powered goal-based matching
 - **Mentor application & onboarding** — voice-first application at `/apply/mentor` (OpenAI Realtime) → admin review → 5-step profile wizard at `/onboarding/mentor`; tiers and rates assigned server-side by a scoring algorithm
 - **Community** — authenticated hub at `/dashboard/community` (aliases from `/community`) with live feed and category sub-communities; questions, wins, discussions, and resources with upvotes and flat comments; active mentors get a trust badge
-- **Grouped navigation** — marketing `Navbar` (Discover / Tools / Company dropdowns; `/how-it-works` via footer and landing, not in nav menus) and dashboard `DashboardTopBar` (role-based groups); flat underline chrome, not pill bubbles
+- **Grouped navigation** — guest marketing nav: **Company** + **Resources** dropdowns, flat **How it works** / **Pricing** / **Become a mentor**, **Browse mentors** CTA → `/mentors`; signed-in mentees: **Dashboard** + Discover / Tools / Company; mentors: **Dashboard** + Company + flat Community / Pricing. `/how-it-works` also in footer **Platform** and landing. Dashboard uses flat `DashboardTopBar` links (underline chrome, not pills).
 - **Mentor value stack** — impact stats, earned badges, short advice posts on profiles, session action items, featured mentor spotlight
 - **Admin review panel** — approve or reject mentor applications at `/admin`, with scoring breakdowns
 - **Session booking** — Stripe Checkout (price locked server-side); Calendly integration for scheduling (OAuth, embedded widget, webhook)
@@ -241,7 +241,9 @@ bridge/
 │       │   └── nav/        # mainNavModel, NavMenus, navChrome, dashboardNavModel
 │       ├── context/        # AuthContext + useAuth hook
 │       ├── pages/          # Route-level page components
-│       │   ├── how-it-works/  # HowItWorksHero, HowItWorksSteps, howItWorksData
+│       │   ├── how-it-works/  # index (hero), HowItWorksSteps, HowItWorksContrast, howItWorksData
+│       │   ├── landing/       # HeroSection, WaitlistSection, FAQSection, landingData
+│       │   ├── footer/        # FAQ (sticky section nav), Help, Contact, Trust, legal
 │       │   └── community/  # CommunityHub, CommunityCategory, communityShared
 │       ├── constants/      # sessionTypes.js, mentorshipCategories.js
 │       ├── utils/          # routePalette.js, helpers

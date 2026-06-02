@@ -312,12 +312,12 @@ Every public page has a **one-action goal**. Identify it before designing:
 - Mentors index → open a mentor profile
 - Mentor profile → book a session
 - Pricing → start a plan
-- Footer pages (FAQ, Help, Trust) → return to a primary product page
+- Footer pages (FAQ, Help, Trust) → return to a primary product page (`/mentors` or `/register`). FAQ uses sticky section nav + accordion groups; Help holds step-by-step guides linked from FAQ copy.
 
 Conversion rules:
 
 - Primary CTA appears in the hero, repeats in the final CTA section, and is reachable from the navbar at all times.
-- Secondary CTA never duplicates the primary verb — it offers a softer path ("Browse mentors" alongside "Get started").
+- Secondary CTA never duplicates the primary verb — guest primary is **Browse mentors** → `/mentors`; softer paths are Pricing, How it works, or Become a mentor.
 - No more than one primary CTA per viewport.
 - Forms requesting commitment (email, payment) live near a trust signal (badge, count, testimonial).
 - The action is the closest interactive element to the headline — a reader who scans for 3 seconds must see the CTA.

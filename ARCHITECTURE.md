@@ -164,13 +164,13 @@ Two shells — do not conflate:
 
 **Marketing nav** (`mainNavModel.js`): grouped dropdowns with flat underline active state (`navChrome.js`) — no pill bubbles.
 
-| Role | Primary | Dropdowns | Flat links |
-|------|---------|-----------|------------|
-| Guest | — | **Discover** → Find mentors; **Tools** → Resume review; **Company** → About Bridge, Blog, Careers, FAQ, Contact, Trust & safety | Pricing, Become a mentor |
-| Signed-in mentee | Dashboard | **Discover** → Mentors, Community; **Tools** → Resume review; **Company** (same as guest) | Pricing |
-| Mentor | Dashboard | **Company** (same as guest) | Community, Pricing |
+| Role | Primary | Dropdowns | Flat links | CTA |
+|------|---------|-----------|------------|-----|
+| Guest | — | **Company** → About Bridge, Trust & safety; **Resources** → FAQ, Help, Contact | How it works, Pricing, Become a mentor | **Browse mentors** → `/mentors` (in `Navbar.jsx`) |
+| Signed-in mentee | Dashboard | **Discover** → Mentors, Community; **Tools** → Resume review; **Company** → full company set (About, Blog, Careers, FAQ, Contact, Trust) | Pricing | — |
+| Mentor | Dashboard | **Company** (full set) | Community, Pricing | — |
 
-`/how-it-works` is intentionally absent from navbar dropdowns; reach it via footer **Platform → How it works**, landing hero/section links, or direct URL.
+`/how-it-works` is a guest flat link (not inside dropdowns). Also reachable via footer **Platform → How it works**, landing sections, or direct URL. `/mentors` is public without login; booking still requires auth.
 
 **Footer** (`Footer.jsx`): newsletter + **Company**, **Resources**, **Platform** (Browse mentors, How it works, AI matching), **Tools**, and **Explore** (browse + four mentorship category query links — not the legacy four session-type labels).
 
@@ -201,7 +201,7 @@ Each file owns one domain. They call Supabase directly or hit `/api/*` endpoints
 | `reviews.js` | Create review, fetch reviews for a mentor |
 | `favorites.js` | Add/remove/list favorites |
 | `menteeProfile.js` | AI onboarding output (mentee_profiles table) |
-| `mentorOnboarding.js` | Mentor profile CRUD during onboarding |
+| `verification.js` | Mentor application submit + profile fetch; onboarding wizard writes `mentor_profiles` directly |
 | `calendly.js` | Calendly OAuth, event types, availability |
 | `community.js` | Community posts, upvotes, comments (direct Supabase — no API layer) |
 | `mentorPosts.js` | Mentor advice posts (profile/directory — separate from community) |
