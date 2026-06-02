@@ -182,21 +182,15 @@ export default function Login() {
   return (
     <>
       <main
-        className="grid h-screen overflow-hidden lg:grid-cols-[1fr_1fr]"
+        className="flex h-screen items-center justify-center overflow-y-auto px-6 py-8 sm:px-10"
         style={{ backgroundColor: 'var(--bridge-canvas)' }}
         aria-labelledby="login-heading"
       >
-        <QuotePanel />
-
-        <div
-          className="flex h-full flex-col items-center justify-center overflow-y-auto px-6 py-8 sm:px-10"
-          style={{ backgroundColor: 'var(--bridge-canvas)' }}
-        >
           <div className="w-full max-w-[460px]">
-            <div className="mb-6 lg:hidden">
+            <div className="mb-6 flex justify-center">
               <Link
                 to="/"
-                className="font-display text-lg font-black tracking-[-0.04em] transition-opacity hover:opacity-70"
+                className="font-display text-2xl font-black tracking-[-0.04em] transition-opacity hover:opacity-70"
                 style={{ color: 'var(--bridge-text)' }}
               >
                 mentorshipbridge
@@ -310,7 +304,6 @@ export default function Login() {
               <button type="button" onClick={handleSecretTap} aria-hidden="true" tabIndex={-1} className="absolute bottom-2 right-2 h-4 w-4 rounded-full opacity-0" />
             </div>
           </div>
-        </div>
       </main>
 
       {devOverlay ? <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"><div className="w-full max-w-xs rounded-3xl border border-white/10 bg-[#0a0a1e] p-6 shadow-2xl"><p className="mb-1 text-[10px] font-black uppercase tracking-[0.3em] text-cyan-200/60">Bridge Internal</p><p className="mb-5 text-sm font-bold text-white">Enter access code</p><form onSubmit={handleDevSubmit} className="space-y-3"><input type="password" value={devCode} onChange={(e) => setDevCode(e.target.value)} placeholder="Access code" autoFocus autoComplete="off" className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-cyan-300/50" />{devError ? <p className="text-xs text-red-300">{devError}</p> : null}<div className="flex gap-2"><button type="button" onClick={() => { setDevOverlay(false); setDevCode(''); setDevError(''); }} className="flex-1 rounded-xl border border-white/10 py-2.5 text-xs text-white/50 hover:text-white">Cancel</button><button type="submit" disabled={!devCode.trim()} className="flex-1 rounded-xl bg-cyan-300 py-2.5 text-xs font-black text-slate-950 disabled:opacity-40">Enter</button></div></form></div></div> : null}
