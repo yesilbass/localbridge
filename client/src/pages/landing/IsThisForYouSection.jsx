@@ -6,7 +6,6 @@ const NOT_FIT = [
   "You want someone to validate decisions you've already made.",
   "You'd rather watch a course than think out loud with someone.",
   "You're collecting advice instead of acting on any of it.",
-  "You think AI can replace a sharp person who's done it before.",
   "You want a playbook handed over, not a thinking partner.",
 ];
 
@@ -133,20 +132,6 @@ export default function IsThisForYouSection() {
               boxShadow: '0 12px 40px -10px rgba(0,0,0,0.08)'
             }}
           >
-            {/* Brand mark */}
-            <div className="mb-5 flex items-center gap-2.5">
-              <div
-                className="flex h-9 w-9 items-center justify-center rounded-xl font-black text-white text-sm"
-                style={{ background: 'linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 60%, #a78bfa))' }}
-                aria-hidden
-              >
-                mb
-              </div>
-              <span className="text-[11px] font-black uppercase" style={{ letterSpacing: '0.18em', color: 'var(--bridge-text-muted)' }}>
-                mentorshipbridge
-              </span>
-            </div>
-
             <p
               className="font-display font-black"
               style={{ fontSize: 'clamp(1.1rem, 2vw, 1.35rem)', color: 'var(--bridge-text)', letterSpacing: '-0.025em', lineHeight: 1.25 }}

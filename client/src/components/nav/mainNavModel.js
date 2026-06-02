@@ -25,24 +25,27 @@ export function buildMainNavModel({ showGuestChrome, asMentor, resolve, t }) {
       primary: null,
       groups: [
         {
-          id: 'discover',
-          label: t('nav.discover', 'Discover'),
+          id: 'company',
+          label: t('nav.company', 'Company'),
           items: [
-            { path: resolve('/mentors'), label: t('nav.findMentors', 'Find mentors') },
+            { path: resolve('/company'), label: t('nav.aboutBridge', 'About Bridge') },
+            { path: resolve('/trust'), label: t('nav.trust', 'Trust & Safety') },
           ],
         },
         {
-          id: 'tools',
-          label: t('nav.tools', 'Tools'),
+          id: 'resources',
+          label: t('nav.resources', 'Resources'),
           items: [
-            { path: resolve('/resume'), label: t('nav.resume', 'Resume review'), ai: true },
+            { path: resolve('/faq'), label: t('nav.faq', 'FAQ') },
+            { path: resolve('/help'), label: t('nav.help', 'Help') },
+            { path: resolve('/contact'), label: t('nav.contact', 'Contact') },
           ],
         },
-        companyGroup,
       ],
       links: [
+        { path: resolve('/how-it-works'), label: t('nav.howItWorks', 'How it works') },
         { path: resolve('/pricing'), label: t('nav.pricing', 'Pricing') },
-        { path: '/become-a-mentor', label: t('nav.becomeMentor', 'Become a Mentor') },
+        { path: '/become-a-mentor', label: t('nav.becomeMentor', 'Become a mentor') },
       ],
       cta: null,
     };

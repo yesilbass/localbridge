@@ -212,7 +212,7 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 
 11. **Community posts ≠ mentor posts** — `community_posts` powers `/dashboard/community` (and `/community` redirect). `mentor_posts` is short mentor advice on profiles and `/community/posts`.
 
-12. **Navigation** — Marketing: `Navbar.jsx` + `components/nav/` (`mainNavModel.js`, flat `navChrome.js`). Guest dropdowns: **Discover** (Find mentors), **Tools** (Resume review), **Company** (About Bridge, Blog, Careers, FAQ, Contact, Trust); flat **Pricing** + **Become a mentor**. Signed-in mentees: **Dashboard** + Discover (Mentors, Community), Tools, Company; flat **Pricing**. Mentors: **Dashboard**, **Company**, flat Community + Pricing. `/how-it-works` is not in navbar dropdowns — footer Platform column + landing links only. Dashboard: `DashboardTopBar.jsx` + `dashboardNavModel.js`. URL aliasing: `authNav.js` (`resolveAuthEntryPath`, `dashboardProductPath`). Extend the nav models; no flat link sprawl.
+12. **Navigation** — Marketing: `Navbar.jsx` + `components/nav/` (`mainNavModel.js`, flat `navChrome.js`). Guest (logged-out): dropdowns **Company** (About Bridge, Trust & Safety) + **Resources** (FAQ, Help, Contact); flat links **How it works** + **Pricing** + **Become a mentor**; primary CTA button **"Browse mentors" → /mentors** (replaces old "Get started" → /register). `/mentors` is public — no login required to browse; booking still requires auth. Signed-in mentees: **Dashboard** + Discover (Mentors, Community), Tools, Company; flat **Pricing**. Mentors: **Dashboard**, **Company**, flat Community + Pricing. Dashboard: `DashboardTopBar.jsx` + `dashboardNavModel.js`. URL aliasing: `authNav.js` (`resolveAuthEntryPath`, `dashboardProductPath`). Extend the nav models; no flat link sprawl.
 
 13. **Realtime sessions** — `POST /api/realtime-session` → OpenAI GA `POST /v1/realtime/client_secrets` (not beta `/v1/realtime/sessions`). Client uses `client_secret.value` in `useRealtimeCall.js`.
 
@@ -252,7 +252,7 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 |---|---|
 | Navbar.jsx | Marketing/product top bar (auth, scroll hide, mobile drawer) |
 | DashboardTopBar.jsx | Dashboard shell nav — grouped dropdowns by role |
-| nav/mainNavModel.js | Marketing nav structure (Discover / Tools / Company; `/how-it-works` not in dropdowns) |
+| nav/mainNavModel.js | Marketing nav structure. Guest: Company + Resources dropdowns; flat How it works / Pricing / Become a mentor; CTA "Browse mentors" → /mentors. Logged-in mentee/mentor sets unchanged. |
 | nav/NavMenus.jsx | Desktop dropdowns + mobile accordions |
 | nav/navChrome.js | Shared flat link/menu class strings |
 | nav/dashboardNavModel.js | Dashboard flat nav links (mentee/mentor sets); logo = home |

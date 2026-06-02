@@ -45,7 +45,7 @@ export const TIMELINE_ENTRIES = [
     title: 'First conversation.',
     body:
       'Five operators, one shared frustration. We spent a weekend sketching what we wished had existed when we were stuck.',
-    cta: { label: 'Join the waitlist', to: '/register' },
+    cta: { label: 'Create an account', to: '/register' },
   },
   {
     date: 'Mar 2026',

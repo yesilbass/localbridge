@@ -6,7 +6,7 @@ const STEP_ICONS = [Sparkles, CalendarCheck, Video, ListChecks];
 const STEPS = [
   {
     title: 'Browse or get matched',
-    body: 'Search the mentor directory yourself, or answer a few questions and let our AI find the right person for your goal. Every mentor is here voluntarily.',
+    body: "Browse the mentor directory by skill, industry, or career goal. Or describe your situation and get matched to someone whose experience lines up with what you're facing.",
   },
   {
     title: 'Book a session',
@@ -188,16 +188,6 @@ export default function HowItWorksSection() {
           ))}
         </motion.div>
 
-        <p
-          className="mt-10 text-center"
-          style={{
-            fontSize: 15,
-            lineHeight: 1.5,
-            color: 'var(--color-text-secondary)',
-          }}
-        >
-          Sessions are always free. Mentors volunteer their time.
-        </p>
       </div>
     </section>
   );

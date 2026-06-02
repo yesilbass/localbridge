@@ -19,28 +19,7 @@ export default function HeroSection() {
   const { s }   = useContent();
   const flat    = reduced || tier === 'low';
 
-  const heroChecks = [
-    s.landing.heroTrustNoCard,
-    s.landing.heroTrustBooked,
-  ];
-
-  const heroQuotes = [
-    {
-      quote:
-        "I had no idea what career path to take. One conversation with someone who'd been through it changed everything for me.",
-      attribution: '— College junior, undecided major',
-    },
-    {
-      quote:
-        'I kept applying and getting rejected. A mentor spotted exactly what was wrong with my approach in 20 minutes.',
-      attribution: '— Recent grad, first job search',
-    },
-    {
-      quote:
-        'I wish something like this existed when I was starting out. Would have saved me two years of figuring it out alone.',
-      attribution: '— First-gen student, engineering',
-    },
-  ];
+  const heroChecks = [];
 
   const enter = (delay, axis = 'y', distance = 14, duration = DUR_MED) => {
     if (flat) return {};
@@ -138,7 +117,7 @@ export default function HeroSection() {
               {s.landing.heroSubCopy}
             </motion.p>
 
-            <motion.div {...enter(0.45, 'y', 14, DUR_MED)} className="mt-8">
+            <motion.div {...enter(0.45, 'y', 14, DUR_MED)} className="mt-8 flex flex-col gap-4">
               <AppLink
                 to="/register"
                 className="lp-cta group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full px-8 py-4 text-base font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -150,87 +129,52 @@ export default function HeroSection() {
                   outlineColor: 'var(--color-primary)',
                   transition: `transform ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1), box-shadow ${DUR_SHORT}s cubic-bezier(0.16,1,0.3,1)`
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
               >
                 <span className="absolute inset-0 translate-y-full rounded-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
                 <span className="relative z-10 flex items-center gap-2">
-                  {s.landing.heroCtaGetMatched}
+                  Get started
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </span>
               </AppLink>
+              <AppLink
+                to="/become-a-mentor"
+                className="self-start text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                style={{ color: 'var(--bridge-text-secondary)' }}
+              >
+                Or apply as a founding mentor →
+              </AppLink>
             </motion.div>
-
-            <motion.ul
-              {...enter(0.55, 'y', 14, DUR_MED)}
-              className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 sm:gap-x-8"
-            >
-              {heroChecks.map((item) => (
-                <li key={item} className="flex items-center gap-2">
-                  <span
-                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-                    style={{
-                      backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-                      color: 'var(--color-primary)'
-                    }}
-                  >
-                    <Check className="h-3 w-3 stroke-[3]" aria-hidden="true" />
-                  </span>
-                  <span className="text-sm leading-snug" style={{ color: 'var(--bridge-text-secondary)' }}>
-                    {item}
-                  </span>
-                </li>
-              ))}
-            </motion.ul>
 
             <motion.div
               {...enter(0.65, 'y', 14, DUR_MED)}
               className="mt-10 w-full"
             >
-              <p
-                className="text-center text-[10px] font-black uppercase"
-                style={{ color: 'var(--color-text-muted)', letterSpacing: '0.3em' }}
+              <div
+                className="rounded-2xl p-5"
+                style={{
+                  background: 'color-mix(in srgb, var(--color-primary) 6%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--color-primary) 20%, transparent)',
+                }}
               >
-                EARLY REACTIONS
-              </p>
-              <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-                {heroQuotes.map((item, index) => (
-                  <figure
-                    key={item.attribution}
-                    className={`rounded-2xl p-4 ${index === 2 ? 'hidden md:block' : ''}`}
-                    style={{
-                      backgroundColor: 'var(--color-surface)',
-                      borderLeft:
-                        '3px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
-                      boxShadow: 'inset 0 0 0 1px var(--color-border)',
-                    }}
-                  >
-                    <blockquote
-                      className="italic"
-                      style={{
-                        fontSize: 13,
-                        lineHeight: 1.6,
-                        color: 'var(--color-text)',
-                      }}
-                    >
-                      {item.quote}
-                    </blockquote>
-                    <figcaption
-                      className="mt-3"
-                      style={{
-                        fontSize: 12,
-                        lineHeight: 1.45,
-                        color: 'var(--color-text-muted)',
-                      }}
-                    >
-                      {item.attribution}
-                    </figcaption>
-                  </figure>
-                ))}
+                <p className="text-[10px] font-black uppercase" style={{ color: 'var(--color-primary)', letterSpacing: '0.25em' }}>
+                  FOUNDING MENTORS
+                </p>
+                <p className="mt-2 font-semibold leading-snug" style={{ fontSize: 15, color: 'var(--bridge-text)' }}>
+                  Shape the platform from day one.
+                </p>
+                <p className="mt-1.5" style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--bridge-text-secondary)' }}>
+                  We're recruiting a founding cohort right now — featured placement, direct input on the product, and first access to mentees on the platform.
+                </p>
+                <AppLink
+                  to="/become-a-mentor"
+                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                  style={{ color: 'var(--color-primary)' }}
+                >
+                  Apply as a founding mentor
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                </AppLink>
               </div>
             </motion.div>
           </div>
