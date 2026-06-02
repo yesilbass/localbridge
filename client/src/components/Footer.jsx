@@ -157,7 +157,7 @@ export default function Footer() {
                 {
                   title: t('footer.company', 'Company'),
                   links: [
-                    { label: t('nav.company', 'Company'), to: '/company' },
+                    { label: t('nav.aboutBridge', 'About Bridge'), to: '/company' },
                     { label: t('footer.blog', 'Blog'), to: '/blog' },
                     { label: t('footer.careers', 'Careers'), to: '/careers' },
                     { label: t('footer.trustSafety', 'Trust & Safety'), to: '/trust' },
@@ -168,7 +168,6 @@ export default function Footer() {
                   links: [
                     { label: t('footer.help', 'Help Center'), to: '/help' },
                     { label: t('footer.faq', 'FAQ'), to: '/faq' },
-                    { label: t('footer.community', 'Community'), to: '/community' },
                     { label: t('footer.contact', 'Contact'), to: '/contact' },
                   ],
                 },
@@ -181,28 +180,20 @@ export default function Footer() {
                   title: t('footer.platform', 'Platform'),
                   links: [
                     { label: t('footer.howItWorks', 'How it works'), to: '/how-it-works' },
-                    { label: t('footer.aiMatching', 'AI Matching'), to: '/mentors', app: true },
+                    { label: t('footer.browseMentors', 'Browse Mentors'), to: '/mentors', app: true },
+                    { label: t('footer.community', 'Community'), to: '/community', app: true },
+                    { label: t('nav.becomeMentor', 'Become a Mentor'), to: '/become-a-mentor' },
                   ],
                 },
                 {
                   title: t('footer.tools', 'Tools'),
                   links: [
                     { label: t('footer.resumeReview', 'Resume Review'), to: '/resume', app: true },
-                    { label: t('nav.pricing', 'Pricing'), to: '/pricing', app: true },
+                    { label: t('footer.aiMatching', 'AI Matching'), to: '/mentors', app: true },
+                    { label: t('nav.pricing', 'Pricing'), to: '/pricing' },
                     { label: t('footer.dashboard', 'Dashboard'), to: '/dashboard', app: true },
                   ],
                 },
-              ]}
-            />
-
-            <LinkColumn
-              title={t('footer.explore', 'Explore')}
-              links={[
-                { label: t('footer.browseMentors', 'Browse Mentors'), to: '/mentors', app: true },
-                { label: t('footer.categoryCareer', 'Career & Professional'), to: '/mentors?category=career', app: true },
-                { label: t('footer.categoryRelationships', 'Relationships & Family'), to: '/mentors?category=relationships', app: true },
-                { label: t('footer.categoryFaith', 'Faith & Spirituality'), to: '/mentors?category=faith', app: true },
-                { label: t('footer.categoryLife', 'Life Navigation'), to: '/mentors?category=life', app: true },
               ]}
             />
           </div>

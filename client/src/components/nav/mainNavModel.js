@@ -29,7 +29,6 @@ export function buildMainNavModel({ showGuestChrome, asMentor, resolve, t }) {
           label: t('nav.company', 'Company'),
           items: [
             { path: resolve('/company'), label: t('nav.aboutBridge', 'About Bridge') },
-            { path: resolve('/trust'), label: t('nav.trust', 'Trust & Safety') },
           ],
         },
         {
@@ -39,6 +38,7 @@ export function buildMainNavModel({ showGuestChrome, asMentor, resolve, t }) {
             { path: resolve('/faq'), label: t('nav.faq', 'FAQ') },
             { path: resolve('/help'), label: t('nav.help', 'Help') },
             { path: resolve('/contact'), label: t('nav.contact', 'Contact') },
+            { path: resolve('/trust'), label: t('nav.trust', 'Trust & Safety') },
           ],
         },
       ],
