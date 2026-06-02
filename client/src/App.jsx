@@ -11,6 +11,7 @@ import { resolvePalette } from './utils/routePalette';
 import Footer from './components/Footer';
 import BridgeGlobalAtmosphere from './components/BridgeGlobalAtmosphere';
 import FeedbackFAB from './components/FeedbackFAB';
+import CookieConsentBanner from './components/CookieConsentBanner';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthPage, PublicPage, AuthenticatedProductRedirect, CommunityEntryGate, CommunitySubscriptionGate } from './components/routing/RouteGuards';
 import TrialBanner from './components/TrialBanner';
@@ -178,6 +179,7 @@ function AppContent() {
         </ErrorBoundary>
       </div>
       {!isVideoCall && !isAuthPage && <FeedbackFAB />}
+      {!isVideoCall && !isAuthPage && <CookieConsentBanner />}
       {!hideFooter && <Footer />}
       <PaletteDevBadge />
     </div>

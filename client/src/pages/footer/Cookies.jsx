@@ -1,4 +1,5 @@
 import { Shield, Settings, BarChart3, Megaphone, Printer } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Reveal from '../../components/Reveal';
 import { pageShell } from '../../ui';
 
@@ -87,7 +88,18 @@ export default function Cookies() {
               What are cookies
             </h2>
             <p className="mt-4 text-[15px] leading-[1.75] text-[var(--bridge-text-secondary)]">
-              Cookies are small text files stored on your device when you visit a website. They help the site remember your preferences and understand how you use it.
+              Cookies are small text files stored on your device when you visit a website. They help the site remember your preferences and understand how you use it. When you first visit Bridge, a banner lets you accept or review these settings — your choice is saved in your browser.
+            </p>
+            <p className="mt-4 text-[15px] leading-[1.75] text-[var(--bridge-text-secondary)]">
+              For how we handle personal data overall, see our{' '}
+              <Link
+                to="/privacy"
+                className="font-semibold underline underline-offset-4 transition hover:opacity-80"
+                style={{ color: 'var(--color-primary)' }}
+              >
+                Privacy policy
+              </Link>
+              .
             </p>
           </section>
 

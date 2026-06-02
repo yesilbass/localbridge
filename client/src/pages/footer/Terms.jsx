@@ -202,7 +202,7 @@ export default function Terms() {
         <div className="grid gap-10 lg:grid-cols-12">
           <aside ref={asideRef} className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
             <nav
-              className="relative overflow-hidden rounded-2xl p-5 pt-6"
+              className="relative max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl p-5 pt-6"
               style={{
                 backgroundColor: 'var(--bridge-surface)',
                 boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
@@ -231,21 +231,17 @@ export default function Terms() {
             </nav>
           </aside>
 
-          <article ref={articleRef} className="space-y-6 lg:col-span-9">
+          <article ref={articleRef} className="max-w-3xl space-y-20 lg:col-span-9">
             {SECTIONS.map((s) => (
               <section
                 key={s.id}
                 id={s.id}
-                className="scroll-mt-24 rounded-2xl p-8 sm:p-10"
-                style={{
-                  backgroundColor: 'var(--bridge-surface)',
-                  boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
-                }}
+                className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12 [&:first-child]:border-t-0 [&:first-child]:pt-0"
               >
                 <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
                   {s.title}
                 </h2>
-                <div className="mt-4 space-y-4 text-[15px] leading-[1.75] text-[var(--bridge-text-secondary)]">
+                <div className="mt-6 space-y-5 text-[16px] leading-[1.85] text-[var(--bridge-text-secondary)]">
                   {renderBody(s.body)}
                 </div>
               </section>
