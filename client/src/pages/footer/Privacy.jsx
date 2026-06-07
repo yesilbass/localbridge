@@ -7,13 +7,6 @@ import {
 import Reveal from '../../components/Reveal';
 import { pageShell } from '../../ui';
 
-// ─── Data ────────────────────────────────────────────────────────────────────
-
-const SECTION_IDS = [
-  'collection', 'usage', 'sharing', 'rights',
-  'security', 'cookies', 'retention', 'children', 'changes', 'contact',
-];
-
 const SECTIONS = [
   {
     id: 'collection',
@@ -22,116 +15,228 @@ const SECTIONS = [
       type: 'groups',
       groups: [
         {
-          label: 'Directly from you',
-          items: ['Name, email, and password', 'Profile info and bio', 'Payment method (processed by Stripe — we never see your card number)', 'Messages, reviews, and session notes you write']
+          label: 'You provide directly',
+          items: [
+            'Name, email address, and password',
+            'Profile information: title, company, bio, LinkedIn, GitHub, website, and photo',
+            'Resume files (PDF, up to 5 MB — stored privately in Supabase storage)',
+            'Session booking messages and session notes',
+            'Community posts, comments, and reviews',
+            'Voice audio during the Mentor application interview (transcribed in real-time; audio not retained by Bridge)',
+            'Support, feedback, and safety report submissions',
+          ]
         },
         {
-          label: 'Generated through use',
-          items: ['Session history and booking patterns', 'Mentor or mentee preferences', 'Platform activity and feature usage']
+          label: 'Generated through platform use',
+          items: [
+            'Session history, booking status, and scheduling data',
+            'Saved (favorited) mentor records',
+            'AI feature usage counts and token metadata (for rate limiting)',
+            'Mentor onboarding wizard progress and step completion',
+            'Subscription status, plan type, billing identifiers, and trial dates from Stripe',
+            'Stripe checkout metadata: session type, price, user ID, mentor ID, mentor name',
+            'Calendly scheduling data: event URI, invitee URI, join URL, cancel/reschedule URLs',
+            'In-app messages between Mentors and Mentees (stored in our database)',
+          ]
         },
         {
-          label: 'Technical data',
-          items: ['IP address and approximate location', 'Browser type and device identifiers', 'Usage logs and error reports']
+          label: 'Mentor verification data',
+          items: [
+            'Identity verification run results and component scores (identity, government ID, professional email, LinkedIn, resume AI, expertise interview, reference, track record)',
+            'Background check results provided by Checkr (where applicable)',
+            'Professional reference submissions from named third parties, including AI-generated authenticity scores',
+            'Voice interview transcripts and AI evaluation outputs stored in your mentor profile record',
+          ]
+        },
+        {
+          label: 'Technical and device data',
+          items: [
+            'IP address (logged by Vercel infrastructure and our server)',
+            'Browser type and approximate location (inferred from IP at the network level)',
+            'API request timestamps and error logs',
+            'Record-level timestamps on all database rows',
+          ]
         },
       ]
     }
   },
   {
     id: 'usage',
-    title: '2. How We Use Information',
+    title: '2. How We Use Your Information',
     content: {
       type: 'mixed',
-      body: 'We use your data to operate the platform, match you with mentors, process payments, send transactional communications, improve our services, detect fraud, and comply with legal obligations.',
-      callout: 'We do not sell personal data to third parties. Ever.'
+      body: 'We use your information to: operate the platform and match you with Mentors; process payments and manage subscriptions; enable scheduling, video calls, and in-app messaging; personalize your experience; enforce our Terms and detect fraud; respond to support requests; improve platform performance and safety; and comply with legal obligations. We analyze anonymized, aggregated usage patterns to improve our product.',
+      callout: 'We do not sell your personal data. We do not run advertising. We do not use your data for any purpose unrelated to operating and improving Bridge.'
     }
   },
   {
-    id: 'sharing',
-    title: '3. Data Sharing',
+    id: 'third-parties',
+    title: '3. Third-Party Services',
+    content: {
+      type: 'groups',
+      groups: [
+        {
+          label: 'Infrastructure',
+          items: [
+            'Supabase (Supabase Inc.): PostgreSQL database, authentication, real-time signaling, and file storage. Hosted on AWS in the US-East region.',
+            'Vercel: serverless function hosting and static asset delivery. Vercel logs IP addresses and request metadata per their privacy policy.',
+          ]
+        },
+        {
+          label: 'Payments',
+          items: [
+            'Stripe: all payment processing. Your card number is never sent to or stored by Bridge. Stripe receives: your email, checkout metadata (session type, price, user ID, mentor ID), and subscription details. Stripe\'s privacy policy applies.',
+          ]
+        },
+        {
+          label: 'Scheduling',
+          items: [
+            'Calendly: session scheduling via embedded widget. When you book, your name and email are sent to Calendly. Bridge receives booking details (event time, join URL, cancellation and reschedule links) via a signature-verified webhook. Calendly\'s privacy policy governs their independent processing.',
+          ]
+        },
+        {
+          label: 'AI providers',
+          items: [
+            'OpenAI: mentor matching (mentee profile + resume text), voice application transcription, reference authenticity scoring, and resume content extraction.',
+            'Anthropic (Claude API): resume review analysis, mentor bio refinement, and expertise category tagging.',
+            'Per both providers\' enterprise API policies at the time of writing, data submitted via API is not used to train their models.',
+          ]
+        },
+        {
+          label: 'Email and support',
+          items: [
+            'Web3Forms: support, feedback, and safety report submissions are relayed to mentors.bridge@gmail.com via the Web3Forms API. Your message and any contact information you provide are included in the relay.',
+          ]
+        },
+        {
+          label: 'Background checks',
+          items: [
+            'Checkr (Consumer Reporting Agency): Where applicable, Mentor applicants may be subject to background reports via Checkr\'s FCRA-compliant process. Checkr\'s own privacy policy and user rights disclosures apply.',
+          ]
+        },
+        {
+          label: 'CDN',
+          items: [
+            'Google Fonts CDN: font files are loaded from Google\'s servers. Standard HTTP request metadata (IP address, browser user-agent) is sent to Google per their privacy policy.',
+          ]
+        },
+      ]
+    }
+  },
+  {
+    id: 'ai-processing',
+    title: '4. AI Features & External Data Processing',
     content: {
       type: 'text',
       paragraphs: [
-        'We share data only with: mentors you\'ve booked (limited profile info relevant to the session), service providers who help us operate (Stripe for payments, AWS for hosting), and authorities when legally compelled.',
-        'All service providers are bound by data processing agreements.',
+        'Several Bridge features transmit your data to external AI providers. By using these features, you accept that your information leaves Bridge\'s infrastructure and is processed under those providers\' data policies.',
+        'Resume review: your full resume PDF (up to 5 MB) is sent to Anthropic\'s Claude API. We receive a structured analysis (score, grade, section feedback) and display it to you. Usage limit: 1 per account lifetime.',
+        'Mentor matching: your mentee profile (current role, target role, goals, years of experience) and, optionally, extracted resume text are sent to OpenAI to rank mentor recommendations. Usage limit: 3 per account.',
+        'Voice mentor application: during the Mentor application, your audio is streamed in real-time to OpenAI\'s Realtime API for transcription. The resulting transcript and AI evaluation are stored in our database as part of your application record. Audio is not stored by Bridge after the call ends.',
+        'Reference authenticity scoring: text submitted by your professional references undergoes AI-based authenticity scoring via OpenAI\'s API. Reference text is processed as part of the Mentor verification pipeline.',
+        'All AI feature calls are logged by user ID, feature name, and token counts for rate limiting purposes. These logs are retained for up to 12 months.',
+      ]
+    }
+  },
+  {
+    id: 'video-comms',
+    title: '5. Video Sessions & Communications',
+    content: {
+      type: 'text',
+      paragraphs: [
+        'Video sessions use a direct peer-to-peer WebRTC connection. Video and audio streams are transmitted directly between participants\' devices and never pass through or are stored on Bridge\'s servers.',
+        'Bridge does not record, store, or have access to video or audio from sessions. Connection setup (signaling) uses Supabase Realtime channels that carry only connection metadata — SDP offers and ICE candidates — not media content.',
+        'In-app messaging between Mentors and Mentees is stored in our database. Messages are accessible to both participants and are subject to our data retention policy.',
+        'Community posts, comments, and upvotes are stored in our database and visible to all authenticated users on the platform.',
       ]
     }
   },
   {
     id: 'rights',
-    title: '4. Your Rights',
+    title: '6. Your Rights & Controls',
     content: {
       type: 'rights',
-      intro: 'You can exercise any of these rights at any time through your account settings or by emailing mentors.bridge@gmail.com.',
+      intro: 'You can exercise any of these rights at any time through your account settings or by emailing mentors.bridge@gmail.com. We respond to all requests within 30 days.',
       rights: [
-        { icon: Eye, label: 'Access', desc: 'See all personal data we hold about you' },
-        { icon: FileCheck, label: 'Correct', desc: 'Fix inaccurate or incomplete information' },
-        { icon: Database, label: 'Export', desc: 'Download a copy of your data in a portable format' },
-        { icon: Trash2, label: 'Delete', desc: 'Remove your account and all associated data' },
-        { icon: UserCheck, label: 'Object', desc: 'Opt out of specific processing activities' },
+        { icon: Eye, label: 'Access', desc: 'Request a copy of all personal data we hold about you' },
+        { icon: FileCheck, label: 'Correct', desc: 'Update inaccurate or incomplete information in your profile' },
+        { icon: Database, label: 'Export', desc: 'Download your data in a portable, machine-readable format' },
+        { icon: Trash2, label: 'Delete', desc: 'Delete your account and have your personal data removed within 30 days' },
+        { icon: UserCheck, label: 'Object', desc: 'Opt out of specific processing, including AI features and non-essential use' },
       ],
-      footnote: 'EU, UK, and California residents have additional rights under GDPR, CCPA, and similar laws.'
+      footnote: 'EU, UK, and California (CCPA) residents have additional statutory rights. We honor all requests regardless of your country of residence.'
     }
   },
   {
     id: 'security',
-    title: '5. Security',
+    title: '7. Security Measures',
     content: {
       type: 'security',
-      body: 'No system is perfectly secure, but we treat your data with the same care we\'d treat our own.',
+      body: 'We apply security controls at every layer of the stack. No system is 100% secure, but we follow best practices and limit access to your data on a need-to-know basis.',
       badges: [
-        { label: 'AES-256', note: 'Encryption at rest & in transit' },
-        { label: 'SOC 2 Type II', note: 'Third-party audited' },
-        { label: 'Access controls', note: 'Role-based, least-privilege' },
+        { label: 'TLS in transit', note: 'All traffic encrypted end-to-end' },
+        { label: 'bcrypt passwords', note: 'Hashed with cost factor 10; never stored in plain text' },
+        { label: 'Row-Level Security', note: 'Postgres RLS enforced on every table; users can only access their own data' },
+        { label: 'JWT authentication', note: 'Tokens signed server-side; service credentials never sent to the browser' },
+        { label: 'Private storage', note: 'Resume files in a private Supabase bucket; access via short-lived signed URLs only' },
       ]
     }
   },
   {
-    id: 'cookies',
-    title: '6. Cookies',
+    id: 'cookies-storage',
+    title: '8. Cookies & Local Storage',
     content: {
       type: 'text',
       paragraphs: [
-        'We use cookies for authentication, preferences, and analytics. No third-party advertising cookies are set. See our Cookie Policy for the full breakdown.',
+        'Bridge sets Supabase authentication cookies (HttpOnly, SameSite=Lax, Secure in production) to maintain your login session. These are essential and cannot be disabled.',
+        'Stripe.js and the Calendly scheduling widget may set their own first-party or third-party cookies when loaded on payment or scheduling pages. These are governed by Stripe\'s and Calendly\'s privacy policies respectively.',
+        'We use browser localStorage to store client-side preferences that are never transmitted to our servers: your theme preference (bridge-appearance), onboarding modal dismissal (bridge_onboarded), cookie consent state (bridge_cookie_consent), notification read state (bridge_notif_read), and a recently viewed mentors list (bridge_recently_viewed_mentors).',
+        'Bridge does not use analytics cookies, advertising tracking pixels, heatmap scripts, session replay tools, or any third-party marketing technology. See our Cookie Policy for the full inventory.',
       ]
     }
   },
   {
     id: 'retention',
-    title: '7. Data Retention',
+    title: '9. Data Retention',
     content: {
       type: 'text',
       paragraphs: [
-        'We retain account data while your account is active. If you delete your account, personal data is removed within 30 days — except where retention is legally required (e.g., tax records, which are kept for 7 years per IRS requirements).',
+        'We retain your personal data while your account is active and for a reasonable period afterward to handle disputes, enforce our Terms, and comply with legal obligations.',
+        'Account deletion: when you delete your account, personal data is removed within 30 days. Financial transaction records (required for tax compliance) are retained for 7 years per IRS requirements. Verification data may be retained where legally required.',
+        'Session and review data: anonymized session metadata without personally identifiable information may be retained after account deletion for platform safety and product analytics.',
+        'Voice interview transcripts: transcripts stored in your Mentor profile record are deleted within 30 days of account deletion.',
+        'AI usage logs: token counts and feature usage metadata are retained for up to 12 months for billing audit and rate-limiting purposes.',
+        'Resume files: stored in a private Supabase bucket and deleted immediately upon account deletion or when you remove them manually from settings.',
       ]
     }
   },
   {
     id: 'children',
-    title: '8. Children',
+    title: '10. Children\'s Privacy',
     content: {
       type: 'text',
       paragraphs: [
-        'Bridge is not for users under 18. We do not knowingly collect data from minors. If you believe a minor has created an account, email mentors.bridge@gmail.com and we\'ll remove it immediately.',
+        'Bridge is not directed at users under 18 years of age. We do not knowingly collect personal information from minors.',
+        'If you believe a minor has created an account on Bridge, email mentors.bridge@gmail.com immediately. We will investigate and remove the account and all associated data promptly.',
       ]
     }
   },
   {
     id: 'changes',
-    title: '9. Changes to This Policy',
+    title: '11. Changes to This Policy',
     content: {
       type: 'text',
       paragraphs: [
-        'We may update this policy as the platform evolves. Material changes — anything that affects how your data is used or shared — will be communicated via email at least 30 days before taking effect. The "last updated" date at the top of this page always reflects the most recent revision.',
+        'We may update this policy as Bridge evolves. Material changes — those that affect how your data is used or shared — will be communicated by email at least 30 days before they take effect. The "last updated" date at the top of this page always reflects the currently effective version.',
       ]
     }
   },
   {
     id: 'contact',
-    title: '10. Contact',
+    title: '12. Contact & Privacy Requests',
     content: {
       type: 'contact',
       email: 'mentors.bridge@gmail.com',
-      address: 'Bridge Privacy Office\n525 Market Street, Suite 1200\nSan Francisco, CA 94105'
     }
   },
 ];
@@ -141,10 +246,11 @@ const TLDR = [
     icon: Database,
     heading: 'What we collect',
     items: [
-      'Your name, email, and profile',
-      'Session history and activity',
-      'Payment info (Stripe handles it)',
-      'Device and usage logs',
+      'Name, email, and profile information',
+      'Session history and booking data',
+      'Resume files (private, encrypted at rest)',
+      'Voice interview transcript (Mentors only)',
+      'Payment metadata via Stripe (not your card)',
     ]
   },
   {
@@ -152,31 +258,29 @@ const TLDR = [
     heading: 'What we never do',
     items: [
       'Sell your personal data',
-      'Share without consent',
-      'Use it for advertising',
-      'Retain after you delete',
+      'Record or store video/audio sessions',
+      'Share data without consent or legal compulsion',
+      'Use your data for advertising',
     ]
   },
   {
     icon: UserCheck,
     heading: 'You can always',
     items: [
-      'Access all your data',
-      'Export everything',
-      'Delete your account fully',
-      'Email us any time',
+      'Access and export all your data',
+      'Correct inaccurate information',
+      'Delete your account and data fully',
+      'Opt out of AI features at any time',
     ]
   },
 ];
 
 const CHIPS = [
-  { icon: Lock, label: 'AES-256 encrypted' },
-  { icon: FileCheck, label: 'SOC 2 Type II' },
+  { icon: Lock, label: 'TLS + bcrypt' },
+  { icon: FileCheck, label: 'Row-Level Security' },
   { icon: Eye, label: 'Zero data sales' },
-  { icon: Shield, label: 'GDPR & CCPA' },
+  { icon: Shield, label: 'GDPR & CCPA ready' },
 ];
-
-// ─── Hooks ───────────────────────────────────────────────────────────────────
 
 function useActiveSection(ids) {
   const [active, setActive] = useState(ids[0]);
@@ -240,14 +344,11 @@ function useSidebarInView() {
   return [ref, inView];
 }
 
-// ─── Floating TOC ─────────────────────────────────────────────────────────────
-
 function FloatingToc({ sections, activeSection, visible }) {
   const [open, setOpen] = useState(false);
   const activeIdx = sections.findIndex((s) => s.id === activeSection);
   const activeTitle = sections[activeIdx]?.title ?? sections[0].title;
 
-  // Close on outside click
   const containerRef = useRef(null);
   useEffect(() => {
     if (!open) return;
@@ -258,21 +359,19 @@ function FloatingToc({ sections, activeSection, visible }) {
     return () => document.removeEventListener('mousedown', fn);
   }, [open]);
 
-  // Close on section click
   const handleSectionClick = useCallback(() => setOpen(false), []);
 
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2"
+      className="fixed bottom-6 left-4 right-[4.5rem] z-50 max-w-lg"
       style={{
         opacity: visible ? 1 : 0,
-        transform: `translateX(-50%) translateY(${visible ? 0 : 16}px)`,
+        transform: `translateY(${visible ? 0 : 16}px)`,
         transition: 'opacity 280ms cubic-bezier(0.16,1,0.3,1), transform 320ms cubic-bezier(0.16,1,0.3,1)',
         pointerEvents: visible ? 'auto' : 'none'
       }}
     >
-      {/* Expanded list — opens upward */}
       <div
         className="mb-2 overflow-hidden rounded-2xl"
         style={{
@@ -289,9 +388,7 @@ function FloatingToc({ sections, activeSection, visible }) {
       >
         <div
           className="sticky top-0 flex items-center justify-between px-4 py-2.5"
-          style={{
-            backgroundColor: 'var(--bridge-surface)'
-          }}
+          style={{ backgroundColor: 'var(--bridge-surface)' }}
         >
           <span
             className="text-[10px] font-black uppercase"
@@ -360,7 +457,6 @@ function FloatingToc({ sections, activeSection, visible }) {
         </ul>
       </div>
 
-      {/* Collapsed pill */}
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-2.5 rounded-full px-4 py-2.5 text-[13px] font-semibold"
@@ -396,8 +492,6 @@ function FloatingToc({ sections, activeSection, visible }) {
     </div>
   );
 }
-
-// ─── Section renderers ───────────────────────────────────────────────────────
 
 function SectionBody({ content }) {
   if (content.type === 'text') {
@@ -499,7 +593,7 @@ function SectionBody({ content }) {
           {content.badges.map(({ label, note }) => (
             <div
               key={label}
-              className="rounded-xl px-4 py-2.5"
+              className="min-w-[120px] rounded-xl px-4 py-2.5"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--bridge-canvas) 70%, transparent)',
                 boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
@@ -533,12 +627,6 @@ function SectionBody({ content }) {
         >
           {content.email}
         </a>
-        <pre
-          className="mt-3 whitespace-pre-wrap text-[13px] leading-relaxed"
-          style={{ color: 'var(--bridge-text-muted)', fontFamily: 'inherit' }}
-        >
-          {content.address}
-        </pre>
       </div>
     );
   }
@@ -546,10 +634,8 @@ function SectionBody({ content }) {
   return null;
 }
 
-// ─── Main ────────────────────────────────────────────────────────────────────
-
 export default function Privacy() {
-  const activeSection = useActiveSection(SECTION_IDS);
+  const activeSection = useActiveSection(SECTIONS.map(s => s.id));
   const progress = useReadingProgress();
   const showBackToTop = useShowBackToTop();
   const [sidebarRef, sidebarInView] = useSidebarInView();
@@ -559,12 +645,17 @@ export default function Privacy() {
   }, []);
 
   return (
-    <main
-      className={`${pageShell} scroll-smooth`}
-    >
-      <div className="mx-auto max-w-6xl px-5 pt-28 pb-8 sm:px-8 lg:pt-36 lg:pb-12">
+    <main className={`${pageShell} relative px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[40vmax] w-[80vmax] -translate-x-1/2 opacity-30"
+        style={{
+          background: 'radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-primary) 15%, transparent), transparent 68%)',
+          filter: 'blur(80px)'
+        }}
+      />
+      <div className="relative mx-auto max-w-bridge">
 
-        {/* ── Page header ── */}
         <div
           className="mb-14 flex flex-col gap-6 pb-12 sm:flex-row sm:items-end sm:justify-between"
           style={{ borderBottom: '1px solid var(--bridge-border)' }}
@@ -589,12 +680,12 @@ export default function Privacy() {
             </h1>
             <div className="mt-3 flex items-center gap-3 flex-wrap">
               <p className="text-sm" style={{ color: 'var(--bridge-text-muted)' }}>
-                Last updated: April 21, 2026
+                Last updated: June 7, 2026
               </p>
               <span aria-hidden style={{ color: 'var(--bridge-border-strong)' }}>·</span>
               <p className="flex items-center gap-1 text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>
                 <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-                ~3 min read
+                ~5 min read
               </p>
             </div>
           </div>
@@ -631,7 +722,6 @@ export default function Privacy() {
           </div>
         </div>
 
-        {/* ── TL;DR ── */}
         <Reveal>
           <div
             className="mb-16 overflow-hidden rounded-2xl"
@@ -658,7 +748,6 @@ export default function Privacy() {
                   className={`p-7 ${idx > 0 ? 'border-t sm:border-t-0 sm:border-l' : ''}`}
                   style={{ borderColor: 'var(--bridge-border)' }}
                 >
-                  {/* Heading — clearly dominant above the list */}
                   <div className="mb-4 flex items-center gap-2.5">
                     <span
                       aria-hidden="true"
@@ -692,11 +781,9 @@ export default function Privacy() {
           </div>
         </Reveal>
 
-        {/* ── Sidebar + content ── */}
-        <div className="grid gap-10 lg:grid-cols-12">
+        <div className="flex items-start gap-10">
 
-          {/* Sticky sidebar */}
-          <aside ref={sidebarRef} className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
+          <aside ref={sidebarRef} className="hidden w-56 shrink-0 lg:block lg:sticky lg:top-24 lg:self-start">
             <nav
               className="relative max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl"
               style={{
@@ -704,7 +791,6 @@ export default function Privacy() {
                 boxShadow: 'inset 0 0 0 1px var(--bridge-border)'
               }}
             >
-              {/* Reading progress bar */}
               <div
                 className="absolute inset-x-0 top-0 h-0.5 origin-left transition-transform duration-150"
                 style={{
@@ -773,8 +859,7 @@ export default function Privacy() {
             </nav>
           </aside>
 
-          {/* Article */}
-          <article className="max-w-3xl space-y-20 lg:col-span-9">
+          <article className="min-w-0 flex-1 max-w-[700px] space-y-20">
             {SECTIONS.map((s, idx) => (
               <Reveal key={s.id} delay={Math.min(idx * 25, 100)}>
                 <section
@@ -794,43 +879,14 @@ export default function Privacy() {
           </article>
         </div>
 
-        {/* ── Footer row ── */}
-        <div
-          className="mt-14 flex flex-col items-start gap-4 pt-10 sm:flex-row sm:items-center sm:justify-between"
-          style={{ borderTop: '1px solid var(--bridge-border)' }}
-        >
-          <p className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>
-            Questions?{' '}
-            <a
-              href="mailto:mentors.bridge@gmail.com"
-              className="font-medium underline underline-offset-2"
-              style={{ color: 'var(--bridge-text-secondary)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--bridge-text)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--bridge-text-secondary)'; }}
-            >
-              mentors.bridge@gmail.com
-            </a>
-          </p>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors"
-            style={{ color: 'var(--bridge-text-secondary)', boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--bridge-text)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--bridge-text-secondary)'; }}
-          >
-            ← Back to Bridge
-          </Link>
-        </div>
       </div>
 
-      {/* ── Floating TOC ── */}
       <FloatingToc
         sections={SECTIONS}
         activeSection={activeSection}
         visible={!sidebarInView}
       />
 
-      {/* ── Back to top ── */}
       <button
         onClick={scrollToTop}
         aria-label="Back to top"
