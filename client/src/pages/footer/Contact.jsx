@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, Mail, Clock, MessageSquareText, MapPin, Shield } from 'lucide-react';
+import {
+  Loader2, Mail, Clock, MessageSquareText,
+  Shield, AlertTriangle, ChevronRight
+} from 'lucide-react';
 import Reveal from '../../components/Reveal';
 import { pageShell } from '../../ui';
 import { COMPANY_EMAIL, mailtoHref, generateTicketId } from '../../config/contact';
@@ -17,6 +20,16 @@ const EYEBROW = {
 
 const FIELD =
   'w-full rounded-lg border border-[var(--bridge-border)] bg-transparent px-4 py-3.5 text-base text-[var(--bridge-text)] outline-none placeholder:text-[var(--bridge-text-muted)] transition focus:border-[var(--color-primary)] focus:outline-none';
+
+const TOPICS = [
+  { value: 'General question', isSafety: false, responseTime: '24–48 hours' },
+  { value: 'Billing issue', isSafety: false, responseTime: '24–48 hours' },
+  { value: 'Session problem', isSafety: false, responseTime: '24–48 hours' },
+  { value: 'Mentor verification', isSafety: false, responseTime: '24–48 hours' },
+  { value: 'Technical issue', isSafety: false, responseTime: '24–48 hours' },
+  { value: 'Partnership', isSafety: false, responseTime: '2–3 business days' },
+  { value: 'Safety, Harassment, or Fraud', isSafety: true, responseTime: '1 business day' },
+];
 
 function ContactChannel({ icon: Icon, label, children }) {
   return (
@@ -42,11 +55,15 @@ export default function Contact() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
+  const activeTopic = TOPICS.find((t) => t.value === form.topic) ?? TOPICS[0];
+  const isSafety = activeTopic.isSafety;
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.name || !form.email || !form.message || submitting) return;
 
-    const id = generateTicketId();
+    const prefix = isSafety ? 'SAFE' : undefined;
+    const id = generateTicketId(prefix);
     const subject = `[${form.topic}] [#${id}] Bridge contact from ${form.name}`;
     const body = [`Topic: ${form.topic}`, `From: ${form.name} <${form.email}>`, '', form.message].join('\n');
 
@@ -54,7 +71,7 @@ export default function Contact() {
     setSubmitError(null);
     try {
       await sendSupportEmail({
-        kind: 'contact',
+        kind: isSafety ? 'safety' : 'contact',
         ticketId: id,
         subject,
         body,
@@ -64,6 +81,7 @@ export default function Contact() {
           Topic: form.topic,
           Name: form.name,
           Email: form.email,
+          IsSafety: String(isSafety),
           Page: typeof window !== 'undefined' ? window.location.href : '',
           Submitted: new Date().toISOString(),
         },
@@ -85,7 +103,16 @@ export default function Contact() {
   }
 
   return (
-    <main className={`${pageShell} px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
+    <main className={`${pageShell} relative px-4 py-20 sm:px-6 sm:py-24 lg:px-8`}>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[40vmax] w-[80vmax] -translate-x-1/2 opacity-30"
+        style={{
+          background:
+            'radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-primary) 15%, transparent), transparent 68%)',
+          filter: 'blur(80px)'
+        }}
+      />
       <div className="mx-auto max-w-5xl">
         <Reveal className="mb-12">
           <span className="mb-3 block" style={EYEBROW}>
@@ -98,11 +125,13 @@ export default function Contact() {
             {s.footer.contactHeading}
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-[1.7] text-[var(--bridge-text-secondary)]">
-            Goes straight to a founder. Same-day reply when we can.
+            Goes directly to a founder. Select a topic below — safety reports are routed to a priority queue and reviewed within one business day.
           </p>
         </Reveal>
 
         <div className="grid items-start gap-12 lg:grid-cols-5 lg:gap-16">
+
+          {/* Sidebar */}
           <aside className="lg:col-span-2">
             <Reveal delay={10}>
               <div
@@ -123,35 +152,62 @@ export default function Contact() {
                       {COMPANY_EMAIL}
                     </a>
                   </ContactChannel>
-                  <ContactChannel icon={Clock} label="Response time">
-                    Same business day for most messages. Safety reports within one business day.
+                  <ContactChannel icon={Clock} label="Response times">
+                    <ul className="space-y-1">
+                      <li>Standard tickets: 24–48 hours</li>
+                      <li>Safety reports: 1 business day</li>
+                      <li>Partnership inquiries: 2–3 business days</li>
+                    </ul>
                   </ContactChannel>
-                  <ContactChannel icon={MessageSquareText} label="Quick feedback">
-                    Use the feedback button on any page — bottom-right corner — for bugs and product ideas.
-                  </ContactChannel>
-                  <ContactChannel icon={MapPin} label="Office">
-                    <address className="not-italic">
-                      Bridge
-                      <br />
-                      525 Market Street, Suite 1200
-                      <br />
-                      San Francisco, CA 94105
-                    </address>
-                  </ContactChannel>
-                  <ContactChannel icon={Shield} label="Safety concerns">
+                  <ContactChannel icon={Shield} label="Safety & harassment">
+                    Use the form and select <strong className="font-semibold" style={{ color: 'var(--bridge-text)' }}>Safety, Harassment, or Fraud</strong> — or go directly to the{' '}
                     <Link
                       to="/trust"
                       className="font-semibold underline underline-offset-4 transition hover:opacity-80"
                       style={{ color: 'var(--color-primary)' }}
                     >
-                      Trust & Safety report form
+                      Trust & Safety page
                     </Link>
+                    {' '}for anonymous reporting.
                   </ContactChannel>
+                  <ContactChannel icon={MessageSquareText} label="Quick feedback">
+                    Use the feedback button on any page (bottom-right corner) for bugs and product ideas.
+                  </ContactChannel>
+                </div>
+
+                <div className="mt-6 border-t border-[var(--bridge-border)] pt-5">
+                  <p className="mb-3 text-[12px] font-semibold text-[var(--bridge-text-muted)] uppercase tracking-[0.14em]">
+                    Before you write
+                  </p>
+                  <ul className="space-y-2">
+                    {[
+                      { label: 'Help center', to: '/help', sub: 'Step-by-step guides' },
+                      { label: 'FAQ', to: '/faq', sub: 'Common questions' },
+                      { label: 'Trust & Safety', to: '/trust', sub: 'Report abuse anonymously' },
+                    ].map(({ label, to, sub }) => (
+                      <li key={label}>
+                        <Link
+                          to={to}
+                          className="group flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors"
+                          style={{ backgroundColor: 'color-mix(in srgb, var(--bridge-canvas) 50%, transparent)' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--color-primary) 6%, transparent)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--bridge-canvas) 50%, transparent)'; }}
+                        >
+                          <div>
+                            <p className="text-[13px] font-semibold text-[var(--bridge-text)]">{label}</p>
+                            <p className="text-[12px] text-[var(--bridge-text-muted)]">{sub}</p>
+                          </div>
+                          <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[var(--bridge-text-muted)] transition group-hover:translate-x-0.5" aria-hidden />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </Reveal>
           </aside>
 
+          {/* Form */}
           <div className="lg:col-span-3">
             <Reveal delay={20}>
               {sent ? (
@@ -160,7 +216,9 @@ export default function Contact() {
                     {s.footer.contactSentHeading}
                   </h2>
                   <p className="mt-3 text-base leading-[1.8] text-[var(--bridge-text-secondary)]">
-                    {s.footer.contactSentBody}
+                    {isSafety
+                      ? 'Your safety report has been sent directly to a founder. We review safety reports within one business day and will follow up if you provided an email.'
+                      : s.footer.contactSentBody}
                   </p>
                   {ticketId && (
                     <p className="mt-5 text-base text-[var(--bridge-text-secondary)]">
@@ -198,9 +256,71 @@ export default function Contact() {
                     >
                       Help
                     </Link>
-                    ? Send a message — include your topic so we can route it faster.
+                    ? Select your topic below — it helps us route and prioritize your message.
                   </p>
+
                   <form onSubmit={handleSubmit} className="space-y-6">
+
+                    {/* Topic selector — always first */}
+                    <div>
+                      <label htmlFor="contact-topic" className="mb-2 block text-base font-medium text-[var(--bridge-text)]">
+                        {s.footer.contactTopicLabel}
+                      </label>
+                      <select
+                        id="contact-topic"
+                        value={form.topic}
+                        onChange={(e) => setForm({ ...form, topic: e.target.value })}
+                        className={FIELD}
+                        style={isSafety ? {
+                          borderColor: 'color-mix(in srgb, #ef4444 60%, transparent)',
+                          backgroundColor: 'color-mix(in srgb, #ef4444 4%, transparent)'
+                        } : undefined}
+                      >
+                        {TOPICS.map((t) => (
+                          <option key={t.value} value={t.value}>{t.value}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Safety callout / response time — fixed height container prevents layout shift */}
+                    <div className="min-h-[5.5rem]">
+                    {isSafety ? (
+                      <div
+                        className="flex items-start gap-3 rounded-xl p-4"
+                        style={{
+                          backgroundColor: 'color-mix(in srgb, #ef4444 6%, transparent)',
+                          boxShadow: 'inset 0 0 0 1px color-mix(in srgb, #ef4444 25%, transparent)'
+                        }}
+                      >
+                        <AlertTriangle
+                          className="mt-0.5 h-5 w-5 shrink-0"
+                          style={{ color: '#ef4444' }}
+                          aria-hidden
+                        />
+                        <div>
+                          <p className="text-[14px] font-semibold" style={{ color: 'var(--bridge-text)' }}>
+                            Safety report — priority queue
+                          </p>
+                          <p className="mt-1 text-[13px] leading-[1.6] text-[var(--bridge-text-secondary)]">
+                            This report will be sent directly to a founder and reviewed within one business day. For immediate danger, contact local emergency services. To report anonymously,{' '}
+                            <Link
+                              to="/trust"
+                              className="font-semibold underline underline-offset-2"
+                              style={{ color: 'var(--color-primary)' }}
+                            >
+                              use Trust & Safety
+                            </Link>
+                            {' '}instead.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-[13px]" style={{ color: 'var(--bridge-text-muted)' }}>
+                        Expected response: <strong className="font-semibold text-[var(--bridge-text)]">{activeTopic.responseTime}</strong>
+                      </p>
+                    )}
+                    </div>
+
                     <div className="grid gap-6 sm:grid-cols-2">
                       <div>
                         <label htmlFor="contact-name" className="mb-2 block text-base font-medium text-[var(--bridge-text)]">
@@ -232,24 +352,6 @@ export default function Contact() {
                     </div>
 
                     <div>
-                      <label htmlFor="contact-topic" className="mb-2 block text-base font-medium text-[var(--bridge-text)]">
-                        {s.footer.contactTopicLabel}
-                      </label>
-                      <select
-                        id="contact-topic"
-                        value={form.topic}
-                        onChange={(e) => setForm({ ...form, topic: e.target.value })}
-                        className={FIELD}
-                      >
-                        <option>General question</option>
-                        <option>Billing issue</option>
-                        <option>Session problem</option>
-                        <option>Partnership</option>
-                        <option>Other</option>
-                      </select>
-                    </div>
-
-                    <div>
                       <label htmlFor="contact-message" className="mb-2 block text-base font-medium text-[var(--bridge-text)]">
                         {s.footer.contactMessageLabel}
                       </label>
@@ -259,7 +361,11 @@ export default function Contact() {
                         rows={7}
                         value={form.message}
                         onChange={(e) => setForm({ ...form, message: e.target.value })}
-                        placeholder="What happened, what you expected, and anything we should look at."
+                        placeholder={
+                          isSafety
+                            ? 'Describe what happened — who was involved, when, and what you need from us. You can include screenshots or links.'
+                            : 'What happened, what you expected, and anything we should look at.'
+                        }
                         className={`resize-y ${FIELD}`}
                       />
                     </div>
@@ -273,7 +379,11 @@ export default function Contact() {
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-8 py-3.5 text-base font-semibold text-[var(--color-on-primary)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)] sm:w-auto"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg px-8 py-3.5 text-base font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bridge-canvas)] sm:w-auto"
+                      style={{
+                        backgroundColor: isSafety ? '#ef4444' : 'var(--color-primary)',
+                        color: 'var(--color-on-primary)'
+                      }}
                     >
                       {submitting ? (
                         <>
@@ -281,7 +391,7 @@ export default function Contact() {
                           {s.footer.contactSending}
                         </>
                       ) : (
-                        s.footer.contactSendCta
+                        isSafety ? 'Submit safety report' : s.footer.contactSendCta
                       )}
                     </button>
                   </form>

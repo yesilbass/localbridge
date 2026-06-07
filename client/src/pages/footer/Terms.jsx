@@ -4,40 +4,244 @@ import Reveal from '../../components/Reveal';
 import { pageShell } from '../../ui';
 
 const SECTIONS = [
-  { id: 'acceptance', title: '1. Acceptance of Terms', body: `By accessing or using Bridge, you agree to be bound by these Terms. If you don't agree, don't use the service. We may update these Terms; continued use after updates constitutes acceptance.` },
-  { id: 'eligibility', title: '2. Eligibility', body: `You must be at least 18 years old and capable of entering a binding contract under applicable law. Mentors must meet additional verification requirements outlined in the Mentor Agreement.` },
-  { id: 'accounts', title: '3. Accounts', body: `You're responsible for maintaining the security of your credentials and for all activity under your account. Notify us immediately of any unauthorized use. We reserve the right to suspend accounts that violate these Terms.` },
-  { id: 'payment', title: '4. Payments and Refunds', body: `Session fees are charged at booking and held until 24 hours after the session completes.\n\n**Refunds**: Full refund anytime before a session begins. Full refund within 48 hours of a completed session if you're unsatisfied. Subscription fees are non-refundable except where required by law.` },
-  { id: 'conduct', title: '5. User Conduct', body: `You agree not to: harass or discriminate against other users, share illegal or infringing content, attempt to circumvent platform payments, misrepresent credentials or identity, scrape or automate platform access, or use the service for any unlawful purpose.\n\nViolations may result in account suspension, termination, or legal action.` },
-  { id: 'ip', title: '6. Intellectual Property', body: `All platform content, trademarks, and code are owned by Bridge or our licensors. User-generated content (messages, reviews, notes) remains yours, but you grant Bridge a worldwide, royalty-free license to display it on the platform as necessary to operate the service.` },
-  { id: 'mentors', title: '7. Mentors Are Independent Contractors', body: `Mentors on Bridge are independent contractors, not employees or agents of Bridge. We facilitate the connection but do not direct, supervise, or guarantee the content, quality, or outcome of any session.` },
-  { id: 'disclaimers', title: '8. Disclaimers', body: `The service is provided "as is" and "as available." We don't guarantee specific outcomes from mentorship sessions. To the extent permitted by law, we disclaim all warranties, express or implied.` },
-  { id: 'liability', title: '9. Limitation of Liability', body: `To the maximum extent permitted by law, Bridge's total liability is limited to the amount you paid in the 12 months preceding the claim. We are not liable for indirect, incidental, or consequential damages.` },
-  { id: 'indemnity', title: '10. Indemnification', body: `You agree to indemnify and hold Bridge harmless from claims, damages, and expenses arising from your violation of these Terms or misuse of the platform.` },
-  { id: 'termination', title: '11. Termination', body: `We may suspend or terminate accounts that violate these Terms. You can close your account at any time through settings. Termination doesn't relieve either party of obligations incurred before termination.` },
-  { id: 'disputes', title: '12. Dispute Resolution', body: `Disputes will be resolved through binding arbitration under the rules of the American Arbitration Association, except for small-claims court actions and injunctive relief. Class-action waiver applies.` },
-  { id: 'governing', title: '13. Governing Law', body: `These Terms are governed by the laws of the State of California, without regard to conflict-of-law principles. Exclusive venue for any court actions: San Francisco County, California.` },
-  { id: 'contact', title: '14. Contact', body: `Questions about these Terms? Email mentors.bridge@gmail.com.` },
+  {
+    id: 'acceptance',
+    title: '1. Acceptance & Eligibility',
+    body: `By accessing or using Bridge ("we," "us," "our"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree, stop using the service. We may revise these Terms at any time; continued use after a change takes effect constitutes acceptance of the updated Terms.
+
+You must be at least 18 years old and legally capable of entering a binding contract. By creating an account, you confirm these conditions are met. Accounts belonging to users under 18 will be removed immediately upon discovery.`
+  },
+  {
+    id: 'accounts',
+    title: '2. Account Responsibilities',
+    body: `You are solely responsible for maintaining the security of your credentials and for all activity under your account. Provide accurate, current, and complete information when registering, and keep it updated.
+
+Notify us immediately at mentors.bridge@gmail.com if you suspect unauthorized access. We are not liable for losses caused by unauthorized access resulting from your failure to secure your credentials.
+
+Mentor accounts are subject to identity and professional verification, which may include document review, a background screen via Checkr (a third-party consumer reporting agency), reference checks, and an AI-evaluated voice interview. Verification status directly determines account privileges.`
+  },
+  {
+    id: 'marketplace',
+    title: '3. The Bridge Marketplace',
+    body: `Bridge is a two-sided marketplace connecting professional career mentors ("Mentors") with individuals seeking career guidance ("Mentees"). We provide tools for discovery, scheduling, payment, and peer-to-peer video communication.
+
+Bridge is not a party to the mentorship relationship and does not supervise, direct, or guarantee the substance of any session. Nothing on Bridge constitutes legal, financial, medical, or therapeutic advice. Sessions represent professional opinions and career guidance only.
+
+Bridge acts as a limited payment collection agent for Mentors solely to process session fees. Our collection of payment on a Mentor's behalf satisfies a Mentee's payment obligation to that Mentor.`
+  },
+  {
+    id: 'mentors',
+    title: '4. Mentor Independent Contractor Status',
+    body: `Mentors are independent contractors, not employees, agents, or partners of Bridge. They set their own rates, availability, and session content. Bridge does not direct or control the guidance a Mentor provides.
+
+Where authorized, Bridge may run background screening on Mentor applicants via Checkr. A completed background check does not constitute an endorsement of a Mentor's qualifications or guarantee the accuracy of their advice. Profile content — including titles, employers, and credentials — is submitted by Mentors and is not independently verified beyond our stated verification process.
+
+Mentors are solely responsible for the accuracy of their profiles and the quality of their sessions.`
+  },
+  {
+    id: 'scheduling',
+    title: '5. Scheduling & Calendly Integration',
+    body: `Sessions are scheduled through an embedded Calendly widget. When you book a session, your name and email are transmitted to Calendly's systems. This data is also received by Bridge via a secure, signature-verified webhook and stored to create your session record.
+
+Session data received from Calendly includes: invitee email, name, event start and end time, meeting join URL, and cancellation and reschedule links. This data is used solely to manage and display your session.
+
+When you cancel or reschedule through Calendly, Bridge's records update automatically. Calendly's own privacy policy (available at calendly.com/legal) governs Calendly's independent processing of your information.`
+  },
+  {
+    id: 'cancellations',
+    title: '6. Cancellations & Refunds',
+    body: `**Cancelling a session**: Use the cancellation link in your confirmation email or your dashboard. Sessions cancelled more than one hour before the scheduled start time are eligible for a full refund. Cancellations made within one hour of the start time are subject to Mentor discretion.
+
+**Satisfaction guarantee**: Email mentors.bridge@gmail.com within 48 hours of a completed session if you are unsatisfied. We review each case individually.
+
+**Mentor cancellations**: If a Mentor cancels a confirmed session, you receive a full refund.
+
+**Subscriptions**: Subscriptions include a 7-day free trial. Cancel before the trial ends and you will not be charged. After the trial, subscription fees are non-refundable except where required by law. Access continues through the end of the paid billing period upon cancellation.
+
+**No-shows**: If you do not attend a session without prior cancellation, you may forfeit the session fee. Contact us if extraordinary circumstances prevented attendance.`
+  },
+  {
+    id: 'billing',
+    title: '7. Fees, Billing & Subscriptions',
+    body: `**Session fees**: Per-session rates are set by Mentors and displayed at booking. Payment is processed at checkout via Stripe. By completing checkout, you agree to Stripe's Terms of Service. Bridge never stores your card number — Stripe handles all payment card data directly.
+
+**Subscriptions**: Monthly and annual plans are available. Annual plans are billed as a single upfront charge. Subscriptions renew automatically at the end of each billing period. Your plan, renewal date, and billing history are accessible in account settings.
+
+**Student discount**: Users with verified .edu email addresses may receive a discounted rate applied automatically at checkout.
+
+**Price changes**: We will notify you by email at least 30 days before changing your subscription price. Changes take effect at your next renewal.
+
+**Failed payments**: If a payment fails, subscription features may be restricted until payment is resolved. We will attempt to notify you by email.`
+  },
+  {
+    id: 'ai',
+    title: '8. AI-Powered Features',
+    body: `By using Bridge's AI features, you accept that the data described below leaves Bridge's servers and is processed under the applicable provider's privacy policy.
+
+**AI mentor matching**: Your mentee profile (current role, target role, goals, experience level) and, if uploaded, your resume text are sent to OpenAI's API to rank mentor recommendations. Limit: 3 per account.
+
+**AI resume review**: Your uploaded resume (PDF, up to 5 MB) is transmitted to Anthropic's Claude API. You receive a score, letter grade, and section-by-section feedback. Limit: 1 per account lifetime.
+
+**Voice mentor application**: Mentor applicants participate in an AI-facilitated voice interview via OpenAI's Realtime API. Audio is transcribed in real-time; the transcript and AI evaluation are stored in our database as part of your application record.
+
+**Reference authenticity scoring**: Text submitted by your professional references is scored via OpenAI's API for authenticity as part of mentor verification.
+
+**AI outputs are not professional advice.** Resume scores, mentor rankings, and evaluations are probabilistic model outputs — not certified professional assessments. Do not rely on them as substitutes for licensed professional judgment.`
+  },
+  {
+    id: 'video',
+    title: '9. Video Sessions & Recording',
+    body: `Video sessions use a direct peer-to-peer WebRTC connection. No video or audio is routed through or stored on Bridge's servers. Connection setup (signaling) uses an encrypted Supabase Realtime channel identified by session ID.
+
+**Bridge does not record sessions.** Video and audio exist only on participating devices during the live call.
+
+**Recording without mutual consent is prohibited.** You must obtain explicit, affirmative consent from all participants before recording a session by any means. Unauthorized recording violates these Terms and may violate applicable wiretapping or privacy laws in your jurisdiction.
+
+In-call features — screen sharing, whiteboard drawing, file sharing, and in-call text chat — operate within the peer connection and are not stored by Bridge.`
+  },
+  {
+    id: 'ip',
+    title: '10. Intellectual Property',
+    body: `Bridge and its licensors own all platform content, designs, trademarks, and source code. You may not copy, reproduce, modify, or create derivative works from Bridge-owned materials without prior written permission.
+
+Users retain ownership of content they bring to Bridge — including career materials, ideas, and strategies. By submitting content to Bridge (profile text, community posts, reviews), you grant Bridge a worldwide, non-exclusive, royalty-free license to display and use that content to operate and promote the platform. This license terminates when you delete the content or your account.
+
+Mentors retain ownership of their original educational and advisory materials. Mentees retain ownership of their resumes and career strategies.
+
+You are responsible for ensuring that content you submit does not infringe any third-party intellectual property rights.`
+  },
+  {
+    id: 'conduct',
+    title: '11. User Conduct',
+    body: `You agree not to use Bridge to:
+
+- Harass, threaten, intimidate, or discriminate against users based on any protected characteristic
+- Misrepresent your identity, credentials, or professional qualifications
+- Post defamatory, obscene, illegal, or IP-infringing content
+- Record sessions without explicit consent from all participants
+- Circumvent or reverse-engineer any platform security or payment mechanism
+- Scrape, crawl, or programmatically access platform data without authorization
+- Interfere with the accounts or data of other users
+- Share another user's private information outside the platform without their consent
+- Solicit users to move transactions or relationships off the platform
+- Use Bridge for any unlawful purpose
+
+Violations may result in content removal, account restriction, permanent termination, and referral to law enforcement where appropriate.`
+  },
+  {
+    id: 'disintermediation',
+    title: '12. Platform Integrity',
+    body: `All paid professional services between a Mentor and Mentee who first connected via Bridge must be transacted through Bridge's payment infrastructure. This includes any session, coaching, consulting, or other paid arrangement arising from a Bridge introduction.
+
+Arranging payment outside Bridge — via cash, wire transfer, PayPal, Venmo, cryptocurrency, or any mechanism that bypasses Bridge — is a material breach of these Terms and grounds for immediate, permanent suspension of both accounts involved.
+
+Bridge enforces this policy to protect users through Stripe-managed payment security, dispute resolution, and official receipts, and to sustain the platform's ability to operate as a free-to-browse service.
+
+We interpret "first connected via Bridge" broadly. If you met a mentor or mentee on Bridge, the 12-month post-connection window applies regardless of how you communicate afterward.`
+  },
+  {
+    id: 'suspension',
+    title: '13. Account Suspension & Termination',
+    body: `Bridge may restrict, suspend, or permanently terminate accounts that violate these Terms, engage in prohibited conduct, fail or lose mentor verification, are linked to fraudulent transactions, or pose a safety risk to the community.
+
+Where feasible, we will notify you before suspension and provide an opportunity to respond. Emergency suspensions for active safety threats may occur immediately without prior notice. Suspended Mentors may submit a dispute via our Trust & Safety report form for review.
+
+You may close your account at any time from account settings. Upon deletion, personal data is removed within 30 days per our Privacy Policy, except for records legally required to be retained (e.g., financial records for tax compliance).`
+  },
+  {
+    id: 'disclaimers',
+    title: '14. Disclaimers',
+    body: `The platform is provided "as is" and "as available." To the fullest extent permitted by law, Bridge disclaims all express and implied warranties, including merchantability, fitness for a particular purpose, and non-infringement.
+
+We do not guarantee: specific career outcomes; the accuracy of any Mentor's advice; uninterrupted or error-free platform availability; or the accuracy of AI-generated content, scores, or evaluations.
+
+Background check results are sourced from Checkr; Bridge makes no independent representation about their accuracy, completeness, or current relevance. AI feature outputs are probabilistic and not professional certifications.`
+  },
+  {
+    id: 'liability',
+    title: '15. Limitation of Liability',
+    body: `To the maximum extent permitted by law, Bridge's total liability to you for claims arising from or related to these Terms or the platform is limited to the fees you paid to Bridge in the 12 months preceding the claim.
+
+Bridge is not liable for indirect, incidental, special, consequential, or punitive damages, including lost profits, lost data, or business interruption, even if advised of the possibility of such damages.
+
+Nothing in these Terms excludes or limits liability that cannot be excluded under applicable law, including liability for fraud, fraudulent misrepresentation, or personal injury caused by negligence.`
+  },
+  {
+    id: 'indemnity',
+    title: '16. Indemnification',
+    body: `You agree to defend, indemnify, and hold harmless Bridge and its officers, directors, employees, and contractors from all claims, liabilities, damages, losses, and costs (including reasonable attorneys' fees) arising from:
+
+- Your use of the platform in a manner that violates these Terms
+- Your submitted content or conduct on the platform
+- Your violation of applicable law or regulation
+- Your infringement of any third party's intellectual property or privacy rights`
+  },
+  {
+    id: 'disputes',
+    title: '17. Dispute Resolution & Governing Law',
+    body: `**Informal resolution**: Before starting formal proceedings, both parties agree to attempt resolution through good-faith negotiation. Contact mentors.bridge@gmail.com and allow 30 days for a response.
+
+**Binding arbitration**: If informal resolution fails, disputes will be resolved by individual binding arbitration under the AAA Consumer Arbitration Rules, except for small-claims court matters and emergency injunctive relief.
+
+**Class action waiver**: You waive any right to participate in a class action lawsuit or class-wide arbitration.
+
+**Governing law**: These Terms are governed by the laws of the State of California without regard to conflict-of-law principles. Any court proceedings not subject to arbitration will be brought exclusively in San Francisco County, California.`
+  },
+  {
+    id: 'changes',
+    title: '18. Changes & Contact',
+    body: `We may revise these Terms as the platform evolves. We will notify you of material changes — those affecting your rights or how your data is processed — by email at least 30 days before changes take effect.
+
+Questions about these Terms? Email mentors.bridge@gmail.com.`
+  },
 ];
 
 const TLDR = [
-  { label: 'Refunds', text: 'Full refund before any session starts, or within 48 hours of completion if unsatisfied.' },
-  { label: 'Conduct', text: 'No harassment, fraud, or payment circumvention — violations result in suspension or termination.' },
-  { label: 'Disputes', text: 'Binding arbitration under AAA rules. Class-action waiver applies. California law governs.' },
+  { label: 'Mentors', text: 'Independent contractors, not Bridge employees. We do not guarantee advice quality or session outcomes.' },
+  { label: 'Payments', text: 'All paid services must go through Bridge. Off-platform arrangements result in permanent suspension for both accounts.' },
+  { label: 'Video', text: 'Peer-to-peer calls — not stored by Bridge. Recording without mutual consent is prohibited and may be illegal.' },
 ];
 
 function renderBody(body) {
-  return body.split('\n\n').map((p, i) => (
-    <p
-      key={i}
-      dangerouslySetInnerHTML={{
-        __html: p.replace(
-          /\*\*(.+?)\*\*/g,
-          '<strong class="font-semibold text-[var(--bridge-text)]">$1</strong>'
-        )
-      }}
-    />
-  ));
+  return body.split('\n\n').map((block, i) => {
+    const lines = block.split('\n');
+    const isDash = lines.length > 1 && lines.slice(1).every((l) => l.startsWith('- '));
+    if (isDash) {
+      const [intro, ...items] = lines;
+      return (
+        <div key={i}>
+          {intro && (
+            <p
+              dangerouslySetInnerHTML={{
+                __html: intro.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-[var(--bridge-text)]">$1</strong>')
+              }}
+            />
+          )}
+          <ul className="mt-3 space-y-1.5 pl-4">
+            {items.map((l, j) => (
+              <li
+                key={j}
+                className="relative pl-3"
+                dangerouslySetInnerHTML={{
+                  __html: ('• ' + l.slice(2)).replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-[var(--bridge-text)]">$1</strong>')
+                }}
+              />
+            ))}
+          </ul>
+        </div>
+      );
+    }
+    return (
+      <p
+        key={i}
+        dangerouslySetInnerHTML={{
+          __html: block
+            .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-[var(--bridge-text)]">$1</strong>')
+            .replace(/\n/g, '<br />')
+        }}
+      />
+    );
+  });
 }
 
 function SidebarLink({ section, isActive }) {
@@ -154,11 +358,11 @@ export default function Terms() {
               color: 'var(--color-primary)'
             }}
           >
-            Terms of Use
+            Terms of Service
           </h1>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <p className="text-[13px] font-medium text-[var(--bridge-text-muted)]">
-              Last updated: April 21, 2026
+              Last updated: June 7, 2026
             </p>
             <button
               onClick={() => window.print()}
@@ -199,8 +403,8 @@ export default function Terms() {
           </div>
         </Reveal>
 
-        <div className="grid gap-10 lg:grid-cols-12">
-          <aside ref={asideRef} className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
+        <div className="flex items-start gap-10">
+          <aside ref={asideRef} className="hidden w-56 shrink-0 lg:block lg:sticky lg:top-24 lg:self-start">
             <nav
               className="relative max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl p-5 pt-6"
               style={{
@@ -231,7 +435,7 @@ export default function Terms() {
             </nav>
           </aside>
 
-          <article ref={articleRef} className="max-w-3xl space-y-20 lg:col-span-9">
+          <article ref={articleRef} className="min-w-0 flex-1 max-w-[700px] space-y-20">
             {SECTIONS.map((s) => (
               <section
                 key={s.id}
@@ -252,12 +456,10 @@ export default function Terms() {
 
       <div
         ref={pillRef}
-        className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2"
+        className="fixed bottom-6 left-4 right-[4.5rem] z-50 max-w-lg"
         style={{
-          maxWidth: '520px',
-          width: 'calc(100vw - 2rem)',
           opacity: pillVisible ? 1 : 0,
-          transform: pillVisible ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(8px)',
+          transform: pillVisible ? 'translateY(0)' : 'translateY(8px)',
           pointerEvents: pillVisible ? 'auto' : 'none',
           transition: 'opacity 200ms, transform 200ms'
         }}

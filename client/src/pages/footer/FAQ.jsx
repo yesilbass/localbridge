@@ -17,115 +17,165 @@ const EYEBROW = {
 
 const SECTIONS = [
     {
-        id: 'getting-started',
-        name: 'Getting started',
-        sub: 'The basics — what Bridge is, what it costs, and what "pre-launch" means today.',
+        id: 'platform',
+        name: 'Platform mechanics',
+        sub: 'How Bridge works, what the subscription covers, and how we match mentors.',
         faqs: [
             {
                 q: 'What is Bridge?',
-                a: `Bridge connects people who want career or life advice with mentors who've actually done the thing. You browse mentors, book a free 30-minute session, and have a real conversation. That's it. No courses, no community, no DMs to manage.`,
+                a: `Bridge connects job seekers and career changers with established professionals for 1-on-1 mentorship sessions. You browse a verified mentor directory, book a session, and meet on a private video call — no middlemen, no courses, no community feed to manage.`,
             },
             {
-                q: 'Wait — is it really free?',
-                a: `Yes. Every session on Bridge is free. Mentors volunteer their time because they remember what it was like to need someone who'd answer the email. We don't take a cut because there's nothing to take a cut of. We're not running a marketplace; we're running an introduction.`,
+                q: 'How does the mentor matching algorithm work?',
+                a: `When you run AI matching, your mentee profile (current role, target role, goals, and experience level) is sent to OpenAI's API alongside the mentor directory. The model ranks mentors by how well their expertise, industry, and mentorship focus align with your goals. Results are suggestions — browse the full directory if the top matches aren't the right fit. See Help → AI mentor matching for details.`,
             },
             {
-                q: `If it's free, what's the catch? How does Bridge make money?`,
-                a: `Right now, it doesn't. Ahmet and I (Muaz) are funding this ourselves while we figure out whether it's useful to people. If it is, we'll probably add a paid layer for companies who want to sponsor mentorship for their teams — but mentee sessions stay free. We'll tell you before anything changes.`,
+                q: 'How do I find the right mentor without using AI matching?',
+                a: `Open Mentors from the nav, then filter by industry, role, or expertise area. Read the mentorship description section of each profile — that's where mentors explain the specific problems they help with, and it's more useful than job title alone. Check reviews and available time slots before committing to a profile.`,
             },
             {
-                q: 'Do I need an account to look around?',
-                a: `No. You can browse mentor profiles without signing up. You only need an account when you want to book a session, so we can send you the meeting link and a reminder.`,
+                q: 'What are the four session types?',
+                a: `Career Advice (broad career planning and decisions), Interview Prep (mock interviews and coaching), Resume Review (line-by-line feedback on your resume), and Networking (introductions and relationship strategy). Choose the type that matches what you want out of the session when booking.`,
             },
             {
-                q: 'Where are the step-by-step guides?',
-                a: `Open Help from the Resources menu for step-by-step guides — account setup, booking, video calls, and subscription billing. This FAQ covers the bigger "what is Bridge?" questions.`,
-            },
-            {
-                q: 'You say "pre-launch" but I can sign up. What does pre-launch mean?',
-                a: `It means we're still recruiting our founding mentors. The product works — you can make an account today — but the mentor side is thin while we onboard the first batch. If your field isn't covered yet, sign up anyway and we'll email you when a relevant mentor comes online.`,
+                q: 'Does Bridge take a cut of session fees?',
+                a: `Bridge collects the session fee on the mentor's behalf through Stripe and acts as a limited payment agent. Specific fee splits are disclosed at checkout. All payment processing is handled by Stripe — we never store your card number.`,
             },
         ],
     },
     {
-        id: 'booking-a-session',
-        name: 'Booking a session',
-        sub: 'How to actually get on a call with a mentor.',
+        id: 'trust',
+        name: 'Trust & safety',
+        sub: 'How we vet mentors, what we do with your data, and what to do when something goes wrong.',
         faqs: [
             {
-                q: 'How does booking actually work?',
-                a: `Open a mentor's profile, pick a time from their calendar, write a sentence or two about what you want to talk about, and confirm. You'll get an email with the video link. Show up at the time. That's the whole flow.`,
+                q: 'Are my video calls private?',
+                a: `Yes. Video sessions use a direct peer-to-peer WebRTC connection — your video and audio go directly from your device to the mentor's device and never pass through or get stored on Bridge's servers. Bridge cannot view, record, or access your calls. See our Privacy Policy → Section 5 for the technical details.`,
             },
             {
-                q: 'How long is a session?',
-                a: `30 minutes by default. Some mentors offer 60-minute slots for deeper conversations — you'll see it on their profile if they do.`,
+                q: 'How do you vet mentors?',
+                a: `Every mentor goes through a multi-step verification: identity check, professional email and LinkedIn confirmation, a voice-based application interview (AI-transcribed and evaluated), reference review, and in some cases a Checkr background check. Borderline applications go to a human founder for final review — we reject more than we approve. See Trust & Safety for details.`,
             },
             {
-                q: 'How far in advance can I book?',
-                a: `Up to 4 weeks out, depending on what the mentor has opened on their calendar. Most slots get booked within a few days of being posted, so checking back is worth it.`,
+                q: 'What should I do if a mentor asks for money outside the platform?',
+                a: `Report it immediately using the Trust & Safety report form. This is a serious violation of our Terms — all paid professional services between mentors and mentees introduced on Bridge must be transacted through the platform. Both accounts involved are subject to permanent suspension. We take these reports seriously and respond within one business day.`,
             },
             {
-                q: 'I need to reschedule. Now what?',
-                a: `From your dashboard, open the upcoming session and pick a new time from the mentor's calendar. Try to do it more than 24 hours ahead so the mentor isn't holding the slot for nothing. Last-minute changes happen — just give them a heads up.`,
-            },
-            {
-                q: `What if the mentor doesn't show up?`,
-                a: `Contact us with the session details through the Contact page. We'll follow up with the mentor and help you rebook with someone else. A no-show without a reason is grounds for us removing a mentor from the platform.`,
-            },
-        ],
-    },
-    {
-        id: 'mentors',
-        name: 'Mentors',
-        sub: 'Who they are, how we pick them, and why they show up.',
-        faqs: [
-            {
-                q: 'How are mentors vetted?',
-                a: `Every mentor applies, and Ahmet or I review the application by hand. We check that they actually work where they say they work (usually LinkedIn plus a short call), and we read what they wrote about why they want to mentor. We turn down more applications than we accept. There's more detail on the Trust & Safety page.`,
-            },
-            {
-                q: 'Do mentors get paid?',
-                a: `No. Mentors on Bridge are volunteers. We don't pay them and they don't pay us. If a mentor ever asks you for money — directly, or through a link, or to "move the conversation off-platform" — please report it on the Trust & Safety page. That's not what this is.`,
-            },
-            {
-                q: 'Why would anyone volunteer their time?',
-                a: `Because someone did it for them, mostly. Every mentor we've talked to has a version of the same story: a stranger took a call early in their career, and it changed the trajectory. They want to be that person for someone else. That's the whole thing.`,
-            },
-            {
-                q: 'Can I become a mentor?',
-                a: `Probably, yes — if you have a few years of real experience in something and the patience to talk to people who are earlier than you were. Apply through the Become a Mentor page. We read every application.`,
-            },
-        ],
-    },
-    {
-        id: 'privacy-safety',
-        name: 'Privacy & safety',
-        sub: 'What we collect, what we don\'t, and what to do if something goes wrong.',
-        faqs: [
-            {
-                q: 'Is my data secure?',
-                a: `We collect the minimum we need to make a session happen — your name, email, what you want to talk about. We don't sell data and we don't run ads. Connections are encrypted in transit. We are not SOC 2 certified; we're two people. We say this plainly because anyone claiming bank-grade security at our stage is making it up.`,
-            },
-            {
-                q: 'Can I stay anonymous with my mentor?',
-                a: `Sort of. Your mentor sees the first name and the note you wrote when booking. You don't have to share your last name, your company, or anything else you don't want to. If you'd rather use a different first name with mentors than the one on your account, you can — just put it in your profile.`,
+                q: 'Can a mentor or mentee record a session?',
+                a: `Bridge does not record sessions — there is no recording functionality on the platform. If either party wants to record, they must get explicit consent from all participants before doing so. Recording without consent violates our Terms and may violate wiretapping laws in your jurisdiction.`,
             },
             {
                 q: 'How do I report a bad experience?',
-                a: `Use the form on the Trust & Safety page, or the Contact page. Both go to a real person (us). We respond within 48 hours, usually sooner.`,
+                a: `Use the report form on the Trust & Safety page. You can submit anonymously by leaving the email field blank. Reports go directly to a founder and receive a ticket ID. Safety and harassment reports are prioritized and reviewed within one business day.`,
+            },
+        ],
+    },
+    {
+        id: 'booking',
+        name: 'Booking & sessions',
+        sub: 'How to book, reschedule, cancel, and what happens if someone doesn\'t show up.',
+        faqs: [
+            {
+                q: 'How does booking actually work?',
+                a: `Open a mentor's profile, pick a session type, complete checkout via Stripe, and then schedule the time using the embedded Calendly widget. You'll receive a confirmation email with a calendar invite and a cancel/reschedule link. The session appears in your dashboard once the mentor accepts.`,
+            },
+            {
+                q: 'How far in advance can I book, and when can I reschedule?',
+                a: `You can book up to 4 weeks out, depending on the mentor's availability settings in Calendly. To reschedule, use the reschedule link in your confirmation email or Dashboard → Sessions. Try to reschedule at least 24 hours in advance so the mentor isn't holding the original slot unnecessarily.`,
+            },
+            {
+                q: 'What is the cancellation and refund policy?',
+                a: `Cancel more than 1 hour before the session for a full refund. Cancellations made within 1 hour of start time are at the mentor's discretion. If a mentor cancels on you, you get a full automatic refund. See Help → Session refund policy for the complete no-show and late arrival rules.`,
+            },
+            {
+                q: 'What happens if the mentor doesn\'t show up?',
+                a: `If your mentor doesn't join within 15 minutes of the scheduled start, email mentors.bridge@gmail.com with the session time and mentor name. You'll receive a full refund and priority rebooking with another mentor. A confirmed no-show without communication is grounds for removal from the platform.`,
+            },
+            {
+                q: 'Can I book a session without a subscription?',
+                a: `Booking may start a 7-day free trial if you're not already subscribed. You won't be charged until day 8 — a reminder is sent on day 5. Cancel during the trial and you owe nothing. See Billing → Subscription & free trial.`,
+            },
+        ],
+    },
+    {
+        id: 'ai',
+        name: 'AI features',
+        sub: 'What AI tools are available, what data they use, and what they can\'t do.',
+        faqs: [
+            {
+                q: 'What AI features does Bridge offer?',
+                a: `AI mentor matching (ranks mentors against your profile, 3 uses per account), AI resume review (scores and analyzes your resume PDF via Claude, 1 use lifetime), and voice mentor application (AI-facilitated interview for mentor applicants, with real-time transcription). Mentors also have an AI bio-polishing tool and expertise categorization during onboarding.`,
+            },
+            {
+                q: 'Does Bridge send my resume to a third party?',
+                a: `Yes — when you use AI resume review, your resume PDF is transmitted to Anthropic's Claude API for analysis. When you use AI mentor matching, your profile (and optionally extracted resume text) is sent to OpenAI's API. Neither provider uses API-submitted data for model training per their enterprise API policies. See our Privacy Policy → Section 4 for full details.`,
+            },
+            {
+                q: 'How accurate is the AI resume review?',
+                a: `The review produces a probabilistic estimate from a language model — not a certified professional assessment. It's useful as a structured second opinion and a fast way to identify obvious gaps, but it should not replace feedback from a human recruiter or career coach. Use it as one data point, not the final word.`,
+            },
+            {
+                q: 'Can I opt out of AI features?',
+                a: `Yes. All AI features are opt-in — you choose when to use them. Simply don't use AI matching or AI resume review and your data is never sent to external AI providers. Mentor applicants go through a voice interview as part of the standard application process; that step cannot be skipped.`,
+            },
+        ],
+    },
+    {
+        id: 'billing',
+        name: 'Billing & subscriptions',
+        sub: 'Pricing, the free trial, student discounts, and how to manage or cancel.',
+        faqs: [
+            {
+                q: 'What does the subscription include?',
+                a: `Full mentor directory access, AI matching (3 uses), AI resume review (1 use lifetime), community access, unlimited in-app messaging with mentors, and all features we ship going forward. Mentor time is always free — the subscription is for platform access, not session fees.`,
+            },
+            {
+                q: 'How does the free trial work?',
+                a: `New subscribers get a 7-day free trial. No charge until day 8, and a reminder is sent on day 5. Cancel any time before day 8 via Dashboard → Billing and you owe nothing. After the trial, the subscription renews automatically each month or year depending on your plan.`,
+            },
+            {
+                q: 'Is there a student discount?',
+                a: `Yes. Students with a verified .edu email address receive a reduced rate applied automatically at checkout. If your school uses a non-.edu domain, email mentors.bridge@gmail.com with proof of enrollment and we'll apply it manually.`,
+            },
+            {
+                q: 'How do I cancel my subscription?',
+                a: `Go to Dashboard → Billing, which opens the Stripe customer portal. Click Cancel plan. Your access continues until the end of the current billing period. Cancelling does not delete your account or session history. See Help → Manage or cancel your subscription.`,
+            },
+        ],
+    },
+    {
+        id: 'privacy',
+        name: 'Privacy & data',
+        sub: 'What we collect, who else touches your data, and how to delete your account.',
+        faqs: [
+            {
+                q: 'What personal data does Bridge collect?',
+                a: `Name, email, and profile information you provide; session history and booking data; payment metadata via Stripe (not your card number); and technical data like IP address and browser type. For mentors: identity verification results, voice interview transcripts, and reference submissions. See Privacy Policy → Section 1 for the full list.`,
+            },
+            {
+                q: 'Does Bridge sell my data?',
+                a: `No. We do not sell personal data, run advertising, or share your data with any third party except the specific service providers needed to operate the platform (Stripe, Calendly, OpenAI, Anthropic, Supabase). See Privacy Policy → Section 2.`,
+            },
+            {
+                q: 'How do I delete my account and data?',
+                a: `Go to Dashboard → Settings → Account → Delete account. Personal data is removed within 30 days. Financial transaction records are kept for 7 years for tax compliance. Resume files are deleted immediately. See Help → Deleting your account or Privacy Policy → Section 9.`,
+            },
+            {
+                q: 'Can I download all my data?',
+                a: `Yes — this is your right under GDPR and CCPA. Email mentors.bridge@gmail.com requesting a data export and we'll respond within 30 days with a portable copy of everything we hold about you.`,
             },
         ],
     },
 ];
 
 const DEFAULT_OPEN = new Set([
-    'Wait — is it really free?',
+    'Are my video calls private?',
     'How does booking actually work?',
-    'How are mentors vetted?',
+    'How do you vet mentors?',
 ]);
 
 function FAQItem({ q, a, isOpen, onToggle, isLast }) {
-    const answerId = `answer-${q.replace(/\s+/g, '-').toLowerCase()}`;
+    const answerId = `answer-${q.replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '')}`;
     return (
         <div style={!isLast ? HAIRLINE : undefined}>
             <button
@@ -231,7 +281,7 @@ export default function FAQ() {
                         className="mt-5 max-w-2xl leading-[1.7] text-[var(--bridge-text-secondary)]"
                         style={{ fontSize: 'clamp(1rem, 1.5vw, 1.125rem)' }}
                     >
-                        Things people ask before signing up. Step-by-step guides live in the{' '}
+                        Answers to the most common questions. Step-by-step how-tos live in the{' '}
                         <Link
                             to="/help"
                             className="font-semibold underline underline-offset-4 transition hover:opacity-80"
@@ -247,7 +297,7 @@ export default function FAQ() {
                         >
                             Contact
                         </Link>
-                        {' '}&mdash; a real person reads it.
+                        {' '}&mdash; a real person reads every message.
                     </p>
 
                     <div className="relative mt-8 max-w-2xl">
@@ -259,7 +309,7 @@ export default function FAQ() {
                             type="search"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search — free sessions, booking, mentors, privacy…"
+                            placeholder="Search — video privacy, matching, refunds, AI features…"
                             aria-label="Search FAQ"
                             className="w-full rounded-lg border border-[var(--bridge-border)] bg-transparent py-4 pl-12 pr-4 text-lg text-[var(--bridge-text)] outline-none placeholder:text-[var(--bridge-text-muted)] transition focus:border-[var(--color-primary)] focus:outline-none"
                         />
@@ -293,20 +343,25 @@ export default function FAQ() {
                             </p>
                         ) : (
                             <div className="border-t border-[var(--bridge-border)]">
-                                {searchResults.map((faq, fi) => (
-                                    <div key={faq.q}>
-                                        <p className="pt-6 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
-                                            {faq.sectionName}
-                                        </p>
-                                        <FAQItem
-                                            q={faq.q}
-                                            a={faq.a}
-                                            isOpen={openSet.has(faq.q)}
-                                            onToggle={toggle}
-                                            isLast={fi === searchResults.length - 1}
-                                        />
-                                    </div>
-                                ))}
+                                {searchResults.map((faq, fi) => {
+                                    const showLabel = fi === 0 || searchResults[fi - 1].sectionId !== faq.sectionId;
+                                    return (
+                                        <div key={faq.q}>
+                                            {showLabel && (
+                                                <p className="pt-6 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
+                                                    {faq.sectionName}
+                                                </p>
+                                            )}
+                                            <FAQItem
+                                                q={faq.q}
+                                                a={faq.a}
+                                                isOpen={openSet.has(faq.q)}
+                                                onToggle={toggle}
+                                                isLast={fi === searchResults.length - 1}
+                                            />
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -337,31 +392,33 @@ export default function FAQ() {
                     </aside>
 
                     <div className="min-w-0 flex-1">
-                        <div className="mb-12 flex flex-wrap gap-x-2 gap-y-2 lg:hidden">
-                            {SECTIONS.map((section, i) => {
-                                const isActive = activeSection === section.id;
-                                return (
-                                    <span key={section.id} className="inline-flex items-center">
-                                        {i > 0 && (
-                                            <span className="mx-2 text-[var(--bridge-border)]" aria-hidden>
-                                                /
-                                            </span>
-                                        )}
+                        <div className="-mx-4 mb-12 overflow-x-auto px-4 sm:-mx-6 sm:px-6 lg:hidden">
+                            <div className="flex gap-2 pb-2">
+                                {SECTIONS.map((section) => {
+                                    const isActive = activeSection === section.id;
+                                    return (
                                         <button
+                                            key={section.id}
                                             type="button"
                                             onMouseDown={(e) => e.preventDefault()}
                                             onClick={() => scrollTo(section.id)}
-                                            className={`text-base transition-colors focus:outline-none focus-visible:underline ${
-                                                isActive
-                                                    ? 'font-semibold text-[var(--color-primary)]'
-                                                    : 'text-[var(--bridge-text-muted)]'
-                                            }`}
+                                            className="shrink-0 rounded-full px-4 py-1.5 text-[13px] transition-colors focus:outline-none focus-visible:underline"
+                                            style={{
+                                                backgroundColor: isActive
+                                                    ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)'
+                                                    : 'color-mix(in srgb, var(--bridge-canvas) 80%, transparent)',
+                                                color: isActive ? 'var(--color-primary)' : 'var(--bridge-text-muted)',
+                                                fontWeight: isActive ? 600 : 400,
+                                                boxShadow: isActive
+                                                    ? 'inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 25%, transparent)'
+                                                    : 'inset 0 0 0 1px var(--bridge-border)'
+                                            }}
                                         >
                                             {section.name}
                                         </button>
-                                    </span>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
                         </div>
 
                         {SECTIONS.map((section, si) => (
@@ -395,13 +452,21 @@ export default function FAQ() {
 
                         <Reveal delay={100}>
                             <p className="mt-20 border-t border-[var(--bridge-border)] pt-12 text-base leading-[1.8] text-[var(--bridge-text-secondary)] sm:text-lg">
-                                Need a how-to?{' '}
+                                Need a how-to guide?{' '}
                                 <Link
                                     to="/help"
                                     className="font-semibold underline underline-offset-4 transition hover:opacity-80"
                                     style={{ color: 'var(--color-primary)' }}
                                 >
                                     Help center
+                                </Link>
+                                . Safety concern?{' '}
+                                <Link
+                                    to="/trust"
+                                    className="font-semibold underline underline-offset-4 transition hover:opacity-80"
+                                    style={{ color: 'var(--color-primary)' }}
+                                >
+                                    Trust & Safety
                                 </Link>
                                 . Still stuck?{' '}
                                 <Link
@@ -411,7 +476,7 @@ export default function FAQ() {
                                 >
                                     Contact us
                                 </Link>
-                                . One of us (Ahmet or Muaz) will reply, usually same day.
+                                .
                             </p>
                         </Reveal>
                     </div>
