@@ -52,6 +52,7 @@ const MentorOnboardingFlow = lazy(() => import('./pages/MentorOnboardingFlow.jsx
 const CommunityHub       = lazy(() => import('./pages/community/CommunityHub.jsx'));
 const CommunityCategory  = lazy(() => import('./pages/community/CommunityCategory.jsx'));
 const MentorPostsPage    = lazy(() => import('./pages/community/MentorPostsPage.jsx'));
+const CommunityPage      = lazy(() => import('./pages/footer/Community.jsx'));
 const Privacy   = lazy(() => import('./pages/footer/Privacy.jsx'));
 const Terms     = lazy(() => import('./pages/footer/Terms.jsx'));
 const Cookies   = lazy(() => import('./pages/footer/Cookies.jsx'));
@@ -168,9 +169,9 @@ function AppContent() {
           <Route path="/contact" element={<PublicPage><Contact /></PublicPage>} />
           <Route path="/help" element={<PublicPage><Help /></PublicPage>} />
           <Route path="/trust" element={<PublicPage><Trust /></PublicPage>} />
-          <Route path="/community" element={<CommunityEntryGate />} />
+          <Route path="/community" element={<CommunityPage />} />
           <Route path="/community/posts" element={<PublicPage><MentorPostsPage /></PublicPage>} />
-          <Route path="/community/:categoryId" element={<CommunityEntryGate />} />
+          <Route path="/community/:channelId" element={<CommunityPage />} />
           <Route path="/privacy" element={<PublicPage><Privacy /></PublicPage>} />
           <Route path="/terms" element={<PublicPage><Terms /></PublicPage>} />
           <Route path="/cookies" element={<PublicPage><Cookies /></PublicPage>} />
