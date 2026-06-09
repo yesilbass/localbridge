@@ -383,7 +383,7 @@ export async function modAction(action, payload) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return { error: 'Not authenticated' };
 
-  const res = await fetch('/api/community-mod', {
+  const res = await fetch('/api/utils?action=community-mod', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

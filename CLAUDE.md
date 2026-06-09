@@ -4,67 +4,6 @@ Mentorship platform connecting job seekers with established professionals. React
 
 ---
 
-## 0. Always-on execution doctrine (read first, every turn)
-
-Bridge is pre-revenue and pursuing seed approval. Every change ships demo-ready. The diff is part of the founder's narrative — tight, opinionated, confident. No `// TODO`, no `console.log`, no half-states. If a change cannot ship demo-ready in this turn, raise it as a follow-up rather than smuggle it into the diff.
-
-### 0.1 Token discipline (non-negotiable)
-
-- **Parallel by default.** Independent reads, greps, and tool calls fire in one turn, never sequentially. Sequential is only justified when step N's output feeds step N+1.
-- **Read once, remember.** A file read in this conversation is not re-read unless edited or known-changed.
-- **Scope the read.** For files > 1000 lines (`MentorProfile.jsx`, `Profile.jsx`, `VideoCall.jsx`, `Settings.jsx`, `MentorOnboardingFlow.jsx`), grep first, then `read_file` with `offset` + `limit`. No full-file reads on large files.
-- **Use `code_search` for unknown territory.** Delegate first-pass exploration to the subagent — it's cheaper than searching in-context.
-- **No speculative work.** No "fix while I'm here", no adjacent refactors, no rename-for-clarity. Speculative edits double the diff and the verification cost.
-- **No scratch files.** No helper scripts, progress notes, or `.md` artifacts unless the user asks or the task spans sessions.
-- **Climb the uncertainty ladder in order:** file map → grep → `code_search` → scoped `read_file` → ask the user. Skipping to "ask the user" wastes their time; skipping to full-file reads wastes tokens.
-
-### 0.2 Output discipline
-
-**Silent execution is the default.** Do the work, ship the diff, stop. No explanation of what changed, what was wrong, what was fixed, or what to do next — unless the user explicitly asks ("explain", "walk me through", "why", "summarize", etc.).
-
-Default response shape after a code change:
-
-```
-[citation block(s) for the changed code — @/abs/path:start-end]
-[Run this — only if the user MUST run something to see the change]
-[Followups — only if a real risk was deferred and the user needs to know]
-```
-
-No prose paragraph. No "what changed and why". No recap. If the user wants context, they'll ask.
-
-Exceptions where one short line is allowed:
-
-- The edit failed or was partially applied (you must say so — silence here violates the verification contract).
-- The user asked a question, not for a code change (answer the question).
-- A blocking ambiguity stopped you from coding (one-line question, 2–4 options).
-
-That is the entire response. Never:
-
-- Restate the user's request before answering.
-- Open with "Let me…", "I'll…", "Great idea!", "You're absolutely right!".
-- Re-explain the same thing in three formats (prose + bullets + table).
-- Add comments to code unless asked.
-- Use emojis unless asked.
-- Use filler ("as discussed", "as you can see", "hopefully this helps").
-
-When **proposing** instead of executing: lead with the recommendation, one paragraph of reasoning max, one concrete next step.
-
-### 0.3 Change verification contract (fixes "I changed it but nothing changed")
-
-A change is only **claimed** if it was actually written. Specifically:
-
-1. **Every change claim cites the file by absolute path and line range** (`@/Users/.../file.ext:start-end`). No claim without a citation.
-2. **Every edit goes through `edit` / `multi_edit` / `write_to_file`** — never describe a change in prose alone and call it done.
-3. **After an edit, the response identifies exactly what shipped**: which file, which lines, which symbol. If the edit failed, say so explicitly — do not silently move on.
-4. **If the user reports "I don't see the change"**: re-read the file at the cited lines first to verify what's actually on disk, then report the truth. Never re-edit blindly.
-5. **Multi-file changes list every file touched.** No hidden edits.
-
-### 0.4 Skill composition (always-on signal)
-
-This baseline applies to every prompt. Domain skills (`bridge-ui`, `bridge-web-design`, `bridge-motion`, `bridge-data-flow`, `bridge-debugging`, `bridge-cleanup`, `bridge-ai-features`, `bridge-transitions`, `bridge-layout`, `shipping-features`) compose on top — most non-trivial tasks fire two or three together. If a UI/design/motion task is in scope, treat the relevant skill's contract as binding even if the skill description didn't auto-trigger.
-
----
-
 ## Stack & Key Package Versions
 
 | Layer | Package | Version |
@@ -73,14 +12,16 @@ This baseline applies to every prompt. Domain skills (`bridge-ui`, `bridge-web-d
 | Frontend | vite | ^8.0.1 |
 | Frontend | tailwindcss | ^4.2.2 |
 | Frontend | react-router-dom | ^7.14.1 |
-| Frontend | @supabase/supabase-js | ^2.104.1 |
+| Frontend | @supabase/supabase-js | ^2.103.3 |
 | Frontend | axios | ^1.15.0 |
+| Frontend | googleapis | ^171.4.0 |
 | Frontend | lucide-react | ^0.400.0 |
 | Frontend | motion | ^12.38.0 |
 | Backend | express | ^5.2.1 |
 | Backend | @supabase/supabase-js | ^2.103.3 |
 | Backend | jsonwebtoken | ^9.0.3 |
 | Backend | bcrypt | ^6.0.0 |
+| Backend | googleapis | ^171.4.0 |
 | Backend | express-validator | ^7.3.2 |
 
 ---
@@ -104,12 +45,7 @@ This baseline applies to every prompt. Domain skills (`bridge-ui`, `bridge-web-d
 | availability_schedule | jsonb | `{"weekly":{"0":["09:00",...],...},"timezone":"UTC"}` |
 | tier | text | |
 | session_rate | integer | |
-| mentorship_description | text | Required for mentors; AI-tagged into pillars |
-| mentorship_categories | jsonb | AI-derived pillar IDs (service-role write only) |
-| mentorship_subcategories | jsonb | AI-derived subcategory IDs |
-| why_i_mentor | text | Public motivation statement |
-| onboarding_step | int | Post-approval wizard progress (0–5) |
-| is_featured | boolean | Admin spotlight toggle |
+| google_refresh_token | text | Google Calendar OAuth token |
 | expertise_search | text | generated: `lower(expertise::text)` stored |
 | created_at | timestamptz | default now() |
 **RLS**: SELECT public (anon), INSERT/UPDATE own user only.
@@ -124,7 +60,7 @@ This baseline applies to every prompt. Domain skills (`bridge-ui`, `bridge-web-d
 | scheduled_date | timestamptz | |
 | status | text | enum: `pending` `accepted` `declined` `completed` `cancelled` |
 | message | text | |
-| video_room_url | text | Room identifier: `bridge-{sessionId}` (set on accept; truthy = "Join Call" visible) |
+| video_room_url | text | Jitsi: `https://meet.jit.si/bridge-{sessionId}` |
 | created_at | timestamptz | |
 **RLS**: SELECT mentee or mentor (via mentor_profiles join). INSERT authenticated mentees. UPDATE mentor only. Mentee can cancel own.
 
@@ -139,7 +75,6 @@ This baseline applies to every prompt. Domain skills (`bridge-ui`, `bridge-web-d
 | comment | text | |
 | created_at | timestamptz | |
 **RLS**: SELECT public, INSERT authenticated, DELETE own.
-**Rating trigger**: `update_mentor_rating()` recalculates `mentor_profiles.rating` on INSERT/UPDATE/DELETE. The client must NOT recalculate — RLS blocks direct mentor_profiles UPDATE from mentees.
 
 ### `favorites`
 | Column | Type | Notes |
@@ -175,14 +110,85 @@ Stores AI onboarding output: `user_id`, `current_position`, `target_role`, `targ
 ### `ai_usage`
 Tracks per-user AI feature consumption: `user_id`, `feature` (`resume_review` limit 1, `mentor_match` limit 3). See `client/src/api/aiUsage.js`.
 
-### `community_posts` / `community_post_upvotes` / `community_comments`
-Community product at `/community`. Pillar `category_id`, post types `question|win|discussion|resource`. Denormalized `upvotes` and `comment_count` maintained by triggers. **Not the same as `mentor_posts`.**
+### `admins`
+| Column | Type | Notes |
+|---|---|---|
+| user_id | uuid | FK → auth.users, UNIQUE |
+| email | text | |
+| notes | text | |
+| created_at | timestamptz | |
+Grants full community moderator powers. To promote a user: INSERT INTO admins (user_id, email, notes) VALUES ('uuid', 'email', 'reason'). To revoke: DELETE FROM admins WHERE user_id = 'uuid'. **Never check user_metadata.role for mod access — always query the admins table.**
 
-### `mentor_posts` / `mentor_badges`
-Mentor value stack — short advice posts and earned badges on mentor profiles.
+### Community tables
+
+#### `community_sections`
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | PK |
+| name | text | Display name shown in sidebar (uppercase) |
+| position | integer | Sort order |
+| created_at | timestamptz | |
+**RLS**: SELECT public. Write via `api/community-mod.js` serverless function (service role).
+
+#### `community_channels`
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | PK |
+| section_id | uuid | FK → community_sections ON DELETE CASCADE |
+| name | text | Shown as #name in sidebar |
+| description | text | Shown in channel top bar |
+| position | integer | Sort order within section |
+| created_at | timestamptz | |
+**RLS**: SELECT public. Write via `api/community-mod.js`.
+
+#### `community_messages`
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | PK |
+| channel_id | uuid | FK → community_channels ON DELETE CASCADE |
+| author_id | uuid | FK → auth.users ON DELETE CASCADE |
+| body | text | 1–2000 chars |
+| created_at | timestamptz | |
+**RLS**: SELECT authenticated. INSERT authenticated + not blocked. DELETE own. Supabase Realtime enabled on this table.
+
+#### `community_posts`
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | PK |
+| author_id | uuid | FK → auth.users |
+| category_id | text | Maps to MENTORSHIP_CATEGORIES |
+| post_type | text | `question` `win` `discussion` `resource` |
+| title | text | max 120 chars |
+| body | text | 50–2000 chars |
+| upvotes | integer | default 0 |
+| is_pinned | boolean | |
+| comment_count | integer | |
+| created_at | timestamptz | |
+
+#### `community_comments`
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | PK |
+| post_id | uuid | FK → community_posts |
+| author_id | uuid | FK → auth.users |
+| body | text | |
+| created_at | timestamptz | |
+
+#### `community_post_upvotes`
+Tracks per-user upvotes: `post_id`, `user_id`. UNIQUE(post_id, user_id).
+
+#### `community_blocked_users`
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | PK |
+| user_id | uuid | FK → auth.users, UNIQUE |
+| blocked_by | uuid | FK → auth.users |
+| reason | text | |
+| created_at | timestamptz | |
+**RLS**: Users can SELECT own row only. All writes via `api/community-mod.js` (service role). Blocked users cannot INSERT into community_messages.
 
 ### Storage
-Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in Supabase dashboard). RLS: authenticated user can CRUD files prefixed `{user_id}/`.
+Bucket `resumes` (private). RLS: authenticated user can CRUD files prefixed `{user_id}/`.
 
 ---
 
@@ -202,17 +208,17 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 
 7. **AI keys in client env** — `VITE_ANTHROPIC_API_KEY` and `VITE_OPENAI_API_KEY` are used directly in client code (not proxied). Be aware of exposure in browser builds.
 
-8. **Video rooms** — Custom WebRTC video call at `/session/:sessionId/video`. Signaling via Supabase Realtime channel `video:{sessionId}`. Mentor = caller (sends offer), mentee = callee (sends answer). `video_room_url` is set to `bridge-{sessionId}` on accept (truthy flag to show "Join Call").
+8. **Video rooms** — URLs are generated server-side in `server/routes/sessions.js` when a session is accepted. Format: `https://meet.jit.si/bridge-{sessionId}`.
 
-9. **Calendly scheduling** — Mentors connect Calendly via `client/src/api/calendly.js` (client) and `api/calendly/[action].js` (Vercel serverless) + `api/_lib/calendlyHandlers/` (shared handlers, also imported by Express dev server via `server/app.js`). Post-checkout scheduling uses embedded Calendly widget on `/booking/finalize`. Google Calendar was removed.
+9. **Google Calendar OAuth** — Refresh token is stored in `mentor_profiles.google_refresh_token`. OAuth routes live in `server/routes/googleAuth.js`; calendar operations in `server/routes/calendar.js`.
 
-10. **Community = direct Supabase** — All community CRUD in `client/src/api/community.js`. No Vercel serverless function (12-function limit). RLS handles auth.
+10. **Community mod check** — Never use `user_metadata.role` to check for moderator/admin. Always query the `admins` table: `supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle()`. A non-null result = admin/mod.
 
-11. **Community posts ≠ mentor posts** — `community_posts` powers `/dashboard/community` (and `/community` redirect). `mentor_posts` is short mentor advice on profiles and `/community/posts`.
+11. **Community mod writes** — All writes to `community_sections`, `community_channels`, `community_blocked_users` must go through `api/community-mod.js` (serverless, uses `SUPABASE_SERVICE_ROLE_KEY`). Never attempt these from the client directly.
 
-12. **Navigation** — Marketing: `Navbar.jsx` + `components/nav/` (`mainNavModel.js`, flat `navChrome.js`). Guest (logged-out): dropdowns **Company** (About Bridge, Trust & Safety) + **Resources** (FAQ, Help, Contact); flat links **How it works** + **Pricing** + **Become a mentor**; primary CTA button **"Browse mentors" → /mentors** (replaces old "Get started" → /register). `/mentors` is public — no login required to browse; booking still requires auth. Signed-in mentees: **Dashboard** + Discover (Mentors, Community), Tools, Company; flat **Pricing**. Mentors: **Dashboard**, **Company**, flat Community + Pricing. Dashboard: `DashboardTopBar.jsx` + `dashboardNavModel.js`. URL aliasing: `authNav.js` (`resolveAuthEntryPath`, `dashboardProductPath`). Extend the nav models; no flat link sprawl.
+12. **Supabase Realtime** — `community_messages` has Realtime enabled. Subscribe per channel: `supabase.channel('community:${channelId}').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'community_messages', filter: 'channel_id=eq.${channelId}' }, handler).subscribe()`. Always unsubscribe on channel switch and component unmount.
 
-13. **Realtime sessions** — `POST /api/realtime-session` → OpenAI GA `POST /v1/realtime/client_secrets` (not beta `/v1/realtime/sessions`). Client uses `client_secret.value` in `useRealtimeCall.js`.
+13. **Vercel function cap** — Hobby plan: max 12 serverless functions. Currently at 9 (after removing api/stripe/ duplicates). Never add a new /api/*.js file without checking the count first. Consolidate into existing functions where possible.
 
 ---
 
@@ -224,18 +230,13 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 | supabase.js | Supabase client singleton (VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY) |
 | client.js | Axios instance → http://localhost:3001/api with JWT interceptor |
 | mentors.js | getMentorById, getAllMentors (search/filter/sort), getFeaturedMentors, getIndustries |
-| sessions.js | createSession, getMySession, updateSessionStatus, acceptSession (sets video_room_url = `bridge-{sessionId}`) |
+| sessions.js | createSession, getMySession, updateSessionStatus, acceptSession (sets Jitsi URL) |
 | reviews.js | createReview, getReviewsForMentor |
 | favorites.js | getMyFavorites, toggleFavorite, addToFavorites, removeFromFavorites |
 | menteeProfile.js | getMenteeProfile, upsertMenteeProfile, deleteMenteeProfile |
-| calendly.js | Calendly OAuth, event types, availability |
-| community.js | Community posts, upvotes, comments (direct Supabase) |
-| mentorPosts.js | Mentor advice posts (separate from community) |
-| mentorBadges.js | Mentor badge fetch |
-| tagMentorCategories.js | AI pillar tagging via ai-proxy |
-| verification.js | Mentor application submit, profile fetch |
-| mentorAvatarStorage.js | mentor-avatars bucket upload |
-| ai.js | callClaude() + callAIProxy() |
+| mentorOnboarding.js | Mentor onboarding CRUD against mentor_profiles |
+| calendar.js | getCalendarAuthUrl, getMentorAvailability, bookCalendarEvent, checkCalendarConnection |
+| ai.js | callClaude() — direct Anthropic SDK wrapper (claude-sonnet-4-20250514) |
 | aiMatching.js | getAIMatchedMentors() — OpenAI-based mentor ranking from mentee profile |
 | aiResumeReview.js | getAIResumeReview() — Claude-based resume analysis |
 | aiUsage.js | getUsageCount, hasReachedLimit, recordUsage per feature |
@@ -243,164 +244,111 @@ Buckets: `resumes` (private), `mentor-avatars` (public read; create manually in 
 | resumeStorage.js | uploadResumeFile, removeResumeFile, getResumeSignedUrl (resumes bucket) |
 | mockMentors.js | Static mock mentor data for dev |
 | supportEmail.js | Feedback/support email send |
-| stripe.js | Stripe checkout, subscription, billing portal |
-| cancellations.js | Session cancellation logic |
-| intake.js | Mentee intake call booking |
-| meet.js | Meet/lobby session helpers |
-| messages.js | In-app messaging between mentor and mentee |
-| blog.js | Blog post fetch (Supabase) |
+| community.js | getCommunityStructure, getChannelMessages, sendChannelMessage, getCommunityPosts, createCommunityPost, togglePostUpvote, getComments, createComment, deleteCommunityPost, deleteComment, modAction, checkIfBlocked |
 
 ### `client/src/components/`
 | File | Purpose |
 |---|---|
-| Navbar.jsx | Marketing/product top bar (auth, scroll hide, mobile drawer) |
-| DashboardTopBar.jsx | Dashboard shell nav — grouped dropdowns by role |
-| nav/mainNavModel.js | Marketing nav structure. Guest: Company + Resources dropdowns; flat How it works / Pricing / Become a mentor; CTA "Browse mentors" → /mentors. Logged-in mentee/mentor sets unchanged. |
-| nav/NavMenus.jsx | Desktop dropdowns + mobile accordions |
-| nav/navChrome.js | Shared flat link/menu class strings |
-| nav/dashboardNavModel.js | Dashboard flat nav links (mentee/mentor sets); logo = home |
-| nav/DashboardNavMenus.jsx | Dashboard dropdown UI |
-| routing/RouteGuards.jsx | Auth-gated route wrappers |
-| routing/LegacyCompanyRedirect.jsx | Redirects old company routes |
-| Footer.jsx | App footer — Company / Resources / Platform / Tools + **Explore** pillar links (`/mentors?category=*`); no fake mentor counts |
-| AppLink.jsx | Smart link — resolves auth-aware paths |
+| Navbar.jsx | Top nav with auth state |
+| Footer.jsx | App footer |
 | LoadingSpinner.jsx | Reusable spinner |
 | MentorAvatar.jsx | Mentor photo with fallback |
 | SessionTypeCard.jsx | Card for career_advice / interview_prep / resume_review / networking |
 | MentorMatchWizard.jsx | Multi-step AI mentor-matching form |
-| OnboardingModal.jsx | Mentee first-login onboarding modal |
-| MentorOnboardingBanner.jsx | Dashboard banner for incomplete mentor onboarding |
-| CalendlyInlineWidget.jsx | Embedded Calendly scheduling widget |
+| OnboardingModal.jsx | Mentor onboarding modal (goals, expertise, availability) |
+| CalendarConnectButton.jsx | Trigger Google Calendar OAuth |
+| CalendarSuccessToast.jsx | Post-OAuth success toast |
 | FeedbackFAB.jsx | Floating feedback button |
 | FeedbackModal.jsx | Feedback submission form |
-| ReviewModal.jsx | Post-session review submission modal |
 | BridgeGlobalAtmosphere.jsx | Global visual theme/atmosphere |
 | PageGutterAtmosphere.jsx | Page gutter visual effect |
-| MagneticPointer.jsx | Custom cursor animation (desktop only) |
-| CustomCursor.jsx | Alternative custom cursor |
+| MagneticPointer.jsx | Custom cursor animation |
 | Reveal.jsx | Scroll-triggered reveal animation |
 | ScrollProgress.jsx | Scroll progress bar |
-| EmbeddedCheckoutPanel.jsx | Stripe embedded checkout |
-| SubscriptionGate.jsx | Paywall wrapper for gated features |
-| PaywallPrompt.jsx | Inline paywall prompt UI |
-| TrialBanner.jsx | Trial period status banner |
-| TierBadge.jsx | Mentor tier badge display |
-| TierDisputeModal.jsx | Tier dispute submission modal |
-| CancellationModal.jsx | Session cancellation confirmation |
-| NotificationPanel.jsx | In-app notification tray |
-| CalendarSuccessToast.jsx | Toast after calendar booking |
-| ErrorBoundary.jsx | React error boundary wrapper |
-| MentorPostsStrip.jsx | Horizontal strip of mentor posts |
-| MentorTagGroups.jsx | Grouped expertise/category tags |
-| MentorCertificate.jsx | Mentor certification badge |
-| ThemeToggle.jsx | Light/dark theme toggle |
-| FuturisticAuthFrame.jsx | Animated frame for auth pages |
-| PaletteDevBadge.jsx | Dev-only palette indicator |
-| TestModeChip.jsx | Dev/test mode indicator chip |
-| mentor/ | Mentor-specific sub-components (AvailabilityPanel, FAQSection, etc.) |
 
 ### `client/src/pages/` (top-level)
 | File | Purpose |
 |---|---|
-| landing/ | Public home page (`/`) — sections: HeroSection, HowItWorksSection, IsThisForYouSection, WaitlistSection, FAQSection; data in `landingData.js`; palette via `landingPalette.js` |
-| how-it-works/ | `/how-it-works` — centered hero in `index.jsx`; `HowItWorksSteps` with `track="sessions"`; close CTA in `HowItWorksContrast.jsx`; copy in `howItWorksData.js` (`SESSION_STEPS`). `BookingFlowAnimation.jsx` / `HowItWorksHero.jsx` kept for reuse (not mounted on this route) |
+| Landing.jsx | Public home page |
 | Login.jsx | Auth — sign in |
 | Register.jsx | Auth — sign up |
-| Mentors/ | Mentor browse + AI matching (`index.jsx`, `MentorCard.jsx`, `AiMatchCards.jsx`) |
-| mentor-profile/ | Individual mentor detail + booking — modular section components (`BookingDrawer`, `ReviewsBlock`, `ImpactStatsStrip`, etc.); `index.jsx` is entry; `profileHooks.js` for data |
-| BecomeMentor.jsx | Mentor recruitment landing |
-| MentorApplication.jsx | Voice-first mentor application (`/apply/mentor`) |
-| MentorOnboardingFlow.jsx | Post-approval mentor profile wizard |
+| Mentors.jsx | Mentor browse + AI matching |
+| MentorProfile.jsx | Individual mentor detail + booking |
+| MentorOnboarding.jsx | Mentor signup flow |
 | ResumeReview.jsx | AI resume review interface |
 | Profile.jsx | User profile page |
 | Settings.jsx | User settings |
-| VideoCall.jsx | Custom WebRTC video session (Supabase Realtime signaling) |
-| about/ | About Bridge page — Hero, OriginStory, Principles, Team, Timeline, ContactCta; data in `aboutData.js` |
-| company/ | Company/marketing page — Beliefs, BuiltFor, Story, People, HowItWorks, Close; data in `companyData.js` |
-| why-us/ | `/why-us` — narrative marketing page (AudienceSection, Mechanism, ContrarianBeliefs, Receipts, SideBySide, FinalCta); data in `whyUsData.js` |
-| Pricing/ | Pricing page (monthly / annual, student discount) |
-| IntakeCall.jsx | Mentee intake call scheduling page |
-| MeetLobby.jsx | Pre-session lobby / waiting room |
-| SubscriptionSuccess.jsx | Post-checkout success page |
-| booking/ | `/booking/finalize` — embedded Calendly scheduling post-checkout (`finalize.jsx`) |
-| blog/ | Blog listing + `WriteBlogPost.jsx` |
-| community/ | Community hub + category feeds (see community section below) |
-| dashboard/ | Dashboard shell + all sub-pages (see dashboard section below) |
-| admin/ | Dev portal + admin tools (gated; `DevGate.jsx` guards entry) |
-| footer/ | Static footer pages (About, Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust) |
-| refs/ | `SubmitReference.jsx` — reference submission for mentor applications |
+| VideoCall.jsx | Jitsi video session |
+| About.jsx | About page |
+| Pricing.jsx | Pricing tiers |
 
 ### `client/src/pages/dashboard/`
 | File | Purpose |
 |---|---|
-| index.jsx | Dashboard entry — shell + routing |
-| DashboardShell.jsx | Layout wrapper: `DashboardTopBar` + main content (no sidebar) |
-| Sidebar.jsx | Legacy sidebar component (not used by current shell) |
-| MobileTabBar.jsx | Mobile bottom nav |
-| home/ | Dashboard home sub-pages (HomeAtAGlance, HomeHeader, HomeNowStrip, HomeSpending, PageHeader) |
-| MenteeSection.jsx | Mentee-specific dashboard view |
-| MentorSection.jsx | Mentor-specific dashboard view |
-| SessionsPage.jsx | Session list + management |
-| SessionCalendar.jsx | Calendar view of scheduled sessions |
-| UpcomingSessionsBlock.jsx | Upcoming sessions widget |
-| PastSessionsBlock.jsx | Past sessions history block |
-| NextSessionCard.jsx | Next session countdown card |
-| SavedPage.jsx | Saved/favorited mentors page |
-| SavedMentorsBlock.jsx | Saved mentors widget |
-| MessagesPage.jsx | In-app messaging thread UI |
-| ReviewsPage.jsx | Reviews given/received |
-| ReviewsRecentBlock.jsx | Recent reviews widget |
-| EarningsPage.jsx | Mentor earnings breakdown |
-| EarningsCard.jsx | Earnings summary card |
-| BillingPage.jsx | Subscription + billing management |
-| AvailabilityPage.jsx | Mentor availability settings page |
-| MentorAvailabilityPanel.jsx | Availability schedule editor |
-| MentorPostsPanel.jsx | Mentor advice posts management |
-| ProfilePage.jsx | In-dashboard profile editor |
-| ProfileHealthCard.jsx | Profile completeness indicator |
-| SettingsPage.jsx | In-dashboard settings |
-| RecommendationsBlock.jsx | AI-matched mentor recommendations |
-| ActivityFeed.jsx | Recent activity stream |
-| MenteeIntakePrompt.jsx | Prompt to complete mentee intake |
-| EmptyState.jsx | Shared empty state component |
-| dashboardHooks.js | Data-fetching hooks for dashboard pages |
-| dashboardLayout.js | Layout constants and helpers |
-| dashboardCinematic.jsx | Cinematic/animated dashboard transitions |
-
-### `client/src/pages/community/`
-| File | Purpose |
-|---|---|
-| CommunityHub.jsx | Live feed + category sidebar (`/community`) |
-| CommunityCategory.jsx | Pillar feed with filters, sort, comments |
-| communityShared.jsx | Post cards, create form, mentor badge, post type pills |
-| MentorPostsPage.jsx | Mentor advice posts directory (`/community/posts`) |
-| communityPaths.js | Route helpers — maps `/community/*` ↔ `/dashboard/community/*` for signed-in users |
-
-### `client/src/constants/`
-| File | Purpose |
-|---|---|
-| sessionTypes.js | Four session type keys — source of truth |
-| mentorshipCategories.js | Re-exports career mentorship categories from `shared/mentorshipCategories.js` |
-| mentorBadges.js | Mentor badge definitions |
-
-### `api/` (Vercel serverless functions)
-| File | Purpose |
-|---|---|
-| ai-proxy.js | Claude/OpenAI proxy — used by client AI features |
-| realtime-session.js | `POST /api/realtime-session` → OpenAI Realtime API client secret |
-| calendly/[action].js | Calendly OAuth + event-type endpoints |
-| calendly-webhook.js | Calendly webhook receiver |
-| create-booking-checkout.js | Stripe checkout session for one-off bookings |
-| create-subscription-checkout.js | Stripe subscription checkout |
-| finalize-checkout.js | Post-payment finalization |
-| booking-confirm-scheduled.js | Confirm booking after Calendly scheduling |
-| cancel-session.js | Server-side session cancellation |
-| verification/ | Mentor verification endpoints |
-| admin/ | Admin-gated API routes |
-| _lib/ | Shared handlers (Calendly, Supabase client, Stripe client, auth, security) |
+| Dashboard.jsx | Container — routes to mentee or mentor view |
+| MenteeDashboardContent.jsx | Sessions, favorites, history for mentees |
+| MentorDashboardContent.jsx | Incoming requests, schedule, earnings for mentors |
+| DashboardSettingsPanel.jsx | In-dashboard settings |
+| MentorAvailabilityModal.jsx | Set/edit availability schedule |
+| dashboardShared.jsx | Shared constants & utilities |
+| dashboardUtils.js | SESSION_TYPE_MAP (type → icon + color metadata) |
+| useDashboardData.js | Hook: fetches sessions, profile, reviews |
 
 ### `client/src/pages/footer/`
-Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust — static informational pages (`grounded-guidance` palette). **FAQ** (`FAQ.jsx`): two-column layout with sticky section nav (`lg:sticky top-28`), `gap-16` between nav and content, uniform `text-sm` nav labels, `focus-visible` rings only (no default focus ring). **Help**, **Contact**, **Trust**: shared `pageShell` + accordion/section patterns; Help cross-links FAQ for policy questions. Also `Community.jsx` (marketing copy — not the product `/community` hub). About lives at `pages/about/`, not here.
+| File | Purpose |
+|---|---|
+| Community.jsx | **Discord-style community page** — sidebar with sections/channels, real-time chat via Supabase Realtime, admin Mod Tools button (admins table check). Routes: /community and /community/:channelId |
+| ModPanel.jsx | **Moderator slide-over panel** — tabs for Channels, Sections, Blocked Users. Receives { open, onClose, isAdmin } props. Only renders if isAdmin=true. All actions go through modAction() → api/community-mod.js |
+| communityShared.jsx | Shared components: CommunityPostCard, CreatePostForm, useCommunityPaths, POST_TYPES, AuthorAvatar, PostTypePill, MentorBadge |
+| communityPaths.js | getCommunityBase, communityPath, dashboardCommunityPath helpers |
+| CommunityCategory.jsx | Category-specific post feed (used within Discord layout for post-type channels) |
+| CommunityHub.jsx | Legacy hub — superseded by Community.jsx Discord layout |
+| About, Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust | Static informational pages |
+
+### `api/` (Vercel serverless functions — max 12, currently 9)
+| File | Purpose |
+|---|---|
+| community-mod.js | **Moderator actions** — block/unblock user, delete message/post, add/remove channel/section. Checks admins table via service role. Requires Authorization: Bearer token header. |
+| google-auth.js | Google Calendar OAuth initiation |
+| google-callback.js | Google Calendar OAuth callback |
+| calendar-availability.js | Fetch mentor busy times from Google Calendar |
+| calendar-book.js | Create Google Calendar event on booking |
+| realtime-session.js | OpenAI Realtime ephemeral token (server-side, OPENAI_API_KEY no VITE_ prefix) |
+| finalize-checkout.js | Stripe checkout finalization → Supabase session insert + calendar-book fire-and-forget |
+| create-booking-checkout.js | Stripe per-session checkout |
+| create-subscription-checkout.js | Stripe subscription checkout |
+
+---
+
+## Community Architecture (Discord-style)
+
+**Layout:** Full viewport height (`h-screen flex overflow-hidden`). Left sidebar (~240px, fixed) shows sections and channels. Main area is flex-1 with top bar, scrollable message area, and sticky input bar.
+
+**Real-time:** Supabase Realtime on `community_messages`. Subscribe on channel switch, unsubscribe on switch/unmount. Filter: `channel_id=eq.${channelId}`.
+
+**Routing:** `/community` and `/community/:channelId` both render `CommunityPage`. If no channelId in URL, default to first channel of first section after structure loads.
+
+**Admin check pattern (use everywhere):**
+```js
+const { data: adminRow } = await supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle();
+const isAdmin = Boolean(adminRow);
+```
+
+**Mod actions pattern:**
+```js
+await modAction('block_user', { user_id, reason });
+await modAction('add_channel', { section_id, name, description, position });
+await modAction('remove_channel', { channel_id });
+await modAction('add_section', { name, position });
+await modAction('remove_section', { section_id }); // cascades to channels
+await modAction('delete_message', { message_id });
+await modAction('delete_post', { post_id });
+```
+
+**Seeded channel structure:**
+- GENERAL: #welcome, #announcements, #general
+- CAREER: #job-hunting, #resume-help, #interview-prep, #career-advice
+- COMMUNITY: #wins, #introductions, #off-topic
 
 ---
 
@@ -410,26 +358,20 @@ Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust — static inf
 - Mentor discovery: browse, search, filter by industry, sort
 - Mentor profile detail page with reviews
 - Session booking (create, accept/decline, cancel, complete)
-- Custom WebRTC video call rooms (peer-to-peer, no 3rd-party service)
+- Jitsi video call rooms (URL auto-generated on session accept)
 - Favorites (add/remove/list)
 - AI mentor matching (OpenAI ranking)
 - AI resume review (Claude)
 - AI onboarding wizard (mentee_profiles)
-- Calendly OAuth + embedded scheduling widget
-- Voice-first mentor application + post-approval onboarding wizard
-- Community hub + category feeds (direct Supabase, quiet-authority palette)
-- Mentor value stack (badges, mentor posts, impact stats, session action items)
-- Mentorship category taxonomy + AI tagging
+- Google Calendar OAuth + availability + booking
+- Mentor onboarding flow
 - Dashboard (mentee + mentor views)
 - Resume upload/storage (Supabase bucket)
-- Seeded mentor profiles across industries (see `supabase/seeds/`)
-- Landing, About, Pricing, Why Us, footer static pages
-- Stripe subscription + billing portal
-- In-app messaging (mentor ↔ mentee)
-- Mentor intake call scheduling (`IntakeCall.jsx`)
-- Meet lobby / pre-session waiting room (`MeetLobby.jsx`)
-- Dev/admin portal (gated by `DevGate.jsx`)
-- Blog (Supabase-backed)
+- 30 seeded mentor profiles across industries
+- Landing, About, Pricing, footer static pages
+- **Discord-style community** with real-time chat, sections, channels, mod tools
+- **Community moderation** via admins table + api/community-mod.js serverless function
+- OpenAI Realtime voice intake (WebRTC, gpt-realtime-1.5, ballad voice)
 
 ---
 
@@ -439,17 +381,7 @@ Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust — static inf
 |---|---|---|
 | `feature/dashboard` / `review/omar-dashboard` | **Omar** | Dashboard improvements — do not merge or rebase without coordination |
 | `feature/review-system` | **Irshad** | Review system — do not touch `reviews` table logic or ReviewModal |
-| `feature/sprint2-mentor-flow` | **Muaz** | Sprint 2 mentor onboarding + profile flow |
-
----
-
-## Sprint 2 Goals
-
-| Person | Goal |
-|---|---|
-| Muaz | Mentor profile flow polish, onboarding improvements, calendar integration hardening |
-| Omar | Dashboard v2 — session management UI, mentor earnings view |
-| Irshad | Review system — post-session review prompt, review display on mentor profile |
+| `feature/community-discord` | **Muaz** | Discord-style community overhaul (may be merged to main) |
 
 ---
 
@@ -466,18 +398,15 @@ Blog, Careers, Contact, Cookies, FAQ, Help, Privacy, Terms, Trust — static inf
 
 ## Environment Variables
 
-### Server (`server/.env`)
+### Vercel (production serverless functions)
 ```
-PORT
 SUPABASE_URL
 SUPABASE_SERVICE_ROLE_KEY
-JWT_SECRET
+OPENAI_API_KEY              (no VITE_ — server-side only, used by realtime-session.js)
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+GOOGLE_REDIRECT_URI         (must be exactly: https://bridge-eight-lemon.vercel.app/api/google-callback)
 STRIPE_SECRET_KEY
-CALENDLY_CLIENT_ID
-CALENDLY_CLIENT_SECRET
-CALENDLY_REDIRECT_URI
-CLIENT_URL
-CLIENT_URL_PROD
 ```
 
 ### Client (`client/.env`)
@@ -487,4 +416,18 @@ VITE_SUPABASE_ANON_KEY
 VITE_SERVER_URL
 VITE_ANTHROPIC_API_KEY
 VITE_OPENAI_API_KEY
+VITE_STRIPE_PUBLISHABLE_KEY
+```
+
+### Server (`server/.env` — local only, never deployed)
+```
+PORT
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+JWT_SECRET
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+GOOGLE_REDIRECT_URI
+CLIENT_URL
+CLIENT_URL_PROD
 ```
