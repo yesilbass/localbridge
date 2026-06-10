@@ -40,6 +40,7 @@
     { "source": "/api/admin/review-detail",                      "destination": "/api/admin/review/[action]?action=detail" },
     { "source": "/api/admin/mentor-flags",                       "destination": "/api/admin/review/[action]?action=mentor-flags" },
     { "source": "/api/cron/verification-retry",                  "destination": "/api/utils/[action]?action=verification-retry" },
+    { "source": "/api/community-mod", "destination": "/api/community-mod.js" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

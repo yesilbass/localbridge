@@ -7,6 +7,12 @@ import devPortalHandler from '../_lib/devPortal.js';
 import { getStripe } from '../_lib/stripeClient.js';
 import { getPublicOrigin } from '../_lib/publicOrigin.js';
 import { randomBytes, createHmac } from 'node:crypto';
+import { createClient } from '@supabase/supabase-js';
+
+const communityAdminClient = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 // bodyParser disabled so the Checkr webhook can read raw body for HMAC.
 // All other actions re-parse the body themselves below.
@@ -37,6 +43,7 @@ export default async function handler(req, res) {
   if (action === 'billing-portal') return handleBillingPortal(req, res);
   if (action === 'verification-retry') return handleVerificationRetry(req, res);
   if (action === 'dev') return devPortalHandler(req, res);
+  if (action === 'community-mod') return handleCommunityMod(req, res);
   return jsonError(res, 404, 'Unknown util action');
 }
 
@@ -319,4 +326,82 @@ function isAuthorizedCronRequest(req) {
   const secret = req.query?.secret || req.headers?.['x-cron-secret'];
   if (process.env.CRON_SECRET && secret === process.env.CRON_SECRET) return true;
   return false;
+}
+
+// ── community-mod ────────────────────────────────────────────────────────────
+
+async function handleCommunityMod(req, res) {
+  applySecurityHeaders(res);
+  if (req.method !== 'POST') return jsonError(res, 405, 'Method not allowed');
+
+  const { user, error: authErr } = await verifyAuthUser(req);
+  if (authErr || !user) return jsonError(res, 401, 'Invalid token');
+
+  const { data: adminRow } = await communityAdminClient
+    .from('admins')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (!adminRow) return jsonError(res, 403, 'Forbidden');
+
+  const { action: modAction, payload } = req.body || {};
+  if (!modAction || !payload) return jsonError(res, 400, 'Missing action or payload');
+
+  try {
+    switch (modAction) {
+      case 'block_user': {
+        const { user_id, reason } = payload;
+        const { error } = await communityAdminClient.from('community_blocked_users').insert({ user_id, reason });
+        if (error) throw error;
+        break;
+      }
+      case 'unblock_user': {
+        const { user_id } = payload;
+        const { error } = await communityAdminClient.from('community_blocked_users').delete().eq('user_id', user_id);
+        if (error) throw error;
+        break;
+      }
+      case 'delete_message': {
+        const { message_id } = payload;
+        const { error } = await communityAdminClient.from('community_messages').delete().eq('id', message_id);
+        if (error) throw error;
+        break;
+      }
+      case 'delete_post': {
+        const { post_id } = payload;
+        const { error } = await communityAdminClient.from('community_posts').delete().eq('id', post_id);
+        if (error) throw error;
+        break;
+      }
+      case 'add_channel': {
+        const { section_id, name, description, position } = payload;
+        const { error } = await communityAdminClient.from('community_channels').insert({ section_id, name, description, position });
+        if (error) throw error;
+        break;
+      }
+      case 'remove_channel': {
+        const { channel_id } = payload;
+        const { error } = await communityAdminClient.from('community_channels').delete().eq('id', channel_id);
+        if (error) throw error;
+        break;
+      }
+      case 'add_section': {
+        const { name, position } = payload;
+        const { error } = await communityAdminClient.from('community_sections').insert({ name, position });
+        if (error) throw error;
+        break;
+      }
+      case 'remove_section': {
+        const { section_id } = payload;
+        const { error } = await communityAdminClient.from('community_sections').delete().eq('id', section_id);
+        if (error) throw error;
+        break;
+      }
+      default:
+        return jsonError(res, 400, `Unknown action: ${modAction}`);
+    }
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    return jsonError(res, 500, err.message || 'Internal server error');
+  }
 }

@@ -287,3 +287,122 @@ export async function getCommunityHubStats() {
   }
   return { data: stats, error: countsRes.error ?? lastRes.error };
 }
+
+export async function getCommunityStructure() {
+  const { data: sections, error: sErr } = await supabase
+    .from('community_sections')
+    .select('*')
+    .order('position', { ascending: true });
+  if (sErr) return { data: null, error: sErr };
+
+  const { data: channels, error: cErr } = await supabase
+    .from('community_channels')
+    .select('*')
+    .order('position', { ascending: true });
+  if (cErr) return { data: null, error: cErr };
+
+  const channelsBySection = {};
+  for (const ch of channels ?? []) {
+    if (!channelsBySection[ch.section_id]) channelsBySection[ch.section_id] = [];
+    channelsBySection[ch.section_id].push(ch);
+  }
+
+  return {
+    data: (sections ?? []).map((s) => ({ ...s, channels: channelsBySection[s.id] ?? [] })),
+    error: null,
+  };
+}
+
+export async function getChannelMessages(channelId, { limit = 50, before = null } = {}) {
+  let query = supabase
+    .from('community_messages')
+    .select('*')
+    .eq('channel_id', channelId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (before) query = query.lt('created_at', before);
+
+  const { data, error } = await query;
+  if (error) return { data: [], error };
+
+  const authorIds = [...new Set((data ?? []).map((m) => m.author_id))];
+  const { profileMap, mentorMap } = await fetchAuthorMeta(authorIds);
+
+  return {
+    data: (data ?? []).reverse().map((m) => {
+      const profile = profileMap.get(m.author_id) ?? { name: 'Member', avatar: null };
+      const mentor = mentorMap.get(m.author_id);
+      return {
+        ...m,
+        author: {
+          id: m.author_id,
+          name: profile.name,
+          avatar: profile.avatar ?? mentor?.image_url ?? null,
+          is_mentor: Boolean(mentor),
+          mentor_profile_id: mentor?.mentor_profile_id ?? null,
+        },
+      };
+    }),
+    error: null,
+  };
+}
+
+export async function sendChannelMessage(channelId, body) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { data: null, error: new Error('Not authenticated') };
+
+  const { data, error } = await supabase
+    .from('community_messages')
+    .insert({ channel_id: channelId, author_id: user.id, body: body.trim() })
+    .select('*')
+    .single();
+
+  if (error) return { data: null, error };
+
+  const { profileMap, mentorMap } = await fetchAuthorMeta([user.id]);
+  const profile = profileMap.get(user.id) ?? { name: 'Member', avatar: null };
+  const mentor = mentorMap.get(user.id);
+
+  return {
+    data: {
+      ...data,
+      author: {
+        id: user.id,
+        name: profile.name,
+        avatar: profile.avatar ?? mentor?.image_url ?? null,
+        is_mentor: Boolean(mentor),
+        mentor_profile_id: mentor?.mentor_profile_id ?? null,
+      },
+    },
+    error: null,
+  };
+}
+
+export async function modAction(action, payload) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return { error: 'Not authenticated' };
+
+  const res = await fetch('/api/utils?action=community-mod', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ action, payload }),
+  });
+
+  const json = await res.json();
+  return res.ok ? { success: true } : { error: json.error ?? 'Action failed' };
+}
+
+export async function checkIfBlocked() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { data } = await supabase
+    .from('community_blocked_users')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  return Boolean(data);
+}
