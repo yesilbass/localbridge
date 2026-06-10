@@ -168,6 +168,7 @@ function AppContent() {
           <Route path="/faq" element={<PublicPage><FAQ /></PublicPage>} />
           <Route path="/contact" element={<PublicPage><Contact /></PublicPage>} />
           <Route path="/help" element={<PublicPage><Help /></PublicPage>} />
+          <Route path="/help/:articleId" element={<PublicPage><Help /></PublicPage>} />
           <Route path="/trust" element={<PublicPage><Trust /></PublicPage>} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/community/posts" element={<PublicPage><MentorPostsPage /></PublicPage>} />

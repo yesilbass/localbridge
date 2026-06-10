@@ -210,6 +210,13 @@ export default function Contact() {
           {/* Form */}
           <div className="lg:col-span-3">
             <Reveal delay={20}>
+              <div
+                className="rounded-2xl p-6 sm:p-8"
+                style={{
+                  backgroundColor: 'var(--bridge-surface)',
+                  boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
+                }}
+              >
               {sent ? (
                 <div>
                   <h2 className="font-display text-2xl font-bold text-[var(--bridge-text)]">
@@ -397,6 +404,7 @@ export default function Contact() {
                   </form>
                 </>
               )}
+              </div>
             </Reveal>
           </div>
         </div>

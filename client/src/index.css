@@ -814,3 +814,56 @@ html.theme-dark div[aria-hidden].pointer-events-none {
     0 20px 48px -10px color-mix(in srgb, var(--color-primary) 35%, transparent),
     0 56px 110px -18px color-mix(in srgb, var(--color-primary) 38%, transparent);
 }
+
+/* Terms of Service — bullet markers, floating ToC hover, print rules */
+.terms-bullets {
+  list-style: none;
+  padding-left: 1rem;
+}
+.terms-bullets > li {
+  position: relative;
+  padding-left: 1rem;
+}
+.terms-bullets > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 9999px;
+  background-color: var(--color-primary);
+}
+
+.floating-toc-link {
+  color: var(--bridge-text-secondary);
+  font-weight: 500;
+  background-color: transparent;
+}
+.floating-toc-link:hover {
+  background-color: color-mix(in srgb, var(--color-primary) 5%, transparent);
+  color: var(--bridge-text);
+}
+.floating-toc-link.is-active {
+  color: var(--bridge-text);
+  font-weight: 600;
+  background-color: color-mix(in srgb, var(--color-primary) 9%, transparent);
+}
+
+@media print {
+  nav, header, aside, footer { display: none !important; }
+  .fixed, .sticky { display: none !important; }
+  [aria-hidden="true"] { display: none !important; }
+  main { padding: 0 !important; background: white !important; color: black !important; }
+  h1, h2, h3, p, li, strong { color: black !important; }
+  a { color: black !important; text-decoration: underline; }
+  a[href^="http"]::after,
+  a[href^="mailto:"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    color: #444 !important;
+  }
+  h2, h3 { break-after: avoid; page-break-after: avoid; }
+  section { break-inside: avoid-page; }
+  .terms-bullets > li::before { background-color: black !important; }
+}
