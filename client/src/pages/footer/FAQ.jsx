@@ -18,128 +18,124 @@ const EYEBROW = {
 const SECTIONS = [
     {
         id: 'platform',
-        name: 'Platform mechanics',
-        sub: 'How Bridge works, what the subscription covers, and how we match mentors.',
+        name: 'Getting started',
+        sub: 'How Bridge works and how to find the right mentor.',
         faqs: [
             {
                 q: 'What is Bridge?',
-                a: `Bridge connects job seekers and career changers with established professionals for 1-on-1 mentorship sessions. You browse a verified mentor directory, book a session, and meet on a private video call — no middlemen, no courses, no community feed to manage.`,
+                a: `Bridge connects job seekers and career changers with established professionals for 1-on-1 mentorship sessions. You browse the mentor directory, book a session, and meet on a private video call.`,
             },
             {
-                q: 'How does the mentor matching algorithm work?',
-                a: `When you run AI matching, your mentee profile (current role, target role, goals, and experience level) is sent to OpenAI's API alongside the mentor directory. The model ranks mentors by how well their expertise, industry, and mentorship focus align with your goals. Results are suggestions — browse the full directory if the top matches aren't the right fit. See Help → AI mentor matching for details.`,
+                q: 'How do I find the right mentor?',
+                a: `Open Mentors from the nav and filter by industry, role, or expertise. Read the mentorship description on each profile. That section is where mentors explain the specific problems they actually help with, and it tells you more than a job title does. Check reviews and available time slots before booking.`,
             },
             {
-                q: 'How do I find the right mentor without using AI matching?',
-                a: `Open Mentors from the nav, then filter by industry, role, or expertise area. Read the mentorship description section of each profile — that's where mentors explain the specific problems they help with, and it's more useful than job title alone. Check reviews and available time slots before committing to a profile.`,
+                q: 'How does AI mentor matching work?',
+                a: `If you fill out a mentee profile, you can ask Bridge to rank mentors against your goals, current role, and target role. The results are suggestions, not a verdict. If the top matches don't look right, browse the full directory yourself.`,
             },
             {
-                q: 'What are the four session types?',
-                a: `Career Advice (broad career planning and decisions), Interview Prep (mock interviews and coaching), Resume Review (line-by-line feedback on your resume), and Networking (introductions and relationship strategy). Choose the type that matches what you want out of the session when booking.`,
+                q: 'What are the session types?',
+                a: `Career Advice for broad career planning. Interview Prep for mock interviews and coaching. Resume Review for line-by-line feedback. Networking for introductions and relationship strategy. Pick the one that matches what you actually want out of the hour when you book.`,
             },
             {
                 q: 'Does Bridge take a cut of session fees?',
-                a: `Bridge collects the session fee on the mentor's behalf through Stripe and acts as a limited payment agent. Specific fee splits are disclosed at checkout. All payment processing is handled by Stripe — we never store your card number.`,
+                a: `Bridge takes a small platform fee on each session to keep the lights on. The exact mentor payout and platform fee are shown at checkout before you pay. Card processing is handled by Stripe; we never see or store your card number.`,
             },
         ],
     },
     {
         id: 'trust',
         name: 'Trust & safety',
-        sub: 'How we vet mentors, what we do with your data, and what to do when something goes wrong.',
+        sub: 'How we vet mentors and what to do when something goes wrong.',
         faqs: [
             {
                 q: 'Are my video calls private?',
-                a: `Yes. Video sessions use a direct peer-to-peer WebRTC connection — your video and audio go directly from your device to the mentor's device and never pass through or get stored on Bridge's servers. Bridge cannot view, record, or access your calls. See our Privacy Policy → Section 5 for the technical details.`,
+                a: `Yes. Video and audio go directly between you and your mentor and do not pass through Bridge servers. We can't see, record, or replay your calls. More detail on the Trust & Safety page.`,
             },
             {
                 q: 'How do you vet mentors?',
-                a: `Every mentor goes through a multi-step verification: identity check, professional email and LinkedIn confirmation, a voice-based application interview (AI-transcribed and evaluated), reference review, and in some cases a Checkr background check. Borderline applications go to a human founder for final review — we reject more than we approve. See Trust & Safety for details.`,
+                a: `Every mentor goes through identity verification, professional email and LinkedIn confirmation, an application interview, and a reference check. Borderline applications get a human review. We reject more applicants than we approve.`,
             },
             {
-                q: 'What should I do if a mentor asks for money outside the platform?',
-                a: `Report it immediately using the Trust & Safety report form. This is a serious violation of our Terms — all paid professional services between mentors and mentees introduced on Bridge must be transacted through the platform. Both accounts involved are subject to permanent suspension. We take these reports seriously and respond within one business day.`,
+                q: 'What should I do if a mentor asks for payment outside the platform?',
+                a: `Report it. Use the report form on the Trust & Safety page. Moving paid sessions off Bridge is a serious violation of our Terms and both accounts can be permanently removed. Safety reports are reviewed within one business day.`,
             },
             {
                 q: 'Can a mentor or mentee record a session?',
-                a: `Bridge does not record sessions — there is no recording functionality on the platform. If either party wants to record, they must get explicit consent from all participants before doing so. Recording without consent violates our Terms and may violate wiretapping laws in your jurisdiction.`,
+                a: `Bridge has no recording feature built into the platform. If either of you wants to record on your own, you need clear consent from everyone on the call. Recording without consent violates our Terms and may break wiretapping laws where you live.`,
             },
             {
                 q: 'How do I report a bad experience?',
-                a: `Use the report form on the Trust & Safety page. You can submit anonymously by leaving the email field blank. Reports go directly to a founder and receive a ticket ID. Safety and harassment reports are prioritized and reviewed within one business day.`,
+                a: `Use the report form on the Trust & Safety page. You can submit anonymously by leaving the email field blank. You'll get a ticket ID either way, and safety or harassment reports are prioritized.`,
             },
         ],
     },
     {
         id: 'booking',
         name: 'Booking & sessions',
-        sub: 'How to book, reschedule, cancel, and what happens if someone doesn\'t show up.',
+        sub: 'Booking, rescheduling, cancellations, and no-shows.',
         faqs: [
             {
-                q: 'How does booking actually work?',
-                a: `Open a mentor's profile, pick a session type, complete checkout via Stripe, and then schedule the time using the embedded Calendly widget. You'll receive a confirmation email with a calendar invite and a cancel/reschedule link. The session appears in your dashboard once the mentor accepts.`,
+                q: 'How does booking work?',
+                a: `Open a mentor's profile, choose a session type, pick a time, and check out. You'll get a confirmation email with the calendar invite and a link to reschedule or cancel. The session shows up in your dashboard once the mentor accepts.`,
             },
             {
-                q: 'How far in advance can I book, and when can I reschedule?',
-                a: `You can book up to 4 weeks out, depending on the mentor's availability settings in Calendly. To reschedule, use the reschedule link in your confirmation email or Dashboard → Sessions. Try to reschedule at least 24 hours in advance so the mentor isn't holding the original slot unnecessarily.`,
+                q: 'How far in advance can I book?',
+                a: `You can book up to about four weeks out, depending on the mentor's availability. To reschedule, use the link in your confirmation email or open the session from your dashboard. Try to give at least 24 hours notice so the mentor isn't holding a slot for nothing.`,
             },
             {
                 q: 'What is the cancellation and refund policy?',
-                a: `Cancel more than 1 hour before the session for a full refund. Cancellations made within 1 hour of start time are at the mentor's discretion. If a mentor cancels on you, you get a full automatic refund. See Help → Session refund policy for the complete no-show and late arrival rules.`,
+                a: `Cancel more than an hour before the session for a full refund. Cancellations inside the last hour are at the mentor's discretion. If a mentor cancels on you, the refund is automatic.`,
             },
             {
-                q: 'What happens if the mentor doesn\'t show up?',
-                a: `If your mentor doesn't join within 15 minutes of the scheduled start, email mentors.bridge@gmail.com with the session time and mentor name. You'll receive a full refund and priority rebooking with another mentor. A confirmed no-show without communication is grounds for removal from the platform.`,
-            },
-            {
-                q: 'Can I book a session without a subscription?',
-                a: `Booking may start a 7-day free trial if you're not already subscribed. You won't be charged until day 8 — a reminder is sent on day 5. Cancel during the trial and you owe nothing. See Billing → Subscription & free trial.`,
+                q: "What happens if the mentor doesn't show up?",
+                a: `If your mentor hasn't joined within 15 minutes of the start time, contact support with the session time and mentor name. You get a full refund and priority rebooking with another mentor. Confirmed no-shows without explanation are grounds for removal from the platform.`,
             },
         ],
     },
     {
         id: 'ai',
         name: 'AI features',
-        sub: 'What AI tools are available, what data they use, and what they can\'t do.',
+        sub: 'What our AI tools do, what data they use, and what they can\'t do.',
         faqs: [
             {
                 q: 'What AI features does Bridge offer?',
-                a: `AI mentor matching (ranks mentors against your profile, 3 uses per account), AI resume review (scores and analyzes your resume PDF via Claude, 1 use lifetime), and voice mentor application (AI-facilitated interview for mentor applicants, with real-time transcription). Mentors also have an AI bio-polishing tool and expertise categorization during onboarding.`,
+                a: `Two things you'll actually interact with: AI mentor matching, which ranks mentors against your profile, and AI resume review, which gives you structured feedback on your resume. Both are opt-in.`,
             },
             {
-                q: 'Does Bridge send my resume to a third party?',
-                a: `Yes — when you use AI resume review, your resume PDF is transmitted to Anthropic's Claude API for analysis. When you use AI mentor matching, your profile (and optionally extracted resume text) is sent to OpenAI's API. Neither provider uses API-submitted data for model training per their enterprise API policies. See our Privacy Policy → Section 4 for full details.`,
+                q: 'Where does my data go when I use them?',
+                a: `When you use AI resume review or AI matching, the relevant content is sent to a third-party AI provider for analysis and then returned to you. The providers we use do not train their models on the data sent through their paid APIs. We don't share this data with anyone else.`,
             },
             {
                 q: 'How accurate is the AI resume review?',
-                a: `The review produces a probabilistic estimate from a language model — not a certified professional assessment. It's useful as a structured second opinion and a fast way to identify obvious gaps, but it should not replace feedback from a human recruiter or career coach. Use it as one data point, not the final word.`,
+                a: `It's a fast second opinion, not a verdict. Good for catching obvious gaps and tightening structure. It shouldn't replace feedback from a recruiter, a hiring manager, or a mentor who knows your target role.`,
             },
             {
                 q: 'Can I opt out of AI features?',
-                a: `Yes. All AI features are opt-in — you choose when to use them. Simply don't use AI matching or AI resume review and your data is never sent to external AI providers. Mentor applicants go through a voice interview as part of the standard application process; that step cannot be skipped.`,
+                a: `Yes. They are opt-in. If you never use AI matching or AI resume review, your data is never sent to an AI provider.`,
             },
         ],
     },
     {
         id: 'billing',
         name: 'Billing & subscriptions',
-        sub: 'Pricing, the free trial, student discounts, and how to manage or cancel.',
+        sub: 'Pricing, the free trial, student discounts, and cancelling.',
         faqs: [
             {
                 q: 'What does the subscription include?',
-                a: `Full mentor directory access, AI matching (3 uses), AI resume review (1 use lifetime), community access, unlimited in-app messaging with mentors, and all features we ship going forward. Mentor time is always free — the subscription is for platform access, not session fees.`,
+                a: `Full directory access, AI matching, AI resume review, the community, and in-app messaging with mentors. The subscription covers the platform. Session fees are paid separately at the rate the mentor sets.`,
             },
             {
                 q: 'How does the free trial work?',
-                a: `New subscribers get a 7-day free trial. No charge until day 8, and a reminder is sent on day 5. Cancel any time before day 8 via Dashboard → Billing and you owe nothing. After the trial, the subscription renews automatically each month or year depending on your plan.`,
+                a: `New subscribers get a 7-day free trial. You won't be charged until day 8, and we send a reminder before that happens. Cancel during the trial from your billing settings and you owe nothing.`,
             },
             {
                 q: 'Is there a student discount?',
-                a: `Yes. Students with a verified .edu email address receive a reduced rate applied automatically at checkout. If your school uses a non-.edu domain, email mentors.bridge@gmail.com with proof of enrollment and we'll apply it manually.`,
+                a: `Yes. A verified .edu email gets the student rate at checkout automatically. If your school uses a different domain, contact support with proof of enrollment and we'll apply it manually.`,
             },
             {
                 q: 'How do I cancel my subscription?',
-                a: `Go to Dashboard → Billing, which opens the Stripe customer portal. Click Cancel plan. Your access continues until the end of the current billing period. Cancelling does not delete your account or session history. See Help → Manage or cancel your subscription.`,
+                a: `Go to Dashboard, open Billing, and cancel from there. Your access continues until the end of the current billing period. Cancelling doesn't delete your account or your session history.`,
             },
         ],
     },
@@ -150,19 +146,19 @@ const SECTIONS = [
         faqs: [
             {
                 q: 'What personal data does Bridge collect?',
-                a: `Name, email, and profile information you provide; session history and booking data; payment metadata via Stripe (not your card number); and technical data like IP address and browser type. For mentors: identity verification results, voice interview transcripts, and reference submissions. See Privacy Policy → Section 1 for the full list.`,
+                a: `What you give us (name, email, profile info), what you do on the platform (sessions booked, reviews left, messages sent), payment metadata from Stripe, and standard technical data like IP address and browser. The full breakdown is in our Privacy Policy.`,
             },
             {
                 q: 'Does Bridge sell my data?',
-                a: `No. We do not sell personal data, run advertising, or share your data with any third party except the specific service providers needed to operate the platform (Stripe, Calendly, OpenAI, Anthropic, Supabase). See Privacy Policy → Section 2.`,
+                a: `No. We don't sell personal data and we don't run ads. We share data only with the service providers we need to run the platform, like our payment processor and infrastructure providers.`,
             },
             {
-                q: 'How do I delete my account and data?',
-                a: `Go to Dashboard → Settings → Account → Delete account. Personal data is removed within 30 days. Financial transaction records are kept for 7 years for tax compliance. Resume files are deleted immediately. See Help → Deleting your account or Privacy Policy → Section 9.`,
+                q: 'How do I delete my account?',
+                a: `Open Settings from your dashboard and use the delete account option. Personal data is removed within 30 days. We keep transaction records longer for tax and accounting reasons, which is a legal requirement.`,
             },
             {
                 q: 'Can I download all my data?',
-                a: `Yes — this is your right under GDPR and CCPA. Email mentors.bridge@gmail.com requesting a data export and we'll respond within 30 days with a portable copy of everything we hold about you.`,
+                a: `Yes. You have that right under GDPR and CCPA. Contact support to request an export and we'll send a portable copy within 30 days.`,
             },
         ],
     },
@@ -170,7 +166,7 @@ const SECTIONS = [
 
 const DEFAULT_OPEN = new Set([
     'Are my video calls private?',
-    'How does booking actually work?',
+    'How does booking work?',
     'How do you vet mentors?',
 ]);
 
@@ -281,7 +277,7 @@ export default function FAQ() {
                         className="mt-5 max-w-2xl leading-[1.7] text-[var(--bridge-text-secondary)]"
                         style={{ fontSize: 'clamp(1rem, 1.5vw, 1.125rem)' }}
                     >
-                        Answers to the most common questions. Step-by-step how-tos live in the{' '}
+                        The short answers. For step-by-step walkthroughs, the{' '}
                         <Link
                             to="/help"
                             className="font-semibold underline underline-offset-4 transition hover:opacity-80"
@@ -289,15 +285,15 @@ export default function FAQ() {
                         >
                             Help center
                         </Link>
-                        . Still need us?{' '}
+                        {' '}goes deeper. If you can't find what you need,{' '}
                         <Link
                             to="/contact"
                             className="font-semibold underline underline-offset-4 transition hover:opacity-80"
                             style={{ color: 'var(--color-primary)' }}
                         >
-                            Contact
+                            email us
                         </Link>
-                        {' '}&mdash; a real person reads every message.
+                        . A real person reads every message.
                     </p>
 
                     <div className="relative mt-8 max-w-2xl">
@@ -309,7 +305,7 @@ export default function FAQ() {
                             type="search"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search — video privacy, matching, refunds, AI features…"
+                            placeholder="Search refunds, video privacy, matching, billing…"
                             aria-label="Search FAQ"
                             className="w-full rounded-lg border border-[var(--bridge-border)] bg-transparent py-4 pl-12 pr-4 text-lg text-[var(--bridge-text)] outline-none placeholder:text-[var(--bridge-text-muted)] transition focus:border-[var(--color-primary)] focus:outline-none"
                         />
@@ -452,7 +448,7 @@ export default function FAQ() {
 
                         <Reveal delay={100}>
                             <p className="mt-20 border-t border-[var(--bridge-border)] pt-12 text-base leading-[1.8] text-[var(--bridge-text-secondary)] sm:text-lg">
-                                Need a how-to guide?{' '}
+                                Looking for a walkthrough? Try the{' '}
                                 <Link
                                     to="/help"
                                     className="font-semibold underline underline-offset-4 transition hover:opacity-80"
@@ -460,7 +456,7 @@ export default function FAQ() {
                                 >
                                     Help center
                                 </Link>
-                                . Safety concern?{' '}
+                                . For anything safety related, head to{' '}
                                 <Link
                                     to="/trust"
                                     className="font-semibold underline underline-offset-4 transition hover:opacity-80"
@@ -468,13 +464,13 @@ export default function FAQ() {
                                 >
                                     Trust & Safety
                                 </Link>
-                                . Still stuck?{' '}
+                                . Otherwise just{' '}
                                 <Link
                                     to="/contact"
                                     className="font-semibold underline underline-offset-4 transition hover:opacity-80"
                                     style={{ color: 'var(--color-primary)' }}
                                 >
-                                    Contact us
+                                    write to us
                                 </Link>
                                 .
                             </p>

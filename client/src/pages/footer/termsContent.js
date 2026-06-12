@@ -1,5 +1,5 @@
 export const EMAIL = 'mentors.bridge@gmail.com';
-export const LAST_UPDATED = 'June 7, 2026';
+export const LAST_UPDATED = 'June 12, 2026';
 
 export const SECTIONS = [
   {
@@ -53,14 +53,12 @@ Mentors are solely responsible for the accuracy of their profiles and the qualit
   },
   {
     id: 'scheduling',
-    title: '6. Scheduling & Calendly Integration',
-    body: `Sessions are scheduled through an embedded Calendly widget. When you book a session, your name and email are transmitted to Calendly's systems. This data is also received by Bridge via a secure, signature-verified webhook and stored to create your session record.
+    title: '6. Scheduling',
+    body: `Sessions are booked directly on Bridge against the availability a Mentor has published. Each Mentor sets weekly availability windows and a timezone; Mentees pick an open slot and confirm at checkout. Confirmation, reminder, and cancellation links are sent to the email address on your account.
 
-Session data received from Calendly includes: invitee email, name, event start and end time, meeting join URL, and cancellation and reschedule links. This data is used solely to manage and display your session.
+**Optional calendar connection.** Mentors may connect a Google Calendar so that external events automatically block out availability and so confirmed Sessions appear on their personal calendar. Connecting a calendar is voluntary and can be revoked at any time from account settings; revoking it does not affect Sessions already booked.
 
-When you cancel or reschedule through Calendly, Bridge's records update automatically. Calendly's own privacy policy (available at https://calendly.com/legal) governs Calendly's independent processing of your information.
-
-Bridge cannot reconstruct session data that Calendly fails to deliver via webhook. If a confirmation does not appear in your dashboard within a few minutes of scheduling, contact mentors.bridge@gmail.com so we can manually reconcile your booking.`
+**If something looks wrong.** If a confirmed Session is missing from your dashboard, the join link is broken, or your availability is displaying incorrectly, email mentors.bridge@gmail.com and we will reconcile the booking manually.`
   },
   {
     id: 'cancellations',
@@ -99,34 +97,32 @@ Bridge cannot reconstruct session data that Calendly fails to deliver via webhoo
   {
     id: 'ai',
     title: '9. AI-Powered Features',
-    body: `By using Bridge's AI features, you accept that the data described below leaves Bridge's servers and is processed under the applicable provider's privacy policy.
+    body: `Bridge offers a small number of optional AI-assisted features. Using them means the inputs you submit leave Bridge's servers and are processed by the applicable third-party provider under that provider's own terms.
 
-**AI mentor matching**: Your mentee profile (current role, target role, goals, experience level) and, if uploaded, your resume text are sent to OpenAI's API to rank mentor recommendations. Limit: 3 per account.
+**AI mentor matching**: Profile information you provide (current role, target role, goals, experience level) and, if you upload one, the text of your resume are sent to a third-party AI provider to rank Mentor recommendations. Usage is rate-limited on a per-account basis.
 
-**AI resume review**: Your uploaded resume (PDF, up to 5 MB) is transmitted to Anthropic's Claude API. You receive a score, letter grade, and section-by-section feedback. Limit: 1 per account lifetime.
+**AI resume review**: A resume you upload is transmitted to a third-party AI provider, which returns a score and section-by-section feedback. File-size and per-account usage limits apply and may change.
 
-**Voice mentor application**: Mentor applicants participate in an AI-facilitated voice interview via OpenAI's Realtime API. Audio is transcribed in real-time; the transcript and AI evaluation are stored in our database as part of your application record. Transcripts and evaluations are retained for the life of the related Mentor application record and removed within 30 days of account deletion, except where retention is legally required.
+**Voice mentor application**: Mentor applicants may participate in an AI-facilitated voice interview. Audio is transcribed in real time; the transcript and AI evaluation are stored as part of the application record and removed within 30 days of account deletion, except where retention is legally required.
 
-**Reference authenticity scoring**: Text submitted by your professional references is scored via OpenAI's API for authenticity as part of mentor verification.
+**No model training on your data.** Our AI providers are not permitted to train their models on content you submit through Bridge. Our integrations use API endpoints whose terms exclude submitted content from provider training.
 
-**Model training**: We do not permit our AI providers — currently OpenAI and Anthropic — to train their models on user data submitted through Bridge. Our integrations are configured to use API endpoints whose terms exclude submitted content from provider training.
+**Deletion**: You may request deletion of AI-generated records tied to your account — resume reviews, voice interview transcripts, match results — by emailing mentors.bridge@gmail.com. We action verified requests within 30 days, subject to lawful retention obligations.
 
-**Deletion**: You may request deletion of AI-generated records tied to your account (resume reviews, voice interview transcripts, match results) by emailing mentors.bridge@gmail.com. We will action verified requests within 30 days, subject to lawful retention obligations.
-
-**AI outputs are not professional advice.** Resume scores, mentor rankings, and evaluations are probabilistic model outputs — not certified professional assessments. Do not rely on them as substitutes for licensed professional judgment.`
+**AI outputs are not professional advice.** Scores, rankings, and evaluations produced by these features are probabilistic outputs, not certified professional assessments, and should not be relied on as a substitute for licensed professional judgment.`
   },
   {
     id: 'video',
     title: '10. Video Sessions & Recording',
-    body: `Video sessions use a direct peer-to-peer WebRTC connection. No video or audio is routed through or stored on Bridge's servers. Connection setup (signaling) uses an encrypted Supabase Realtime channel identified by session ID.
+    body: `Video Sessions take place inside an embedded third-party meeting room that opens from your Session confirmation. The meeting runs over encrypted connections and is subject to the meeting provider's own terms and privacy policy.
 
-**Bridge does not record sessions.** Video and audio exist only on participating devices during the live call.
+**Bridge does not record Sessions.** We do not capture, store, or retain video or audio from your Sessions. Any in-call chat, screen sharing, or other in-call features are handled by the meeting provider and are not stored by Bridge.
 
-**Recording without mutual consent is prohibited.** You must obtain explicit, affirmative consent from all participants before recording a session by any means. Unauthorized recording violates these Terms and may violate applicable wiretapping or privacy laws in your jurisdiction.
+**Recording without mutual consent is prohibited.** You must obtain explicit, affirmative consent from every participant before recording a Session by any means, including screen recording, screen capture, or third-party tools. Unauthorized recording violates these Terms and may violate wiretapping or privacy laws where you or the other participant are located.
 
-**Screen sharing.** Anything you voluntarily share on screen is your responsibility. Bridge cannot technically prevent the other party from taking screenshots or screen-recording locally despite the recording prohibition; do not share information you are not comfortable disclosing.
+**Screen sharing.** Anything you choose to share on screen during a Session is your responsibility. Bridge cannot prevent the other party from taking a screenshot or recording locally in violation of these Terms — do not share information you would not be comfortable disclosing to that participant directly.
 
-In-call features — screen sharing, whiteboard drawing, file sharing, and in-call text chat — operate within the peer connection and are not stored by Bridge.`
+**Join issues.** If a Session join link fails or the meeting room will not load, contact mentors.bridge@gmail.com so we can reschedule or refund as appropriate.`
   },
   {
     id: 'ip',
@@ -142,9 +138,9 @@ You are responsible for ensuring that content you submit does not infringe any t
   {
     id: 'reviews',
     title: '12. Reviews & Ratings',
-    body: `Reviews on Bridge are how Mentees evaluate Mentors and how the marketplace stays honest. We hold reviews to a strict standard.
+    body: `Reviews are how Mentees evaluate Mentors and how the marketplace stays accountable. The following rules apply to every review submitted on Bridge.
 
-- Only a Mentee who has completed a paid Session with a Mentor may review that Mentor, and only for that completed Session.
+- Only a Mentee who has completed a paid Session with a Mentor may review that Mentor, and only in connection with that completed Session.
 - Fake, fabricated, traded, or incentivized reviews are prohibited. Mentors must not offer discounts, gifts, refunds, or favors in exchange for positive reviews, and must not retaliate against Mentees who leave honest negative reviews.
 - Bridge may remove reviews that violate these Terms or our content policies (e.g., harassment, doxxing, unlawful content, or material that is clearly false), at our discretion and without notice.
 - Mentors do not have a right to demand removal of an honest negative review. Mentors may respond publicly or report a policy-violating review through our Trust & Safety form; Bridge makes the final determination.`
@@ -207,7 +203,7 @@ We do not guarantee: specific career outcomes; the accuracy of any Mentor's advi
 
 Background check results are sourced from Checkr; Bridge makes no independent representation about their accuracy, completeness, or current relevance. AI feature outputs are probabilistic and not professional certifications.
 
-**Third-party dependencies.** Bridge relies on Calendly for scheduling, Stripe for payments, Supabase for data and signaling, and OpenAI/Anthropic for AI features. Bridge is not liable for outages, data loss, errors, or delays caused by these third parties, and your use of their portions of the service is also subject to their own terms.`
+**Third-party dependencies.** Bridge relies on third-party providers for payment processing, hosting and data storage, video meetings, calendar integration, and AI features. Bridge is not liable for outages, data loss, errors, or delays caused by these third parties, and your use of those portions of the service is also subject to their own terms and privacy policies.`
   },
   {
     id: 'liability',
@@ -272,7 +268,7 @@ Questions about these Terms? Email mentors.bridge@gmail.com.`
 ];
 
 export const TLDR = [
-  { label: 'Refunds', text: 'Cancel >1 hour before a Session for a full refund. Subscription fees are non-refundable after the 7-day free trial.' },
-  { label: 'Payments', text: 'All paid services must go through Bridge for 12 months after first connection. Off-platform = permanent suspension.' },
-  { label: 'Video', text: 'Peer-to-peer calls — not stored by Bridge. Recording without mutual consent is prohibited and may be illegal.' },
+  { label: 'Refunds', text: 'Cancel a Session more than one hour before it starts for a full refund. Subscription fees are non-refundable after the 7-day free trial.' },
+  { label: 'Payments', text: 'For 12 months after you first connect on Bridge, all paid sessions between you and that user must run through Bridge. Off-platform payments are grounds for permanent suspension.' },
+  { label: 'Video', text: 'Bridge does not record your Sessions. Recording the other participant without their explicit consent is prohibited and may be unlawful where you live.' },
 ];

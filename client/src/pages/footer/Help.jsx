@@ -19,7 +19,7 @@ const HAIRLINE = { borderBottom: '1px solid var(--bridge-border)' };
 
 function ArticleList({ keys, onSelect }) {
   return (
-    <ul className="mt-4 border-t border-[var(--bridge-border)] pb-2">
+    <ul className="mt-4 border-t border-[var(--bridge-border)] pb-5">
       {keys.map((key, i) => {
         const article = ARTICLES[key];
         const last = i === keys.length - 1;
@@ -28,7 +28,7 @@ function ArticleList({ keys, onSelect }) {
             <button
               type="button"
               onClick={() => onSelect(key)}
-              className="group flex w-full items-center justify-between gap-3 py-4 text-left focus:outline-none focus-visible:underline"
+              className="group flex w-full items-center justify-between gap-3 px-5 py-4 text-left focus:outline-none focus-visible:underline"
             >
               <span className="text-base font-semibold text-[var(--bridge-text)]">{article.title}</span>
               <ChevronRight
@@ -295,8 +295,13 @@ function HelpIndex({ search, onSearchChange, onSelect }) {
             <div className="grid gap-6 sm:grid-cols-2">
               {CATEGORIES.map((cat, ci) => {
                 const Icon = cat.Icon;
+                const isLastOdd = ci === CATEGORIES.length - 1 && CATEGORIES.length % 2 === 1;
                 return (
-                  <Reveal key={cat.id} delay={ci * 40}>
+                  <Reveal
+                    key={cat.id}
+                    delay={ci * 40}
+                    className={isLastOdd ? 'sm:col-span-2 sm:mx-auto sm:w-[calc(50%-12px)]' : undefined}
+                  >
                     <div
                       className="overflow-hidden rounded-2xl"
                       style={{

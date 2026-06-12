@@ -23,7 +23,7 @@ export const ARTICLES = {
     categoryId: 'mentees',
     category: 'For Mentees',
     title: 'Booking your first session',
-    body: `On a mentor's profile, choose a session type — Career Advice, Interview Prep, Resume Review, or Networking. Then pick an open slot from their calendar, add a short note about what you want to cover, and complete checkout.\n\nAfter checkout you're directed to Calendly to confirm the time. The session appears as "pending" in your dashboard until the mentor accepts. Once accepted, the Join Call button appears.\n\nIf you're not yet subscribed, booking may start a 7-day free trial. You won't be charged until day 8. See [Subscription & free trial](article:subscription) for details.`,
+    body: `On a mentor's profile, choose a session type — Career Advice, Interview Prep, Resume Review, or Networking. Then pick an open slot from their calendar, add a short note about what you want to cover, and complete checkout.\n\nAfter checkout you'll be guided through Calendly to lock in the time. The session shows as "pending" in your dashboard until the mentor accepts; once accepted, the Join Call button appears in Dashboard → Sessions.\n\nIf you're not yet subscribed, booking may start a 7-day free trial. You won't be charged until day 8. See [Subscription & free trial](article:subscription) for details.`,
   },
 
   'preparing-session': {
@@ -53,7 +53,7 @@ export const ARTICLES = {
     categoryId: 'mentors',
     category: 'For Mentors',
     title: 'How to apply as a mentor',
-    body: `Go to Become a Mentor from the navigation (or /apply/mentor) and complete the application. The application uses a voice-based interview format — you answer questions about your background, why you want to mentor, and your area of expertise.\n\nYour audio is transcribed in real-time and an AI-generated evaluation is produced alongside the transcript. Both are stored in your application record and reviewed by a founder.\n\nApplications are reviewed manually. You'll receive an email about your application status typically within 3–5 business days. Approved applicants are taken through a separate onboarding flow before going live.`,
+    body: `Click Become a Mentor in the navigation and complete the application. The application uses a short voice interview — you answer a handful of questions about your background, why you want to mentor, and where you can help most.\n\nYour answers are transcribed and stored alongside a structured summary so our review team can read through them quickly. We don't post recordings publicly and we don't share them outside Bridge.\n\nApplications are reviewed by a real person, not auto-approved. Expect a decision by email within 3–5 business days. Approved mentors are taken through a separate onboarding flow before their profile goes live.`,
   },
 
   'mentor-onboarding': {
@@ -66,15 +66,15 @@ export const ARTICLES = {
   'mentor-calendly': {
     categoryId: 'mentors',
     category: 'For Mentors',
-    title: 'Connecting your Calendly calendar',
-    body: `Go to Dashboard → Availability and click Connect Calendly. You'll be taken through Calendly's OAuth authorization flow. Grant the requested permissions, then return to Bridge — your event types will load automatically.\n\nChoose which event type mentees should use for booking. Bridge creates a Calendly webhook subscription that updates your session records whenever a booking is confirmed, cancelled, or rescheduled. Your Calendly access token is stored server-side only.\n\nIf you want to disconnect Calendly later, go to Dashboard → Availability → Disconnect. This removes stored tokens and disables booking until you reconnect.`,
+    title: 'Connecting your calendar with Calendly',
+    body: `Bridge uses Calendly for scheduling, so mentees book directly into open slots on your calendar — no back-and-forth emails.\n\nDuring mentor onboarding, or anytime from Dashboard → Availability, click Connect Calendly. Sign in to your Calendly account, grant access, and pick the event type mentees should use for booking. From that point on, every booking on Bridge syncs through Calendly automatically.\n\nYou can disconnect at any time from Dashboard → Availability → Disconnect. That removes your Calendly link from Bridge and pauses new bookings until you reconnect. Existing accepted sessions are unaffected.`,
   },
 
   'mentor-sessions': {
     categoryId: 'mentors',
     category: 'For Mentors',
     title: 'Managing incoming session requests',
-    body: `When a mentee books and completes checkout, a session appears in your dashboard with status "pending." You'll see their name, session type, and the note they wrote. Accept or decline from Dashboard → Sessions.\n\nAccepting a session sets the video room URL and notifies the mentee. The Join Call button appears for both parties. Declining sends the mentee a notification and frees the slot.\n\nIf you need to cancel after accepting, do it through Calendly using the original event link, or contact us. Mentee-initiated cancellations are handled automatically.`,
+    body: `When a mentee books and completes checkout, a session appears in your dashboard with status "pending." You'll see their name, session type, and the note they wrote. Accept or decline from Dashboard → Sessions.\n\nAccepting a session sets the video room URL and notifies the mentee. The Join Call button appears for both parties. Declining sends the mentee a notification and frees the slot.\n\nIf you need to cancel after accepting, use the cancellation link in the Calendly confirmation email, or email ${COMPANY_EMAIL} if the session is within the hour. Mentee-initiated cancellations are handled automatically.`,
   },
 
   'mentor-video-tips': {
@@ -155,7 +155,7 @@ export const ARTICLES = {
     categoryId: 'account',
     category: 'Account & Community',
     title: 'Reporting another user',
-    body: `Use the right channel:\n- **Trust & Safety**: harassment, harmful content, off-platform payment requests, or anything that makes you feel unsafe. Go to [Trust & Safety](route:/trust) for the report form\n- **Contact**: billing disputes, account access issues, refund requests, or anything else. Use [Contact](route:/contact)\n- **Help center**: how-to questions about using the platform (you're here)\n\nReports to Trust & Safety are reviewed by a founder, typically within 24 hours. We do not share the reporter's identity with the reported user.`,
+    body: `Use the right channel:\n- **Trust & Safety**: harassment, harmful content, off-platform payment requests, or anything that makes you feel unsafe. Go to [Trust & Safety](route:/trust) for the report form\n- **Contact**: billing disputes, account access issues, refund requests, or anything else. Use [Contact](route:/contact)\n- **Help center**: how-to questions about using the platform (you're here)\n\nReports to Trust & Safety are reviewed by our team, typically within 24 hours. We do not share the reporter's identity with the reported user.`,
   },
 
   // ── Billing & Account ────────────────────────────────────────────────────────
@@ -192,7 +192,7 @@ export const ARTICLES = {
     categoryId: 'billing',
     category: 'Billing & Account',
     title: 'Session refund policy',
-    body: `**Before a session starts**: Cancel more than 1 hour before the scheduled start time for a full refund. Use the cancellation link in your Calendly confirmation email or Dashboard → Sessions → Cancel.\n\n**After a session completes**: If you're unsatisfied with a completed session, email ${COMPANY_EMAIL} within 48 hours. We review each case individually.\n\n**Subscription fees**: Non-refundable after the free trial ends, except where required by law. Cancelling a subscription stops future charges but does not refund the current period.\n\nFor detailed policy terms, see the [Terms of Service](route:/terms).`,
+    body: `**Before a session starts**: Cancel more than 1 hour before the scheduled start time for a full refund. Use the cancellation link in your Calendly confirmation email or go to Dashboard → Sessions → Cancel.\n\n**After a session completes**: If you're unsatisfied with a completed session, email ${COMPANY_EMAIL} within 48 hours. We review each case individually.\n\n**Subscription fees**: Non-refundable after the free trial ends, except where required by law. Cancelling a subscription stops future charges but does not refund the current period.\n\nFor detailed policy terms, see the [Terms of Service](route:/terms).`,
   },
 
   'delete-account': {

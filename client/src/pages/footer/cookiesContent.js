@@ -11,7 +11,7 @@ export const SECTIONS = [
   { id: 'consent', title: '8. Consent & withdrawal' },
   { id: 'managing', title: '9. Managing preferences' },
   { id: 'changes', title: '10. Changes to this policy' },
-  { id: 'questions', title: '11. Questions' },
+  { id: 'questions', title: '11. Questions?' },
 ];
 
 export const ESSENTIAL_COOKIES = [
@@ -44,11 +44,11 @@ export const THIRD_PARTY = [
   },
   {
     Icon: CalendarDays,
-    title: 'Calendly (served via Cloudflare)',
-    body: 'The embedded Calendly scheduling widget is fronted by Cloudflare. When the widget loads, Cloudflare sets a bot-detection cookie and Calendly sets a widget session cookie. These load only on pages where the scheduling widget is present.',
+    title: 'Calendly',
+    body: "The embedded Calendly scheduling widget loads only on pages where you can book a session. When it loads, Calendly (and Cloudflare, which fronts Calendly's network) set cookies used for widget session state and bot detection.",
     policy: 'calendly.com/legal/privacy-notice',
     cookies: [
-      { name: '__cf_bm', purpose: 'Cloudflare bot detection (set by Cloudflare, not Calendly directly)', duration: '30 minutes', type: 'Essential' },
+      { name: '__cf_bm', purpose: 'Cloudflare bot detection', duration: '30 minutes', type: 'Essential' },
       { name: 'calendly_session', purpose: 'Widget session state and timezone', duration: 'Session', type: 'Functional' },
     ],
   },

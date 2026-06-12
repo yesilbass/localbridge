@@ -75,23 +75,10 @@ function ExternalLinkText({ children }) {
   );
 }
 
-function MobileScrollHint() {
-  return (
-    <p
-      className="px-4 py-1.5 text-[10px] font-medium sm:hidden"
-      style={{ color: 'var(--bridge-text-muted)', letterSpacing: '0.06em' }}
-      aria-hidden="true"
-    >
-      Scroll horizontally →
-    </p>
-  );
-}
-
 function CookieTable({ columns, rows, dense = false, headerBg }) {
   const cellPadY = dense ? 'py-3' : 'py-4';
   return (
     <div className="overflow-hidden rounded-2xl" style={{ boxShadow: 'inset 0 0 0 1px var(--bridge-border)' }}>
-      <MobileScrollHint />
       <div className="relative">
         <div className="cookies-table-scroll overflow-x-auto">
           <table className={`w-full ${dense ? 'min-w-[420px]' : 'min-w-[520px]'}`}>
@@ -416,9 +403,9 @@ export default function Cookies() {
                   ))}
                 </ul>
                 <p className="mt-5 text-[13px] leading-relaxed text-[var(--bridge-text-muted)]">
-                  Clear local storage at any time via your browser's developer tools, under
-                  "Application" (Chrome/Edge) or "Storage" (Firefox/Safari) → Local Storage → Clear.
-                  This resets preferences but does not affect your account or any data on our servers.
+                  You can clear these values at any time from your browser's site data settings (see
+                  §9 for step-by-step instructions per browser). Clearing them resets your
+                  preferences but does not affect your account or any data held on our servers.
                 </p>
               </div>
             </section>
@@ -452,7 +439,6 @@ export default function Cookies() {
                     </p>
                     {cookies.length > 0 && (
                       <div style={{ borderTop: '1px solid var(--bridge-border)' }}>
-                        <MobileScrollHint />
                         <div className="overflow-x-auto">
                           <table className="w-full min-w-[420px]">
                             <thead>
@@ -519,7 +505,7 @@ export default function Cookies() {
                   <Link to="/privacy" className="font-semibold underline underline-offset-4 transition hover:opacity-80" style={{ color: 'var(--color-primary)' }}>
                     Privacy policy
                   </Link>{' '}
-                  §5 for the full processor list, and Google's policy linked above.
+                  for the full list of subprocessors, and Google's policy linked above.
                 </p>
               </div>
             </section>
@@ -579,15 +565,13 @@ export default function Cookies() {
                   in your browser's local storage so the banner does not reappear on subsequent
                   visits. The cookies described in §2 (authentication) and §4 (Stripe, Calendly) are
                   set only when needed for the relevant action — signing in, checking out, or
-                  scheduling — and are categorised as essential.
+                  scheduling — and are categorized as essential.
                 </p>
                 <p>
                   <strong className="font-semibold text-[var(--bridge-text)]">To withdraw or reset consent:</strong>{' '}
-                  clear your browser's storage for this site (see §9), or delete the{' '}
-                  <code className="font-mono text-[13px]" style={{ color: 'var(--bridge-text)' }}>bridge-cookie-consent</code>{' '}
-                  entry in DevTools → Application/Storage → Local Storage. The banner will reappear
-                  on your next visit. Withdrawing acknowledgement does not affect data already
-                  processed before the withdrawal.
+                  clear your browser's site data for Bridge using the steps in §9 below. The banner
+                  will reappear on your next visit. Withdrawing acknowledgement does not affect data
+                  already processed before the withdrawal.
                 </p>
               </div>
             </section>

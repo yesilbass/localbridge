@@ -125,7 +125,7 @@ export default function Contact() {
             {s.footer.contactHeading}
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-[1.7] text-[var(--bridge-text-secondary)]">
-            Goes directly to a founder. Select a topic below — safety reports are routed to a priority queue and reviewed within one business day.
+            Pick a topic so we can route your message to the right person. Safety reports are prioritized and reviewed within one business day.
           </p>
         </Reveal>
 
@@ -141,7 +141,7 @@ export default function Contact() {
                   boxShadow: 'inset 0 0 0 1px var(--bridge-border)',
                 }}
               >
-                <p className="mb-2 text-base font-semibold text-[var(--bridge-text)]">Reach us</p>
+                <p className="mb-2 text-base font-semibold text-[var(--bridge-text)]">Get in touch</p>
                 <div className="divide-y divide-[var(--bridge-border)]">
                   <ContactChannel icon={Mail} label="Email">
                     <a
@@ -160,7 +160,7 @@ export default function Contact() {
                     </ul>
                   </ContactChannel>
                   <ContactChannel icon={Shield} label="Safety & harassment">
-                    Use the form and select <strong className="font-semibold" style={{ color: 'var(--bridge-text)' }}>Safety, Harassment, or Fraud</strong> — or go directly to the{' '}
+                    Use the form and select <strong className="font-semibold" style={{ color: 'var(--bridge-text)' }}>Safety, Harassment, or Fraud</strong>, or visit the{' '}
                     <Link
                       to="/trust"
                       className="font-semibold underline underline-offset-4 transition hover:opacity-80"
@@ -168,16 +168,16 @@ export default function Contact() {
                     >
                       Trust & Safety page
                     </Link>
-                    {' '}for anonymous reporting.
+                    {' '}to report anonymously.
                   </ContactChannel>
                   <ContactChannel icon={MessageSquareText} label="Quick feedback">
-                    Use the feedback button on any page (bottom-right corner) for bugs and product ideas.
+                    For bugs and product ideas, use the feedback button in the bottom-right corner of any page.
                   </ContactChannel>
                 </div>
 
                 <div className="mt-6 border-t border-[var(--bridge-border)] pt-5">
                   <p className="mb-3 text-[12px] font-semibold text-[var(--bridge-text-muted)] uppercase tracking-[0.14em]">
-                    Before you write
+                    Helpful links
                   </p>
                   <ul className="space-y-2">
                     {[
@@ -224,7 +224,7 @@ export default function Contact() {
                   </h2>
                   <p className="mt-3 text-base leading-[1.8] text-[var(--bridge-text-secondary)]">
                     {isSafety
-                      ? 'Your safety report has been sent directly to a founder. We review safety reports within one business day and will follow up if you provided an email.'
+                      ? 'Your safety report is in our priority queue. We review reports within one business day and will follow up at the email you provided.'
                       : s.footer.contactSentBody}
                   </p>
                   {ticketId && (
@@ -247,7 +247,7 @@ export default function Contact() {
               ) : (
                 <>
                   <p className="mb-6 text-base leading-[1.7] text-[var(--bridge-text-secondary)]">
-                    Couldn&apos;t find it in{' '}
+                    Can&apos;t find an answer in the{' '}
                     <Link
                       to="/faq"
                       className="font-semibold underline underline-offset-4 transition hover:opacity-80 focus:outline-none focus-visible:underline"
@@ -261,9 +261,9 @@ export default function Contact() {
                       className="font-semibold underline underline-offset-4 transition hover:opacity-80 focus:outline-none focus-visible:underline"
                       style={{ color: 'var(--color-primary)' }}
                     >
-                      Help
+                      Help Center
                     </Link>
-                    ? Select your topic below — it helps us route and prioritize your message.
+                    ? Send us a message and we&apos;ll get back to you.
                   </p>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
@@ -289,8 +289,7 @@ export default function Contact() {
                       </select>
                     </div>
 
-                    {/* Safety callout / response time — fixed height container prevents layout shift */}
-                    <div className="min-h-[5.5rem]">
+                    <div>
                     {isSafety ? (
                       <div
                         className="flex items-start gap-3 rounded-xl p-4"
@@ -309,7 +308,7 @@ export default function Contact() {
                             Safety report — priority queue
                           </p>
                           <p className="mt-1 text-[13px] leading-[1.6] text-[var(--bridge-text-secondary)]">
-                            This report will be sent directly to a founder and reviewed within one business day. For immediate danger, contact local emergency services. To report anonymously,{' '}
+                            Your report will be reviewed within one business day. If you&apos;re in immediate danger, contact local emergency services. To report anonymously,{' '}
                             <Link
                               to="/trust"
                               className="font-semibold underline underline-offset-2"
