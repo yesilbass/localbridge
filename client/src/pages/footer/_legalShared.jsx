@@ -169,7 +169,7 @@ export function FloatingToc({ sections, activeSection, visible, label = 'On this
         bottom: `calc(1.5rem + ${bottomOffset}px)`,
         opacity: visible ? 1 : 0,
         transform: `translateY(${visible ? 0 : 16}px)`,
-        transition: 'bottom 180ms linear, opacity 280ms cubic-bezier(0.16,1,0.3,1), transform 320ms cubic-bezier(0.16,1,0.3,1)',
+        transition: 'opacity 280ms cubic-bezier(0.16,1,0.3,1), transform 320ms cubic-bezier(0.16,1,0.3,1)',
         pointerEvents: visible ? 'auto' : 'none',
       }}
     >

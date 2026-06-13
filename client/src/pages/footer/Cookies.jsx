@@ -677,7 +677,7 @@ export default function Cookies() {
           opacity: pillVisible ? 1 : 0,
           transform: pillVisible ? 'translateY(0)' : 'translateY(8px)',
           pointerEvents: pillVisible ? 'auto' : 'none',
-          transition: 'bottom 180ms linear, opacity 200ms, transform 200ms'
+          transition: 'opacity 200ms, transform 200ms'
         }}
       >
         {pillOpen && (
