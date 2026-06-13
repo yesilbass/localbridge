@@ -3,6 +3,7 @@ import { ArrowUp, ChevronUp, Hash, List, Printer, X } from 'lucide-react';
 import Reveal from '../../components/Reveal';
 import { pageShell } from '../../ui';
 import { EMAIL, LAST_UPDATED, SECTIONS, TLDR } from './termsContent';
+import { useFooterOffset } from './_legalShared';
 
 // SECTIONS bodies are static, author-controlled constants. renderBody returns
 // React nodes (no dangerouslySetInnerHTML), so user-derived content must NEVER
@@ -128,7 +129,7 @@ function smoothScrollTo(id) {
   }
 }
 
-function FloatingToc({ sections, activeSection, visible }) {
+function FloatingToc({ sections, activeSection, visible, bottomOffset = 0 }) {
   const [open, setOpen] = useState(false);
   const activeIdx = sections.findIndex((s) => s.id === activeSection);
   const activeTitle = sections[activeIdx]?.title ?? sections[0].title;
@@ -184,11 +185,12 @@ function FloatingToc({ sections, activeSection, visible }) {
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-6 left-4 right-[4.5rem] z-50 max-w-lg"
+      className="fixed left-4 right-[4.5rem] z-50 max-w-lg"
       style={{
+        bottom: `calc(1.5rem + ${bottomOffset}px)`,
         opacity: visible ? 1 : 0,
         transform: `translateY(${visible ? 0 : 16}px)`,
-        transition: 'opacity 280ms cubic-bezier(0.16,1,0.3,1), transform 320ms cubic-bezier(0.16,1,0.3,1)',
+        transition: 'bottom 180ms linear, opacity 280ms cubic-bezier(0.16,1,0.3,1), transform 320ms cubic-bezier(0.16,1,0.3,1)',
         pointerEvents: visible ? 'auto' : 'none'
       }}
     >
@@ -324,6 +326,7 @@ export default function Terms() {
   const [showTop, setShowTop] = useState(false);
   const articleRef = useRef(null);
   const [sidebarRef, sidebarInView] = useSidebarInView();
+  const footerOffset = useFooterOffset();
 
   // Contrast audit (item #12): in the modern-signal palette,
   // --bridge-text-secondary and --bridge-text-muted both resolve via the
@@ -486,7 +489,7 @@ export default function Terms() {
 
           <article ref={articleRef} className="min-w-0 flex-1 space-y-12">
             {SECTIONS.map((s) => (
-              <section
+              <div
                 key={s.id}
                 id={s.id}
                 className="scroll-mt-28 border-t border-[var(--bridge-border)] pt-10 [&:first-child]:border-t-0 [&:first-child]:pt-0"
@@ -505,13 +508,13 @@ export default function Terms() {
                 <div className="mt-5 space-y-4 text-[16px] leading-[1.85] text-[var(--bridge-text-secondary)]">
                   {renderBody(s.body, s.id)}
                 </div>
-              </section>
+              </div>
             ))}
           </article>
         </div>
       </div>
 
-      <FloatingToc sections={SECTIONS} activeSection={activeId} visible={!sidebarInView} />
+      <FloatingToc sections={SECTIONS} activeSection={activeId} visible={!sidebarInView} bottomOffset={footerOffset} />
 
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}

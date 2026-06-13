@@ -28,6 +28,41 @@ export function smoothScrollTo(id) {
   }
 }
 
+/**
+ * Returns the number of pixels the page `<footer>` currently occupies inside
+ * the viewport (measured from the bottom). FloatingToc consumers add this to
+ * their bottom offset so the pill rides up above the footer instead of
+ * overlapping it.
+ */
+export function useFooterOffset() {
+  const [offset, setOffset] = useState(0);
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const el = document.querySelector('footer');
+    if (!el) return undefined;
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const rect = el.getBoundingClientRect();
+      const intruding = Math.max(0, window.innerHeight - rect.top);
+      setOffset(intruding);
+    };
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(measure);
+    };
+    measure();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
+  return offset;
+}
+
 /** Tracks whether the desktop sidebar ToC is on-screen; drives FloatingToc visibility. */
 export function useSidebarInView() {
   const ref = useRef(null);
@@ -92,7 +127,7 @@ export function useActiveSection(sectionIds) {
  * Mobile/tablet floating table-of-contents pill.
  * `sections`: `[{ id, title }]`. `activeSection`: id. `visible`: boolean.
  */
-export function FloatingToc({ sections, activeSection, visible, label = 'On this page' }) {
+export function FloatingToc({ sections, activeSection, visible, label = 'On this page', bottomOffset = 0 }) {
   const [open, setOpen] = useState(false);
   const activeIdx = sections.findIndex((s) => s.id === activeSection);
   const activeTitle = sections[activeIdx]?.title ?? sections[0].title;
@@ -129,11 +164,12 @@ export function FloatingToc({ sections, activeSection, visible, label = 'On this
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-6 left-4 right-6 z-50 max-w-lg"
+      className="fixed left-4 right-6 z-50 max-w-lg"
       style={{
+        bottom: `calc(1.5rem + ${bottomOffset}px)`,
         opacity: visible ? 1 : 0,
         transform: `translateY(${visible ? 0 : 16}px)`,
-        transition: 'opacity 280ms cubic-bezier(0.16,1,0.3,1), transform 320ms cubic-bezier(0.16,1,0.3,1)',
+        transition: 'bottom 180ms linear, opacity 280ms cubic-bezier(0.16,1,0.3,1), transform 320ms cubic-bezier(0.16,1,0.3,1)',
         pointerEvents: visible ? 'auto' : 'none',
       }}
     >

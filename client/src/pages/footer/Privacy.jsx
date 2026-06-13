@@ -6,6 +6,7 @@ import {
 import Reveal from '../../components/Reveal';
 import { pageShell } from '../../ui';
 import { SECTIONS, TLDR, CHIPS, LAST_UPDATED } from './privacyContent';
+import { useFooterOffset } from './_legalShared';
 
 // Reading progress scoped to the <article> element — not the whole document —
 // so the bar tracks article progress, not page progress (footer doesn't count).
@@ -299,7 +300,7 @@ function scrollToHash(id) {
   window.history.replaceState(null, '', `#${id}`);
 }
 
-function FloatingToc({ sections, activeSection, visible }) {
+function FloatingToc({ sections, activeSection, visible, bottomOffset = 0 }) {
   const [open, setOpen] = useState(false);
   const activeIdx = sections.findIndex((s) => s.id === activeSection);
   const activeTitle = sections[activeIdx]?.title ?? sections[0].title;
@@ -351,11 +352,12 @@ function FloatingToc({ sections, activeSection, visible }) {
   return (
     <div
       ref={containerRef}
-      className="pp-no-print fixed bottom-6 left-4 right-[4.5rem] z-50 max-w-lg"
+      className="pp-no-print fixed left-4 right-[4.5rem] z-50 max-w-lg"
       style={{
+        bottom: `calc(1.5rem + ${bottomOffset}px)`,
         opacity: visible ? 1 : 0,
         transform: `translateY(${visible ? 0 : 16}px)`,
-        transition: 'opacity 280ms cubic-bezier(0.16,1,0.3,1), transform 320ms cubic-bezier(0.16,1,0.3,1)',
+        transition: 'bottom 180ms linear, opacity 280ms cubic-bezier(0.16,1,0.3,1), transform 320ms cubic-bezier(0.16,1,0.3,1)',
         pointerEvents: visible ? 'auto' : 'none'
       }}
       aria-hidden={!visible}
@@ -479,6 +481,7 @@ export default function Privacy() {
   const progress = useReadingProgress(articleRef);
   const showBackToTop = useShowBackToTop();
   const [sidebarRef, sidebarInView] = useSidebarInView();
+  const footerOffset = useFooterOffset();
 
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -706,7 +709,7 @@ export default function Privacy() {
           <article ref={articleRef} className="min-w-0 flex-1 space-y-20">
             {SECTIONS.map((s, idx) => (
               <Reveal key={s.id} delay={Math.min(idx * 25, 100)}>
-                <section
+                <div
                   id={s.id}
                   className={`scroll-mt-28 pt-12 ${idx > 0 ? 'border-t border-[var(--bridge-border)]' : ''}`}
                 >
@@ -717,7 +720,7 @@ export default function Privacy() {
                     {s.title}
                   </h2>
                   <SectionBody content={s.content} />
-                </section>
+                </div>
               </Reveal>
             ))}
           </article>
@@ -729,6 +732,7 @@ export default function Privacy() {
         sections={SECTIONS}
         activeSection={activeSection}
         visible={!sidebarInView}
+        bottomOffset={footerOffset}
       />
 
       <button

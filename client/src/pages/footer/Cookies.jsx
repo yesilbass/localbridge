@@ -11,6 +11,7 @@ import {
   LOCAL_STORAGE_KEYS,
   BROWSER_INSTRUCTIONS,
 } from './cookiesContent';
+import { useFooterOffset } from './_legalShared';
 
 export { SECTIONS, ESSENTIAL_COOKIES, THIRD_PARTY, NOT_USED };
 
@@ -133,6 +134,7 @@ export default function Cookies() {
   const [activeId, setActiveId] = useState(SECTIONS[0].id);
   const [progress, setProgress] = useState(0);
   const [pillVisible, setPillVisible] = useState(false);
+  const footerOffset = useFooterOffset();
   const [pillOpen, setPillOpen] = useState(false);
   const [showTop, setShowTop] = useState(false);
   const asideRef = useRef(null);
@@ -317,7 +319,7 @@ export default function Cookies() {
 
           <article ref={articleRef} className="min-w-0 flex-1 space-y-20">
 
-            <section id="what-are-cookies" className="scroll-mt-24">
+            <div id="what-are-cookies" className="scroll-mt-24">
               <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
                 1. What are cookies?
               </h2>
@@ -344,9 +346,9 @@ export default function Cookies() {
                   .
                 </p>
               </div>
-            </section>
+            </div>
 
-            <section id="essential" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
+            <div id="essential" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
               <div className="mb-6 flex items-center gap-3">
                 <span aria-hidden className="inline-flex h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)' }}>
                   <Shield className="h-4 w-4" style={{ color: 'var(--color-primary)' }} />
@@ -369,9 +371,9 @@ export default function Cookies() {
                   { content: <TypeBadge type={c.type} /> },
                 ])}
               />
-            </section>
+            </div>
 
-            <section id="local-storage" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
+            <div id="local-storage" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
               <div className="mb-6 flex items-center gap-3">
                 <span aria-hidden className="inline-flex h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)' }}>
                   <HardDrive className="h-4 w-4" style={{ color: 'var(--color-primary)' }} />
@@ -408,9 +410,9 @@ export default function Cookies() {
                   preferences but does not affect your account or any data held on our servers.
                 </p>
               </div>
-            </section>
+            </div>
 
-            <section id="third-party" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
+            <div id="third-party" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
               <div className="mb-6 flex items-center gap-3">
                 <span aria-hidden className="inline-flex h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)' }}>
                   <Settings className="h-4 w-4" style={{ color: 'var(--color-primary)' }} />
@@ -487,9 +489,9 @@ export default function Cookies() {
                   </div>
                 ))}
               </div>
-            </section>
+            </div>
 
-            <section id="fonts" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
+            <div id="fonts" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
               <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
                 5. Fonts
               </h2>
@@ -508,9 +510,9 @@ export default function Cookies() {
                   for the full list of subprocessors, and Google's policy linked above.
                 </p>
               </div>
-            </section>
+            </div>
 
-            <section id="not-used" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
+            <div id="not-used" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
               <div className="mb-6 flex items-center gap-3">
                 <span aria-hidden className="inline-flex h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)' }}>
                   <BarChart3 className="h-4 w-4" style={{ color: 'var(--color-primary)' }} />
@@ -533,9 +535,9 @@ export default function Cookies() {
                   </li>
                 ))}
               </ul>
-            </section>
+            </div>
 
-            <section id="dnt" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
+            <div id="dnt" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
               <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
                 7. Do Not Track
               </h2>
@@ -552,9 +554,9 @@ export default function Cookies() {
                   a non-negotiable part of that change.
                 </p>
               </div>
-            </section>
+            </div>
 
-            <section id="consent" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
+            <div id="consent" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
               <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
                 8. Consent &amp; withdrawal
               </h2>
@@ -574,9 +576,9 @@ export default function Cookies() {
                   already processed before the withdrawal.
                 </p>
               </div>
-            </section>
+            </div>
 
-            <section id="managing" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
+            <div id="managing" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
               <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
                 9. Managing preferences
               </h2>
@@ -617,9 +619,9 @@ export default function Cookies() {
                   </details>
                 ))}
               </div>
-            </section>
+            </div>
 
-            <section id="changes" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
+            <div id="changes" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
               <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
                 10. Changes to this policy
               </h2>
@@ -635,9 +637,9 @@ export default function Cookies() {
                   notice commitment.
                 </p>
               </div>
-            </section>
+            </div>
 
-            <section id="questions" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
+            <div id="questions" className="scroll-mt-24 border-t border-[var(--bridge-border)] pt-12">
               <h2 className="font-display text-xl font-semibold text-[var(--bridge-text)] sm:text-2xl">
                 11. Questions?
               </h2>
@@ -661,7 +663,7 @@ export default function Cookies() {
                   .
                 </p>
               </div>
-            </section>
+            </div>
 
           </article>
         </div>
@@ -669,12 +671,13 @@ export default function Cookies() {
 
       <div
         ref={pillRef}
-        className="cookies-pill fixed bottom-6 left-4 right-[4.5rem] z-50 max-w-lg"
+        className="cookies-pill fixed left-4 right-[4.5rem] z-50 max-w-lg"
         style={{
+          bottom: `calc(1.5rem + ${footerOffset}px)`,
           opacity: pillVisible ? 1 : 0,
           transform: pillVisible ? 'translateY(0)' : 'translateY(8px)',
           pointerEvents: pillVisible ? 'auto' : 'none',
-          transition: 'opacity 200ms, transform 200ms'
+          transition: 'bottom 180ms linear, opacity 200ms, transform 200ms'
         }}
       >
         {pillOpen && (
